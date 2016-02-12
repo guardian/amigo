@@ -1,0 +1,6 @@
+description: Installs an OpenJDK 8 JDK and headless JRE
+params: []
+dependencies: []
+
+# TODO how do we handle compatibility between features and Ubuntu versions?
+# Separate features per version? Or try hard and handle Ubuntu version disparity in the feature's install script?
