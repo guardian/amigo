@@ -21,8 +21,20 @@ object PackerRunner {
     val tmpFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
     Files.write(tmpFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling
     println(s"Wrote Packer json to $tmpFile")
-    // TODO spawn a Packer process, plus a monitor thread that consumes its stdout and sends updates to the listener
+
+    val packerProcess = new ProcessBuilder()
+      .command("packer", "build", "-machine-readable", tmpFile.toAbsolutePath.toString)
+      .start()
+    // TODO do we need to consume stderr to prevent the Packer process from hanging?
+
+    val runnable = new Runnable {
+      def run(): Unit = PackerProcessMonitor.monitorProcess(packerProcess, packerListener)
+    }
+    val listenerThread = new Thread(runnable, s"Packer process monitor for ${bake.recipe.id.value} #${bake.buildNumber}")
+    listenerThread.setDaemon(true)
+    listenerThread.start()
     // TODO make sure to delete the tmp file after Packer completes, regardless of success or failure
+    // TODO could create a promise and return a Future, but not sure if it's useful?
   }
 
 }

@@ -6,6 +6,8 @@ case class PackerBuilderConfig(
   name: String,
   `type`: String,
   region: String,
+  vpc_id: String,
+  subnet_id: String,
   source_ami: String,
   instance_type: String,
   ssh_username: String,
