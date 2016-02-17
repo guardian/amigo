@@ -71,8 +71,8 @@ object PackerConfigGenerator {
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
       region = "eu-west-1",
-      vpc_id = "vpc-f0348995", // TODO make this configurable
-      subnet_id = "subnet-0bbc2d7c",
+      vpc_id = None, // TODO make this configurable
+      subnet_id = None,
       source_ami = "{{user `base_image_ami_id`}}",
       instance_type = "t2.micro",
       ssh_username = "ubuntu",
