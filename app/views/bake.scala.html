@@ -1,0 +1,39 @@
+@(bake: Bake)
+@main("AMIgo"){
+
+    <h1>Bake!</h1>
+    <h2>Recipe: @bake.recipe.id.value</h2>
+    <h2>Build #@bake.buildNumber</h2>
+    <h2>Status: <span id="status">Running</span></h2>
+    <h2>AMI = <span id="ami-id">(still baking...)</span></h2>
+
+    <h2>Packer output:</h2>
+    <div id="packer-output">
+    </div>
+
+    <script>
+        var packerOutputDiv = document.getElementById("packer-output");
+        var amiIdDiv = document.getElementById("ami-id");
+        var statusDiv = document.getElementById("status");
+
+        var socket = new WebSocket("ws://localhost:9000/socket?recipe=@{bake.recipe.id.value}&buildNumber=@{bake.buildNumber}");
+        socket.onmessage = function(event) {
+            var msg = JSON.parse(event.data);
+            switch (msg.eventType) {
+                case "packer-output":
+                    var html = "[" + msg.timestamp + "] " + msg.line + "<br/>";
+                    packerOutputDiv.innerHTML += html;
+                    break;
+                case "ami-created":
+                    amiIdDiv.innerText = msg.amiId;
+                    break;
+                case "packer-process-exited":
+                    var status = msg.exitCode === 0 ? "Complete" : "Failed";
+                    statusDiv.innerText = status;
+                    break;
+                default:
+                    console.log("Unsupported message received", msg);
+            }
+        };
+    </script>
+}
