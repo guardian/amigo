@@ -2,7 +2,7 @@ name := "amigo"
 version := "1.0-SNAPSHOT"
 scalaVersion := "2.11.7"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
 
 val jacksonVersion = "2.7.1"
 libraryDependencies ++= Seq(
@@ -13,5 +13,10 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator
+
+riffRaffPackageType := (packageZipTarball in Universal).value
+riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
+riffRaffUploadArtifactBucket := Option("riffraff-artifact")
+riffRaffUploadManifestBucket := Option("riffraff-builds")
 
 scalariformSettings

@@ -1,0 +1,22 @@
+{
+    "defaultStacks": [ "deploy" ],
+    "packages": {
+        "amigo": {
+            "type": "autoscaling",
+            "data": {
+                "bucket": "deploy-dist"
+            }
+        }
+    },
+    "recipes": {
+        "default": {
+            "depends": [ "artifactUploadOnly", "deployOnly" ]
+        },
+        "artifactUploadOnly": {
+            "actions": [ "amigo.uploadArtifacts" ]
+        },
+        "deployOnly": {
+            "actions": [ "amigo.deploy" ]
+        }
+    }
+}

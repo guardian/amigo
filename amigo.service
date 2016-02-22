@@ -1,0 +1,14 @@
+[Unit]
+Description=AMIgo
+
+[Service]
+User=amigo
+Group=amigo
+Restart=on-failure
+Environment='HOME=/home/amigo'
+Environment='JAVA_OPTS=-Xmx512m -Xms512m -XX:+UseConcMarkSweepGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/home/amigo/logs/gc.log -XX:ReservedCodeCacheSize=128m'
+WorkingDirectory=/home/amigo
+ExecStart=/home/amigo/amigo/bin/amigo
+
+[Install]
+WantedBy=multi-user.target
