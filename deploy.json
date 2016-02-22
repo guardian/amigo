@@ -4,7 +4,7 @@
         "amigo": {
             "type": "autoscaling",
             "data": {
-                "bucket": "deploy-dist"
+                "bucket": "deploy-tools-dist"
             }
         }
     },

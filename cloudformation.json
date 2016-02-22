@@ -57,7 +57,7 @@
             {
               "Effect": "Allow",
               "Action": [ "s3:GetObject" ],
-              "Resource": [ "arn:aws:s3::*:deploy-dist/*" ]
+              "Resource": [ "arn:aws:s3::*:deploy-tools-dist/*" ]
             }
           ]
         },
