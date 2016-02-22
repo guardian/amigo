@@ -1,7 +1,9 @@
 package packer
 
-import models.packer.{ PackerBuilderConfig, PackerBuildConfig }
-import models.{ Bake, Recipe }
+import java.nio.file.{ Paths, Path }
+
+import models.packer.{ PackerProvisionerConfig, PackerBuilderConfig, PackerBuildConfig }
+import models.{ RoleId, Bake, Recipe }
 
 object PackerConfigGenerator {
 
@@ -38,30 +40,16 @@ object PackerConfigGenerator {
        ],
        "provisioners": [
          {
-           "type": "shell",
-           "inline": [
-             ... base image's init script
-           ]
-         },
-         {
-           ... copy required features to /tmp
-         },
-         {
-           ... install all features, in correct dependency order
-         },
-         {
-           "type": "shell",
-           "inline": [
-             "# clean up /tmp"
-             "/usr/bin/sudo rm -rf /tmp/features"
-           ]
+           "type": "ansible-local",
+           "playbook_file": "/tmp/foo.yml",
+           "role_paths": [ "roles/ *" ]
          }
        ]
      }
    * }}}
    * // format: ON
    */
-  def generatePackerBuildConfig(bake: Bake): PackerBuildConfig = {
+  def generatePackerBuildConfig(bake: Bake, playbookFile: Path): PackerBuildConfig = {
     val variables = Map(
       "recipe" -> bake.recipe.id.value,
       "base_image_ami_id" -> bake.recipe.baseImage.amiId.value,
@@ -91,7 +79,15 @@ object PackerConfigGenerator {
       )
     )
     val provisioners = Seq(
-      // TODO
+      // bootstrap Ansible
+      PackerProvisionerConfig.executeRemoteCommands(Seq(
+        "apt-get --yes install software-properties-common",
+        "apt-add-repository ppa:ansible/ansible",
+        "apt-get --yes update",
+        "apt-get --yes install ansible"
+      )),
+      // Use ansible to install roles
+      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
     )
     PackerBuildConfig(
       variables,

@@ -2,7 +2,7 @@ package controllers
 
 import packer.{ PackerListener, PackerRunner }
 import akka.actor._
-import features.FeaturesRepository
+import roles.RolesRepository
 import models._
 import play.api._
 import play.api.libs.json.JsValue
@@ -22,26 +22,9 @@ class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) exte
       id = BaseImageId("ubuntu-wily"),
       description = "Ubuntu 15.10 (Wily) hvm:ebs release 20160204 eu-west-1",
       amiId = AmiId("ami-cda312be"),
-      initScript = ShellScript(
-        """
-          |add-apt-repository "deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ wily universe multiverse"
-          |add-apt-repository "deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ wily main restricted"
-          |add-apt-repository "deb http://eu-west-1.ec2.archive.ubuntu.com/ubuntu/ wily-updates universe multiverse"
-          |sleep 1
-          |
-          |apt-get update
-          |apt-get --yes upgrade
-          |
-          |## Ensure we don't swap unnecessarily
-          |echo "vm.overcommit_memory=1" > /etc/sysctl.d/70-vm-overcommit.conf
-          |
-          |# Configure locale
-          |locale-gen en_GB.UTF-8
-        """.stripMargin
-      ),
-      mandatoryFeatures = Nil // TODO install a bunch of useful tools here (jq, aws-cli, git, etc.)
+      builtinRoles = Seq(RoleId("ubuntu-wily-init"))
     ),
-    features = FeaturesRepository.features.find(_.id == FeatureId("java8")).toSet
+    roles = RolesRepository.roles.filter(_ == RoleId("java8"))
   )
   val theBake = Bake(recipe, buildNumber = 123)
 

@@ -1,0 +1,5 @@
+---
+# TODO Add the extra apt repos (requires python-apt?)
+
+- name: Update apt cache and upgrade packages
+  apt: upgrade=dist update_cache=yes
