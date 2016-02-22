@@ -1,18 +1,28 @@
 package controllers
 
 import packer.{ PackerListener, PackerRunner }
-import akka.actor._
 import roles.RolesRepository
 import models._
+import data.BaseImages
+import websockets._
+
 import play.api._
 import play.api.libs.json.JsValue
 import play.api.mvc._
-import websockets._
+
+import akka.actor._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) extends Controller {
 
   def index = Action {
     Ok(views.html.sample())
+  }
+
+  def baseImages = Action.async {
+    BaseImages.list() map { images =>
+      Ok(views.html.baseImages(images))
+    }
   }
 
   val recipe = Recipe(

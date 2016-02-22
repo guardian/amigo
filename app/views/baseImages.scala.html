@@ -1,0 +1,31 @@
+@(images: Iterable[BaseImage])
+@layout("AMIgo"){
+
+  <h1>Base images</h1>
+
+  <table class="table table-striped">
+    <thead>
+      <th>Name</th>
+      <th>AMI ID</th>
+      <th>Description</th>
+      <th>Builtin roles</th>
+    </thead>
+    <tbody>
+    @for(image <- images) {
+      <tr>
+        <td>@image.id.value</td>
+        <td>@image.amiId.value</td>
+        <td>@image.description</td>
+        <td>
+          <ul>
+            @for(role <- image.builtinRoles) {
+              <li>@role.value</li>
+            }
+          </ul>
+        </td>
+      </tr>
+    }
+    </tbody>
+  </table>
+
+}
