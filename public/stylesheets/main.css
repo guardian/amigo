@@ -1,1 +1,6 @@
 body { padding-top: 70px; }
+
+.hola {
+    padding: 40px 15px;
+    text-align: center;
+}

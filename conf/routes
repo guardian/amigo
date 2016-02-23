@@ -4,8 +4,13 @@
 
 # Home page
 GET     /                           controllers.Amigo.index
-GET     /base-images                controllers.Amigo.baseImages
 POST    /bake                       controllers.Amigo.bake
+
+GET     /base-images                controllers.Amigo.baseImages
+
+GET     /roles                      controllers.Amigo.roles
+
+GET     /recipes                    controllers.Amigo.recipes
 
 GET     /socket                     controllers.Amigo.socket
 

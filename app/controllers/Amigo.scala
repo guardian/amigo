@@ -1,9 +1,8 @@
 package controllers
 
 import packer.{ PackerListener, PackerRunner }
-import roles.RolesRepository
 import models._
-import data.BaseImages
+import _root_.data.{ Recipes, Roles, BaseImages }
 import websockets._
 
 import play.api._
@@ -16,12 +15,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) extends Controller {
 
   def index = Action {
-    Ok(views.html.sample())
+    Ok(views.html.index())
   }
 
   def baseImages = Action.async {
     BaseImages.list() map { images =>
       Ok(views.html.baseImages(images))
+    }
+  }
+
+  def roles = Action {
+    Ok(views.html.roles(Roles.list))
+  }
+
+  def recipes = Action.async {
+    Recipes.list() map { recipes =>
+      Ok(views.html.recipes(recipes))
     }
   }
 
@@ -34,7 +43,7 @@ class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) exte
       amiId = AmiId("ami-cda312be"),
       builtinRoles = Seq(RoleId("ubuntu-wily-init"))
     ),
-    roles = RolesRepository.roles.filter(_ == RoleId("java8"))
+    roles = Roles.list.filter(_ == RoleId("java8"))
   )
   val theBake = Bake(recipe, buildNumber = 123)
 

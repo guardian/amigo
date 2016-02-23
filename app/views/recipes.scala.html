@@ -1,24 +1,24 @@
-@(images: Iterable[BaseImage])
+@(recipes: Iterable[Recipe])
 @layout("AMIgo"){
 
-  <h1>Base images</h1>
+  <h1>Recipes</h1>
 
   <table class="table table-striped">
     <thead>
       <th>Name</th>
-      <th>AMI ID</th>
       <th>Description</th>
-      <th>Builtin roles</th>
+      <th>Base image</th>
+      <th>Roles</th>
     </thead>
     <tbody>
-    @for(image <- images) {
+    @for(recipe <- recipes) {
       <tr>
-        <td>@image.id.value</td>
-        <td>@image.amiId.value</td>
-        <td>@image.description</td>
+        <td>@recipe.id.value</td>
+        <td>@recipe.description</td>
+        <td>@recipe.baseImage.id.value (TODO link)</td>
         <td>
           <ul>
-            @for(role <- image.builtinRoles) {
+            @for(role <- recipe.roles) {
               <li>@role.value (TODO link)</li>
             }
           </ul>

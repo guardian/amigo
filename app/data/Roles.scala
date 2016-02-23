@@ -1,4 +1,4 @@
-package roles
+package data
 
 import java.nio.file.{ Files, Paths }
 
@@ -9,10 +9,12 @@ import scala.collection.JavaConverters._
 /**
  * Proof of concept that just loads the list of roles from the local disk
  */
-object RolesRepository {
+object Roles {
 
   private val rootDir = Paths.get("roles")
 
-  val roles: Seq[RoleId] = Files.list(rootDir).iterator.asScala.toSeq.map(path => RoleId(path.getFileName.toString))
+  val list: Seq[RoleId] = Files.list(rootDir).iterator.asScala.toSeq.map(path => RoleId(path.getFileName.toString))
+
+  def findById(id: RoleId) = list.find(_ == id)
 
 }
