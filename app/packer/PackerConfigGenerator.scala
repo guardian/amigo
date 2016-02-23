@@ -72,7 +72,7 @@ object PackerConfigGenerator {
       ami_name = "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
       ami_description = "AMI for {{user `recipe`}} built by Amigo: #{{user `build_number`}}",
       tags = Map(
-        "Name" -> "{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
+        "Name" -> "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
         "Recipe" -> "{{user `recipe`}}",
         "Build" -> "{{user `build_number`}}",
         "SourceAMI" -> "{{user `base_image_ami_id`}}"
