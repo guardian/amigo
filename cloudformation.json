@@ -24,6 +24,10 @@
       "Description": "What version of Packer to install",
       "Type": "String",
       "Default": "0.8.6"
+    },
+    "KeyName": {
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Description": "A key pair for SSH'ing into the instance"
     }
   },
   "Resources": {
@@ -211,21 +215,24 @@
         "IamInstanceProfile": {
           "Ref": "InstanceProfile"
         },
+        "KeyName": {
+          "Ref": "KeyName"
+        }, 
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [ "\n", [
               "#!/bin/bash -ev",
 
-              "adduser --system --home /home/amigo --user-group --disabled-password amigo",
+              "adduser --system --home /home/amigo --disabled-password amigo",
 
               { "Fn::Join": [ "", [ "wget -P /tmp https://releases.hashicorp.com/packer/", { "Ref": "PackerVersion" }, "/packer_", { "Ref": "PackerVersion" }, "_linux_amd64.zip" ] ] },
               "mkdir /opt/packer",
               "unzip -d /opt/packer /tmp/packer_*_linux_amd64.zip",
-              "echo 'PATH=${PATH}:/opt/packer' >> /etc/environment",
+              "echo 'export PATH=${PATH}:/opt/packer' > /etc/profile.d/packer.sh",
 
               "aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo.service /etc/systemd/system",
-              "aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo.tgz /home/amigo",
-              "tar xfv -C /home/amigo /home/amigo/amigo.tgz",
+              "aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo-1.0-SNAPSHOT.tgz /home/amigo",
+              "tar -C /home/amigo -x -v -f /home/amigo/amigo-1.0-SNAPSHOT.tgz",
               "mv /home/amigo/amigo-1.0-SNAPSHOT /home/amigo/amigo",
               "mkdir /home/amigo/logs",
               "chown -R amigo /home/amigo",
