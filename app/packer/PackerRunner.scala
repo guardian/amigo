@@ -13,6 +13,8 @@ import scala.util.Try
 
 object PackerRunner {
 
+  private val packerCmd = sys.env.get("PACKER_HOME").map(ph => s"$ph/packer").getOrElse("packer")
+
   /**
    * Starts a Packer process to create an image using the given recipe.
    *
@@ -32,7 +34,7 @@ object PackerRunner {
     println(s"Wrote Packer json to $packerConfigFile")
 
     val packerProcess = new ProcessBuilder()
-      .command("packer", "build", "-machine-readable", packerConfigFile.toAbsolutePath.toString)
+      .command(packerCmd, "build", "-machine-readable", packerConfigFile.toAbsolutePath.toString)
       .start()
 
     val exitValuePromise = Promise[Int]()
