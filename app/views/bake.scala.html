@@ -16,7 +16,8 @@
         var amiIdDiv = document.getElementById("ami-id");
         var statusDiv = document.getElementById("status");
 
-        var socket = new WebSocket("ws://localhost:9000/socket?recipe=@{bake.recipe.id.value}&buildNumber=@{bake.buildNumber}");
+        var socketUrl = "ws://" + location.host + "/socket";
+        var socket = new WebSocket(socketUrl + "?recipe=@{bake.recipe.id.value}&buildNumber=@{bake.buildNumber}");
         socket.onmessage = function(event) {
             var msg = JSON.parse(event.data);
             switch (msg.eventType) {

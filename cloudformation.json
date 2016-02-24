@@ -55,7 +55,7 @@
     "UserDataPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "packer-bake-ami",
+        "PolicyName": "download-artifacts-from-s3",
         "PolicyDocument": {
           "Statement": [
             {
@@ -75,7 +75,7 @@
     "PackerPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
-        "PolicyName": "packer-bake-ami",
+        "PolicyName": "packer-required-permissions",
         "PolicyDocument": {
           "Statement": [
             {
