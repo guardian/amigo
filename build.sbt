@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator
+routesImport += "models._"
 
 riffRaffPackageType := (packageZipTarball in Universal).value
 riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")

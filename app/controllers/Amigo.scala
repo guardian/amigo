@@ -1,18 +1,18 @@
 package controllers
 
-import packer.{ PackerListener, PackerRunner }
+import packer.PackerRunner
 import models._
 import _root_.data.{ Recipes, Roles, BaseImages }
-import websockets._
+import play.api.libs.EventSource
+import play.api.libs.iteratee.{ Iteratee, Enumerator, Concurrent }
+import event._
 
-import play.api._
-import play.api.libs.json.JsValue
 import play.api.mvc._
 
-import akka.actor._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) extends Controller {
+class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus) extends Controller {
 
   def index = Action {
     Ok(views.html.index())
@@ -48,34 +48,15 @@ class Amigo(webSocketMaster: ActorRef, applicationThunk: () => Application) exte
   val theBake = Bake(recipe, buildNumber = 123)
 
   def bake = Action {
-    val listener = new PackerListener {
-      override def onProcessExited(exitCode: Int): Unit = {
-        Logger.info(s"Packer process completed with exit code $exitCode")
-        webSocketMaster ! PackerProcessExited(theBake.bakeId, exitCode)
-      }
-
-      override def onAmiCreated(amiId: AmiId): Unit = {
-        Logger.info(s"Packer created an AMI! AMI id = ${amiId.value}")
-        webSocketMaster ! AmiCreated(theBake.bakeId, amiId)
-      }
-
-      override def onLineOfOutput(line: String): Unit = {
-        Logger.info(s"PACKER: $line")
-        webSocketMaster ! PackerOutput(theBake.bakeId, line)
-      }
-    }
-    PackerRunner.createImage(theBake, listener)
+    PackerRunner.createImage(theBake, eventBus)
     Ok(views.html.bake(theBake))
   }
 
-  def socket = {
-    val bakeId = theBake.bakeId // TODO construct bake ID from URL params
-    implicit val application = applicationThunk() // to avoid a ridiculous cyclic dependency
-    WebSocket.acceptWithActor[String, JsValue] { request =>
-      out =>
-        Props(new WebSocketActor(bakeId, webSocketMaster, out))
-    }
+  def sse(recipeId: RecipeId, buildNumber: Int) = Action { implicit req =>
+    val bakeId = BakeId(recipeId, buildNumber)
+    Ok.feed(eventsOut
+      &> Concurrent.buffer(50) // TODO filter by bakeId
+      &> EventSource[BakeEvent]()).as("text/event-stream")
   }
-
 }
 
