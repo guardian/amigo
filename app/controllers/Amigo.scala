@@ -2,36 +2,29 @@ package controllers
 
 import packer.PackerRunner
 import models._
-import _root_.data.{ Recipes, Roles, BaseImages }
+import data.{ Dynamo, Recipes, Roles, BaseImages }
 import play.api.libs.EventSource
-import play.api.libs.iteratee.{ Iteratee, Enumerator, Concurrent }
+import play.api.libs.iteratee.{ Enumerator, Concurrent }
 import event._
 
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus) extends Controller {
+class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus)(implicit dynamo: Dynamo) extends Controller {
 
   def index = Action {
     Ok(views.html.index())
   }
 
-  def baseImages = Action.async {
-    BaseImages.list() map { images =>
-      Ok(views.html.baseImages(images))
-    }
+  def baseImages = Action {
+    Ok(views.html.baseImages(BaseImages.list()))
   }
 
   def roles = Action {
     Ok(views.html.roles(Roles.list))
   }
 
-  def recipes = Action.async {
-    Recipes.list() map { recipes =>
-      Ok(views.html.recipes(recipes))
-    }
+  def recipes = Action {
+    Ok(views.html.recipes(Recipes.list()))
   }
 
   val recipe = Recipe(
@@ -41,9 +34,9 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus) extends Contro
       id = BaseImageId("ubuntu-wily"),
       description = "Ubuntu 15.10 (Wily) hvm:ebs release 20160204 eu-west-1",
       amiId = AmiId("ami-cda312be"),
-      builtinRoles = Seq(RoleId("ubuntu-wily-init"))
+      builtinRoles = Seq(CustomisedRole(RoleId("ubuntu-wily-init"), Map.empty))
     ),
-    roles = Roles.list.filter(_ == RoleId("java8"))
+    roles = List(CustomisedRole(RoleId("java8"), Map.empty))
   )
   val theBake = Bake(recipe, buildNumber = 123)
 
