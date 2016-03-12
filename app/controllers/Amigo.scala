@@ -27,20 +27,10 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus)(implicit dynam
     Ok(views.html.recipes(Recipes.list()))
   }
 
-  val recipe = Recipe(
-    id = RecipeId("ubuntu-wily-java8"),
-    description = "Ubuntu Wily with only Java 8 installed",
-    baseImage = BaseImage(
-      id = BaseImageId("ubuntu-wily"),
-      description = "Ubuntu 15.10 (Wily) hvm:ebs release 20160204 eu-west-1",
-      amiId = AmiId("ami-cda312be"),
-      builtinRoles = Seq(CustomisedRole(RoleId("ubuntu-wily-init"), Map.empty))
-    ),
-    roles = List(CustomisedRole(RoleId("java8"), Map.empty))
-  )
-  val theBake = Bake(recipe, buildNumber = 123)
-
   def bake = Action {
+    val recipe = Recipes.findById(RecipeId("ubuntu-wily-java8")).get
+    val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
+    val theBake = Bake(recipe, buildNumber)
     PackerRunner.createImage(theBake, eventBus)
     Ok(views.html.bake(theBake))
   }

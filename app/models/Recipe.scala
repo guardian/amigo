@@ -12,6 +12,7 @@ object Recipe {
     id: RecipeId,
     description: String,
     baseImageId: BaseImageId,
-    roles: List[CustomisedRole])
+    roles: List[CustomisedRole],
+    nextBuildNumber: Int)
 
 }

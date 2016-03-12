@@ -1,20 +1,24 @@
 package data
 
+import cats.data.ValidatedNel
+import com.amazonaws.services.dynamodbv2.model.{ ScanRequest, GetItemResult }
+import com.gu.scanamo.{ DynamoReadError, Scanamo }
 import models._
+
+import scala.collection.JavaConverters._
 
 object BaseImages {
 
-  private val images = Map(
-    BaseImageId("ubuntu-wily") -> BaseImage(
-      id = BaseImageId("ubuntu-wily"),
-      description = "Ubuntu 15.10 (Wily) hvm:ebs release 20160204 eu-west-1",
-      amiId = AmiId("ami-cda312be"),
-      builtinRoles = Seq(CustomisedRole(RoleId("ubuntu-wily-init"), Map.empty))
-    )
-  )
+  def list()(implicit dynamo: Dynamo): Iterable[BaseImage] = {
+    val scanRequest = new ScanRequest(tableName)
+    val items: Iterable[Option[ValidatedNel[DynamoReadError, BaseImage]]] =
+      dynamo.client.scan(scanRequest).getItems.asScala.map { item => Scanamo.from[BaseImage](new GetItemResult().withItem(item)) }
+    items.flatMap(_.flatMap(_.toOption))
+  }
 
-  def list(): Iterable[BaseImage] = images.values
+  def findById(id: BaseImageId)(implicit dynamo: Dynamo): Option[BaseImage] =
+    Scanamo.get[BaseImageId, BaseImage](dynamo.client)(tableName)("id" -> id).flatMap(_.toOption)
 
-  def findById(id: BaseImageId): Option[BaseImage] = images.get(id)
+  private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.baseImages.name
 
 }

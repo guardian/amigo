@@ -4,5 +4,5 @@ case class BaseImage(
   id: BaseImageId,
   description: String,
   amiId: AmiId,
-  builtinRoles: Seq[CustomisedRole])
+  builtinRoles: List[CustomisedRole])
 
