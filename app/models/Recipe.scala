@@ -15,4 +15,8 @@ object Recipe {
     roles: List[CustomisedRole],
     nextBuildNumber: Int)
 
+  import automagic._
+
+  def db2domain(dbModel: DbModel, baseImage: BaseImage): Recipe = transform[DbModel, Recipe](dbModel, "baseImage" -> baseImage)
+
 }

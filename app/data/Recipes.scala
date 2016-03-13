@@ -19,12 +19,7 @@ object Recipes {
       dbModel <- dbModels.flatMap(_.flatMap(_.toOption))
       baseImage <- BaseImages.findById(dbModel.baseImageId)
     } yield {
-      Recipe(
-        id = dbModel.id,
-        description = dbModel.description,
-        baseImage = baseImage,
-        roles = dbModel.roles
-      )
+      Recipe.db2domain(dbModel, baseImage)
     }
   }
 
@@ -33,12 +28,7 @@ object Recipes {
       dbModel <- Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> id).flatMap(_.toOption)
       baseImage <- BaseImages.findById(dbModel.baseImageId)
     } yield {
-      Recipe(
-        id = dbModel.id,
-        description = dbModel.description,
-        baseImage = baseImage,
-        roles = dbModel.roles
-      )
+      Recipe.db2domain(dbModel, baseImage)
     }
   }
 

@@ -11,6 +11,8 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.gu" %% "scanamo" % "0.1.0",
+  "com.github.cb372" %% "automagic" % "0.1",
+  "com.beachape" %% "enumeratum" % "1.3.7",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator

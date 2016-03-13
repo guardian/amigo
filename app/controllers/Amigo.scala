@@ -2,7 +2,7 @@ package controllers
 
 import packer.PackerRunner
 import models._
-import data.{ Dynamo, Recipes, Roles, BaseImages }
+import data._
 import play.api.libs.EventSource
 import play.api.libs.iteratee.{ Enumerator, Concurrent }
 import event._
@@ -30,7 +30,7 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus)(implicit dynam
   def bake = Action {
     val recipe = Recipes.findById(RecipeId("ubuntu-wily-java8")).get
     val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-    val theBake = Bake(recipe, buildNumber)
+    val theBake = Bakes.create(recipe, buildNumber)
     PackerRunner.createImage(theBake, eventBus)
     Ok(views.html.bake(theBake))
   }
