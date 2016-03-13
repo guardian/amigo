@@ -3,8 +3,9 @@ package packer
 import java.io.{ InputStreamReader, BufferedReader }
 
 import event.EventBus
-import event.BakeEvent.{ AmiCreated, PackerOutput, PackerProcessExited }
-import models.BakeId
+import event.BakeEvent.{ AmiCreated, Log, PackerProcessExited }
+import models.{ BakeLog, BakeId }
+import org.joda.time.DateTime
 
 import scala.annotation.tailrec
 import scala.concurrent.Promise
@@ -33,14 +34,19 @@ object PackerProcessMonitor {
   }
 
   @tailrec
-  private def processNextLine(process: Process, reader: BufferedReader, bakeId: BakeId, eventBus: EventBus): Unit = {
+  private def processNextLine(process: Process, reader: BufferedReader, bakeId: BakeId, eventBus: EventBus, logNumber: Int = 0): Unit = {
     val line = reader.readLine()
     if (line != null) {
+      var nextLogNumber = logNumber
       PackerOutputParser.parseLine(line).foreach {
-        case PackerOutputParser.UserFacingOutput(message) => eventBus.publish(PackerOutput(bakeId, message))
-        case PackerOutputParser.AmiCreated(amiId) => eventBus.publish(AmiCreated(bakeId, amiId))
+        case PackerOutputParser.UiOutput(logLevel, messageParts) =>
+          val bakeLog = BakeLog(bakeId, logNumber, DateTime.now, logLevel, messageParts)
+          eventBus.publish(Log(bakeId, bakeLog))
+          nextLogNumber += 1
+        case PackerOutputParser.AmiCreated(amiId) =>
+          eventBus.publish(AmiCreated(bakeId, amiId))
       }
-      processNextLine(process, reader, bakeId, eventBus)
+      processNextLine(process, reader, bakeId, eventBus, nextLogNumber)
     }
     // if line is null it means the stream has closed, so stop recursing and return
   }

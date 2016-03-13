@@ -20,8 +20,8 @@
         var handler = function(event){
             var msg = JSON.parse(event.data);
             switch (msg.eventType) {
-                case "packer-output":
-                    var html = "[" + msg.timestamp + "] " + msg.line + "<br/>";
+                case "log":
+                    var html = "[" + msg.timestamp + "] " + msg.log.messageHtml + "<br/>";
                     packerOutputDiv.innerHTML += html;
                     break;
                 case "ami-created":
