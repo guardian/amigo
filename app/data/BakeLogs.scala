@@ -12,8 +12,12 @@ object BakeLogs {
 
   implicit val dateTimeFormat = DynamoFormat.xmap(DynamoFormat.stringFormat)(d => Validated.valid(new DateTime(d)))(_.toString)
 
-  def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit =
-    Scanamo.put(dynamo.client)(tableName)(bakeLog)
+  def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
+    // Make sure we don't try to save an empty string to Dynamo
+    val safeMessageParts = bakeLog.messageParts.map(part => part.copy(text = if (part.text.nonEmpty) part.text else " "))
+    val safeBakeLog = bakeLog.copy(messageParts = safeMessageParts)
+    Scanamo.put(dynamo.client)(tableName)(safeBakeLog)
+  }
 
   def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[BakeLog] = {
     val queryRequest = new QueryRequest(tableName)

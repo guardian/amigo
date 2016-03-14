@@ -34,8 +34,8 @@ class AppComponents(context: Context)
   val eventBusActorSystem = {
     val eventListeners = Map(
       "channelSender" -> Props(Behaviours.sendToChannel(eventsChannel)),
-      "logWriter" -> Props(Behaviours.writeToLog)
-    // TODO event listeners for writing to Dynamo
+      "logWriter" -> Props(Behaviours.writeToLog),
+      "dynamoWriter" -> Props(Behaviours.writeToDynamo)
     )
     ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
   }
