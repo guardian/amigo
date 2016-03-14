@@ -1,7 +1,6 @@
 package event
 
-import play.api.Logger
-import play.api.libs.iteratee.Concurrent.Channel
+import akka.typed.ActorSystem
 
 trait EventBus {
 
@@ -9,18 +8,8 @@ trait EventBus {
 
 }
 
-class ChannelWrapper(channel: Channel[BakeEvent]) extends EventBus {
-  import BakeEvent._
+class ActorSystemWrapper(system: ActorSystem[BakeEvent]) extends EventBus {
 
-  def publish(dataMessage: BakeEvent): Unit = {
-    channel.push(dataMessage)
-    log(dataMessage)
-  }
-
-  private def log(event: BakeEvent) = event match {
-    case Log(bakeId, line) => Logger.info(s"PACKER: $line")
-    case AmiCreated(bakeId, amiId) => Logger.info(s"Packer created an AMI! AMI id = ${amiId.value}")
-    case PackerProcessExited(bakeId, exitCode) => Logger.info(s"Packer process completed with exit code $exitCode")
-  }
+  def publish(event: BakeEvent): Unit = system.tell(event)
 
 }

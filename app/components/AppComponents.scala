@@ -1,12 +1,13 @@
 package components
 
+import akka.typed._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, EnvironmentVariableCredentialsProvider, AWSCredentialsProviderChain }
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import controllers.Amigo
 import data.Dynamo
-import event.{ BakeEvent, ChannelWrapper }
+import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.iteratee.Concurrent
@@ -30,7 +31,16 @@ class AppComponents(context: Context)
   dynamo.initTables()
 
   val (eventsOut, eventsChannel) = Concurrent.broadcast[BakeEvent]
-  val eventBus = new ChannelWrapper(eventsChannel)
+  val eventBusActorSystem = {
+    val eventListeners = Map(
+      "channelSender" -> Props(Behaviours.sendToChannel(eventsChannel)),
+      "logWriter" -> Props(Behaviours.writeToLog)
+    // TODO event listeners for writing to Dynamo
+    )
+    ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
+  }
+  val eventBus = new ActorSystemWrapper(eventBusActorSystem)
+
   val controller = new Amigo(eventsOut, eventBus)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(httpErrorHandler, controller, assets)
