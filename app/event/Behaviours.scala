@@ -2,8 +2,9 @@ package event
 
 import akka.typed._
 import akka.typed.ScalaDSL._
-import data.{ BakeLogs, Dynamo }
+import data.{ Bakes, BakeLogs, Dynamo }
 import event.BakeEvent._
+import models.BakeStatus
 import play.api.Logger
 import play.api.libs.iteratee.Concurrent.Channel
 
@@ -49,12 +50,12 @@ object Behaviours {
   }
 
   /**
-    * Writes updates to the appropriate Dynamo records
-    */
+   * Writes updates to the appropriate Dynamo records
+   */
   def writeToDynamo(implicit dynamo: Dynamo): Behavior[BakeEvent] = Static {
     case Log(bakeId, bakeLog) => BakeLogs.save(bakeLog)
-    case AmiCreated(bakeId, amiId) => // TODO
-    case PackerProcessExited(bakeId, exitCode) => // TODO
+    case AmiCreated(bakeId, amiId) => Bakes.updateAmiId(bakeId, amiId)
+    case PackerProcessExited(bakeId, exitCode) => Bakes.updateStatus(bakeId, if (exitCode == 0) BakeStatus.Complete else BakeStatus.Failed)
   }
 
 }

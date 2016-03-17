@@ -2,7 +2,7 @@ package data
 
 import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoReadError, Scanamo }
+import com.gu.scanamo.{ DynamoFormat, DynamoReadError, Scanamo }
 import models.{ RecipeId, _ }
 
 import scala.collection.JavaConverters._
@@ -14,6 +14,14 @@ object Bakes {
     val dbModel = Bake.domain2db(bake)
     Scanamo.put(dynamo.client)(tableName)(dbModel)
     bake
+  }
+
+  def updateStatus(bakeId: BakeId, status: BakeStatus)(implicit dynamo: Dynamo, fbs: DynamoFormat[BakeStatus]): Unit = {
+    updateItem(bakeId, "SET #status = :status", "#status" -> "status", ":status" -> fbs.write(status))
+  }
+
+  def updateAmiId(bakeId: BakeId, amiId: AmiId)(implicit dynamo: Dynamo, fai: DynamoFormat[AmiId]): Unit = {
+    updateItem(bakeId, "SET #amiId = :amiId", "#amiId" -> "amiId", ":amiId" -> fai.write(amiId))
   }
 
   def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[Bake] = {
@@ -29,6 +37,17 @@ object Bakes {
     } yield {
       Bake.db2domain(dbModel, r)
     }
+  }
+
+  private def updateItem(bakeId: BakeId, updateExpression: String, attrNames: (String, String), attrValues: (String, AttributeValue))(implicit dynamo: Dynamo, frid: DynamoFormat[RecipeId], fint: DynamoFormat[Int]): Unit = {
+    val updateRequest = new UpdateItemRequest()
+      .withTableName(tableName)
+      .withConditionExpression("attribute_exists(recipeId) AND attribute_exists(buildNumber)")
+      .withKey(Map("recipeId" -> frid.write(bakeId.recipeId), "buildNumber" -> fint.write(bakeId.buildNumber)).asJava)
+      .withUpdateExpression(updateExpression)
+      .withExpressionAttributeNames(Map(attrNames).asJava)
+      .withExpressionAttributeValues(Map(attrValues).asJava)
+    dynamo.client.updateItem(updateRequest)
   }
 
   private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.bakes.name
