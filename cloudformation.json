@@ -72,6 +72,36 @@
         ]
       }
     },
+    "AmigoAppPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "amigo-app",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [ "dynamodb:ListTables" ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [ "dynamodb:*" ],
+              "Resource": { "Fn::Join": [ "-", ["arn:aws:dynamodb:*:*:table/amigo", { "Ref": "Stage" }, "*" ] ] } 
+            },
+            {
+              "Effect": "Allow",
+              "Action": [ "dynamodb:DescribeTable", "dynamodb:GetItem" ],
+              "Resource": "arn:aws:dynamodb:*:*:table/config-deploy" 
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "RootRole"
+          }
+        ]
+      }
+    },
     "PackerPolicy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
