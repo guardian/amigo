@@ -92,6 +92,11 @@
               "Effect": "Allow",
               "Action": [ "dynamodb:DescribeTable", "dynamodb:GetItem" ],
               "Resource": "arn:aws:dynamodb:*:*:table/config-deploy" 
+            },
+            {
+                "Effect": "Allow",
+                "Action": "ec2:DescribeTags",
+                "Resource": "*"
             }
           ]
         },

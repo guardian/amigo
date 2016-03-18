@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
+  "com.gu" %% "configuration-magic-play2-4" % "1.2.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator
