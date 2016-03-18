@@ -16,13 +16,12 @@
         var amiIdDiv = document.getElementById("ami-id");
         var statusDiv = document.getElementById("status");
 
-        var socketUrl = "ws://" + location.host + "/socket";
-        var socket = new WebSocket(socketUrl + "?recipe=@{bake.recipe.id.value}&buildNumber=@{bake.buildNumber}");
-        socket.onmessage = function(event) {
+        var feed = new EventSource('@controllers.routes.Amigo.sse(bake.recipe.id, bake.buildNumber)');
+        var handler = function(event){
             var msg = JSON.parse(event.data);
             switch (msg.eventType) {
-                case "packer-output":
-                    var html = "[" + msg.timestamp + "] " + msg.line + "<br/>";
+                case "log":
+                    var html = "[" + msg.timestamp + "] " + msg.log.messageHtml + "<br/>";
                     packerOutputDiv.innerHTML += html;
                     break;
                 case "ami-created":
@@ -36,5 +35,6 @@
                     console.log("Unsupported message received", msg);
             }
         };
+        feed.addEventListener('message', handler, false);
     </script>
 }

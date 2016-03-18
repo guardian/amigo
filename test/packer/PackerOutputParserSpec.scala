@@ -1,16 +1,16 @@
 package packer
 
 import org.scalatest._
-import models.AmiId
+import models.{ MessagePart, AmiId }
 
 class PackerOutputParserSpec extends FlatSpec with Matchers {
 
   it should "parse a line of Packer output" in {
     PackerOutputParser.parseLine("1455354962,,ui,say,ubuntu-wily-java8 output will be in this color.") should be(
-      Some(PackerOutputParser.UserFacingOutput("ubuntu-wily-java8 output will be in this color."))
+      Some(PackerOutputParser.UiOutput("info", List(MessagePart("ubuntu-wily-java8 output will be in this color.", "black"))))
     )
     PackerOutputParser.parseLine("""1455355203,,ui,message,    ubuntu-wily-java8: Adding tag: "SourceAMI": "ami-cda312be"""") should be(
-      Some(PackerOutputParser.UserFacingOutput("""    ubuntu-wily-java8: Adding tag: "SourceAMI": "ami-cda312be""""))
+      Some(PackerOutputParser.UiOutput("info", List(MessagePart("""    ubuntu-wily-java8: Adding tag: "SourceAMI": "ami-cda312be"""", "black"))))
     )
 
   }

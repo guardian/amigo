@@ -4,18 +4,33 @@ scalaVersion := "2.11.7"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
 
+def getTravisBranch(): String = {
+  sys.env.get("TRAVIS_PULL_REQUEST") match {
+    case Some("false") => sys.env.getOrElse("TRAVIS_BRANCH", "unknown-branch")
+    case Some(i) => s"pr/$i"
+    case None => "unknown-branch"
+  }
+}
+
 val jacksonVersion = "2.7.1"
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+  "com.gu" %% "scanamo" % "0.1.0",
+  "com.github.cb372" %% "automagic" % "0.1",
+  "com.beachape" %% "enumeratum" % "1.3.7",
+  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
+  "com.gu" %% "configuration-magic-play2-4" % "1.2.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator
+routesImport += "models._"
 
 riffRaffPackageType := (packageZipTarball in Universal).value
 riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
+riffRaffManifestBranch := getTravisBranch()
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 

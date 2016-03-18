@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import ansible.PlaybookGenerator
+import event.EventBus
 import models.Bake
 import play.api.libs.json.Json
 
@@ -20,7 +21,7 @@ object PackerRunner {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(bake: Bake, packerListener: PackerListener): Future[Int] = {
+  def createImage(bake: Bake, eventBus: EventBus): Future[Int] = {
     val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe)
     println(playbookYaml)
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
@@ -40,7 +41,7 @@ object PackerRunner {
     val exitValuePromise = Promise[Int]()
 
     val runnable = new Runnable {
-      def run(): Unit = PackerProcessMonitor.monitorProcess(packerProcess, exitValuePromise, packerListener)
+      def run(): Unit = PackerProcessMonitor.monitorProcess(packerProcess, exitValuePromise, bake.bakeId, eventBus)
     }
     val listenerThread = new Thread(runnable, s"Packer process monitor for ${bake.recipe.id.value} #${bake.buildNumber}")
     listenerThread.setDaemon(true)
