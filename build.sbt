@@ -4,6 +4,14 @@ scalaVersion := "2.11.7"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
 
+def getTravisBranch(): String = {
+  sys.env.get("TRAVIS_PULL_REQUEST") match {
+    case Some("false") => sys.env.getOrElse("TRAVIS_BRANCH", "unknown-branch")
+    case Some(i) => s"pr/$i"
+    case None => "unknown-branch"
+  }
+}
+
 val jacksonVersion = "2.7.1"
 libraryDependencies ++= Seq(
   ws,
@@ -21,6 +29,7 @@ routesImport += "models._"
 
 riffRaffPackageType := (packageZipTarball in Universal).value
 riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
+riffRaffManifestBranch := getTravisBranch()
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 
