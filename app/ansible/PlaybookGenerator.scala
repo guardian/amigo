@@ -1,6 +1,6 @@
 package ansible
 
-import models.Recipe
+import models.{ CustomisedRole, Recipe }
 
 object PlaybookGenerator {
 
@@ -14,8 +14,15 @@ object PlaybookGenerator {
       |- hosts: all
       |  become: yes
       |  roles:
-      |${allRoles.map(role => s"    - ${role.roleId.value}").mkString("\n")}
-    """.stripMargin
+      |${allRoles.map(role => s"    - ${renderRole(role)}").mkString("\n")}
+      |""".stripMargin
+  }
+
+  private def renderRole(role: CustomisedRole): String = {
+    if (role.variables.isEmpty)
+      role.roleId.value
+    else
+      s"{ role: ${role.roleId.value}, ${role.variables.map { case (k, v) => s"$k: '$v'" }.mkString(", ")} }"
   }
 
 }
