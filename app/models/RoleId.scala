@@ -3,7 +3,7 @@ package models
 import cats.data.Validated.Valid
 import com.gu.scanamo.DynamoFormat
 
-case class RoleId(value: String)
+case class RoleId(value: String) extends StringId(value)
 
 object RoleId {
 

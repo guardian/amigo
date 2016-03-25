@@ -3,26 +3,18 @@
 
   <h1>Recipes</h1>
 
+  <p>Click on a row for more details.</p>
+
   <table class="table table-striped">
     <thead>
       <th>Name</th>
       <th>Description</th>
-      <th>Base image</th>
-      <th>Roles</th>
     </thead>
     <tbody>
     @for(recipe <- recipes) {
-      <tr>
-        <td>@recipe.id.value</td>
+      <tr data-href="@routes.Amigo.showRecipe(recipe.id)">
+        <td>@recipe.id</td>
         <td>@recipe.description</td>
-        <td>@recipe.baseImage.id.value (TODO link)</td>
-        <td>
-          <ul>
-            @for(role <- recipe.roles) {
-              <li>@role.roleId.value (TODO link)</li>
-            }
-          </ul>
-        </td>
       </tr>
     }
     </tbody>

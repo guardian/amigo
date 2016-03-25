@@ -1,0 +1,65 @@
+@(recipe: Recipe, recentBakes: Iterable[Bake])
+@layout("AMIgo"){
+
+  <h1>@recipe.id.value</h1>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Actions</div>
+    <div class="panel-body">
+    <form action="@routes.Amigo.startBaking(recipe.id)" method="post">
+      <button type="submit" class="btn btn-primary">Bake!</button>
+    </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Description</div>
+    <div class="panel-body">
+      @recipe.description
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Base image</div>
+    <div class="panel-body">
+      <a href="@routes.Amigo.showBaseImage(recipe.baseImage.id)">@recipe.baseImage.id</a>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Roles</div>
+    <div class="panel-body">
+    @fragments.customisedRoles(recipe.roles)
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Recent bakes</div>
+    <div class="panel-body">
+      <table class="table table-striped">
+        <thead>
+          <th>Started at</th>
+          <th>Build number</th>
+          <th>Status</th>
+          <th>AMI</th>
+        </thead>
+        <tbody>
+        @for(bake <- recentBakes) {
+          <tr data-href="@routes.Amigo.showBake(bake.recipe.id, bake.buildNumber)">
+            <td>TODO</td>
+            <td>@bake.buildNumber</td>
+            <td>@bake.status</td>
+            <td>
+            @if(bake.amiId.isDefined) {
+              <code>@bake.amiId</code>
+            }
+            </td>
+          </tr>
+        }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TODO listen to bake events and update the bakes list accordingly -->
+}

@@ -26,7 +26,8 @@ object BakeEvent {
         "timestamp" -> JsString(log.timestamp.toString("YYYY-MM-dd HH:mm:ss")),
         "log" -> JsObject(Seq(
           "level" -> JsString(log.logLevel),
-          "messageHtml" -> JsString(log.messageParts.map(_.toHtml).mkString)
+          "number" -> JsNumber(log.logNumber),
+          "messageHtml" -> JsString(log.messageHtml.toString)
         ))
       ))
       case AmiCreated(_, amiId) => JsObject(Seq(

@@ -24,16 +24,38 @@ object Bakes {
     updateItem(bakeId, "SET #amiId = :amiId", "#amiId" -> "amiId", ":amiId" -> fai.write(amiId))
   }
 
-  def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[Bake] = {
+  def list(recipeId: RecipeId, limit: Int = 20)(implicit dynamo: Dynamo): Iterable[Bake] = {
     val queryRequest = new QueryRequest(tableName)
       .withKeyConditionExpression("#recipeId = :recipeId")
+      .withExpressionAttributeNames(Map("#recipeId" -> "recipeId").asJava)
+      .withExpressionAttributeValues(Map(":recipeId" -> new AttributeValue(recipeId.value)).asJava)
       .withScanIndexForward(false) // return newest (highest build number) first
+      .withLimit(limit)
     val recipe = Recipes.findById(recipeId)
     val dbModels: Iterable[Option[ValidatedNel[DynamoReadError, Bake.DbModel]]] =
       dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[Bake.DbModel](new GetItemResult().withItem(item)) }
     for {
       r <- recipe.toIterable
       dbModel <- dbModels.flatMap(_.flatMap(_.toOption))
+    } yield {
+      Bake.db2domain(dbModel, r)
+    }
+  }
+
+  def findById(recipeId: RecipeId, buildNumber: Int)(implicit dynamo: Dynamo): Option[Bake] = {
+    val queryRequest = new QueryRequest(tableName)
+      .withKeyConditionExpression("#recipeId = :recipeId AND #buildNumber = :buildNumber")
+      .withExpressionAttributeNames(Map("#recipeId" -> "recipeId", "#buildNumber" -> "buildNumber").asJava)
+      .withExpressionAttributeValues(Map(":recipeId" -> new AttributeValue(recipeId.value), ":buildNumber" -> new AttributeValue().withN(buildNumber.toString)).asJava)
+      .withScanIndexForward(false) // return newest (highest build number) first
+      .withLimit(1)
+    val recipe = Recipes.findById(recipeId)
+    val dbModel: Option[ValidatedNel[DynamoReadError, Bake.DbModel]] =
+      dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[Bake.DbModel](new GetItemResult().withItem(item)) }
+        .headOption.flatten
+    for {
+      r <- recipe
+      dbModel <- dbModel.flatMap(_.toOption)
     } yield {
       Bake.db2domain(dbModel, r)
     }

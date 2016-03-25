@@ -4,7 +4,7 @@ import cats.data.Validated.Valid
 import com.gu.scanamo.DynamoFormat
 import play.api.mvc.PathBindable
 
-case class RecipeId(value: String)
+case class RecipeId(value: String) extends StringId(value)
 
 object RecipeId {
 

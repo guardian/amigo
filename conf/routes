@@ -4,15 +4,17 @@
 
 # Home page
 GET     /                           controllers.Amigo.index
-POST    /bake                       controllers.Amigo.bake
 
 GET     /base-images                controllers.Amigo.baseImages
+GET     /base-images/:id            controllers.Amigo.showBaseImage(id: BaseImageId)
 
 GET     /roles                      controllers.Amigo.roles
 
 GET     /recipes                    controllers.Amigo.recipes
-
-GET     /:recipeId/:buildNumber/events    controllers.Amigo.sse(recipeId: models.RecipeId, buildNumber: Int)
+GET     /recipes/:id                controllers.Amigo.showRecipe(id: RecipeId)
+POST    /recipes/:id/bake                               controllers.Amigo.startBaking(id: RecipeId)
+GET     /recipes/:recipeId/bakes/:buildNumber           controllers.Amigo.showBake(recipeId: RecipeId, buildNumber: Int)
+GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.Amigo.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

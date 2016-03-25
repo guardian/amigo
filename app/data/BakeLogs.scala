@@ -19,10 +19,11 @@ object BakeLogs {
     Scanamo.put(dynamo.client)(tableName)(safeBakeLog)
   }
 
-  def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[BakeLog] = {
+  def list(bakeId: BakeId)(implicit dynamo: Dynamo): Iterable[BakeLog] = {
     val queryRequest = new QueryRequest(tableName)
-      .withKeyConditionExpression("recipeId = :recipeId")
-      .withExpressionAttributeValues(Map(":recipeId" -> new AttributeValue(recipeId.value)).asJava)
+      .withKeyConditionExpression("#bakeId = :bakeId")
+      .withExpressionAttributeNames(Map("#bakeId" -> "bakeId").asJava)
+      .withExpressionAttributeValues(Map(":bakeId" -> BakeId.dynamoFormat.write(bakeId)).asJava)
       .withScanIndexForward(true) // return oldest logs first
     val items: Iterable[Option[ValidatedNel[DynamoReadError, BakeLog]]] =
       dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[BakeLog](new GetItemResult().withItem(item)) }

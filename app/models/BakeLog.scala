@@ -1,6 +1,7 @@
 package models
 
 import org.joda.time.DateTime
+import play.twirl.api.Html
 
 case class MessagePart(text: String, colour: String) {
 
@@ -8,5 +9,9 @@ case class MessagePart(text: String, colour: String) {
 
 }
 
-case class BakeLog(bakeId: BakeId, logNumber: Int, timestamp: DateTime, logLevel: String, messageParts: List[MessagePart])
+case class BakeLog(bakeId: BakeId, logNumber: Int, timestamp: DateTime, logLevel: String, messageParts: List[MessagePart]) {
+
+  def messageHtml = Html(messageParts.map(_.toHtml).mkString)
+
+}
 

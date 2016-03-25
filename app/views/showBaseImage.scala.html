@@ -1,0 +1,27 @@
+@(image: BaseImage)
+@layout("AMIgo"){
+
+  <h1>@image.id.value</h1>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Description</div>
+    <div class="panel-body">
+    @image.description
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Source AMI</div>
+    <div class="panel-body">
+      @image.amiId
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Builtin roles</div>
+    <div class="panel-body">
+    @fragments.customisedRoles(image.builtinRoles)
+    </div>
+  </div>
+
+}
