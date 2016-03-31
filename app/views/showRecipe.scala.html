@@ -38,7 +38,7 @@
     <div class="panel-body">
       <table class="table table-striped">
         <thead>
-          <th>Started at</th>
+          <th>Started</th>
           <th>Build number</th>
           <th>Status</th>
           <th>AMI</th>
@@ -46,7 +46,7 @@
         <tbody>
         @for(bake <- recentBakes) {
           <tr data-href="@routes.Amigo.showBake(bake.recipe.id, bake.buildNumber)">
-            <td>TODO</td>
+            <td>@bake.startedAt.toString("yyyy-MM-dd HH:mm:ss") by @bake.startedBy</td>
             <td>@bake.buildNumber</td>
             <td>@bake.status</td>
             <td>

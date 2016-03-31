@@ -4,13 +4,15 @@ import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.{ DynamoFormat, DynamoReadError, Scanamo }
 import models.{ RecipeId, _ }
+import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 
 object Bakes {
+  import DynamoFormats._
 
-  def create(recipe: Recipe, buildNumber: Int)(implicit dynamo: Dynamo): Bake = {
-    val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None)
+  def create(recipe: Recipe, buildNumber: Int, startedBy: String)(implicit dynamo: Dynamo): Bake = {
+    val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None, startedBy = startedBy, startedAt = DateTime.now())
     val dbModel = Bake.domain2db(bake)
     Scanamo.put(dynamo.client)(tableName)(dbModel)
     bake
