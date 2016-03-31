@@ -1,5 +1,6 @@
 package controllers
 
+import com.gu.googleauth.GoogleAuthConfig
 import packer.PackerRunner
 import models._
 import data._
@@ -9,36 +10,36 @@ import event._
 
 import play.api.mvc._
 
-class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus)(implicit dynamo: Dynamo) extends Controller {
+class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo) extends Controller with AuthActions {
 
-  def index = Action {
+  def index = AuthAction {
     Ok(views.html.index())
   }
 
-  def baseImages = Action {
+  def baseImages = AuthAction {
     Ok(views.html.baseImages(BaseImages.list()))
   }
 
-  def showBaseImage(id: BaseImageId) = Action {
+  def showBaseImage(id: BaseImageId) = AuthAction {
     BaseImages.findById(id).fold[Result](NotFound)(image => Ok(views.html.showBaseImage(image)))
   }
 
-  def roles = Action {
+  def roles = AuthAction {
     Ok(views.html.roles(Roles.list))
   }
 
-  def recipes = Action {
+  def recipes = AuthAction {
     Ok(views.html.recipes(Recipes.list()))
   }
 
-  def showRecipe(id: RecipeId) = Action {
+  def showRecipe(id: RecipeId) = AuthAction {
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val recentBakes = Bakes.list(id, limit = 20)
       Ok(views.html.showRecipe(recipe, recentBakes))
     }
   }
 
-  def startBaking(recipeId: RecipeId) = Action {
+  def startBaking(recipeId: RecipeId) = AuthAction {
     Recipes.findById(RecipeId("ubuntu-wily-java8")).fold[Result](NotFound) { recipe =>
       val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
       val theBake = Bakes.create(recipe, buildNumber)
@@ -47,14 +48,14 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus)(implicit dynam
     }
   }
 
-  def showBake(recipeId: RecipeId, buildNumber: Int) = Action {
+  def showBake(recipeId: RecipeId, buildNumber: Int) = AuthAction {
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
       Ok(views.html.showBake(bake, bakeLogs))
     }
   }
 
-  def bakeEvents(recipeId: RecipeId, buildNumber: Int) = Action { implicit req =>
+  def bakeEvents(recipeId: RecipeId, buildNumber: Int) = AuthAction { implicit req =>
     val bakeId = BakeId(recipeId, buildNumber)
     Ok.feed(eventsOut
       &> Concurrent.buffer(50) // TODO filter by bakeId

@@ -6,17 +6,23 @@ import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, EnvironmentVaria
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.gu.cm.{ PlayDefaultLogger, Identity }
-import controllers.Amigo
+import com.gu.googleauth.GoogleAuthConfig
+import controllers.{ Auth, Amigo }
 import data.Dynamo
 import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
+import org.joda.time.Duration
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.iteratee.Concurrent
+import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import router.Routes
 
 class AppComponents(context: Context)
-    extends BuiltInComponentsFromContext(context) {
+    extends BuiltInComponentsFromContext(context)
+    with AhcWSComponents {
+
+  def mandatoryConfig(key: String): String = configuration.getString(key).getOrElse(sys.error(s"Missing config key: $key"))
 
   implicit val dynamo = {
     import com.gu.cm.PlayImplicits._
@@ -43,7 +49,17 @@ class AppComponents(context: Context)
   }
   val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
-  val controller = new Amigo(eventsOut, eventBus)
+  val googleAuthConfig = GoogleAuthConfig(
+    clientId = mandatoryConfig("google.clientId"),
+    clientSecret = mandatoryConfig("google.clientSecret"),
+    redirectUrl = mandatoryConfig("google.redirectUrl"),
+    domain = Some("guardian.co.uk"),
+    maxAuthAge = Some(Duration.standardDays(90)),
+    enforceValidity = true
+  )
+
+  val controller = new Amigo(eventsOut, eventBus, googleAuthConfig)
+  val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
-  lazy val router: Router = new Routes(httpErrorHandler, controller, assets)
+  lazy val router: Router = new Routes(httpErrorHandler, controller, authController, assets)
 }
