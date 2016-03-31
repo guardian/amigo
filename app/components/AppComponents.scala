@@ -5,7 +5,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, EnvironmentVariableCredentialsProvider, AWSCredentialsProviderChain }
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.gu.cm.{ PlayDefaultLogger, Identity }
+import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
 import controllers.{ Auth, Amigo }
 import data.Dynamo
@@ -22,10 +22,15 @@ class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents {
 
+  val identity = {
+    import com.gu.cm.PlayImplicits._
+    Identity.whoAmI("amigo", context.environment.mode)
+  }
+  override lazy val configuration = context.initialConfiguration ++ ConfigurationLoader.playConfig(identity, context.environment.mode)
+
   def mandatoryConfig(key: String): String = configuration.getString(key).getOrElse(sys.error(s"Missing config key: $key"))
 
   implicit val dynamo = {
-    import com.gu.cm.PlayImplicits._
     val awsCreds = new AWSCredentialsProviderChain(
       new EnvironmentVariableCredentialsProvider,
       new ProfileCredentialsProvider("deployTools"),
@@ -33,8 +38,7 @@ class AppComponents(context: Context)
     )
     val region = Regions.fromName(configuration.getString("aws.region").getOrElse("eu-west-1"))
     val dynamoClient: AmazonDynamoDBClient = new AmazonDynamoDBClient(awsCreds).withRegion(region)
-    val stage = Identity.whoAmI("amigo", context.environment.mode, PlayDefaultLogger).stage
-    new Dynamo(dynamoClient, stage)
+    new Dynamo(dynamoClient, identity.stage)
   }
   dynamo.initTables()
 
