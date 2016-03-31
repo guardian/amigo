@@ -8,6 +8,7 @@ import models._
 import scala.collection.JavaConverters._
 
 object BaseImages {
+  import DynamoFormats._
 
   def list()(implicit dynamo: Dynamo): Iterable[BaseImage] = {
     val scanRequest = new ScanRequest(tableName)

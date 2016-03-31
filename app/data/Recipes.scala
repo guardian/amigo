@@ -10,6 +10,7 @@ import models._
 import scala.collection.JavaConverters._
 
 object Recipes {
+  import DynamoFormats._
 
   def list()(implicit dynamo: Dynamo): Iterable[Recipe] = {
     val scanRequest = new ScanRequest(tableName)

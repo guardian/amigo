@@ -1,6 +1,13 @@
 package models
 
-case class Bake(recipe: Recipe, buildNumber: Int, status: BakeStatus, amiId: Option[AmiId]) {
+import org.joda.time.DateTime
+
+case class Bake(recipe: Recipe,
+    buildNumber: Int,
+    status: BakeStatus,
+    amiId: Option[AmiId],
+    startedBy: String,
+    startedAt: DateTime) {
   val bakeId = BakeId(recipe.id, buildNumber)
 }
 
@@ -10,7 +17,9 @@ object Bake {
     recipeId: RecipeId,
     buildNumber: Int,
     status: BakeStatus,
-    amiId: Option[AmiId])
+    amiId: Option[AmiId],
+    startedBy: String,
+    startedAt: DateTime)
 
   import automagic._
 

@@ -39,10 +39,10 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
     }
   }
 
-  def startBaking(recipeId: RecipeId) = AuthAction {
+  def startBaking(recipeId: RecipeId) = AuthAction { request =>
     Recipes.findById(RecipeId("ubuntu-wily-java8")).fold[Result](NotFound) { recipe =>
       val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-      val theBake = Bakes.create(recipe, buildNumber)
+      val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
       PackerRunner.createImage(theBake, eventBus)
       Redirect(routes.Amigo.showBake(recipeId, buildNumber))
     }
