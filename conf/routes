@@ -16,6 +16,9 @@ POST    /recipes/:id/bake                               controllers.Amigo.startB
 GET     /recipes/:recipeId/bakes/:buildNumber           controllers.Amigo.showBake(recipeId: RecipeId, buildNumber: Int)
 GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.Amigo.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
 
+# Healthcheck
+GET     /healthcheck                controllers.Amigo.healthcheck
+
 # Auth
 GET         /login                                                       controllers.Auth.login
 GET         /oauth2callback                                              controllers.Auth.oauth2Callback

@@ -184,7 +184,7 @@
           }
         ],
         "HealthCheck": {
-          "Target": "HTTP:9000/",
+          "Target": "HTTP:9000/healthcheck",
           "Timeout": "5",
           "Interval": "10",
           "UnhealthyThreshold": "2",

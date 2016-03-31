@@ -12,6 +12,10 @@ import play.api.mvc._
 
 class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo) extends Controller with AuthActions {
 
+  def healthcheck = Action {
+    Ok("OK")
+  }
+
   def index = AuthAction {
     Ok(views.html.index())
   }
