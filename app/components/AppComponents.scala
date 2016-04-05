@@ -13,6 +13,7 @@ import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import org.joda.time.Duration
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
+import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
@@ -20,7 +21,8 @@ import router.Routes
 
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
-    with AhcWSComponents {
+    with AhcWSComponents
+    with I18nComponents {
 
   val identity = {
     import com.gu.cm.PlayImplicits._
@@ -62,7 +64,7 @@ class AppComponents(context: Context)
     enforceValidity = true
   )
 
-  val controller = new Amigo(eventsOut, eventBus, googleAuthConfig)
+  val controller = new Amigo(eventsOut, eventBus, googleAuthConfig, messagesApi)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(httpErrorHandler, controller, authController, assets)

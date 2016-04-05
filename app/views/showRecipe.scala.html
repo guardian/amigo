@@ -46,7 +46,7 @@
         <tbody>
         @for(bake <- recentBakes) {
           <tr data-href="@routes.Amigo.showBake(bake.recipe.id, bake.buildNumber)">
-            <td>@bake.startedAt.toString("yyyy-MM-dd HH:mm:ss") by @bake.startedBy</td>
+            <td>@fragments.timestamp(bake.startedAt, bake.startedBy)</td>
             <td>@bake.buildNumber</td>
             <td>@bake.status</td>
             <td>

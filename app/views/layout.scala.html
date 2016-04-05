@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(implicit flash: Flash = Flash())
 
 <!DOCTYPE html>
 
@@ -38,6 +38,10 @@
     </nav>
 
     <div class="container">
+      @if(flash.get("info").isDefined) {
+        <div class="alert alert-success" role="alert">@flash("info")</div>
+      }
+
       @content
     </div>
 

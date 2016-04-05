@@ -5,5 +5,12 @@ case class CustomisedRole(
     variables: Map[String, String]) {
 
   def variablesToString = variables.map { case (k, v) => s"$k: $v" }.mkString("{ ", ", ", " }")
+
+  /** Render the variables for display in a form input box */
+  def variablesToFormInputText = {
+    if (variables.isEmpty) ""
+    else variables.map { case (k, v) => s"$k: $v" }.mkString(", ")
+  }
+
 }
 

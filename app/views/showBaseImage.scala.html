@@ -1,12 +1,21 @@
-@(image: BaseImage)
+@(image: BaseImage)(implicit flash: Flash)
 @layout("AMIgo"){
 
   <h1>@image.id.value</h1>
 
   <div class="panel panel-default">
+    <div class="panel-heading">Actions</div>
+    <div class="panel-body">
+      <a class="btn btn-default" href="@routes.Amigo.editBaseImage(image.id)">Edit</a>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
     <div class="panel-heading">Description</div>
     <div class="panel-body">
-    @image.description
+      <p>Created @fragments.timestamp(image.createdAt, image.createdBy)</p>
+      <p>Modified @fragments.timestamp(image.modifiedAt, image.modifiedBy)</p>
+      <p>@image.description</p>
     </div>
   </div>
 

@@ -7,6 +7,8 @@ GET     /                           controllers.Amigo.index
 
 GET     /base-images                controllers.Amigo.baseImages
 GET     /base-images/:id            controllers.Amigo.showBaseImage(id: BaseImageId)
+GET     /base-images/:id/edit       controllers.Amigo.editBaseImage(id: BaseImageId)
+POST    /base-images/:id/edit       controllers.Amigo.updateBaseImage(id: BaseImageId)
 
 GET     /roles                      controllers.Amigo.roles
 
