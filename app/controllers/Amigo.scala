@@ -43,13 +43,18 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
     }
   }
 
-  def updateBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+  def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
-      // TODO parse roles and variables
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
       }, { update =>
-        BaseImages.update(image, update, modifiedBy = request.user.fullName)
+        val enabledRoles = request.body.getOrElse("roles", Nil)
+        val customisedRoles = enabledRoles.map { roleName =>
+          val variablesString = request.body.get(s"role-$roleName-variables").flatMap(_.headOption).getOrElse("")
+          val variables = CustomisedRole.formInputTextToVariables(variablesString)
+          CustomisedRole(RoleId(roleName), variables)
+        }.toList
+        BaseImages.update(image, update, customisedRoles, modifiedBy = request.user.fullName)
         Redirect(routes.Amigo.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
       })
     }

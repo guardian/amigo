@@ -4,7 +4,6 @@
 
 @layout("AMIgo"){
 
-
   @b3.form(routes.Amigo.updateBaseImage(image.id)) {
     @b3.static("ID"){@image.id.value}
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
@@ -18,7 +17,7 @@
             @if(image.builtinRoles.exists(_.roleId == role)) {
               <div class="col-md-2">
                 <label for="role-@role">
-                  <input type="checkbox" id="role-@role" name="role-@role" value="true" checked> @role
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked> @role
                 </label>
               </div>
               <div class="col-md-10">
@@ -29,7 +28,7 @@
             } else {
               <div class="col-md-2">
                 <label for="role-@role">
-                  <input type="checkbox" id="role-@role" name="role-@role" value="true"> @role
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
                 </label>
               </div>
               <div class="col-md-10">
@@ -43,8 +42,5 @@
 
     @b3.submit('class -> "btn btn-default"){ Save }
   }
-
-  <!-- TODO JS to toggle display of role variable boxes -->
-
 
 }

@@ -14,3 +14,12 @@ case class CustomisedRole(
 
 }
 
+object CustomisedRole {
+
+  private val KeyValuePair = """(.+): ?(.+)""".r
+
+  def formInputTextToVariables(input: String): Map[String, String] = {
+    input.split(", *").collect { case KeyValuePair(k, v) => (k.trim, v.trim) }.toMap
+  }
+
+}
