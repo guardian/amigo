@@ -6,16 +6,17 @@
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
-    <form action="@routes.Amigo.startBaking(recipe.id)" method="post">
-      <button type="submit" class="btn btn-primary">Bake!</button>
-    </form>
+      <a data-href="@routes.Amigo.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
+      <a href="@routes.Amigo.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
     </div>
   </div>
 
   <div class="panel panel-default">
     <div class="panel-heading">Description</div>
     <div class="panel-body">
-      @recipe.description
+      <p>Created @fragments.timestamp(recipe.createdAt, recipe.createdBy)</p>
+      <p>Modified @fragments.timestamp(recipe.modifiedAt, recipe.modifiedBy)</p>
+      <p>@recipe.description</p>
     </div>
   </div>
 

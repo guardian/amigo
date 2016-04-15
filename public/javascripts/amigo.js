@@ -28,7 +28,15 @@ function makeRoleVariablesVisibilityToggleable() {
   });
 }
 
+function enablePostLinks() {
+  $('a.post').click(function() {
+    var href = $(this).data('href');
+    $('<form action="'+href+'" method="post"></form>').appendTo('body').submit();
+  });
+}
+
 $(function(){
+  enablePostLinks();
   makeTableRowsClickable();
   makeRoleVariablesVisibilityToggleable();
 });

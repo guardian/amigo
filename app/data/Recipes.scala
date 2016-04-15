@@ -6,6 +6,7 @@ import com.gu.scanamo.{ DynamoReadError, Scanamo }
 import models.Recipe.DbModel
 import models.RecipeId
 import models._
+import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 
@@ -22,6 +23,19 @@ object Recipes {
     } yield {
       Recipe.db2domain(dbModel, baseImage)
     }
+  }
+
+  def update(recipe: Recipe, description: String, baseImage: BaseImage, roles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+    val updated = recipe.copy(
+      description = description,
+      baseImage = baseImage,
+      roles = roles,
+      modifiedBy = modifiedBy,
+      modifiedAt = DateTime.now()
+    )
+    // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
+    val nextBuildNumber = Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> recipe.id).flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
+    Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(updated, nextBuildNumber))
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {

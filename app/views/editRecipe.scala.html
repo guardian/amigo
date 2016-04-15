@@ -1,20 +1,20 @@
-@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+@(recipe: Recipe, form: Form[_], availableBaseImages: Seq[BaseImage], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @layout("AMIgo"){
 
-  @b3.form(routes.Amigo.updateBaseImage(image.id)) {
-    @b3.static("ID"){@image.id.value}
+  @b3.form(routes.Amigo.updateRecipe(recipe.id)) {
+    @b3.static("ID"){@recipe.id.value}
     @b3.textarea( form("description"), '_label -> "Description" )
-    @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
+    @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), '_label -> "Base image" )
 
     <div class="form-group">
       <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>
       <div class="col-md-10" id="builtin-roles">
         @for(role <- availableRoles) {
           <div class="checkbox">
-            @if(image.builtinRoles.exists(_.roleId == role)) {
+            @if(recipe.roles.exists(_.roleId == role)) {
               <div class="col-md-2">
                 <label for="role-@role">
                   <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked> @role
@@ -22,7 +22,7 @@
               </div>
               <div class="col-md-10">
                 <input type="text" class="form-control" id="role-@role-variables" name="role-@role-variables"
-                       value="@image.builtinRoles.find(_.roleId == role).map(_.variablesToFormInputText)"
+                       value="@recipe.roles.find(_.roleId == role).map(_.variablesToFormInputText)"
                        placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
               </div>
             } else {

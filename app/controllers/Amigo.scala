@@ -63,9 +63,8 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
       case (id, description, amiId) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
-            val form = Forms.createBaseImage.fill((id, description, amiId))
-              .withError("id", "This base image ID is already in use")
-            Conflict(views.html.newBaseImage(form, Roles.list))
+            val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
+            Conflict(views.html.newBaseImage(formWithError, Roles.list))
           case None =>
             val customisedRoles = Amigo.parseEnabledRoles(request.body)
             BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
@@ -86,6 +85,32 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val recentBakes = Bakes.list(id, limit = 20)
       Ok(views.html.showRecipe(recipe, recentBakes))
+    }
+  }
+
+  def editRecipe(id: RecipeId) = AuthAction {
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id))
+      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.list))
+    }
+  }
+
+  def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
+        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.list))
+      }, {
+        case (description, baseImageId) =>
+          BaseImages.findById(baseImageId) match {
+            case Some(baseImage) =>
+              val customisedRoles = Amigo.parseEnabledRoles(request.body)
+              Recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName)
+              Redirect(routes.Amigo.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
+            case None =>
+              val formWithError = Forms.editRecipe.fill((description, baseImageId)).withError("baseImageId", "Unknown base image")
+              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.list))
+          }
+      })
     }
   }
 
@@ -125,6 +150,7 @@ object Amigo {
   }
 
   object Forms {
+
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
@@ -135,6 +161,12 @@ object Amigo {
       "description" -> text(maxLength = 10000),
       "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
     ))
+
+    val editRecipe = Form(tuple(
+      "description" -> text(maxLength = 10000),
+      "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
+    ))
+
   }
 
 }
