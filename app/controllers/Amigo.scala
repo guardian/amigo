@@ -1,7 +1,7 @@
 package controllers
 
 import com.gu.googleauth.GoogleAuthConfig
-import packer.PackerRunner
+import _root_.packer.{ PackerConfig, PackerRunner }
 import models._
 import data._
 import play.api.data.Form
@@ -13,7 +13,11 @@ import event._
 
 import play.api.mvc._
 
-class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig: GoogleAuthConfig, val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+class Amigo(
+    eventsOut: Enumerator[BakeEvent],
+    eventBus: EventBus,
+    val authConfig: GoogleAuthConfig,
+    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Controller with AuthActions with I18nSupport {
   import Amigo._
 
   def healthcheck = Action {

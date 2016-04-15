@@ -11,8 +11,9 @@ import controllers.{ Auth, Amigo }
 import data.Dynamo
 import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import org.joda.time.Duration
+import packer.PackerConfig
 import play.api.ApplicationLoader.Context
-import play.api.BuiltInComponentsFromContext
+import play.api.{ Configuration, BuiltInComponentsFromContext }
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -28,13 +29,12 @@ class AppComponents(context: Context)
     import com.gu.cm.PlayImplicits._
     Identity.whoAmI("amigo", context.environment.mode)
   }
-  override lazy val configuration = context.initialConfiguration ++ ConfigurationLoader.playConfig(identity, context.environment.mode)
+  override lazy val configuration: Configuration = context.initialConfiguration ++ ConfigurationLoader.playConfig(identity, context.environment.mode)
 
   def mandatoryConfig(key: String): String = configuration.getString(key).getOrElse(sys.error(s"Missing config key: $key"))
 
   implicit val dynamo = {
     val awsCreds = new AWSCredentialsProviderChain(
-      new EnvironmentVariableCredentialsProvider,
       new ProfileCredentialsProvider("deployTools"),
       new InstanceProfileCredentialsProvider
     )
@@ -62,6 +62,11 @@ class AppComponents(context: Context)
     domain = Some("guardian.co.uk"),
     maxAuthAge = Some(Duration.standardDays(90)),
     enforceValidity = true
+  )
+
+  implicit val packerConfig = PackerConfig(
+    vpcId = configuration.getString("packer.vpcId"),
+    subnetId = configuration.getString("packer.subnetId")
   )
 
   val controller = new Amigo(eventsOut, eventBus, googleAuthConfig, messagesApi)
