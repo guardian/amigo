@@ -26,7 +26,11 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
       roles = List(
         CustomisedRole(RoleId("recipeRole1"), Map("wow" -> "yeah")),
         CustomisedRole(RoleId("recipeRole2"), Map.empty)
-      )
+      ),
+      createdBy = "Testy McTest",
+      createdAt = DateTime.now(),
+      modifiedBy = "Testy McTest",
+      modifiedAt = DateTime.now()
     )
 
     PlaybookGenerator.generatePlaybook(recipe) should be(
