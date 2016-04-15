@@ -1,0 +1,46 @@
+@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@layout("AMIgo"){
+
+  @b3.form(routes.Amigo.updateBaseImage(image.id)) {
+    @b3.static("ID"){@image.id.value}
+    @b3.textarea( form("description"), '_label -> "Description" )
+    @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
+
+    <div class="form-group">
+      <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>
+      <div class="col-md-10" id="builtin-roles">
+        @for(role <- availableRoles) {
+          <div class="checkbox">
+            @if(image.builtinRoles.exists(_.roleId == role)) {
+              <div class="col-md-2">
+                <label for="role-@role">
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked> @role
+                </label>
+              </div>
+              <div class="col-md-10">
+                <input type="text" class="form-control" id="role-@role-variables" name="role-@role-variables"
+                       value="@image.builtinRoles.find(_.roleId == role).map(_.variablesToFormInputText)"
+                       placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
+              </div>
+            } else {
+              <div class="col-md-2">
+                <label for="role-@role">
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
+                </label>
+              </div>
+              <div class="col-md-10">
+                <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @b3.submit('class -> "btn btn-primary"){ Save }
+  }
+
+}

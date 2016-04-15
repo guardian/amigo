@@ -1,10 +1,16 @@
 package models
 
+import org.joda.time.DateTime
+
 case class Recipe(
   id: RecipeId,
   description: String,
   baseImage: BaseImage,
-  roles: List[CustomisedRole])
+  roles: List[CustomisedRole],
+  createdBy: String,
+  createdAt: DateTime,
+  modifiedBy: String,
+  modifiedAt: DateTime)
 
 object Recipe {
 
@@ -13,10 +19,16 @@ object Recipe {
     description: String,
     baseImageId: BaseImageId,
     roles: List[CustomisedRole],
-    nextBuildNumber: Int)
+    nextBuildNumber: Int,
+    createdBy: String,
+    createdAt: DateTime,
+    modifiedBy: String,
+    modifiedAt: DateTime)
 
   import automagic._
 
   def db2domain(dbModel: DbModel, baseImage: BaseImage): Recipe = transform[DbModel, Recipe](dbModel, "baseImage" -> baseImage)
+
+  def domain2db(recipe: Recipe, nextBuildNumber: Int): DbModel = transform[Recipe, DbModel](recipe, "baseImageId" -> recipe.baseImage.id, "nextBuildNumber" -> nextBuildNumber)
 
 }

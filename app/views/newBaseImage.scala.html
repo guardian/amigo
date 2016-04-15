@@ -1,0 +1,33 @@
+@(form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@layout("AMIgo"){
+
+  @b3.form(routes.Amigo.createBaseImage) {
+    @b3.text(form("id"), '_label -> "ID", 'placeholder -> "my-lovely-image" )
+    @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
+    @b3.textarea( form("description"), '_label -> "Description" )
+
+    <div class="form-group">
+      <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>
+      <div class="col-md-10" id="builtin-roles">
+        @for(role <- availableRoles) {
+          <div class="checkbox">
+            <div class="col-md-2">
+              <label for="role-@role">
+                <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
+              </label>
+            </div>
+            <div class="col-md-10">
+              <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @b3.submit('class -> "btn btn-primary"){ Save }
+  }
+
+}

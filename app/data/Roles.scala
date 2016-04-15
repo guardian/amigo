@@ -13,7 +13,9 @@ object Roles {
 
   private val rootDir = Paths.get("roles")
 
-  val list: Seq[RoleId] = Files.list(rootDir).iterator.asScala.toSeq.map(path => RoleId(path.getFileName.toString))
+  val list: Seq[RoleId] = Files.list(rootDir).iterator.asScala.toSeq
+    .map(path => RoleId(path.getFileName.toString))
+    .sortBy(_.value)
 
   def findById(id: RoleId) = list.find(_ == id)
 
