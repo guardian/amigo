@@ -1,7 +1,6 @@
 package controllers
 
 import com.gu.googleauth.GoogleAuthConfig
-import data.BaseImages.BaseImageUpdate
 import packer.PackerRunner
 import models._
 import data._
@@ -35,10 +34,7 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
 
   def editBaseImage(id: BaseImageId) = AuthAction {
     BaseImages.findById(id).fold[Result](NotFound) { image =>
-      val form = Forms.editBaseImage.fill(BaseImageUpdate(
-        description = image.description,
-        amiId = image.amiId
-      ))
+      val form = Forms.editBaseImage.fill((image.description, image.amiId))
       Ok(views.html.editBaseImage(image, form, Roles.list))
     }
   }
@@ -47,17 +43,35 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
-      }, { update =>
-        val enabledRoles = request.body.getOrElse("roles", Nil)
-        val customisedRoles = enabledRoles.map { roleName =>
-          val variablesString = request.body.get(s"role-$roleName-variables").flatMap(_.headOption).getOrElse("")
-          val variables = CustomisedRole.formInputTextToVariables(variablesString)
-          CustomisedRole(RoleId(roleName), variables)
-        }.toList
-        BaseImages.update(image, update, customisedRoles, modifiedBy = request.user.fullName)
-        Redirect(routes.Amigo.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
+      }, {
+        case (description, amiId) =>
+          val customisedRoles = Amigo.parseEnabledRoles(request.body)
+          BaseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName)
+          Redirect(routes.Amigo.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
       })
     }
+  }
+
+  def newBaseImage = AuthAction {
+    Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.list))
+  }
+
+  def createBaseImage = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
+      BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))
+    }, {
+      case (id, description, amiId) =>
+        BaseImages.findById(id) match {
+          case Some(existingImage) =>
+            val form = Forms.createBaseImage.fill((id, description, amiId))
+              .withError("id", "This base image ID is already in use")
+            Conflict(views.html.newBaseImage(form, Roles.list))
+          case None =>
+            val customisedRoles = Amigo.parseEnabledRoles(request.body)
+            BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
+            Redirect(routes.Amigo.showBaseImage(id)).flashing("info" -> "Successfully created base image")
+        }
+    })
   }
 
   def roles = AuthAction {
@@ -101,11 +115,26 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
 
 object Amigo {
 
+  def parseEnabledRoles(form: Map[String, Seq[String]]): List[CustomisedRole] = {
+    val enabledRoles = form.getOrElse("roles", Nil)
+    enabledRoles.map { roleName =>
+      val variablesString = form.get(s"role-$roleName-variables").flatMap(_.headOption).getOrElse("")
+      val variables = CustomisedRole.formInputTextToVariables(variablesString)
+      CustomisedRole(RoleId(roleName), variables)
+    }.toList
+  }
+
   object Forms {
-    val editBaseImage = Form(mapping(
+    val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
-    )(BaseImageUpdate.apply)(BaseImageUpdate.unapply))
+    ))
+
+    val createBaseImage = Form(tuple(
+      "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
+      "description" -> text(maxLength = 10000),
+      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+    ))
   }
 
 }

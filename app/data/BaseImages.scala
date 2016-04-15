@@ -11,8 +11,6 @@ import scala.collection.JavaConverters._
 object BaseImages {
   import DynamoFormats._
 
-  case class BaseImageUpdate(description: String, amiId: AmiId)
-
   def create(id: BaseImageId,
     description: String,
     amiId: AmiId,
@@ -24,11 +22,11 @@ object BaseImages {
     baseImage
   }
 
-  def update(baseImage: BaseImage, baseImageUpdate: BaseImageUpdate, updatedRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+  def update(baseImage: BaseImage, description: String, amiId: AmiId, builtinRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
-      description = baseImageUpdate.description,
-      amiId = baseImageUpdate.amiId,
-      builtinRoles = updatedRoles,
+      description = description,
+      amiId = amiId,
+      builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now()
     )
