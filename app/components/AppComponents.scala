@@ -1,5 +1,6 @@
 package components
 
+import akka.stream.scaladsl.Source
 import akka.typed._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, EnvironmentVariableCredentialsProvider, AWSCredentialsProviderChain }
@@ -13,6 +14,7 @@ import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import org.joda.time.Duration
 import packer.PackerConfig
 import play.api.ApplicationLoader.Context
+import play.api.libs.streams.Streams
 import play.api.{ Configuration, BuiltInComponentsFromContext }
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -44,7 +46,8 @@ class AppComponents(context: Context)
   }
   dynamo.initTables()
 
-  val (eventsOut, eventsChannel) = Concurrent.broadcast[BakeEvent]
+  val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
+  val eventsSource = Source.fromPublisher(Streams.enumeratorToPublisher(eventsEnumerator))
   val eventBusActorSystem = {
     val eventListeners = Map(
       "channelSender" -> Props(Behaviours.sendToChannel(eventsChannel)),
@@ -53,7 +56,7 @@ class AppComponents(context: Context)
     )
     ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
   }
-  val eventBus = new ActorSystemWrapper(eventBusActorSystem)
+  implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),
@@ -69,7 +72,7 @@ class AppComponents(context: Context)
     subnetId = configuration.getString("packer.subnetId")
   )
 
-  val controller = new Amigo(eventsOut, eventBus, googleAuthConfig, messagesApi)
+  val controller = new Amigo(eventsSource, googleAuthConfig, messagesApi)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(httpErrorHandler, controller, authController, assets)

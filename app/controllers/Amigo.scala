@@ -1,5 +1,6 @@
 package controllers
 
+import akka.stream.scaladsl.Source
 import com.gu.googleauth.GoogleAuthConfig
 import _root_.packer.{ PackerConfig, PackerRunner }
 import models._
@@ -14,10 +15,9 @@ import event._
 import play.api.mvc._
 
 class Amigo(
-    eventsOut: Enumerator[BakeEvent],
-    eventBus: EventBus,
+    eventsSource: Source[BakeEvent, _],
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
   import Amigo._
 
   def healthcheck = Action {
@@ -163,9 +163,10 @@ class Amigo(
 
   def bakeEvents(recipeId: RecipeId, buildNumber: Int) = AuthAction { implicit req =>
     val bakeId = BakeId(recipeId, buildNumber)
-    Ok.feed(eventsOut
-      &> Concurrent.buffer(50) // TODO filter by bakeId
-      &> EventSource[BakeEvent]()).as("text/event-stream")
+    val source = eventsSource
+      .mapConcat(event => if (event.bakeId == bakeId) List(event) else Nil) // only include events relevant to this bake
+      .via(EventSource.flow)
+    Ok.chunked(source).as("text/event-stream")
   }
 }
 

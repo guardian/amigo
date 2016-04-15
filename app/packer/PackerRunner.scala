@@ -30,7 +30,6 @@ object PackerRunner {
     val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
     val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
     Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling
-    println(packerJson)
 
     val packerProcess = new ProcessBuilder()
       .command(packerCmd, "build", "-machine-readable", packerConfigFile.toAbsolutePath.toString)
