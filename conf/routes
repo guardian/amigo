@@ -16,6 +16,9 @@ POST    /base-images/:id/edit       controllers.Amigo.updateBaseImage(id: BaseIm
 GET     /roles                      controllers.Amigo.roles
 
 GET     /recipes                    controllers.Amigo.recipes
+GET     /recipes/new                controllers.Amigo.newRecipe
+POST    /recipes                    controllers.Amigo.createRecipe
+
 GET     /recipes/:id                controllers.Amigo.showRecipe(id: RecipeId)
 GET     /recipes/:id/edit           controllers.Amigo.editRecipe(id: RecipeId)
 POST    /recipes/:id/edit           controllers.Amigo.updateRecipe(id: RecipeId)

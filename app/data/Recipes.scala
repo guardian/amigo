@@ -25,6 +25,17 @@ object Recipes {
     }
   }
 
+  def create(id: RecipeId,
+    description: String,
+    baseImage: BaseImage,
+    roles: List[CustomisedRole],
+    createdBy: String)(implicit dynamo: Dynamo): Recipe = {
+    val now = DateTime.now()
+    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now)
+    Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(recipe, nextBuildNumber = 0))
+    recipe
+  }
+
   def update(recipe: Recipe, description: String, baseImage: BaseImage, roles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
     val updated = recipe.copy(
       description = description,

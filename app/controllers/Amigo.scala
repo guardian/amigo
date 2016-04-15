@@ -81,7 +81,7 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
     Ok(views.html.recipes(Recipes.list()))
   }
 
-  def showRecipe(id: RecipeId) = AuthAction {
+  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val recentBakes = Bakes.list(id, limit = 20)
       Ok(views.html.showRecipe(recipe, recentBakes))
@@ -112,6 +112,33 @@ class Amigo(eventsOut: Enumerator[BakeEvent], eventBus: EventBus, val authConfig
           }
       })
     }
+  }
+
+  def newRecipe = AuthAction {
+    Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.list))
+  }
+
+  def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
+      BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.list))
+    }, {
+      case (id, description, baseImageId) =>
+        Recipes.findById(id) match {
+          case Some(existingRecipe) =>
+            val formWithError = Forms.createRecipe.fill((id, description, baseImageId)).withError("id", "This recipe ID is already in use")
+            Conflict(views.html.newBaseImage(formWithError, Roles.list))
+          case None =>
+            BaseImages.findById(baseImageId) match {
+              case Some(baseImage) =>
+                val customisedRoles = Amigo.parseEnabledRoles(request.body)
+                Recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName)
+                Redirect(routes.Amigo.showRecipe(id)).flashing("info" -> "Successfully created recipe")
+              case None =>
+                val formWithError = Forms.createRecipe.fill((id, description, baseImageId)).withError("baseImageId", "Unknown base image")
+                BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.list))
+            }
+        }
+    })
   }
 
   def startBaking(recipeId: RecipeId) = AuthAction { request =>
@@ -163,6 +190,12 @@ object Amigo {
     ))
 
     val editRecipe = Form(tuple(
+      "description" -> text(maxLength = 10000),
+      "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
+    ))
+
+    val createRecipe = Form(tuple(
+      "id" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
       "description" -> text(maxLength = 10000),
       "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
     ))
