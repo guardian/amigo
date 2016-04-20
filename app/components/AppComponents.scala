@@ -38,6 +38,7 @@ class AppComponents(context: Context)
   implicit val dynamo = {
     val awsCreds = new AWSCredentialsProviderChain(
       new ProfileCredentialsProvider("deployTools"),
+      new ProfileCredentialsProvider(),
       new InstanceProfileCredentialsProvider
     )
     val region = Regions.fromName(configuration.getString("aws.region").getOrElse("eu-west-1"))
