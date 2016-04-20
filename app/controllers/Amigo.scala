@@ -164,7 +164,7 @@ class Amigo(
   def bakeEvents(recipeId: RecipeId, buildNumber: Int) = AuthAction { implicit req =>
     val bakeId = BakeId(recipeId, buildNumber)
     val source = eventsSource
-      .mapConcat(event => if (event.bakeId == bakeId) List(event) else Nil) // only include events relevant to this bake
+      .filter(_.bakeId == bakeId) // only include events relevant to this bake
       .via(EventSource.flow)
     Ok.chunked(source).as("text/event-stream")
   }
