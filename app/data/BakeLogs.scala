@@ -1,16 +1,22 @@
 package data
 
-import cats.data.{ Validated, ValidatedNel }
+import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoFormat, DynamoReadError, Scanamo }
-import models.{ RecipeId, _ }
-import org.joda.time.DateTime
+import com.gu.cm.Identity
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.ScanamoOps
+import com.gu.scanamo.{ Scanamo, ScanamoFree, Table }
+import models._
 
 import scala.collection.JavaConverters._
 
-object BakeLogs {
+class BakeLogs(identity: Identity) {
 
-  implicit val dateTimeFormat = DynamoFormat.xmap(DynamoFormat.stringFormat)(d => Validated.valid(new DateTime(d)))(_.toString)
+  import DynamoFormats.dateTimeFormat
+  import com.gu.scanamo.syntax._
+
+  private val tableName = Dynamo.tableName(identity, "bake-logs")
+  val table = Table[BakeLog](tableName)
 
   def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
     // Make sure we don't try to save an empty string to Dynamo
@@ -19,17 +25,7 @@ object BakeLogs {
     Scanamo.put(dynamo.client)(tableName)(safeBakeLog)
   }
 
-  def list(bakeId: BakeId)(implicit dynamo: Dynamo): Iterable[BakeLog] = {
-    val queryRequest = new QueryRequest(tableName)
-      .withKeyConditionExpression("#bakeId = :bakeId")
-      .withExpressionAttributeNames(Map("#bakeId" -> "bakeId").asJava)
-      .withExpressionAttributeValues(Map(":bakeId" -> BakeId.dynamoFormat.write(bakeId)).asJava)
-      .withScanIndexForward(true) // return oldest logs first
-    val items: Iterable[Option[ValidatedNel[DynamoReadError, BakeLog]]] =
-      dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[BakeLog](new GetItemResult().withItem(item)) }
-    items.flatMap(_.flatMap(_.toOption))
+  def list(bakeId: BakeId): ScanamoOps[Iterable[BakeLog]] = {
+    table.query('bakeId -> bakeId).map(_.flatMap(_.toOption))
   }
-
-  private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.bakeLogs.name
-
 }

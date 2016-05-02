@@ -11,68 +11,72 @@ import play.api.mvc._
 
 class RecipeController(
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    recipes: Recipes,
+    bakes: Bakes,
+    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
+  import dynamo.exec
 
   def listRecipes = AuthAction {
-    Ok(views.html.recipes(Recipes.list()))
+    Ok(views.html.recipes(exec(recipes.list())))
   }
 
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val recentBakes = Bakes.list(id, limit = 20)
+    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
+      val recentBakes = exec(bakes.list(id, limit = 20))
       Ok(views.html.showRecipe(recipe, recentBakes))
     }
   }
 
   def editRecipe(id: RecipeId) = AuthAction {
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id))
-      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.list))
+      Ok(views.html.editRecipe(recipe, form, exec(baseImages.list()).toSeq, Roles.list))
     }
   }
 
   def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.list))
+        BadRequest(views.html.editRecipe(recipe, formWithErrors, exec(baseImages.list()).toSeq, Roles.list))
       }, {
         case (description, baseImageId) =>
-          BaseImages.findById(baseImageId) match {
+          exec(baseImages.findById(baseImageId)) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              Recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName)
+              recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName)
               Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId)).withError("baseImageId", "Unknown base image")
-              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.list))
+              BadRequest(views.html.editRecipe(recipe, formWithError, exec(baseImages.list()).toSeq, Roles.list))
           }
       })
     }
   }
 
   def newRecipe = AuthAction {
-    Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.list))
+    Ok(views.html.newRecipe(Forms.createRecipe, exec(baseImages.list()).toSeq, Roles.list))
   }
 
   def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.list))
+      BadRequest(views.html.newRecipe(formWithErrors, exec(baseImages.list()).toSeq, Roles.list))
     }, {
       case (id, description, baseImageId) =>
-        Recipes.findById(id) match {
+        exec(recipes.findById(id)) match {
           case Some(existingRecipe) =>
             val formWithError = Forms.createRecipe.fill((id, description, baseImageId)).withError("id", "This recipe ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.list))
           case None =>
-            BaseImages.findById(baseImageId) match {
+            exec(baseImages.findById(baseImageId)) match {
               case Some(baseImage) =>
                 val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-                Recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName)
+                recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName)
                 Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
               case None =>
                 val formWithError = Forms.createRecipe.fill((id, description, baseImageId)).withError("baseImageId", "Unknown base image")
-                BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.list))
+                BadRequest(views.html.newRecipe(formWithError, exec(baseImages.list()).toSeq, Roles.list))
             }
         }
     })

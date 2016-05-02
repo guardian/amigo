@@ -2,14 +2,19 @@ package data
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
+import com.gu.cm.Identity
+import com.gu.scanamo.Scanamo
+import com.gu.scanamo.ops._
 import play.api.Logger
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.util.{ Success, Try }
 
-class Dynamo(val client: AmazonDynamoDB, stage: String) {
+class Dynamo(val client: AmazonDynamoDB, identity: Identity) {
   import Dynamo._
+
+  def exec[T](ops: ScanamoOps[T]) = Scanamo.exec(client)(ops)
 
   object Tables {
 
@@ -53,7 +58,7 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) {
       createTableIfDoesNotExist(table)
   }
 
-  private def tableName(suffix: String) = s"amigo-$stage-$suffix"
+  private def tableName(suffix: String) = Dynamo.tableName(identity, suffix)
 
   private def createTableIfDoesNotExist(table: Table): Unit = {
     if (Try(client.describeTable(table.name)).isFailure) {
@@ -79,6 +84,8 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) {
 }
 
 object Dynamo {
+
+  def tableName(identity: Identity, suffix: String) = s"${identity.app}-${identity.stage}-$suffix"
 
   class Table(private[Dynamo] val definition: CreateTableRequest) {
     val name: String = definition.getTableName

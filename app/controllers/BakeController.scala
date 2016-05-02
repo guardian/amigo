@@ -15,21 +15,26 @@ class BakeController(
     eventsSource: Source[BakeEvent, _],
     prism: Prism,
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    recipes: Recipes,
+    bakes: Bakes,
+    bakeLogs: BakeLogs)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
+
+  import dynamo.exec
 
   def startBaking(recipeId: RecipeId) = AuthAction { request =>
-    Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
-      val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-      val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
+    exec(recipes.findById(recipeId)).fold[Result](NotFound) { recipe =>
+      val buildNumber = recipes.incrementAndGetBuildNumber(recipe.id).get
+      val theBake = exec(bakes.create(recipe, buildNumber, startedBy = request.user.fullName))
       PackerRunner.createImage(theBake, prism, eventBus)
       Redirect(routes.BakeController.showBake(recipeId, buildNumber))
     }
   }
 
   def showBake(recipeId: RecipeId, buildNumber: Int) = AuthAction {
-    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
-      val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
-      Ok(views.html.showBake(bake, bakeLogs))
+    exec(bakes.findById(recipeId, buildNumber)).fold[Result](NotFound) { bake =>
+      val bakeLogList = exec(bakeLogs.list(BakeId(recipeId, buildNumber)))
+      Ok(views.html.showBake(bake, bakeLogList))
     }
   }
 

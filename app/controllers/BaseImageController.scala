@@ -12,32 +12,35 @@ import play.api.mvc._
 
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import BaseImageController._
 
+  import dynamo.exec
+
   def listBaseImages = AuthAction {
-    Ok(views.html.baseImages(BaseImages.list()))
+    Ok(views.html.baseImages(exec(baseImages.list())))
   }
 
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
-    BaseImages.findById(id).fold[Result](NotFound)(image => Ok(views.html.showBaseImage(image)))
+    exec(baseImages.findById(id)).fold[Result](NotFound)(image => Ok(views.html.showBaseImage(image)))
   }
 
   def editBaseImage(id: BaseImageId) = AuthAction {
-    BaseImages.findById(id).fold[Result](NotFound) { image =>
+    exec(baseImages.findById(id)).fold[Result](NotFound) { image =>
       val form = Forms.editBaseImage.fill((image.description, image.amiId))
       Ok(views.html.editBaseImage(image, form, Roles.list))
     }
   }
 
   def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    BaseImages.findById(id).fold[Result](NotFound) { image =>
+    exec(baseImages.findById(id)).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
       }, {
         case (description, amiId) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-          BaseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName)
+          baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName)
           Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
       })
     }
@@ -52,13 +55,13 @@ class BaseImageController(
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))
     }, {
       case (id, description, amiId) =>
-        BaseImages.findById(id) match {
+        exec(baseImages.findById(id)) match {
           case Some(existingImage) =>
             val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.list))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-            BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
+            baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
             Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
         }
     })

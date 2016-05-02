@@ -1,27 +1,38 @@
 package data
 
-import cats.data.ValidatedNel
+import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoReadError, Scanamo }
+import com.gu.cm.Identity
+import com.gu.scanamo.{ Scanamo, ScanamoFree, Table }
+import com.gu.scanamo.syntax._
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.ScanamoOps
 import models.Recipe.DbModel
-import models.RecipeId
-import models._
+import models.{ RecipeId, _ }
 import org.joda.time.DateTime
+import cats.syntax.traverse._
+import cats.std.option._
+import cats.std.stream._
 
 import scala.collection.JavaConverters._
 
-object Recipes {
-  import DynamoFormats._
+class Recipes(identity: Identity, baseImages: BaseImages) {
+  import DynamoFormats.dateTimeFormat
 
-  def list()(implicit dynamo: Dynamo): Iterable[Recipe] = {
-    val scanRequest = new ScanRequest(tableName)
-    val dbModels: Iterable[Option[ValidatedNel[DynamoReadError, DbModel]]] =
-      dynamo.client.scan(scanRequest).getItems.asScala.map { item => Scanamo.from[Recipe.DbModel](new GetItemResult().withItem(item)) }
+  private val tableName = Dynamo.tableName(identity, "recipes")
+  val table = Table[Recipe.DbModel](tableName)
+
+  def list(): ScanamoOps[Iterable[Recipe]] = {
     for {
-      dbModel <- dbModels.flatMap(_.flatMap(_.toOption))
-      baseImage <- BaseImages.findById(dbModel.baseImageId)
+      dbModels <- table.scan()
+      models = dbModels.flatMap(_.toOption)
+      baseImage <- models.traverse(m => baseImages.findById(m.baseImageId))
+      baseImages = baseImage.flatten
     } yield {
-      Recipe.db2domain(dbModel, baseImage)
+      for {
+        model <- models
+        image <- baseImages
+      } yield Recipe.db2domain(model, image)
     }
   }
 
@@ -45,16 +56,21 @@ object Recipes {
       modifiedAt = DateTime.now()
     )
     // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
-    val nextBuildNumber = Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> recipe.id).flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
+    val nextBuildNumber = Scanamo.get[DbModel](dynamo.client)(tableName)('id -> recipe.id).flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
     Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(updated, nextBuildNumber))
   }
 
-  def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
+  def findById(id: RecipeId): ScanamoOps[Option[Recipe]] = {
     for {
-      dbModel <- Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> id).flatMap(_.toOption)
-      baseImage <- BaseImages.findById(dbModel.baseImageId)
+      dbModel <- table.get('id -> id)
+      modelOpt = dbModel.flatMap(_.toOption)
+      baseImage <- modelOpt.traverse(m => baseImages.findById(m.baseImageId))
+      baseImageOpt = baseImage.flatten
     } yield {
-      Recipe.db2domain(dbModel, baseImage)
+      for {
+        model <- modelOpt
+        image <- baseImageOpt
+      } yield Recipe.db2domain(model, image)
     }
   }
 
@@ -72,7 +88,5 @@ object Recipes {
     else
       None
   }
-
-  private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.recipes.name
 
 }
