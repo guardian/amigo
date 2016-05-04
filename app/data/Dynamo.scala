@@ -14,7 +14,7 @@ import scala.util.{ Success, Try }
 class Dynamo(val client: AmazonDynamoDB, identity: Identity) {
   import Dynamo._
 
-  def exec[T](ops: ScanamoOps[T]) = Scanamo.exec(client)(ops)
+  def exec[T](ops: ScanamoOps[T]): T = Scanamo.exec(client)(ops)
 
   object Tables {
 
