@@ -176,7 +176,7 @@ class Amigo(
     Ok.chunked(source).as("text/event-stream")
   }
 
-  def exec[T](ops: ScanamoOps[T]) = Scanamo.exec(dynamo.client)(ops)
+  private def exec[T](ops: ScanamoOps[T]): T = Scanamo.exec(dynamo.client)(ops)
 }
 
 object Amigo {
