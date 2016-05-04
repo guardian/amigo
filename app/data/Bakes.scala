@@ -1,21 +1,27 @@
 package data
 
-import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoFormat, DynamoReadError, Scanamo }
+import com.gu.cm.Identity
+import com.gu.scanamo.ops.ScanamoOps
+import com.gu.scanamo.{ DynamoFormat, Table }
 import models.{ RecipeId, _ }
 import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 
-object Bakes {
+class Bakes(identity: Identity, recipes: Recipes) {
   import DynamoFormats._
+  import com.gu.scanamo.syntax._
 
-  def create(recipe: Recipe, buildNumber: Int, startedBy: String)(implicit dynamo: Dynamo): Bake = {
+  private val tableName = Dynamo.tableName(identity, "bakes")
+  val table = Table[Bake.DbModel](tableName)
+
+  def create(recipe: Recipe, buildNumber: Int, startedBy: String): ScanamoOps[Bake] = {
     val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None, startedBy = startedBy, startedAt = DateTime.now())
     val dbModel = Bake.domain2db(bake)
-    Scanamo.put(dynamo.client)(tableName)(dbModel)
-    bake
+    for {
+      _ <- table.put(dbModel)
+    } yield bake
   }
 
   def updateStatus(bakeId: BakeId, status: BakeStatus)(implicit dynamo: Dynamo, fbs: DynamoFormat[BakeStatus]): Unit = {
@@ -26,40 +32,27 @@ object Bakes {
     updateItem(bakeId, "SET #amiId = :amiId", "#amiId" -> "amiId", ":amiId" -> fai.write(amiId))
   }
 
-  def list(recipeId: RecipeId, limit: Int = 20)(implicit dynamo: Dynamo): Iterable[Bake] = {
-    val queryRequest = new QueryRequest(tableName)
-      .withKeyConditionExpression("#recipeId = :recipeId")
-      .withExpressionAttributeNames(Map("#recipeId" -> "recipeId").asJava)
-      .withExpressionAttributeValues(Map(":recipeId" -> new AttributeValue(recipeId.value)).asJava)
-      .withScanIndexForward(false) // return newest (highest build number) first
-      .withLimit(limit)
-    val recipe = Recipes.findById(recipeId)
-    val dbModels: Iterable[Option[ValidatedNel[DynamoReadError, Bake.DbModel]]] =
-      dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[Bake.DbModel](new GetItemResult().withItem(item)) }
+  def list(recipeId: RecipeId, limit: Int = 20): ScanamoOps[Iterable[Bake]] = {
     for {
-      r <- recipe.toIterable
-      dbModel <- dbModels.flatMap(_.flatMap(_.toOption))
+      r <- recipes.findById(recipeId)
+      dbModels <- table.query(('recipeId -> recipeId).descending)
     } yield {
-      Bake.db2domain(dbModel, r)
+      for {
+        recipe <- r.toIterable
+        dbModel <- dbModels.flatMap(_.toOption).take(limit)
+      } yield Bake.db2domain(dbModel, recipe)
     }
   }
 
-  def findById(recipeId: RecipeId, buildNumber: Int)(implicit dynamo: Dynamo): Option[Bake] = {
-    val queryRequest = new QueryRequest(tableName)
-      .withKeyConditionExpression("#recipeId = :recipeId AND #buildNumber = :buildNumber")
-      .withExpressionAttributeNames(Map("#recipeId" -> "recipeId", "#buildNumber" -> "buildNumber").asJava)
-      .withExpressionAttributeValues(Map(":recipeId" -> new AttributeValue(recipeId.value), ":buildNumber" -> new AttributeValue().withN(buildNumber.toString)).asJava)
-      .withScanIndexForward(false) // return newest (highest build number) first
-      .withLimit(1)
-    val recipe = Recipes.findById(recipeId)
-    val dbModel: Option[ValidatedNel[DynamoReadError, Bake.DbModel]] =
-      dynamo.client.query(queryRequest).getItems.asScala.map { item => Scanamo.from[Bake.DbModel](new GetItemResult().withItem(item)) }
-        .headOption.flatten
+  def findById(recipeId: RecipeId, buildNumber: Int): ScanamoOps[Option[Bake]] = {
     for {
-      r <- recipe
-      dbModel <- dbModel.flatMap(_.toOption)
+      r <- recipes.findById(recipeId)
+      dbBake <- table.get('recipeId -> recipeId and 'buildNumber -> buildNumber)
     } yield {
-      Bake.db2domain(dbModel, r)
+      for {
+        recipe <- r
+        dbModel <- dbBake.flatMap(_.toOption)
+      } yield Bake.db2domain(dbModel, recipe)
     }
   }
 
@@ -73,7 +66,4 @@ object Bakes {
       .withExpressionAttributeValues(Map(attrValues).asJava)
     dynamo.client.updateItem(updateRequest)
   }
-
-  private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.bakes.name
-
 }

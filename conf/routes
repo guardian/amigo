@@ -5,7 +5,7 @@
 # Home page
 GET     /                           controllers.Amigo.index
 
-GET     /base-images                controllers.Amigo.baseImages
+GET     /base-images                controllers.Amigo.listBaseImages
 GET     /base-images/new            controllers.Amigo.newBaseImage
 POST    /base-images                controllers.Amigo.createBaseImage
 
@@ -15,7 +15,7 @@ POST    /base-images/:id/edit       controllers.Amigo.updateBaseImage(id: BaseIm
 
 GET     /roles                      controllers.Amigo.roles
 
-GET     /recipes                    controllers.Amigo.recipes
+GET     /recipes                    controllers.Amigo.listRecipes
 GET     /recipes/new                controllers.Amigo.newRecipe
 POST    /recipes                    controllers.Amigo.createRecipe
 
