@@ -2,20 +2,22 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import com.gu.googleauth.GoogleAuthConfig
-import _root_.packer.{ PackerConfig, PackerRunner }
-import models._
-import data._
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
-import play.api.libs.iteratee.{ Enumerator, Concurrent }
+
+import packer.{ PackerConfig, PackerRunner }
+import models._
+import data._
 import event._
 
 import play.api.mvc._
+import prism.Prism
 
 class Amigo(
     eventsSource: Source[BakeEvent, _],
+    prism: Prism,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
   import Amigo._
@@ -149,7 +151,7 @@ class Amigo(
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
       val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
       val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-      PackerRunner.createImage(theBake, eventBus)
+      PackerRunner.createImage(theBake, prism, eventBus)
       Redirect(routes.Amigo.showBake(recipeId, buildNumber))
     }
   }

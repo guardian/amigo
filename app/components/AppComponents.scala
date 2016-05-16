@@ -20,6 +20,7 @@ import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
+import prism.Prism
 import router.Routes
 
 class AppComponents(context: Context)
@@ -73,7 +74,9 @@ class AppComponents(context: Context)
     subnetId = configuration.getString("packer.subnetId")
   )
 
-  val controller = new Amigo(eventsSource, googleAuthConfig, messagesApi)
+  val prism = new Prism(wsClient)
+
+  val controller = new Amigo(eventsSource, prism, googleAuthConfig, messagesApi)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(httpErrorHandler, controller, authController, assets)
