@@ -47,7 +47,6 @@ object PackerBuildConfigGenerator {
       // bootstrap Ansible
       PackerProvisionerConfig.executeRemoteCommands(Seq(
         "apt-get --yes install software-properties-common",
-        "apt-add-repository ppa:ansible/ansible",
         "apt-get --yes update",
         "apt-get --yes install ansible"
       )),
