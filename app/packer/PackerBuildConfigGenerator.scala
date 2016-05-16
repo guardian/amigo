@@ -46,8 +46,9 @@ object PackerBuildConfigGenerator {
     val provisioners = Seq(
       // bootstrap Ansible
       PackerProvisionerConfig.executeRemoteCommands(Seq(
+        // Wait for cloud-init to finish first: https://github.com/mitchellh/packer/issues/2639
+        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
         "apt-get --yes install software-properties-common",
-        "apt-add-repository ppa:ansible/ansible",
         "apt-get --yes update",
         "apt-get --yes install ansible"
       )),

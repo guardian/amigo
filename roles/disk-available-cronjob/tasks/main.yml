@@ -1,0 +1,4 @@
+---
+- name: Add disk available cronjob
+  cron: name="disk space avaible" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --mem-avail --disk-path /dev/xvda1 --auto-scaling --from-cron"
+

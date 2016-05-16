@@ -146,7 +146,7 @@ class Amigo(
   }
 
   def startBaking(recipeId: RecipeId) = AuthAction { request =>
-    Recipes.findById(RecipeId("ubuntu-wily-java8")).fold[Result](NotFound) { recipe =>
+    Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
       val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
       val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
       PackerRunner.createImage(theBake, eventBus)
