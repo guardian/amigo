@@ -1,6 +1,6 @@
 ---
-- name: Install graphicksmagick
+- name: Install graphicsmagick
   apt: name={{ item }} state=present
   with_items:
-    - graphicksmagick
+    - graphicsmagick
     - graphicsmagick-imagemagick-compat
