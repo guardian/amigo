@@ -14,7 +14,8 @@ case class PackerBuilderConfig(
   run_tags: Map[String, String],
   ami_name: String,
   ami_description: String,
-  // TODO ami_users, iam_instance_profile
+  ami_users: String,
+  // TODO iam_instance_profile
   tags: Map[String, String])
 
 object PackerBuilderConfig {
