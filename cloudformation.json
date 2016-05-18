@@ -28,6 +28,10 @@
     "KeyName": {
       "Type": "AWS::EC2::KeyPair::KeyName",
       "Description": "A key pair for SSH'ing into the instance"
+    },
+    "TLSCert": {
+      "Type": "String", 
+      "Description": "ARN of a TLS certificate to install on the load balancer"
     }
   },
   "Resources": {
@@ -181,6 +185,12 @@
             "Protocol": "HTTP",
             "LoadBalancerPort": "80",
             "InstancePort": "9000"
+          },
+          {
+            "Protocol": "HTTPS",
+            "LoadBalancerPort": "443",
+            "InstancePort": "9000",
+            "SSLCertificateId": { "Ref": "TLSCert" }
           }
         ],
         "HealthCheck": {
@@ -290,6 +300,12 @@
             "IpProtocol": "tcp",
             "FromPort": "80",
             "ToPort": "80",
+            "CidrIp": "77.91.248.0/21"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "443",
+            "ToPort": "443",
             "CidrIp": "77.91.248.0/21"
           }
         ],
