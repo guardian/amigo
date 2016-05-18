@@ -5,7 +5,18 @@ import play.twirl.api.Html
 
 case class MessagePart(text: String, colour: String) {
 
-  def toHtml = s"""<span style="color: $colour">$text</span>"""
+  def toHtml = {
+    val htmlColour = MessagePart.HtmlColours.getOrElse(colour, colour)
+    s"""<span style="color: $htmlColour">$text</span>"""
+  }
+
+}
+
+object MessagePart {
+
+  val HtmlColours = Map(
+    "yellow" -> "#FF9900" // kinda orangey
+  )
 
 }
 
