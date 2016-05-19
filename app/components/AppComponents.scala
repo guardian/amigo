@@ -11,19 +11,20 @@ import com.gu.googleauth.GoogleAuthConfig
 import org.joda.time.Duration
 import play.api.ApplicationLoader.Context
 import play.api.libs.streams.Streams
-import play.api.{ Configuration, BuiltInComponentsFromContext }
+import play.api.{ Logger, Configuration, BuiltInComponentsFromContext }
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 
-import data.Dynamo
+import data.{ Recipes, Dynamo }
 import prism.Prism
 import packer.PackerConfig
 import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import controllers._
 
 import router.Routes
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
 
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
@@ -77,6 +78,15 @@ class AppComponents(context: Context)
   )
 
   val prism = new Prism(wsClient)
+
+  val scheduledBakeRunner = {
+    val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
+    new ScheduledBakeRunner(enabled, prism, eventBus)
+  }
+  val bakeScheduler = new BakeScheduler(scheduledBakeRunner)
+
+  Logger.info("Registering all scheduled bakes with the scheduler")
+  bakeScheduler.initialise(Recipes.list())
 
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
