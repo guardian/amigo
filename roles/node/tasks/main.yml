@@ -1,0 +1,6 @@
+---
+- name: Add node source repository
+  shell: curl -sL https://deb.nodesource.com/setup_{{node_version}} | bash -
+
+- name: Install Node.js
+  apt: name=nodejs state=latest
