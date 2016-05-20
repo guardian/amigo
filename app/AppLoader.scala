@@ -4,6 +4,8 @@ import components.AppComponents
 
 import play.api.ApplicationLoader.Context
 
+import scala.concurrent.Future
+
 class AppLoader extends ApplicationLoader {
   override def load(context: Context): Application = {
     new LogbackLoggerConfigurator().configure(context.environment)
@@ -11,6 +13,10 @@ class AppLoader extends ApplicationLoader {
 
     Logger.info("Starting the scheduler")
     components.bakeScheduler.start()
+    components.applicationLifecycle.addStopHook { () =>
+      println("Shutting down scheduler")
+      Future.successful(components.bakeScheduler.shutdown())
+    }
 
     components.application
   }

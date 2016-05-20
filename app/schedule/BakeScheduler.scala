@@ -12,13 +12,13 @@ class BakeScheduler(scheduledBakeRunner: ScheduledBakeRunner) {
 
   private val scheduler = StdSchedulerFactory.getDefaultScheduler()
 
-  def initialise(recipes: Iterable[Recipe]) = {
+  def initialise(recipes: Iterable[Recipe]): Unit = {
     recipes.flatMap(r => r.bakeSchedule.map(s => (r.id, s))).foreach {
       case (recipeId, bakeSchedule) => scheduleBake(recipeId, bakeSchedule)
     }
   }
 
-  def reschedule(recipe: Recipe) = {
+  def reschedule(recipe: Recipe): Unit = {
     // Delete any job and trigger that we may have previously created
     scheduler.deleteJob(jobKey(recipe.id))
 
@@ -35,14 +35,15 @@ class BakeScheduler(scheduledBakeRunner: ScheduledBakeRunner) {
       .build()
     val trigger = newTrigger()
       .withIdentity(triggerKey(recipeId))
-      .forJob(jobDetail)
       .withSchedule(cronSchedule(bakeSchedule.quartzCronExpression))
       .build()
-    scheduler.scheduleJob(trigger)
+    scheduler.scheduleJob(jobDetail, trigger)
     Logger.info(s"Scheduled recipe [$recipeId] to bake with schedule [${bakeSchedule.quartzCronExpression}]")
   }
 
   def start(): Unit = scheduler.start()
+
+  def shutdown(): Unit = scheduler.shutdown()
 
   private def jobKey(recipeId: RecipeId): JobKey = new JobKey(recipeId.value)
   private def triggerKey(recipeId: RecipeId): TriggerKey = new TriggerKey(recipeId.value)

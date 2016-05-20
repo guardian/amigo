@@ -29,29 +29,34 @@ object Recipes {
     description: String,
     baseImage: BaseImage,
     roles: List[CustomisedRole],
-    createdBy: String)(implicit dynamo: Dynamo): Recipe = {
+    createdBy: String,
+    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
     val now = DateTime.now()
-    // TODO bake schedule
-    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule = None)
+    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule)
     Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(recipe, nextBuildNumber = 0))
-    recipe
 
+    recipe
   }
 
-  def update(recipe: Recipe, description: String, baseImage: BaseImage, roles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+  def update(recipe: Recipe,
+    description: String,
+    baseImage: BaseImage,
+    roles: List[CustomisedRole],
+    modifiedBy: String,
+    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
     val updated = recipe.copy(
       description = description,
       baseImage = baseImage,
       roles = roles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now(),
-      bakeSchedule = None // TODO
+      bakeSchedule = bakeSchedule
     )
     // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
     val nextBuildNumber = Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> recipe.id).flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
     Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(updated, nextBuildNumber))
 
-    // TODO update scheduler
+    updated
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
