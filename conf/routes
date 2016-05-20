@@ -3,32 +3,32 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Amigo.index
+GET     /                           controllers.RootController.index
 
-GET     /base-images                controllers.Amigo.baseImages
-GET     /base-images/new            controllers.Amigo.newBaseImage
-POST    /base-images                controllers.Amigo.createBaseImage
+GET     /base-images                controllers.BaseImageController.listBaseImages
+GET     /base-images/new            controllers.BaseImageController.newBaseImage
+POST    /base-images                controllers.BaseImageController.createBaseImage
 
-GET     /base-images/:id            controllers.Amigo.showBaseImage(id: BaseImageId)
-GET     /base-images/:id/edit       controllers.Amigo.editBaseImage(id: BaseImageId)
-POST    /base-images/:id/edit       controllers.Amigo.updateBaseImage(id: BaseImageId)
+GET     /base-images/:id            controllers.BaseImageController.showBaseImage(id: BaseImageId)
+GET     /base-images/:id/edit       controllers.BaseImageController.editBaseImage(id: BaseImageId)
+POST    /base-images/:id/edit       controllers.BaseImageController.updateBaseImage(id: BaseImageId)
 
-GET     /roles                      controllers.Amigo.roles
+GET     /roles                      controllers.RoleController.listRoles
 
-GET     /recipes                    controllers.Amigo.recipes
-GET     /recipes/new                controllers.Amigo.newRecipe
-POST    /recipes                    controllers.Amigo.createRecipe
+GET     /recipes                    controllers.RecipeController.listRecipes
+GET     /recipes/new                controllers.RecipeController.newRecipe
+POST    /recipes                    controllers.RecipeController.createRecipe
 
-GET     /recipes/:id                controllers.Amigo.showRecipe(id: RecipeId)
-GET     /recipes/:id/edit           controllers.Amigo.editRecipe(id: RecipeId)
-POST    /recipes/:id/edit           controllers.Amigo.updateRecipe(id: RecipeId)
+GET     /recipes/:id                controllers.RecipeController.showRecipe(id: RecipeId)
+GET     /recipes/:id/edit           controllers.RecipeController.editRecipe(id: RecipeId)
+POST    /recipes/:id/edit           controllers.RecipeController.updateRecipe(id: RecipeId)
 
-POST    /recipes/:id/bake                               controllers.Amigo.startBaking(id: RecipeId)
-GET     /recipes/:recipeId/bakes/:buildNumber           controllers.Amigo.showBake(recipeId: RecipeId, buildNumber: Int)
-GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.Amigo.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
+POST    /recipes/:id/bake                               controllers.BakeController.startBaking(id: RecipeId)
+GET     /recipes/:recipeId/bakes/:buildNumber           controllers.BakeController.showBake(recipeId: RecipeId, buildNumber: Int)
+GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.BakeController.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
 
 # Healthcheck
-GET     /healthcheck                controllers.Amigo.healthcheck
+GET     /healthcheck                controllers.RootController.healthcheck
 
 # Auth
 GET         /login                                                       controllers.Auth.login

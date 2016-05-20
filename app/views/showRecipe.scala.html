@@ -6,8 +6,8 @@
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
-      <a data-href="@routes.Amigo.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
-      <a href="@routes.Amigo.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
+      <a data-href="@routes.BakeController.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
+      <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
     </div>
   </div>
 
@@ -23,7 +23,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Base image</div>
     <div class="panel-body">
-      <a href="@routes.Amigo.showBaseImage(recipe.baseImage.id)">@recipe.baseImage.id</a>
+      <a href="@routes.BaseImageController.showBaseImage(recipe.baseImage.id)">@recipe.baseImage.id</a>
     </div>
   </div>
 
@@ -46,7 +46,7 @@
         </thead>
         <tbody>
         @for(bake <- recentBakes) {
-          <tr data-href="@routes.Amigo.showBake(bake.recipe.id, bake.buildNumber)">
+          <tr data-href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
             <td>@fragments.timestamp(bake.startedAt, bake.startedBy)</td>
             <td>@bake.buildNumber</td>
             <td>@bake.status</td>

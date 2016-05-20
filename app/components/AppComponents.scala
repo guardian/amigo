@@ -3,16 +3,12 @@ package components
 import akka.stream.scaladsl.Source
 import akka.typed._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, EnvironmentVariableCredentialsProvider, AWSCredentialsProviderChain }
+import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, AWSCredentialsProviderChain }
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
-import controllers.{ Auth, Amigo }
-import data.Dynamo
-import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
 import org.joda.time.Duration
-import packer.PackerConfig
 import play.api.ApplicationLoader.Context
 import play.api.libs.streams.Streams
 import play.api.{ Configuration, BuiltInComponentsFromContext }
@@ -20,7 +16,13 @@ import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
+
+import data.Dynamo
 import prism.Prism
+import packer.PackerConfig
+import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
+import controllers._
+
 import router.Routes
 
 class AppComponents(context: Context)
@@ -76,8 +78,20 @@ class AppComponents(context: Context)
 
   val prism = new Prism(wsClient)
 
-  val controller = new Amigo(eventsSource, prism, googleAuthConfig, messagesApi)
+  val rootController = new RootController(googleAuthConfig)
+  val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
+  val roleController = new RoleController(googleAuthConfig)
+  val recipeController = new RecipeController(googleAuthConfig, messagesApi)
+  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
-  lazy val router: Router = new Routes(httpErrorHandler, controller, authController, assets)
+  lazy val router: Router = new Routes(
+    httpErrorHandler,
+    rootController,
+    baseImageController,
+    roleController,
+    recipeController,
+    bakeController,
+    authController,
+    assets)
 }

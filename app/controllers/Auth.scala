@@ -29,7 +29,7 @@ class Auth(val authConfig: GoogleAuthConfig)(implicit ws: WSClient) extends Cont
           // Redirect a user back there now if it exists
           val redirect = session.get(LOGIN_ORIGIN_KEY) match {
             case Some(url) => Redirect(url)
-            case None => Redirect(routes.Amigo.index)
+            case None => Redirect(routes.RootController.index)
           }
           // Store the JSON representation of the identity in the session - this is checked by AuthAction later
           redirect.withSession {
