@@ -4,7 +4,7 @@
 
 @layout("AMIgo"){
 
-  @b3.form(routes.Amigo.updateRecipe(recipe.id)) {
+  @b3.form(routes.RecipeController.updateRecipe(recipe.id)) {
     @b3.static("ID"){@recipe.id.value}
     @b3.textarea( form("description"), '_label -> "Description" )
     @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), '_label -> "Base image" )

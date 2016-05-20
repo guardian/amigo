@@ -6,7 +6,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
-      <a class="btn btn-primary" href="@routes.Amigo.newRecipe">Create new recipe</a>
+      <a class="btn btn-primary" href="@routes.RecipeController.newRecipe">Create new recipe</a>
     </div>
   </div>
 
@@ -19,7 +19,7 @@
     </thead>
     <tbody>
     @for(recipe <- recipes) {
-      <tr data-href="@routes.Amigo.showRecipe(recipe.id)">
+      <tr data-href="@routes.RecipeController.showRecipe(recipe.id)">
         <td>@recipe.id</td>
         <td>@recipe.description</td>
       </tr>

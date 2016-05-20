@@ -6,7 +6,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
-      <a class="btn btn-primary" href="@routes.Amigo.newBaseImage">Create new base image</a>
+      <a class="btn btn-primary" href="@routes.BaseImageController.newBaseImage">Create new base image</a>
     </div>
   </div>
 
@@ -19,7 +19,7 @@
     </thead>
     <tbody>
     @for(image <- images) {
-      <tr data-href="@routes.Amigo.showBaseImage(image.id)">
+      <tr data-href="@routes.BaseImageController.showBaseImage(image.id)">
         <td>@image.id</td>
         <td>@image.description</td>
       </tr>

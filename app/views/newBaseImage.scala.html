@@ -4,7 +4,7 @@
 
 @layout("AMIgo"){
 
-  @b3.form(routes.Amigo.createBaseImage) {
+  @b3.form(routes.BaseImageController.createBaseImage) {
     @b3.text(form("id"), '_label -> "ID", 'placeholder -> "my-lovely-image" )
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
     @b3.textarea( form("description"), '_label -> "Description" )

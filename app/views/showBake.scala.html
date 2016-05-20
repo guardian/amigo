@@ -21,7 +21,7 @@
     var amiIdDiv = document.getElementById("ami-id");
     var statusDiv = document.getElementById("status");
 
-    var feed = new EventSource('@controllers.routes.Amigo.bakeEvents(bake.recipe.id, bake.buildNumber)');
+    var feed = new EventSource('@controllers.routes.BakeController.bakeEvents(bake.recipe.id, bake.buildNumber)');
     var handler = function(event){
       var msg = JSON.parse(event.data);
       switch (msg.eventType) {
