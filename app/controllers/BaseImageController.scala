@@ -40,7 +40,7 @@ class BaseImageController(
       }, {
         case (description, amiId) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-          baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName)
+          exec(baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName))
           Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
       })
     }
@@ -61,7 +61,7 @@ class BaseImageController(
             Conflict(views.html.newBaseImage(formWithError, Roles.list))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-            baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
+            exec(baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName))
             Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
         }
     })

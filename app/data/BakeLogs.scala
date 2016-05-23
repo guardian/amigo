@@ -10,19 +10,16 @@ import models._
 
 import scala.collection.JavaConverters._
 
-class BakeLogs(identity: Identity) {
+class BakeLogs(table: Table[BakeLog]) {
 
   import DynamoFormats.dateTimeFormat
   import com.gu.scanamo.syntax._
 
-  private val tableName = Dynamo.tableName(identity, "bake-logs")
-  val table = Table[BakeLog](tableName)
-
-  def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
+  def save(bakeLog: BakeLog): ScanamoOps[Unit] = {
     // Make sure we don't try to save an empty string to Dynamo
     val safeMessageParts = bakeLog.messageParts.map(part => part.copy(text = if (part.text.nonEmpty) part.text else " "))
     val safeBakeLog = bakeLog.copy(messageParts = safeMessageParts)
-    Scanamo.put(dynamo.client)(tableName)(safeBakeLog)
+    table.put(safeBakeLog).map(_ => ())
   }
 
   def list(bakeId: BakeId): ScanamoOps[Iterable[BakeLog]] = {

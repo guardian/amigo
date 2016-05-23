@@ -12,24 +12,20 @@ import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 
-class BaseImages(identity: Identity) {
+class BaseImages(table: Table[BaseImage]) {
   import DynamoFormats._
-
-  private val tableName = Dynamo.tableName(identity, "base-images")
-  val table = Table[BaseImage](tableName)
 
   def create(id: BaseImageId,
     description: String,
     amiId: AmiId,
     builtinRoles: List[CustomisedRole],
-    createdBy: String)(implicit dynamo: Dynamo): BaseImage = {
+    createdBy: String): ScanamoOps[BaseImage] = {
     val now = DateTime.now()
     val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now)
-    Scanamo.put(dynamo.client)(tableName)(baseImage)
-    baseImage
+    table.put(baseImage).map(_ => baseImage)
   }
 
-  def update(baseImage: BaseImage, description: String, amiId: AmiId, builtinRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+  def update(baseImage: BaseImage, description: String, amiId: AmiId, builtinRoles: List[CustomisedRole], modifiedBy: String): ScanamoOps[Unit] = {
     val updated = baseImage.copy(
       description = description,
       amiId = amiId,
@@ -37,7 +33,7 @@ class BaseImages(identity: Identity) {
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now()
     )
-    Scanamo.put(dynamo.client)(tableName)(updated)
+    table.put(updated).map(_ => ())
   }
 
   def list(): ScanamoOps[Iterable[BaseImage]] = {

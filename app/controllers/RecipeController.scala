@@ -45,7 +45,7 @@ class RecipeController(
           exec(baseImages.findById(baseImageId)) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName)
+              exec(recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName))
               Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId)).withError("baseImageId", "Unknown base image")
@@ -72,7 +72,7 @@ class RecipeController(
             exec(baseImages.findById(baseImageId)) match {
               case Some(baseImage) =>
                 val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-                recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName)
+                exec(recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName))
                 Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
               case None =>
                 val formWithError = Forms.createRecipe.fill((id, description, baseImageId)).withError("baseImageId", "Unknown base image")

@@ -8,7 +8,9 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
+import com.gu.scanamo.Table
 import data._
+import models.{ Bake, BakeLog, BaseImage, Recipe }
 import org.joda.time.Duration
 import play.api.ApplicationLoader.Context
 import play.api.libs.streams.Streams
@@ -18,7 +20,6 @@ import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 
-import data.Dynamo
 import prism.Prism
 import packer.PackerConfig
 import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
@@ -51,10 +52,13 @@ class AppComponents(context: Context)
   }
   dynamo.initTables()
 
-  val baseImages = new BaseImages(identity)
-  val recipes = new Recipes(identity, baseImages)
-  val bakes = new Bakes(identity, recipes)
-  val bakeLogs = new BakeLogs(identity)
+  def tableName(suffix: String) = Dynamo.tableName(identity, suffix)
+  import DynamoFormats._
+
+  val baseImages = new BaseImages(Table[BaseImage](tableName("base-images")))
+  val recipes = new Recipes(Table[Recipe.DbModel](tableName("recipes")), baseImages)
+  val bakes = new Bakes(Table[Bake.DbModel](tableName("bakes")), recipes)
+  val bakeLogs = new BakeLogs(Table[BakeLog](tableName("bake-logs")))
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
   val eventsSource = Source.fromPublisher(Streams.enumeratorToPublisher(eventsEnumerator))
