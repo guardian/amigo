@@ -7,8 +7,6 @@ object PlaybookGenerator {
   def generatePlaybook(recipe: Recipe): String = {
     val allRoles = recipe.baseImage.builtinRoles ++ recipe.roles
 
-    // TODO variables for roles
-
     s"""---
       |
       |- hosts: all

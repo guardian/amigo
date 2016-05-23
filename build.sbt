@@ -25,6 +25,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "configuration-magic-play2-4" % "1.2.0",
   "com.gu" %% "play-googleauth" % "0.4.0",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
+  "org.quartz-scheduler" % "quartz" % "2.2.3",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 routesGenerator := InjectedRoutesGenerator
