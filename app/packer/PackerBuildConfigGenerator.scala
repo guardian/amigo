@@ -40,6 +40,7 @@ object PackerBuildConfigGenerator {
       ami_users = "{{user `aws_account_numbers`}}",
       tags = Map(
         "BuiltBy" -> "amigo",
+        "AmigoStage" -> packerConfig.stage,
         "Name" -> "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
         "Recipe" -> "{{user `recipe`}}",
         "BuildNumber" -> "{{user `build_number`}}",

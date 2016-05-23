@@ -72,6 +72,7 @@ class AppComponents(context: Context)
   )
 
   implicit val packerConfig = PackerConfig(
+    stage = identity.stage,
     vpcId = configuration.getString("packer.vpcId"),
     subnetId = configuration.getString("packer.subnetId")
   )
