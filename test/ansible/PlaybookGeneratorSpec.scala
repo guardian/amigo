@@ -30,7 +30,8 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
       createdBy = "Testy McTest",
       createdAt = DateTime.now(),
       modifiedBy = "Testy McTest",
-      modifiedAt = DateTime.now()
+      modifiedAt = DateTime.now(),
+      bakeSchedule = None
     )
 
     PlaybookGenerator.generatePlaybook(recipe) should be(

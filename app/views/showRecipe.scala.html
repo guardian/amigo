@@ -16,6 +16,7 @@
     <div class="panel-body">
       <p>Created @fragments.timestamp(recipe.createdAt, recipe.createdBy)</p>
       <p>Modified @fragments.timestamp(recipe.modifiedAt, recipe.modifiedBy)</p>
+      <p>Build schedule: <code>@recipe.bakeSchedule.map(_.quartzCronExpression).getOrElse("(none)")</code></p>
       <p>@recipe.description</p>
     </div>
   </div>

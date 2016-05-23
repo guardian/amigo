@@ -10,7 +10,8 @@ case class Recipe(
   createdBy: String,
   createdAt: DateTime,
   modifiedBy: String,
-  modifiedAt: DateTime)
+  modifiedAt: DateTime,
+  bakeSchedule: Option[BakeSchedule])
 
 object Recipe {
 
@@ -23,7 +24,8 @@ object Recipe {
     createdBy: String,
     createdAt: DateTime,
     modifiedBy: String,
-    modifiedAt: DateTime)
+    modifiedAt: DateTime,
+    bakeSchedule: Option[BakeSchedule])
 
   import automagic._
 
