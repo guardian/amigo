@@ -1,0 +1,6 @@
+---
+- name: Install ntp package
+  apt: name=ntp state=present
+
+- name: Use Amazon NTP server pool
+  replace: dest=/etc/ntp.conf regexp=ubuntu.pool.ntp.org replace=amazon.pool.ntp.org

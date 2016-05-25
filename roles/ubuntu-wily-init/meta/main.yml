@@ -1,3 +1,5 @@
 ---
 dependencies:
-  - { role: apt, ubuntu_name: wily }
+  - apt
+  - useful-packages
+  - ntp

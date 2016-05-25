@@ -1,0 +1,4 @@
+---
+dependencies:
+  - cloud-watch-monitoring
+
