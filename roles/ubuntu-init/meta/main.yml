@@ -3,3 +3,4 @@ dependencies:
   - apt
   - useful-packages
   - ntp
+  - aws-tools
