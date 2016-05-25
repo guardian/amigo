@@ -21,12 +21,12 @@
       <div class="col-md-10" id="builtin-roles">
         @for(role <- availableRoles) {
           <div class="checkbox">
-            <div class="col-md-2">
+            <div>
               <label for="role-@role">
                 <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
               </label>
             </div>
-            <div class="col-md-10">
+            <div>
               <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
             </div>
           </div>

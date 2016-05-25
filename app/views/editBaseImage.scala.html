@@ -15,23 +15,23 @@
         @for(role <- availableRoles) {
           <div class="checkbox">
             @if(image.builtinRoles.exists(_.roleId == role)) {
-              <div class="col-md-2">
+              <div>
                 <label for="role-@role">
                   <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked> @role
                 </label>
               </div>
-              <div class="col-md-10">
+              <div>
                 <input type="text" class="form-control" id="role-@role-variables" name="role-@role-variables"
                        value="@image.builtinRoles.find(_.roleId == role).map(_.variablesToFormInputText)"
                        placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
               </div>
             } else {
-              <div class="col-md-2">
+              <div>
                 <label for="role-@role">
                   <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
                 </label>
               </div>
-              <div class="col-md-10">
+              <div>
                 <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
               </div>
             }
