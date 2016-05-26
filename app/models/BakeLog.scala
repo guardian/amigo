@@ -7,7 +7,7 @@ case class MessagePart(text: String, colour: String) {
 
   def toHtml = {
     val htmlColour = MessagePart.HtmlColours.getOrElse(colour, colour)
-    s"""<span style="color: $htmlColour">$text</span>"""
+    s"""<span style="color: $htmlColour">${text.replaceAllLiterally("\n", "<br>")}</span>"""
   }
 
 }

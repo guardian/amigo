@@ -11,7 +11,7 @@ object PackerOutputParser {
   case class UiOutput(logLevel: String, messageParts: List[MessagePart]) extends PackerEvent
   case class AmiCreated(amiId: AmiId) extends PackerEvent
 
-  private val UiOutputRegex = """^\d+,,ui,(.*),(.*)$""".r
+  private val UiOutputRegex = """^\d+,,ui,(.*?),(.*)$""".r
   private val AmiCreatedRegex = """^\d+,.*,artifact,\d+,id,[a-z0-9-]*:(.*)$""".r
 
   def parseLine(line: String): Option[PackerEvent] = line match {
@@ -28,7 +28,7 @@ object PackerOutputParser {
   }
 
   // Matches a piece of text wrapped in ANSI codes, e.g. "\u001B[0;32mHello I am green\u001B[0m"
-  private val AnsiColouredPart = "\u001B\\[0;(\\d{1,2})m(.*?)\u001B\\[0m".r
+  private val AnsiColouredPart = "(?s)\u001B\\[0;(\\d{1,2})m(.*?)\u001B\\[0m".r
 
   private def parseUiOutput(output: String): List[MessagePart] = {
     val message = output
