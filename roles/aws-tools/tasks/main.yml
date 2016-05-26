@@ -1,0 +1,24 @@
+---
+- name: Install pip
+  apt: name=python3-pip state=present
+
+- name: Install latest AWS CLI
+  command: pip3 install awscli
+
+- name: Download AWS CFN tools
+  get_url: url=https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz dest=/tmp/aws-cfn-bootstrap-latest.tar.gz 
+
+- name: Create directory for AWS CFN tools
+  file: path=/tmp/aws-cfn-bootstrap-latest state=directory
+
+- name: Extract AWS CFN tools
+  command: tar xvfz /tmp/aws-cfn-bootstrap-latest.tar.gz --strip-components=1 -C /tmp/aws-cfn-bootstrap-latest
+
+- name: Install AWS CFN tools
+  command: easy_install /tmp/aws-cfn-bootstrap-latest/
+  register: result
+  until: result.rc == 0
+  retries: 5
+
+- name: Cleanup AWS CFN tools
+  file: path=/tmp/aws-cfn-bootstrap-latest state=absent

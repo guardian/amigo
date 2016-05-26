@@ -14,7 +14,8 @@ case class PackerProvisionerConfig(
   inline: Option[Seq[String]] = None,
   execute_command: Option[String] = None,
   playbook_file: Option[String] = None,
-  role_paths: Option[Seq[String]] = None)
+  role_paths: Option[Seq[String]] = None,
+  extra_arguments: Option[Seq[String]] = None)
 
 object PackerProvisionerConfig {
   implicit val jsonWrites = Json.writes[PackerProvisionerConfig]
@@ -41,6 +42,7 @@ object PackerProvisionerConfig {
     val rolePaths = Files.list(rolesDir).iterator.asScala.toSeq.map(_.toAbsolutePath.toString)
     PackerProvisionerConfig(
       `type` = "ansible-local",
+      extra_arguments = Some(Seq("--verbose")),
       playbook_file = Some(playbookFile.toAbsolutePath.toString),
       role_paths = Some(rolePaths)
     )

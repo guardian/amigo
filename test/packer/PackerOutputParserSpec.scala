@@ -60,4 +60,12 @@ class PackerOutputParserSpec extends FlatSpec with Matchers {
     )
   }
 
+  it should "parse a multi-line string of coloured Ansible output" in {
+    PackerOutputParser.parseLine("123,,ui,message,\u001B[0;33mchanged: [127.0.0.1] => {\"changed\": true, \"msg\": \"Reading package lists...\\nBuilding dependency tree...\"}\u001B[0m") should be(
+      Some(PackerOutputParser.UiOutput("info", List(
+        MessagePart("changed: [127.0.0.1] => {\"changed\": true, \"msg\": \"Reading package lists...\nBuilding dependency tree...\"}", "yellow")
+      )))
+    )
+  }
+
 }
