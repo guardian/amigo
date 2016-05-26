@@ -1,6 +1,6 @@
 ---
 dependencies:
   - apt
-  - useful-packages
+  - enhanced-networking
   - ntp
   - aws-tools

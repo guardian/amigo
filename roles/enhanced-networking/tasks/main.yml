@@ -1,0 +1,20 @@
+---
+- name: Install build-essential
+  apt: name=build-essential state=present
+
+- name: Extract network driver
+  unarchive: src=ixgbevf-{{driver_version}}.tar.gz dest=/tmp/
+
+- name: Make network driver
+  command: make install
+  args:
+    chdir: /tmp/ixgbevf-{{driver_version}}/src/
+
+- name: modprobe
+  command: modprobe ixgbevf
+
+- name: update-initramfs
+  command: update-initramfs -c -k all
+
+- name: Cleanup tmp dir
+  file: path=/tmp/ixgbevf-{{driver_version}} state=absent
