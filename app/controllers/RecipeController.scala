@@ -1,10 +1,11 @@
 package controllers
 
+import cats.data.{ OptionT, XorT }
 import com.gu.googleauth.GoogleAuthConfig
+import com.gu.scanamo.ops._
 import data._
 import models._
 import org.quartz.CronExpression
-
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
@@ -19,74 +20,80 @@ class RecipeController(
     val messagesApi: MessagesApi,
     recipes: Recipes,
     bakes: Bakes,
-    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    baseImages: BaseImages)(implicit val dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
   import RecipeController._
-  import dynamo.exec
 
-  def listRecipes = AuthAction {
-    Ok(views.html.recipes(exec(recipes.list())))
+  def listRecipes = AuthOpAction {
+    recipes.list().map(rs => Ok(views.html.recipes(rs)))
   }
 
-  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
-    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
-      val recentBakes = exec(bakes.list(id, limit = 20))
-      Ok(views.html.showRecipe(recipe, recentBakes))
-    }
+  def showRecipe(id: RecipeId) = AuthOpAction { implicit request =>
+    (for {
+      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id))
+      recentBakes <- OptionT.liftF[ScanamoOps, Iterable[Bake]](bakes.list(id, limit = 20))
+    } yield Ok(views.html.showRecipe(recipe, recentBakes))
+    ).getOrElse(
+      NotFound
+    )
   }
 
-  def editRecipe(id: RecipeId) = AuthAction {
-    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
+  def editRecipe(id: RecipeId) = AuthOpAction {
+    (for {
+      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id))
+      images <- OptionT.liftF[ScanamoOps, Iterable[BaseImage]](baseImages.list())
+    } yield {
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.bakeSchedule))
-      Ok(views.html.editRecipe(recipe, form, exec(baseImages.list()).toSeq, Roles.list))
-    }
+      Ok(views.html.editRecipe(recipe, form, images.toSeq, Roles.list))
+    }).getOrElse(NotFound)
   }
 
-  def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    exec(recipes.findById(id)).fold[Result](NotFound) { recipe =>
-      Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editRecipe(recipe, formWithErrors, exec(baseImages.list()).toSeq, Roles.list))
-      }, {
-        case (description, baseImageId, bakeSchedule) =>
-          exec(baseImages.findById(baseImageId)) match {
-            case Some(baseImage) =>
-              val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              val updatedRecipe = exec(recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule))
-              bakeScheduler.reschedule(updatedRecipe)
-              Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
-            case None =>
-              val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
-              BadRequest(views.html.editRecipe(recipe, formWithError, exec(baseImages.list()).toSeq, Roles.list))
-          }
-      })
-    }
+  def updateRecipe(id: RecipeId) = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    (for {
+      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id)).toRight(NotFound)
+      images <- XorT.right[ScanamoOps, Result, Iterable[BaseImage]](baseImages.list())
+      formValues <- XorT.fromXor[ScanamoOps](Forms.editRecipe.bindFromRequest.toXor).leftMap(formWithErrors =>
+        BadRequest(views.html.editRecipe(recipe, formWithErrors, images.toSeq, Roles.list)))
+      (description, baseImageId, bakeSchedule) = formValues
+      baseImage <- OptionT[ScanamoOps, BaseImage](baseImages.findById(baseImageId)).toRight {
+        val formWithError = Forms.editRecipe.fill(formValues)
+          .withError("baseImageId", "Unknown base image")
+        BadRequest(views.html.editRecipe(recipe, formWithError, images.toSeq, Roles.list))
+      }
+      customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+      updatedRecipe <- XorT.right[ScanamoOps, Result, Recipe](
+        recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule))
+    } yield {
+      bakeScheduler.reschedule(updatedRecipe)
+      Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
+    }).merge
   }
 
-  def newRecipe = AuthAction {
-    Ok(views.html.newRecipe(Forms.createRecipe, exec(baseImages.list()).toSeq, Roles.list))
+  def newRecipe = AuthOpAction {
+    baseImages.list().map(images =>
+      Ok(views.html.newRecipe(Forms.createRecipe, images.toSeq, Roles.list)))
   }
 
-  def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.newRecipe(formWithErrors, exec(baseImages.list()).toSeq, Roles.list))
-    }, {
-      case (id, description, baseImageId, bakeSchedule) =>
-        exec(recipes.findById(id)) match {
-          case Some(existingRecipe) =>
-            val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule)).withError("id", "This recipe ID is already in use")
-            Conflict(views.html.newBaseImage(formWithError, Roles.list))
-          case None =>
-            exec(baseImages.findById(baseImageId)) match {
-              case Some(baseImage) =>
-                val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-                val recipe = exec(recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule))
-                bakeScheduler.reschedule(recipe)
-                Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
-              case None =>
-                val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
-                BadRequest(views.html.newRecipe(formWithError, exec(baseImages.list()).toSeq, Roles.list))
-            }
-        }
-    })
+  def createRecipe = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    (for {
+      images <- XorT.right[ScanamoOps, Result, Iterable[BaseImage]](baseImages.list())
+      formValues <- XorT.fromXor[ScanamoOps](Forms.createRecipe.bindFromRequest.toXor).leftMap(formWithErrors =>
+        BadRequest(views.html.newRecipe(formWithErrors, images.toSeq, Roles.list)))
+      (id, description, baseImageId, bakeSchedule) = formValues
+      _ <- OptionT[ScanamoOps, Recipe](recipes.findById(id)).toLeft(()).leftMap { _ =>
+        val formWithError = Forms.createRecipe.fill(formValues).withError("id", "This recipe ID is already in use")
+        Conflict(views.html.newBaseImage(formWithError, Roles.list))
+      }
+      baseImage <- OptionT[ScanamoOps, BaseImage](baseImages.findById(baseImageId)).toRight {
+        val formWithError = Forms.createRecipe.fill(formValues).withError("baseImageId", "Unknown base image")
+        BadRequest(views.html.newRecipe(formWithError, images.toSeq, Roles.list))
+      }
+      customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+      recipe <- XorT.right[ScanamoOps, Result, Recipe](
+        recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule))
+    } yield {
+      bakeScheduler.reschedule(recipe)
+      Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
+    }).merge
   }
 
 }

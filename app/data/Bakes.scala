@@ -37,7 +37,7 @@ class Bakes(table: Table[Bake.DbModel], recipes: Recipes) {
   def list(recipeId: RecipeId, limit: Int = 20): ScanamoOps[Iterable[Bake]] = {
     for {
       r <- recipes.findById(recipeId)
-      dbModels <- table.query(('recipeId -> recipeId).descending)
+      dbModels <- table.limit(limit).query(('recipeId -> recipeId).descending)
     } yield hydrateBake(r, dbModels)
   }
 

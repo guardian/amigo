@@ -1,10 +1,10 @@
 package controllers
 
+import cats.data.{ OptionT, Xor, XorT }
 import com.gu.googleauth.GoogleAuthConfig
-
+import com.gu.scanamo.ops.ScanamoOps
 import data._
 import models._
-
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
@@ -13,60 +13,73 @@ import play.api.mvc._
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi,
-    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    baseImages: BaseImages)(implicit val dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
   import BaseImageController._
 
-  import dynamo.exec
-
-  def listBaseImages = AuthAction {
-    Ok(views.html.baseImages(exec(baseImages.list())))
+  def listBaseImages = AuthOpAction {
+    baseImages.list().map(images => Ok(views.html.baseImages(images)))
   }
 
-  def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
-    exec(baseImages.findById(id)).fold[Result](NotFound)(image => Ok(views.html.showBaseImage(image)))
+  def showBaseImage(id: BaseImageId) = AuthOpAction { implicit request =>
+    (for {
+      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id))
+    } yield Ok(views.html.showBaseImage(image))
+    ).getOrElse(
+      NotFound
+    )
   }
 
-  def editBaseImage(id: BaseImageId) = AuthAction {
-    exec(baseImages.findById(id)).fold[Result](NotFound) { image =>
+  def editBaseImage(id: BaseImageId) = AuthOpAction {
+    (for {
+      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id))
+    } yield {
       val form = Forms.editBaseImage.fill((image.description, image.amiId))
       Ok(views.html.editBaseImage(image, form, Roles.list))
-    }
+    }).getOrElse(
+      NotFound
+    )
   }
 
-  def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    exec(baseImages.findById(id)).fold[Result](NotFound) { image =>
-      Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
-      }, {
-        case (description, amiId) =>
-          val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-          exec(baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName))
-          Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
-      })
-    }
+  def updateBaseImage(id: BaseImageId) = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    (for {
+      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id)).toRight(NotFound)
+      descriptionAndId <- XorT.fromXor[ScanamoOps](
+        Forms.editBaseImage.bindFromRequest.toXor.leftMap(formWithErrors =>
+          BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))))
+      (description, amiId) = descriptionAndId
+      customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+      _ <- XorT.right[ScanamoOps, Result, Unit](
+        baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName))
+    } yield {
+      Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
+    }).merge
   }
 
   def newBaseImage = AuthAction {
     Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.list))
   }
 
-  def createBaseImage = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
-    Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))
-    }, {
-      case (id, description, amiId) =>
-        exec(baseImages.findById(id)) match {
-          case Some(existingImage) =>
-            val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
-            Conflict(views.html.newBaseImage(formWithError, Roles.list))
-          case None =>
-            val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-            exec(baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName))
-            Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
-        }
-    })
-  }
+  def createBaseImage = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+    (for {
+      idDescAmiId <- XorT.fromXor[ScanamoOps](
+        Forms.createBaseImage.bindFromRequest.toXor.leftMap(formWithErrors =>
+          BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))))
+      (id, description, amiId) = idDescAmiId
 
+      _ <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id)).toLeft(()).leftMap { _ =>
+        val formWithError = Forms.createBaseImage.fill((id, description, amiId))
+          .withError("id", "This base image ID is already in use")
+        Conflict(views.html.newBaseImage(formWithError, Roles.list))
+      }
+
+      _ <- XorT.right[ScanamoOps, Result, BaseImage] {
+        val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+        baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
+      }
+    } yield {
+      Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
+    }).merge
+  }
 }
 
 object BaseImageController {
