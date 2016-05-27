@@ -43,10 +43,10 @@ class BaseImageController(
   def updateBaseImage(id: BaseImageId) = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     (for {
       image <- OptionT(baseImages.findById(id)).toRight(NotFound)
-      descriptionAndId <- XorT.fromXor[ScanamoOps](
+      formValues <- XorT.fromXor[ScanamoOps](
         Forms.editBaseImage.bindFromRequest.toXor.leftMap(formWithErrors =>
           BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))))
-      (description, amiId) = descriptionAndId
+      (description, amiId) = formValues
       customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
       _ <- xorTright(
         baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName))
@@ -61,17 +61,15 @@ class BaseImageController(
 
   def createBaseImage = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     (for {
-      idDescAmiId <- XorT.fromXor[ScanamoOps](
+      formValues <- XorT.fromXor[ScanamoOps](
         Forms.createBaseImage.bindFromRequest.toXor.leftMap(formWithErrors =>
           BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))))
-      (id, description, amiId) = idDescAmiId
-
+      (id, description, amiId) = formValues
       _ <- OptionT(baseImages.findById(id)).toLeft(()).leftMap { _ =>
-        val formWithError = Forms.createBaseImage.fill((id, description, amiId))
+        val formWithError = Forms.createBaseImage.fill(formValues)
           .withError("id", "This base image ID is already in use")
         Conflict(views.html.newBaseImage(formWithError, Roles.list))
       }
-
       _ <- xorTright {
         val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
         baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
