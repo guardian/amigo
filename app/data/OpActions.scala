@@ -1,5 +1,7 @@
 package data
 
+import cats.Functor
+import cats.data.XorT
 import com.gu.googleauth.UserIdentity
 import com.gu.scanamo.ops._
 import controllers.AuthActions
@@ -22,4 +24,6 @@ trait OpActions extends AuthActions {
       AuthAction.apply(bodyParser)(action.andThen(dynamo.exec))
     }
   }
+
+  def xorTright[F[_], A](fa: F[A])(implicit f: Functor[F]) = XorT.right[F, Result, A](fa)
 }

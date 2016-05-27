@@ -22,7 +22,7 @@ class BaseImageController(
 
   def showBaseImage(id: BaseImageId) = AuthOpAction { implicit request =>
     (for {
-      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id))
+      image <- OptionT(baseImages.findById(id))
     } yield Ok(views.html.showBaseImage(image))
     ).getOrElse(
       NotFound
@@ -31,7 +31,7 @@ class BaseImageController(
 
   def editBaseImage(id: BaseImageId) = AuthOpAction {
     (for {
-      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id))
+      image <- OptionT(baseImages.findById(id))
     } yield {
       val form = Forms.editBaseImage.fill((image.description, image.amiId))
       Ok(views.html.editBaseImage(image, form, Roles.list))
@@ -42,13 +42,13 @@ class BaseImageController(
 
   def updateBaseImage(id: BaseImageId) = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     (for {
-      image <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id)).toRight(NotFound)
+      image <- OptionT(baseImages.findById(id)).toRight(NotFound)
       descriptionAndId <- XorT.fromXor[ScanamoOps](
         Forms.editBaseImage.bindFromRequest.toXor.leftMap(formWithErrors =>
           BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))))
       (description, amiId) = descriptionAndId
       customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-      _ <- XorT.right[ScanamoOps, Result, Unit](
+      _ <- xorTright(
         baseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName))
     } yield {
       Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
@@ -66,13 +66,13 @@ class BaseImageController(
           BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))))
       (id, description, amiId) = idDescAmiId
 
-      _ <- OptionT[ScanamoOps, BaseImage](baseImages.findById(id)).toLeft(()).leftMap { _ =>
+      _ <- OptionT(baseImages.findById(id)).toLeft(()).leftMap { _ =>
         val formWithError = Forms.createBaseImage.fill((id, description, amiId))
           .withError("id", "This base image ID is already in use")
         Conflict(views.html.newBaseImage(formWithError, Roles.list))
       }
 
-      _ <- XorT.right[ScanamoOps, Result, BaseImage] {
+      _ <- xorTright {
         val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
         baseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
       }

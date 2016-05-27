@@ -29,8 +29,8 @@ class RecipeController(
 
   def showRecipe(id: RecipeId) = AuthOpAction { implicit request =>
     (for {
-      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id))
-      recentBakes <- OptionT.liftF[ScanamoOps, Iterable[Bake]](bakes.list(id, limit = 20))
+      recipe <- OptionT(recipes.findById(id))
+      recentBakes <- OptionT.liftF(bakes.list(id, limit = 20))
     } yield Ok(views.html.showRecipe(recipe, recentBakes))
     ).getOrElse(
       NotFound
@@ -39,8 +39,8 @@ class RecipeController(
 
   def editRecipe(id: RecipeId) = AuthOpAction {
     (for {
-      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id))
-      images <- OptionT.liftF[ScanamoOps, Iterable[BaseImage]](baseImages.list())
+      recipe <- OptionT(recipes.findById(id))
+      images <- OptionT.liftF(baseImages.list())
     } yield {
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.bakeSchedule))
       Ok(views.html.editRecipe(recipe, form, images.toSeq, Roles.list))
@@ -49,18 +49,18 @@ class RecipeController(
 
   def updateRecipe(id: RecipeId) = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     (for {
-      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(id)).toRight(NotFound)
-      images <- XorT.right[ScanamoOps, Result, Iterable[BaseImage]](baseImages.list())
+      recipe <- OptionT(recipes.findById(id)).toRight(NotFound)
+      images <- xorTright(baseImages.list)
       formValues <- XorT.fromXor[ScanamoOps](Forms.editRecipe.bindFromRequest.toXor).leftMap(formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, images.toSeq, Roles.list)))
       (description, baseImageId, bakeSchedule) = formValues
-      baseImage <- OptionT[ScanamoOps, BaseImage](baseImages.findById(baseImageId)).toRight {
+      baseImage <- OptionT(baseImages.findById(baseImageId)).toRight {
         val formWithError = Forms.editRecipe.fill(formValues)
           .withError("baseImageId", "Unknown base image")
         BadRequest(views.html.editRecipe(recipe, formWithError, images.toSeq, Roles.list))
       }
       customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-      updatedRecipe <- XorT.right[ScanamoOps, Result, Recipe](
+      updatedRecipe <- xorTright(
         recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule))
     } yield {
       bakeScheduler.reschedule(updatedRecipe)
@@ -75,20 +75,20 @@ class RecipeController(
 
   def createRecipe = AuthOpAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     (for {
-      images <- XorT.right[ScanamoOps, Result, Iterable[BaseImage]](baseImages.list())
+      images <- xorTright(baseImages.list)
       formValues <- XorT.fromXor[ScanamoOps](Forms.createRecipe.bindFromRequest.toXor).leftMap(formWithErrors =>
         BadRequest(views.html.newRecipe(formWithErrors, images.toSeq, Roles.list)))
       (id, description, baseImageId, bakeSchedule) = formValues
-      _ <- OptionT[ScanamoOps, Recipe](recipes.findById(id)).toLeft(()).leftMap { _ =>
+      _ <- OptionT(recipes.findById(id)).toLeft(()).leftMap { _ =>
         val formWithError = Forms.createRecipe.fill(formValues).withError("id", "This recipe ID is already in use")
         Conflict(views.html.newBaseImage(formWithError, Roles.list))
       }
-      baseImage <- OptionT[ScanamoOps, BaseImage](baseImages.findById(baseImageId)).toRight {
+      baseImage <- OptionT(baseImages.findById(baseImageId)).toRight {
         val formWithError = Forms.createRecipe.fill(formValues).withError("baseImageId", "Unknown base image")
         BadRequest(views.html.newRecipe(formWithError, images.toSeq, Roles.list))
       }
       customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-      recipe <- XorT.right[ScanamoOps, Result, Recipe](
+      recipe <- xorTright(
         recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule))
     } yield {
       bakeScheduler.reschedule(recipe)

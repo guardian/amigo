@@ -24,9 +24,9 @@ class BakeController(
 
   def startBaking(recipeId: RecipeId) = AuthOpAction { request =>
     (for {
-      recipe <- OptionT[ScanamoOps, Recipe](recipes.findById(recipeId))
+      recipe <- OptionT(recipes.findById(recipeId))
       buildNumber = recipes.incrementAndGetBuildNumber(recipe.id).get
-      bake <- OptionT.liftF[ScanamoOps, Bake](bakes.create(recipe, buildNumber, startedBy = request.user.fullName))
+      bake <- OptionT.liftF(bakes.create(recipe, buildNumber, startedBy = request.user.fullName))
     } yield {
       PackerRunner.createImage(bake, prism, eventBus)
       Redirect(routes.BakeController.showBake(recipeId, buildNumber))
@@ -37,8 +37,8 @@ class BakeController(
 
   def showBake(recipeId: RecipeId, buildNumber: Int) = AuthOpAction {
     (for {
-      bake <- OptionT[ScanamoOps, Bake](bakes.findById(recipeId, buildNumber))
-      bakeLogList <- OptionT.liftF[ScanamoOps, Iterable[BakeLog]](bakeLogs.list(BakeId(recipeId, buildNumber)))
+      bake <- OptionT(bakes.findById(recipeId, buildNumber))
+      bakeLogList <- OptionT.liftF(bakeLogs.list(BakeId(recipeId, buildNumber)))
     } yield {
       Ok(views.html.showBake(bake, bakeLogList))
     }).getOrElse(
