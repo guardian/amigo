@@ -13,7 +13,7 @@ import play.api.mvc._
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi,
-    baseImages: BaseImages)(implicit val dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
+    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
   import BaseImageController._
 
   def listBaseImages = AuthOpAction {

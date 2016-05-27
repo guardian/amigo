@@ -9,18 +9,16 @@ import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc.{ Action, AnyContent, BodyParser, Result }
 
 trait OpActions extends AuthActions {
-  def dynamo: Dynamo
-
   object AuthOpAction {
-    def apply(action: AuthenticatedRequest[AnyContent, UserIdentity] => ScanamoOps[Result]): Action[AnyContent] = {
+    def apply(action: AuthenticatedRequest[AnyContent, UserIdentity] => ScanamoOps[Result])(implicit dynamo: Dynamo): Action[AnyContent] = {
       AuthAction.apply(action.andThen(dynamo.exec))
     }
 
-    def apply(action: => ScanamoOps[Result]): Action[AnyContent] = {
+    def apply(action: => ScanamoOps[Result])(implicit dynamo: Dynamo): Action[AnyContent] = {
       AuthAction.apply(dynamo.exec(action))
     }
 
-    def apply[A](bodyParser: BodyParser[A])(action: AuthenticatedRequest[A, UserIdentity] => ScanamoOps[Result]): Action[A] = {
+    def apply[A](bodyParser: BodyParser[A])(action: AuthenticatedRequest[A, UserIdentity] => ScanamoOps[Result])(implicit dynamo: Dynamo): Action[A] = {
       AuthAction.apply(bodyParser)(action.andThen(dynamo.exec))
     }
   }

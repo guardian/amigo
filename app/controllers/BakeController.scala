@@ -20,7 +20,7 @@ class BakeController(
     val messagesApi: MessagesApi,
     recipes: Recipes,
     bakes: Bakes,
-    bakeLogs: BakeLogs)(implicit val dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with OpActions with I18nSupport {
+    bakeLogs: BakeLogs)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with OpActions with I18nSupport {
 
   def startBaking(recipeId: RecipeId) = AuthOpAction { request =>
     (for {

@@ -20,7 +20,7 @@ class RecipeController(
     val messagesApi: MessagesApi,
     recipes: Recipes,
     bakes: Bakes,
-    baseImages: BaseImages)(implicit val dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
+    baseImages: BaseImages)(implicit dynamo: Dynamo) extends Controller with OpActions with I18nSupport {
   import RecipeController._
 
   def listRecipes = AuthOpAction {
