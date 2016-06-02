@@ -1,0 +1,3 @@
+---
+- name: Move imgops config files into logrotate folder
+  copy: src=logrotate dest=/etc/logrotate.d/imgops owner=root group=root
