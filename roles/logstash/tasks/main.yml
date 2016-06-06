@@ -1,0 +1,12 @@
+---
+- name: Download and extract Logstash
+  unarchive: src=https://download.elastic.co/logstash/logstash/logstash-{{logstash_version}}.tar.gz dest=/opt/ copy=no
+
+- name: Create softlink for Logstash
+  file: src=/opt/logstash-{{logstash_version}} dest=/opt/logstash state=link
+
+- name: Create user for Logstash
+  user: name={{logstash_user}} system=yes createhome=yes
+
+- name: Create systemd file for Logstash
+  template: src=logstash.service.template dest=/etc/systemd/system/logstash.service

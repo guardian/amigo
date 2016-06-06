@@ -1,0 +1,13 @@
+[Unit]
+Description=Logstash
+
+[Service]
+User={{logstash_user}}
+Group={{logstash_user}}
+Restart=on-failure
+Environment='HOME=/home/{{logstash_user}}'
+WorkingDirectory=/home/{{logstash_user}}
+ExecStart=/opt/logstash/bin/logstash -f {{logstash_config_file}}
+
+[Install]
+WantedBy=multi-user.target

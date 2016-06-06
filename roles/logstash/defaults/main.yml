@@ -1,0 +1,4 @@
+---
+logstash_version: 1.5.6
+logstash_user: logstash
+logstash_config_file: /etc/logstash.conf
