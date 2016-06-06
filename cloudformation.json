@@ -20,6 +20,11 @@
       "Type": "String",
       "Default": "ami-6b50e218"
     },
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "t2.small"
+    },
     "PackerVersion": {
       "Description": "What version of Packer to install",
       "Type": "String",
@@ -256,7 +261,7 @@
             "Ref": "ApplicationSecurityGroup"
           }
         ],
-        "InstanceType": "t2.micro",
+        "InstanceType": { "Ref": "InstanceType" },
         "IamInstanceProfile": {
           "Ref": "InstanceProfile"
         },
