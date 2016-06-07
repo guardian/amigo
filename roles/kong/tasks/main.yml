@@ -1,0 +1,31 @@
+---
+- name: Install Kong's dependencies
+  apt: name={{item}} state=latest
+  with_items:
+    - netcat
+    - openssl
+    - libpcre3
+    - dnsmasq
+    - procps
+
+- name: Download Kong package
+  get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.vivid_all.deb dest=/tmp/kong-{{kong_version}}.deb
+
+- name: Install Kong package
+  command: dpkg -i /tmp/kong-{{kong_version}}.deb
+
+- name: Overwrite kong.yml
+  copy: src=kong-{{kong_version}}.yml dest=/etc/kong/kong.yml
+
+- name: Configure Kong log rotation
+  copy: src=kong.logrotate dest=/etc/logrotate.d/kong
+
+- name: Bump ulimits
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      *  soft  nofile  16384
+      *  hard  nofile  16384
+
+- name: Copy Kong configure.sh script
+  copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
