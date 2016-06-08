@@ -1,0 +1,13 @@
+/usr/local/kong/logs/*.log {
+	daily
+	size 100M
+	missingok
+	rotate 4
+	compress
+	delaycompress
+	notifempty
+	nocreate
+	postrotate
+		[ ! -f /usr/local/kong/kong.pid ] || kill -USR1 `cat /usr/local/kong/kong.pid`
+	endscript
+}
