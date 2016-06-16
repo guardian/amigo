@@ -1,27 +1,31 @@
 package data
 
-import cats.data.ValidatedNel
+import cats.std.option._
+import cats.std.list._
+import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoReadError, Scanamo }
-import models.Recipe.DbModel
-import models.RecipeId
-import models._
+import com.gu.scanamo.Table
+import com.gu.scanamo.ops.ScanamoOps
+import com.gu.scanamo.syntax._
+import models.{ RecipeId, _ }
 import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 
-object Recipes {
-  import DynamoFormats._
+class Recipes(table: Table[Recipe.DbModel], baseImages: BaseImages) {
+  import DynamoFormats.dateTimeFormat
 
-  def list()(implicit dynamo: Dynamo): Iterable[Recipe] = {
-    val scanRequest = new ScanRequest(tableName)
-    val dbModels: Iterable[Option[ValidatedNel[DynamoReadError, DbModel]]] =
-      dynamo.client.scan(scanRequest).getItems.asScala.map { item => Scanamo.from[Recipe.DbModel](new GetItemResult().withItem(item)) }
+  def list(): ScanamoOps[Iterable[Recipe]] = {
     for {
-      dbModel <- dbModels.flatMap(_.flatMap(_.toOption))
-      baseImage <- BaseImages.findById(dbModel.baseImageId)
+      dbModels <- table.scan()
+      models = dbModels.flatMap(_.toOption)
+      baseImage <- models.traverse(m => baseImages.findById(m.baseImageId))
+      baseImages = baseImage.flatten
     } yield {
-      Recipe.db2domain(dbModel, baseImage)
+      for {
+        model <- models
+        image <- baseImages
+      } yield Recipe.db2domain(model, image)
     }
   }
 
@@ -30,12 +34,11 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     createdBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
+    bakeSchedule: Option[BakeSchedule]): ScanamoOps[Recipe] = {
     val now = DateTime.now()
     val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule)
-    Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(recipe, nextBuildNumber = 0))
-
-    recipe
+    table.put(Recipe.domain2db(recipe, nextBuildNumber = 0)).map(_ => recipe
+    )
   }
 
   def update(recipe: Recipe,
@@ -43,7 +46,7 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     modifiedBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
+    bakeSchedule: Option[BakeSchedule]): ScanamoOps[Recipe] = {
     val updated = recipe.copy(
       description = description,
       baseImage = baseImage,
@@ -53,24 +56,30 @@ object Recipes {
       bakeSchedule = bakeSchedule
     )
     // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
-    val nextBuildNumber = Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> recipe.id).flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
-    Scanamo.put(dynamo.client)(tableName)(Recipe.domain2db(updated, nextBuildNumber))
-
-    updated
+    for {
+      recipe <- table.get('id -> recipe.id)
+      nextBuildNumber = recipe.flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
+      _ <- table.put(Recipe.domain2db(updated, nextBuildNumber))
+    } yield updated
   }
 
-  def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
+  def findById(id: RecipeId): ScanamoOps[Option[Recipe]] = {
     for {
-      dbModel <- Scanamo.get[RecipeId, DbModel](dynamo.client)(tableName)("id" -> id).flatMap(_.toOption)
-      baseImage <- BaseImages.findById(dbModel.baseImageId)
+      dbModel <- table.get('id -> id)
+      modelOpt = dbModel.flatMap(_.toOption)
+      baseImage <- modelOpt.traverse(m => baseImages.findById(m.baseImageId))
+      baseImageOpt = baseImage.flatten
     } yield {
-      Recipe.db2domain(dbModel, baseImage)
+      for {
+        model <- modelOpt
+        image <- baseImageOpt
+      } yield Recipe.db2domain(model, image)
     }
   }
 
   def incrementAndGetBuildNumber(id: RecipeId)(implicit dynamo: Dynamo): Option[Int] = {
     val updateRequest = new UpdateItemRequest()
-      .withTableName(tableName)
+      .withTableName(table.name)
       .withKey(Map("id" -> new AttributeValue(id.value)).asJava)
       .withUpdateExpression("ADD nextBuildNumber :val1")
       .withConditionExpression("attribute_exists(id)") // to ensure the recipe exists in Dynamo
@@ -82,7 +91,5 @@ object Recipes {
     else
       None
   }
-
-  private def tableName(implicit dynamo: Dynamo) = dynamo.Tables.recipes.name
 
 }

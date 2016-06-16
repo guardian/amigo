@@ -1,6 +1,7 @@
 package controllers
 
 import akka.stream.scaladsl.Source
+import cats.data.OptionT
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import event._
@@ -10,27 +11,39 @@ import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
 import play.api.mvc._
 import prism.Prism
+import com.gu.scanamo.ops.ScanamoOps
 
 class BakeController(
     eventsSource: Source[BakeEvent, _],
     prism: Prism,
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    recipes: Recipes,
+    bakes: Bakes,
+    bakeLogs: BakeLogs)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with OpActions with I18nSupport {
 
-  def startBaking(recipeId: RecipeId) = AuthAction { request =>
-    Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
-      val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-      val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-      PackerRunner.createImage(theBake, prism, eventBus)
+  def startBaking(recipeId: RecipeId) = AuthOpAction { request =>
+    (for {
+      recipe <- OptionT(recipes.findById(recipeId))
+      buildNumber = recipes.incrementAndGetBuildNumber(recipe.id).get
+      bake <- OptionT.liftF(bakes.create(recipe, buildNumber, startedBy = request.user.fullName))
+    } yield {
+      PackerRunner.createImage(bake, prism, eventBus)
       Redirect(routes.BakeController.showBake(recipeId, buildNumber))
-    }
+    }).getOrElse(
+      NotFound
+    )
   }
 
-  def showBake(recipeId: RecipeId, buildNumber: Int) = AuthAction {
-    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
-      val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
-      Ok(views.html.showBake(bake, bakeLogs))
-    }
+  def showBake(recipeId: RecipeId, buildNumber: Int) = AuthOpAction {
+    (for {
+      bake <- OptionT(bakes.findById(recipeId, buildNumber))
+      bakeLogList <- OptionT.liftF(bakeLogs.list(BakeId(recipeId, buildNumber)))
+    } yield {
+      Ok(views.html.showBake(bake, bakeLogList))
+    }).getOrElse(
+      NotFound
+    )
   }
 
   def bakeEvents(recipeId: RecipeId, buildNumber: Int) = AuthAction { implicit req =>
