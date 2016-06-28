@@ -1,0 +1,34 @@
+---
+- name: Install openresty deps 
+  apt: name={{ item }} state=present
+  with_items:
+    - libreadline-dev
+    - libncurses5-dev 
+    - libpcre3-dev
+    - libssl-dev
+    - perl
+    - make 
+    - build-essential
+
+- name: Install image filter deps 
+  apt: name={{ item }} state=present
+  with_items:
+    - libgd2-xpm-dev 
+
+- name: Download openresty source 
+  unarchive: src=https://openresty.org/download/openresty-1.9.15.1.tar.gz dest=/usr/local/src copy=no
+
+- name: Configure openresty
+  command: /usr/local/src/openresty-1.9.15.1/configure --prefix=/opt/openresty --with-http_image_filter_module --with-http_ssl_module
+  args:
+    chdir: /usr/local/src/openresty-1.9.15.1 
+
+- name: Build openresty 
+  command: make
+  args:
+    chdir: /usr/local/src/openresty-1.9.15.1 
+
+- name: Build openresty 
+  command: make install
+  args:
+    chdir: /usr/local/src/openresty-1.9.15.1 
