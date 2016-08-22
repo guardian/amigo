@@ -1,2 +1,3 @@
 ---
 kong_version: 0.9.0
+kong_user: content-api

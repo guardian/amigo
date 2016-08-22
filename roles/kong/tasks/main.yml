@@ -8,6 +8,9 @@
     - dnsmasq
     - procps
 
+- name: Create user for Kong
+  user: name={{kong_user}} system=yes
+
 - name: Download Kong package
   get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.vivid_all.deb dest=/tmp/kong-{{kong_version}}.deb
 
@@ -29,3 +32,6 @@
 
 - name: Copy Kong configure.sh script
   copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
+
+- name: Make 'kong user' own Kong
+  file: path=/usr/local/kong owner={{kong_user}} recurse=yes state=directory
