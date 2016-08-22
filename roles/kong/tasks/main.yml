@@ -12,7 +12,7 @@
   user: name={{kong_user}} system=yes
 
 - name: Download Kong package
-  get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.vivid_all.deb dest=/tmp/kong-{{kong_version}}.deb
+  get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.xenial_all.deb dest=/tmp/kong-{{kong_version}}.deb
 
 - name: Install Kong package
   command: dpkg -i /tmp/kong-{{kong_version}}.deb
