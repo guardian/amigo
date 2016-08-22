@@ -8,6 +8,6 @@
 	notifempty
 	nocreate
 	postrotate
-		[ ! -f /usr/local/kong/kong.pid ] || kill -USR1 `cat /usr/local/kong/kong.pid`
+		[ ! -f /usr/local/kong/nginx.pid ] || kill -USR1 `cat /usr/local/kong/nginx.pid`
 	endscript
 }
