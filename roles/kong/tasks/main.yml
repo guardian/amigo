@@ -18,7 +18,7 @@
   command: dpkg -i /tmp/kong-{{kong_version}}.deb
 
 - name: Overwrite kong.conf
-  copy: src=kong-{{kong_version}}.conf dest=/etc/kong/kong.conf
+  copy: src=kong-{{kong_version}}.conf dest=/etc/kong.conf
 
 - name: Configure Kong log rotation
   copy: src=kong.logrotate dest=/etc/logrotate.d/kong

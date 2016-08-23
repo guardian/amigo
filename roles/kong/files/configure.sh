@@ -28,16 +28,16 @@ replace_postgres_password=$(cat ${3?postgres_password_file_missing})
 
 kong_user=${4?kong_user_missing}
 
-echo "Backing up kong.conf to /etc/kong/kong.conf.bak"
-cp /etc/kong/kong.conf{,.bak}
+echo "Backing up kong.conf to /etc/kong.conf.bak"
+cp /etc/kong.conf{,.bak}
 
 echo "Writing Postgres config to kong.conf"
 # Use perl because sed doesn't play well with newlines
 perl -pe "s/${search_internal_ip}/${replace_internal_ip}/;" \
      -pe "s/${search_postgres_host}/${replace_postgres_host}/;" \
      -pe "s/${search_postgres_username}/${replace_postgres_username}/;" \
-     -pe "s/${search_postgres_password}/${replace_postgres_password}/;" /etc/kong/kong.conf.bak > /etc/kong/kong.conf
+     -pe "s/${search_postgres_password}/${replace_postgres_password}/;" /etc/kong.conf.bak > /etc/kong.conf
 
 
-chmod 400 /etc/kong/kong.conf
-chown $kong_user /etc/kong/kong.conf
+chmod 400 /etc/kong.conf
+chown $kong_user /etc/kong.conf
