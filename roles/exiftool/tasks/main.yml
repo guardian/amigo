@@ -1,0 +1,5 @@
+---
+- name: Install exiftool 
+  apt: name={{ item }} state=present
+  with_items:
+    - libimage-exiftool-perl 
