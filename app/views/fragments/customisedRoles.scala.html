@@ -3,7 +3,7 @@
 <ul class="list-group">
   @for(role <- roles) {
     <li class="list-group-item">
-      @role.roleId
+      <a href="@routes.RoleController.listRoles#@role.roleId">@role.roleId</a>
 
       @if(role.variables.isEmpty) {
         <em>(No custom variables)</em>
