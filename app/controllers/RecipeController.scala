@@ -33,14 +33,14 @@ class RecipeController(
   def editRecipe(id: RecipeId) = AuthAction {
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.bakeSchedule))
-      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.list))
+      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.listIds))
     }
   }
 
   def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.list))
+        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
       }, {
         case (description, baseImageId, bakeSchedule) =>
           BaseImages.findById(baseImageId) match {
@@ -51,25 +51,25 @@ class RecipeController(
               Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
-              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.list))
+              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
           }
       })
     }
   }
 
   def newRecipe = AuthAction {
-    Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.list))
+    Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.listIds))
   }
 
   def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.list))
+      BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.listIds))
     }, {
       case (id, description, baseImageId, bakeSchedule) =>
         Recipes.findById(id) match {
           case Some(existingRecipe) =>
             val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule)).withError("id", "This recipe ID is already in use")
-            Conflict(views.html.newBaseImage(formWithError, Roles.list))
+            Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             BaseImages.findById(baseImageId) match {
               case Some(baseImage) =>
@@ -79,7 +79,7 @@ class RecipeController(
                 Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
               case None =>
                 val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
-                BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.list))
+                BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.listIds))
             }
         }
     })

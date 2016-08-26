@@ -2,7 +2,7 @@
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
-@layout("AMIgo"){
+@simpleLayout("AMIgo"){
 
   @b3.form(routes.BaseImageController.createBaseImage) {
     @b3.text(form("id"), '_label -> "ID", 'placeholder -> "my-lovely-image" )
