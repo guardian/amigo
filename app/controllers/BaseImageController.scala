@@ -26,14 +26,14 @@ class BaseImageController(
   def editBaseImage(id: BaseImageId) = AuthAction {
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val form = Forms.editBaseImage.fill((image.description, image.amiId))
-      Ok(views.html.editBaseImage(image, form, Roles.list))
+      Ok(views.html.editBaseImage(image, form, Roles.listIds))
     }
   }
 
   def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
+        BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
       }, {
         case (description, amiId) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
@@ -44,18 +44,18 @@ class BaseImageController(
   }
 
   def newBaseImage = AuthAction {
-    Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.list))
+    Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.listIds))
   }
 
   def createBaseImage = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
-      BadRequest(views.html.newBaseImage(formWithErrors, Roles.list))
+      BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
       case (id, description, amiId) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
             val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
-            Conflict(views.html.newBaseImage(formWithError, Roles.list))
+            Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
             BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)

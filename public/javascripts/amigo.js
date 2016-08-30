@@ -35,8 +35,30 @@ function enablePostLinks() {
   });
 }
 
+function relocateStickyComponents() {
+  var windowTop = $(window).scrollTop();
+  $('.sticky').each(function () {
+    var $this = $(this);
+    var $anchor = $this.prev(); // the component that you want to make sticky must be preceded by an empty div
+    var componentTop = $anchor.offset().top;
+    if (windowTop > componentTop - 60) {
+      $this.addClass('stick');
+      $anchor.height($this.outerHeight());
+    } else {
+      $this.removeClass('stick');
+      $anchor.height(0);
+    }
+  });
+}
+
+function initStickyComponents() {
+  $(window).scroll(relocateStickyComponents);
+  relocateStickyComponents();
+}
+
 $(function(){
   enablePostLinks();
   makeTableRowsClickable();
   makeRoleVariablesVisibilityToggleable();
+  initStickyComponents();
 });

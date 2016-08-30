@@ -1,21 +1,78 @@
-@(roles: Iterable[RoleId])
+@(roles: Iterable[RoleSummary])
 @layout("AMIgo"){
 
   <h1>Roles</h1>
 
-  <div>TODO show more info about the roles, e.g. a list of tasks.</div>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="list-group">
+      @for(role <- roles) {
+        <a href="#@role.roleId" data-role-id="@role.roleId" class="list-group-item role-id">
+        @role.roleId
+        </a>
+      }
+      </div>
+    </div>
 
-  <table class="table table-striped">
-    <thead>
-      <th>Name</th>
-    </thead>
-    <tbody>
-    @for(id <- roles) {
-      <tr>
-        <td>@id.value (TODO link)</td>
-      </tr>
-    }
-    </tbody>
-  </table>
+    <div class="col-md-9">
+      <div id="sticky-anchor"></div>
+      <div class="sticky">
+        <div id="explanation">
+          Choose a role from the list to see more details.
+        </div>
 
+        @for(role <- roles) {
+          <div id="detail-@role.roleId" style="display: none;">
+
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="tab-label active">
+                <a aria-controls="tasks" role="tab" data-toggle="tab" data-target="#tasks-@role.roleId">Tasks</a>
+              </li>
+              <li role="presentation" class="tab-label">
+                <a aria-controls="dependencies" role="tab" data-toggle="tab" data-target="#dependencies-@role.roleId">Dependencies</a>
+              </li>
+              @for(readme <- role.readme) {
+                <li role="presentation" class="tab-label">
+                  <a aria-controls="readme" role="tab" data-toggle="tab" data-target="#readme-@role.roleId">README</a>
+                </li>
+              }
+            </ul>
+
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active" id="tasks-@role.roleId">
+                <h2>Tasks</h2>
+                <pre><code>@role.tasksMain.content</code></pre>
+              </div>
+
+              <div role="tabpanel" class="tab-pane" id="dependencies-@role.roleId">
+                <h2>Dependencies</h2>
+
+                @if(role.dependsOn.isEmpty) {
+                  This role does not depend on any other roles.
+                } else {
+                  This role depends on:
+                  <ul>
+                    @for(roleId <- role.dependsOn.toList.sortBy(_.value)) {
+                      <li><a href="#@roleId">@roleId</a></li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              @for(readme <- role.readme) {
+                <div role="tabpanel" class="tab-pane markdown" id="readme-@role.roleId">
+                  <pre>@readme.content</pre>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+} {
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.4.3/showdown.min.js" type="text/javascript"></script>
+  <script src="@routes.Assets.versioned("javascripts/roles.js")" type="text/javascript"></script>
 }
