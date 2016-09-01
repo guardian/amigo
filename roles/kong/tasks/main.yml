@@ -8,14 +8,17 @@
     - dnsmasq
     - procps
 
+- name: Create user for Kong
+  user: name={{kong_user}} system=yes
+
 - name: Download Kong package
-  get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.vivid_all.deb dest=/tmp/kong-{{kong_version}}.deb
+  get_url: url=https://github.com/Mashape/kong/releases/download/{{kong_version}}/kong-{{kong_version}}.xenial_all.deb dest=/tmp/kong-{{kong_version}}.deb
 
 - name: Install Kong package
   command: dpkg -i /tmp/kong-{{kong_version}}.deb
 
-- name: Overwrite kong.yml
-  copy: src=kong-{{kong_version}}.yml dest=/etc/kong/kong.yml
+- name: Overwrite kong.conf
+  copy: src=kong-{{kong_version}}.conf dest=/etc/kong.conf
 
 - name: Configure Kong log rotation
   copy: src=kong.logrotate dest=/etc/logrotate.d/kong
@@ -29,3 +32,6 @@
 
 - name: Copy Kong configure.sh script
   copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
+
+- name: Make 'kong user' own Kong
+  file: path=/usr/local/kong owner={{kong_user}} recurse=yes state=directory
