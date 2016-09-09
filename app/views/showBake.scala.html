@@ -1,49 +1,38 @@
 @(bake: Bake, bakeLogs: Iterable[BakeLog])
-@simpleLayout("AMIgo"){
+@layout("AMIgo"){
 
-  <h1>Bake!</h1>
-  <h2>Recipe: @bake.recipe.id.value</h2>
-  <h2>Build #@bake.buildNumber</h2>
-  <h2>Status: <span id="status">@bake.status</span></h2>
-  <h2>AMI = <span id="ami-id">@bake.amiId.getOrElse("(still baking...)")</span></h2>
+  <h1>@bake.bakeId</h1>
 
-  <h2>Packer output:</h2>
-  <div id="packer-output">
+  <div class="panel panel-default">
+    <div class="panel-heading">Status</div>
+    <div class="panel-body"><span id="status">@bake.status</span></div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">AMI</div>
+    <div class="panel-body"><span id="ami-id">@bake.amiId.getOrElse("(none)")</span></div>
+  </div>
+
+  <div>
+    <label>
+      <input id="tail-log" type="checkbox" value="" checked>
+      tail -f
+    </label>
+  </div>
+
+  <div class="well" id="packer-output">
     @for(log <- bakeLogs) {
       <div class="bake-log">[@log.timestamp.toString("YYYY-MM-dd HH:mm:ss")] @log.messageHtml</div>
     }
-
   </div>
 
+} {
+  <script src="@routes.Assets.versioned("javascripts/show-bake.js")" type="text/javascript"></script>
   <script>
-    var highestLogNumber = @{bakeLogs.lastOption.map(_.logNumber).getOrElse(-1)};
-    var packerOutputDiv = document.getElementById("packer-output");
-    var amiIdDiv = document.getElementById("ami-id");
-    var statusDiv = document.getElementById("status");
-
-    var feed = new EventSource('@controllers.routes.BakeController.bakeEvents(bake.recipe.id, bake.buildNumber)');
-    var handler = function(event){
-      var msg = JSON.parse(event.data);
-      switch (msg.eventType) {
-        case "log":
-          if (msg.log.number > highestLogNumber) {
-            var html = "<div class=\"bake-log\">[" + msg.timestamp + "] " + msg.log.messageHtml + "</div>";
-            packerOutputDiv.innerHTML += html;
-            highestLogNumber = msg.log.number;
-          }
-          break;
-        case "ami-created":
-          amiIdDiv.innerText = msg.amiId;
-          break;
-        case "packer-process-exited":
-          var status = msg.exitCode === 0 ? "Complete" : "Failed";
-          statusDiv.innerText = status;
-          break;
-        default:
-          console.log("Unsupported message received", msg);
-      }
-    };
-    feed.addEventListener('message', handler, false);
+    initShowBakePage(
+            '@controllers.routes.BakeController.bakeEvents(bake.recipe.id, bake.buildNumber)',
+            @{bakeLogs.lastOption.map(_.logNumber).getOrElse(-1)}
+    );
   </script>
 
 }

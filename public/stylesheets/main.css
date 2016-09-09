@@ -12,3 +12,8 @@ body { padding-top: 70px; }
     z-index: 10000;
     border-radius: 0 0 0.5em 0.5em;
 }
+
+#packer-output {
+    max-height: 400px; /* This gets updated to match the screen size using JS */
+    overflow-y: scroll;
+}
