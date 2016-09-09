@@ -56,25 +56,10 @@ function initStickyComponents() {
   relocateStickyComponents();
 }
 
-function initPackerOutputComponent() {
-  var div = $('#packer-output');
-  var $window = $(window);
-  
-  function resizeDiv() {
-    var newHeight = $window.height() - div.offset().top - 20;
-    div.css('max-height', newHeight + 'px');
-  }
-  
-  $window.resize(resizeDiv);
-  resizeDiv();
-}
-
-
 
 $(function(){
   enablePostLinks();
   makeTableRowsClickable();
   makeRoleVariablesVisibilityToggleable();
   initStickyComponents();
-  initPackerOutputComponent();
 });

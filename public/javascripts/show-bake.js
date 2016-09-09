@@ -1,5 +1,18 @@
 'use strict';
 
+function initPackerOutputComponent() {
+  var div = $('#packer-output');
+  var $window = $(window);
+
+  function resizeDiv() {
+    var newHeight = $window.height() - div.offset().top - 20;
+    div.css('max-height', newHeight + 'px');
+  }
+
+  $window.resize(resizeDiv);
+  resizeDiv();
+}
+
 function scrollToBottom() {
   var tailCheckbox = $("#tail-log");
   if (tailCheckbox.is(':checked')) {
@@ -44,5 +57,6 @@ function initShowBakePage(eventSourceUrl, initialHighestLogNumber) {
 }
 
 $(function() {
+  initPackerOutputComponent();
   scrollToBottom();
 });
