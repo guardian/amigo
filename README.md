@@ -33,7 +33,18 @@ To run the Play app, you will need credentials in either the `deployTools` profi
 
 If you want to actually perform a bake, you will need separate credentials for Packer. These must be available either as environment variables or in the default profile. (Packer doesn't play nicely with named profiles.) I'm not sure whether Packer understands federated credentials, session token, etc. I created an IAM user with limited permissions (see below) and use that user's credentials.
 
-Once you have your credentials sorted out, just do: 
+If you have created a custom VPC in your AWS account (i.e. your account contains any VPCs other than the default one), then you will also need to tell Packer which VPC and subnet to use when building images:
+
+```
+$ cat ~/.configuration-magic/amigo.conf
+
+packer {
+  vpcId = "vpc-1234abcd"
+  subnetId = "subnet-5678efgh"
+}
+```
+
+Once you have your credentials and config sorted out, just do: 
 
 ```
 $ sbt run
