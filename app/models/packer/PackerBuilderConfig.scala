@@ -15,7 +15,7 @@ case class PackerBuilderConfig(
   ami_name: String,
   ami_description: String,
   ami_users: String,
-  // TODO iam_instance_profile
+  iam_instance_profile: Option[String],
   tags: Map[String, String])
 
 object PackerBuilderConfig {

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+aws s3 cp s3://{{github_keys_bucket}}/{{github_team_name}}/authorized_keys /tmp/authorized_keys
+
+cp /tmp/authorized_keys /home/{{ssh_user}}/.ssh/authorized_keys
+
+chmod 600 /home/{{ssh_user}}/.ssh/authorized_keys

@@ -1,0 +1,8 @@
+[Unit]
+Description=Update SSH keys
+
+[Service]
+ExecStart=/opt/features/ssh-keys/install-keys.sh
+
+[Install]
+WantedBy=multi-user.target

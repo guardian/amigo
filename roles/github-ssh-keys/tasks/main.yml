@@ -1,0 +1,15 @@
+---
+- name: Ensure SSH user exists
+  user: name={{ssh_user}} system=yes createhome=yes
+
+- file: path=/opt/features/ssh-keys state=directory
+
+- name: Copy script for updating SSH keys
+  template: src=install-keys.sh.template dest=/opt/features/ssh-keys/install-keys.sh mode="u=rwx,g=rx,o=rx"
+
+- copy: src=update-keys.service dest=/etc/systemd/system/update-keys.service
+- copy: src=update-keys.timer dest=/etc/systemd/system/update-keys.timer
+- name: Enable job to download SSH keys and execute it immediately
+  shell: "systemctl enable update-keys --now"
+- name: Enable timer to keep SSH keys up to date
+  shell: "systemctl enable update-keys.timer"
