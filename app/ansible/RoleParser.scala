@@ -53,7 +53,7 @@ object RoleParser {
     val deps = jmap.asScala.get("dependencies").map(_.asInstanceOf[java.util.List[Any]].asScala).getOrElse(Nil)
     deps.collect {
       case roleId: String => Some(RoleId(roleId))
-      case customisedRole: java.util.Map[String, String] => customisedRole.asScala.get("role").map(RoleId(_))
+      case customisedRole: java.util.Map[String, String] @unchecked => customisedRole.asScala.get("role").map(RoleId(_))
     }.flatten.toSet
   }
 
