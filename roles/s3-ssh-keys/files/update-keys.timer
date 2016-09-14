@@ -2,7 +2,7 @@
 Description=Update SSH keys every half hour
 
 [Timer]
-OnBootSec=30 seconds
+OnStartupSec=1 minute
 OnUnitActiveSec=30 minutes
 
 [Install]

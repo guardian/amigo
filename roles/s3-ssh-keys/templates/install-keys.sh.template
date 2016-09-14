@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+aws s3 cp s3://{{ssh_keys_bucket}}/{{ssh_keys_prefix}}/authorized_keys /tmp/authorized_keys
+
+install -m 600 -o {{ssh_user}} /tmp/authorized_keys /home/{{ssh_user}}/.ssh/authorized_keys
