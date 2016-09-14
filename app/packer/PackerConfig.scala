@@ -6,5 +6,6 @@ package packer
 case class PackerConfig(
   stage: String,
   vpcId: Option[String],
-  subnetId: Option[String])
+  subnetId: Option[String],
+  instanceProfile: Option[String])
 

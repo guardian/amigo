@@ -25,21 +25,27 @@
           <div id="detail-@role.roleId" style="display: none;">
 
             <ul class="nav nav-tabs" role="tablist">
-              <li role="presentation" class="tab-label active">
+              @for(readme <- role.readme) {
+                <li role="presentation" class="tab-label active">
+                  <a aria-controls="readme" role="tab" data-toggle="tab" data-target="#readme-@role.roleId">README</a>
+                </li>
+              }
+              <li role="presentation" class="tab-label @if(role.readme.isEmpty){active}">
                 <a aria-controls="tasks" role="tab" data-toggle="tab" data-target="#tasks-@role.roleId">Tasks</a>
               </li>
               <li role="presentation" class="tab-label">
                 <a aria-controls="dependencies" role="tab" data-toggle="tab" data-target="#dependencies-@role.roleId">Dependencies</a>
               </li>
-              @for(readme <- role.readme) {
-                <li role="presentation" class="tab-label">
-                  <a aria-controls="readme" role="tab" data-toggle="tab" data-target="#readme-@role.roleId">README</a>
-                </li>
-              }
             </ul>
 
             <div class="tab-content">
-              <div role="tabpanel" class="tab-pane active" id="tasks-@role.roleId">
+              @for(readme <- role.readme) {
+                <div role="tabpanel" class="tab-pane markdown active" id="readme-@role.roleId">
+                  <pre>@readme.content</pre>
+                </div>
+              }
+
+              <div role="tabpanel" class="tab-pane @if(role.readme.isEmpty){active}" id="tasks-@role.roleId">
                 <h2>Tasks</h2>
                 <pre><code>@role.tasksMain.content</code></pre>
               </div>
@@ -58,12 +64,6 @@
                   </ul>
                 }
               </div>
-
-              @for(readme <- role.readme) {
-                <div role="tabpanel" class="tab-pane markdown" id="readme-@role.roleId">
-                  <pre>@readme.content</pre>
-                </div>
-              }
             </div>
 
           </div>
