@@ -1,13 +1,13 @@
 package models
 
-import cats.data.Validated.Valid
+import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 
-case class RoleId(value: String) extends StringId(value)
+case class RoleId(value: String) extends AnyVal with StringId
 
 object RoleId {
 
   implicit val dynamoFormat: DynamoFormat[RoleId] =
-    DynamoFormat.xmap(DynamoFormat.stringFormat)(value => Valid(RoleId(value)))(_.value)
+    DynamoFormat.xmap[RoleId, String](value => Xor.right(RoleId(value)))(_.value)
 
 }

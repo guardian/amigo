@@ -1,8 +1,8 @@
 package models
 
-import cats.data.Validated._
-import cats.data.ValidatedNel
-import com.gu.scanamo.{ TypeCoercionError, DynamoReadError, DynamoFormat }
+import cats.data.Xor
+import com.gu.scanamo.DynamoFormat
+import com.gu.scanamo.error.{ TypeCoercionError, DynamoReadError }
 
 case class BakeId(recipeId: RecipeId, buildNumber: Int) {
   override def toString: String = s"${recipeId.value} #$buildNumber"
@@ -14,11 +14,11 @@ object BakeId {
   private val DynamoFormatRegex = """(.+) #([0-9]+)""".r
 
   implicit val dynamoFormat: DynamoFormat[BakeId] = {
-    def fromString(s: String): ValidatedNel[DynamoReadError, BakeId] = s match {
-      case DynamoFormatRegex(recipeId, buildNumber) => valid(BakeId(RecipeId(recipeId), buildNumber.toInt))
-      case _ => invalidNel(TypeCoercionError(new IllegalArgumentException(s"Invalid bake ID: $s")))
+    def fromString(s: String): Xor[DynamoReadError, BakeId] = s match {
+      case DynamoFormatRegex(recipeId, buildNumber) => Xor.right(BakeId(RecipeId(recipeId), buildNumber.toInt))
+      case _ => Xor.left(TypeCoercionError(new IllegalArgumentException(s"Invalid bake ID: $s")))
     }
-    DynamoFormat.xmap(DynamoFormat.stringFormat)(fromString)(bakeId => bakeId.toString)
+    DynamoFormat.xmap[BakeId, String](fromString)(bakeId => bakeId.toString)
   }
 
 }
