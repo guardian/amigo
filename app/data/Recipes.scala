@@ -49,6 +49,7 @@ object Recipes {
       bakeSchedule = bakeSchedule
     )
     // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
+    // This is currently blocked on guardian/scanamo#62.
     val ops = for {
       recipe <- table.get('id -> recipe.id)
       nextBuildNumber = recipe.flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
