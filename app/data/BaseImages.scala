@@ -1,6 +1,5 @@
 package data
 
-import com.gu.scanamo._
 import com.gu.scanamo.syntax._
 import models._
 import org.joda.time.DateTime

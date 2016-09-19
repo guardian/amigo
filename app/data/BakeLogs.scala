@@ -1,10 +1,7 @@
 package data
 
-import com.amazonaws.services.dynamodbv2.model._
-import models.{ RecipeId, _ }
+import models._
 import com.gu.scanamo.syntax._
-
-import scala.collection.JavaConverters._
 
 object BakeLogs {
   import Dynamo._
