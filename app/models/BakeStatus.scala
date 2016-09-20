@@ -1,11 +1,9 @@
 package models
 
-import cats.data._
+import cats.data.Xor
+import com.gu.scanamo.DynamoFormat
+import com.gu.scanamo.error.{ DynamoReadError, TypeCoercionError }
 import enumeratum._
-import cats.data.Validated._
-import com.gu.scanamo.{ TypeCoercionError, DynamoReadError, DynamoFormat }
-
-import scala.util.{ Failure, Success, Try }
 
 sealed abstract class BakeStatus extends EnumEntry
 
@@ -18,13 +16,11 @@ object BakeStatus extends Enum[BakeStatus] {
   case object Failed extends BakeStatus
 
   implicit val dynamoFormat = {
-    def fromString(s: String): ValidatedNel[DynamoReadError, BakeStatus] = {
-      Try(withName(s)) match {
-        case Success(bakeStatus) => Valid(bakeStatus)
-        case Failure(e) => invalidNel(TypeCoercionError(e.asInstanceOf[Exception]))
-      }
+    def fromString(s: String): Xor[DynamoReadError, BakeStatus] = withNameOption(s) match {
+      case Some(bakeStatus) => Xor.right(bakeStatus)
+      case None => Xor.left(TypeCoercionError(new IllegalArgumentException(s"Invalid bake status: $s")))
     }
-    DynamoFormat.xmap(DynamoFormat.stringFormat)(fromString)(_.entryName)
+    DynamoFormat.xmap[BakeStatus, String](fromString)(_.entryName)
   }
 
 }

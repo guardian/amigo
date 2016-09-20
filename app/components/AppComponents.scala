@@ -3,7 +3,7 @@ package components
 import akka.stream.scaladsl.Source
 import akka.typed._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{ InstanceProfileCredentialsProvider, AWSCredentialsProviderChain }
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.gu.cm.{ ConfigurationLoader, Identity }
@@ -11,20 +11,19 @@ import com.gu.googleauth.GoogleAuthConfig
 import org.joda.time.Duration
 import play.api.ApplicationLoader.Context
 import play.api.libs.streams.Streams
-import play.api.{ Logger, Configuration, BuiltInComponentsFromContext }
+import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
-
-import data.{ Recipes, Dynamo }
+import data.{ Dynamo, Recipes }
 import prism.Prism
 import packer.PackerConfig
-import event.{ ActorSystemWrapper, Behaviours, BakeEvent }
+import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import controllers._
 
 import router.Routes
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
 
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
@@ -45,7 +44,7 @@ class AppComponents(context: Context)
       new ProfileCredentialsProvider(),
       new InstanceProfileCredentialsProvider
     )
-    val region = Regions.fromName(configuration.getString("aws.region").getOrElse("eu-west-1"))
+    val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
     val dynamoClient: AmazonDynamoDBClient = new AmazonDynamoDBClient(awsCreds).withRegion(region)
     new Dynamo(dynamoClient, identity.stage)
   }
