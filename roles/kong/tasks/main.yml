@@ -37,10 +37,10 @@
   copy: src=nginx.template dest=/usr/local/kong/nginx.template
 
 - name: Create shims directory
-  file: path=/user/local/kong/shims state=directory
+  file: path=/usr/local/kong/shims state=directory
 
 - name: Copy Kong command shim
-  copy: src=kong-shim.sh dest=/usr/local/kong/shims/kong
+  copy: src=kong-shim.sh dest=/usr/local/kong/shims/kong mode=a+x
 
 - name: Prepend shims directory to sudoers PATH
   lineinfile: dest=/etc/sudoers regexp='^Defaults(.*)secure_path="(.*)"' line='Defaults\1secure_path="/usr/local/kong/shims:\2"' backrefs=yes
