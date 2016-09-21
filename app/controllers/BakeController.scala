@@ -6,6 +6,7 @@ import data._
 import event._
 import packer._
 import models._
+import play.api.Logger
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
 import play.api.mvc._
@@ -19,10 +20,16 @@ class BakeController(
 
   def startBaking(recipeId: RecipeId) = AuthAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
-      val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-      val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-      PackerRunner.createImage(theBake, prism, eventBus)
-      Redirect(routes.BakeController.showBake(recipeId, buildNumber))
+      Recipes.incrementAndGetBuildNumber(recipe.id) match {
+        case Some(buildNumber) =>
+          val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
+          PackerRunner.createImage(theBake, prism, eventBus)
+          Redirect(routes.BakeController.showBake(recipeId, buildNumber))
+        case None =>
+          val message = s"Failed to get the next build number for recipe $recipeId"
+          Logger.warn(message)
+          InternalServerError(message)
+      }
     }
   }
 

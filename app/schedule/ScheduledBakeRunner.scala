@@ -19,11 +19,15 @@ class ScheduledBakeRunner(enabled: Boolean, prism: Prism, eventBus: EventBus)(im
           if (recipe.bakeSchedule.isEmpty) {
             Logger.warn(s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined")
           } else {
-            val buildNumber = Recipes.incrementAndGetBuildNumber(recipe.id).get
-            val theBake = Bakes.create(recipe, buildNumber, startedBy = "scheduler")
+            Recipes.incrementAndGetBuildNumber(recipe.id) match {
+              case Some(buildNumber) =>
+                val theBake = Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
-            Logger.info(s"Starting scheduled bake: ${theBake.bakeId}")
-            PackerRunner.createImage(theBake, prism, eventBus)
+                Logger.info(s"Starting scheduled bake: ${theBake.bakeId}")
+                PackerRunner.createImage(theBake, prism, eventBus)
+              case None =>
+                Logger.warn(s"Failed to get the next build number for recipe $recipeId")
+            }
           }
         case None =>
           Logger.warn(s"Skipping scheduled bake of recipe $recipeId because the recipe does not exist")
