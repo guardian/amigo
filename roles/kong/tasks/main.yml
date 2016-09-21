@@ -33,5 +33,8 @@
 - name: Copy Kong configure.sh script
   copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
 
+- name: Copy nginx.template file
+  copy: src=nginx.template dest=/usr/local/kong/nginx.template
+
 - name: Make 'kong user' own Kong
   file: path=/usr/local/kong owner={{kong_user}} recurse=yes state=directory
