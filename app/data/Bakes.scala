@@ -31,6 +31,7 @@ object Bakes {
         ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
         set('amiId -> amiId)
       )
+      .exec()
   }
 
   def list(recipeId: RecipeId, limit: Int = 20)(implicit dynamo: Dynamo): Iterable[Bake] = {
