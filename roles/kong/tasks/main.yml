@@ -7,6 +7,7 @@
     - libpcre3
     - dnsmasq
     - procps
+    - postgresql-client-{{postgres_version}}
 
 - name: Create user for Kong
   user: name={{kong_user}} system=yes
@@ -45,5 +46,12 @@
 - name: Prepend shims directory to sudoers PATH
   lineinfile: dest=/etc/sudoers regexp='^Defaults(.*)secure_path="(.*)"' line='Defaults\1secure_path="/usr/local/kong/shims:\2"' backrefs=yes
 
+- name: Copy truncate-ratelimiting_metrics.sh
+  copy: src=truncate-ratelimiting_metrics.sh dest=/usr/local/kong/truncate-ratelimiting_metrics.sh mode=u+x
+
 - name: Make 'kong user' own Kong
   file: path=/usr/local/kong owner={{kong_user}} recurse=yes state=directory
+
+- name: Install truncation script crontab
+  cron: name="truncate ratelimiting_metrics table" minute=0 hour=0
+        user={{kong_user}} job="/usr/local/kong/truncate-ratelimiting_metrics.sh"
