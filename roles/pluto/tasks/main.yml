@@ -1,0 +1,19 @@
+---
+- name: Install ansible deps for redhat
+  yum: name=libselinux-python-2.0.94-7.el6 state=present
+
+- name: Get Portal Tar 
+  get_url: 
+    url: "{{portal_download_path}}/RedHat_Portal_2.0.8-devel.tar"
+    dest: /tmp
+
+- name: Unpack Portal Tar
+  unarchive: src=/tmp/RedHat_Portal_2.0.8-devel.tar dest=/usr/local/share copy=no
+
+- name: Get Portal Install script 
+  get_url: 
+    url: "{{portal_download_path}}/install-pluto.py"
+    dest: /usr/local/share/RedHat_Portal_2.0.8-devel-1243
+
+- name: Run install script
+  command: python install-pluto.py chdir=/usr/local/share/RedHat_Portal_2.0.8-devel-1243
