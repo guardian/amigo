@@ -1,0 +1,3 @@
+---
+- name: Install ansible deps for redhat
+  yum: name=libselinux-python-2.0.94-7.el6 state=present
