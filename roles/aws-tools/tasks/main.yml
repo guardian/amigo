@@ -1,9 +1,11 @@
 ---
-- name: Install pip
-  apt: name=python3-pip state=present
+- name: Install latest AWS CLI
+  include: install-aws-cli-redhat6.yml
+  when: ansible_os_family == "RedHat"
 
 - name: Install latest AWS CLI
-  command: pip3 install awscli
+  include: install-aws-cli-debian.yml
+  when: ansible_os_family == "Debian"
 
 - name: Download AWS CFN tools
   get_url: url=https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz dest=/tmp/aws-cfn-bootstrap-latest.tar.gz 
