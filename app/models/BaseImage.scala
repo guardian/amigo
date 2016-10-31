@@ -19,6 +19,8 @@ object LinuxDist {
     case "ubuntu" => Ubuntu
     case "redhat" => RedHat
   }
+
+  val all = Seq("ubuntu" -> Ubuntu, "redhat" -> RedHat)
 }
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"
