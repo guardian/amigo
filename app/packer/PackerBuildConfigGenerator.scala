@@ -1,9 +1,9 @@
 package packer
 
-import java.nio.file.{ Paths, Path }
+import java.nio.file.{Path, Paths}
 
-import models.packer.{ PackerProvisionerConfig, PackerBuilderConfig, PackerBuildConfig }
-import models.{ RoleId, Bake, Recipe }
+import models.packer.{PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig}
+import models.{Bake, Recipe, RoleId, Ubuntu}
 
 object PackerBuildConfigGenerator {
 
@@ -31,9 +31,7 @@ object PackerBuildConfigGenerator {
       source_ami = "{{user `base_image_ami_id`}}",
       instance_type = "t2.micro",
 
-      ssh_username = bake.recipe.baseImage.linuxDist
-        .map(_.loginName)
-        .getOrElse("ec2-user"),
+      ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
 
       run_tags = Map(
         "Stage" -> "INFRA",
@@ -54,11 +52,9 @@ object PackerBuildConfigGenerator {
       )
     )
 
-    val provisioners = bake.recipe.baseImage.linuxDist.map(dist => {
-      dist.provisioners ++ Seq(
+    val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
         PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
       )
-    }).getOrElse(Nil)
 
     PackerBuildConfig(
       variables,
