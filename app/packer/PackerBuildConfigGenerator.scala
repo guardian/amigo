@@ -30,7 +30,11 @@ object PackerBuildConfigGenerator {
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
       instance_type = "t2.micro",
-      ssh_username = "ubuntu",
+
+      ssh_username = bake.recipe.baseImage.linuxDist
+        .map(_.loginName)
+        .getOrElse("ec2-user"),
+
       run_tags = Map(
         "Stage" -> "INFRA",
         "Stack" -> "amigo-packer",
@@ -49,19 +53,13 @@ object PackerBuildConfigGenerator {
         "SourceAMI" -> "{{user `base_image_ami_id`}}"
       )
     )
-    val provisioners = Seq(
-      // bootstrap Ansible
-      PackerProvisionerConfig.executeRemoteCommands(Seq(
-        // Wait for cloud-init to finish first: https://github.com/mitchellh/packer/issues/2639
-        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-        "apt-get --yes install software-properties-common",
-        "apt-add-repository ppa:ansible/ansible",
-        "apt-get --yes update",
-        "apt-get --yes install ansible"
-      )),
-      // Use ansible to install roles
-      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-    )
+
+    val provisioners = bake.recipe.baseImage.linuxDist.map(dist => {
+      dist.provisioners ++ Seq(
+        PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
+      )
+    }).getOrElse(Nil)
+
     PackerBuildConfig(
       variables,
       Seq(builder),
