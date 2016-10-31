@@ -51,10 +51,10 @@ class BaseImageController(
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
-      case (id, description, amiId) =>
+      case (id, description, amiId, linuxDist) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
-            val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
+            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist)).withError("id", "This base image ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
@@ -78,7 +78,8 @@ object BaseImageController {
     val createBaseImage = Form(tuple(
       "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
-      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
+      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
     ))
 
   }
