@@ -22,7 +22,7 @@
 - name: Unpack Portal Tar
   unarchive: src=/tmp/RedHat_Portal_2.0.8-devel.tar dest=/usr/local/share copy=no
 
-- name: Get Portal Install script 
+- name: Get custom Portal Install script 
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/install-pluto.py /usr/local/share/RedHat_Portal_2.0.8-devel-1243" 
 
 - name: Install deps for cantemo-python 
