@@ -40,7 +40,14 @@ case object Ubuntu extends LinuxDist {
 case object RedHat extends LinuxDist {
   val name = "redhat"
   val loginName = "ec2-user"
-  val provisioners = Nil
+  val provisioners = Seq(
+    PackerProvisionerConfig.executeRemoteCommands(Seq(
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm",
+      "yum -y install ansible",
+      "yum -y install libselinux-python-2.0.94-7.el6"
+    ))
+  )
 }
 
 case class BaseImage(
