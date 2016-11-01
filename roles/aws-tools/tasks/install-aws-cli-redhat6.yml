@@ -1,0 +1,9 @@
+---
+- name: Enable IUS (ius.io) packages on RedHat
+  yum: name=https://centos6.iuscommunity.org/ius-release.rpm state=present
+
+- name: Install pip on centos
+  yum: name=python-pip state=present
+
+- name: Install latest AWS CLI
+  command: pip install awscli
