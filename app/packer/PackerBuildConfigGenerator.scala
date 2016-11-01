@@ -1,9 +1,9 @@
 package packer
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{ Path, Paths }
 
-import models.packer.{PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig}
-import models.{Bake, Recipe, RoleId, Ubuntu}
+import models.packer.{ PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig }
+import models.{ Bake, Recipe, RoleId, Ubuntu }
 
 object PackerBuildConfigGenerator {
 
@@ -53,8 +53,8 @@ object PackerBuildConfigGenerator {
     )
 
     val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
-        PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-      )
+      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
+    )
 
     PackerBuildConfig(
       variables,

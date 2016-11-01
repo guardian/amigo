@@ -62,7 +62,7 @@ class BaseImageController(
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-            BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName)
+            BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName, linuxDist)
             Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
         }
     })

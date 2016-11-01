@@ -11,9 +11,10 @@ object BaseImages {
     description: String,
     amiId: AmiId,
     builtinRoles: List[CustomisedRole],
-    createdBy: String)(implicit dynamo: Dynamo): BaseImage = {
+    createdBy: String,
+    linuxDist: LinuxDist)(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
-    val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now)
+    val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, Some(linuxDist))
 
     table.put(baseImage).exec()
     baseImage
