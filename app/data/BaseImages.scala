@@ -19,10 +19,11 @@ object BaseImages {
     baseImage
   }
 
-  def update(baseImage: BaseImage, description: String, amiId: AmiId, builtinRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+  def update(baseImage: BaseImage, description: String, amiId: AmiId, linuxDist: LinuxDist, builtinRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
       description = description,
       amiId = amiId,
+      linuxDist = Some(linuxDist),
       builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now()

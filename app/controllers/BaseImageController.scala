@@ -25,7 +25,11 @@ class BaseImageController(
 
   def editBaseImage(id: BaseImageId) = AuthAction {
     BaseImages.findById(id).fold[Result](NotFound) { image =>
-      val form = Forms.editBaseImage.fill((image.description, image.amiId))
+      val form = Forms.editBaseImage.fill((
+        image.description,
+        image.amiId,
+        image.linuxDist.getOrElse(Ubuntu)
+      ))
       Ok(views.html.editBaseImage(image, form, Roles.listIds))
     }
   }
@@ -35,9 +39,9 @@ class BaseImageController(
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
       }, {
-        case (description, amiId) =>
+        case (description, amiId, linuxDist) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-          BaseImages.update(image, description, amiId, customisedRoles, modifiedBy = request.user.fullName)
+          BaseImages.update(image, description, amiId, linuxDist, customisedRoles, modifiedBy = request.user.fullName)
           Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
       })
     }
@@ -51,10 +55,10 @@ class BaseImageController(
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
-      case (id, description, amiId) =>
+      case (id, description, amiId, linuxDist) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
-            val formWithError = Forms.createBaseImage.fill((id, description, amiId)).withError("id", "This base image ID is already in use")
+            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist)).withError("id", "This base image ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
@@ -72,13 +76,15 @@ object BaseImageController {
 
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
-      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
+      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
     ))
 
     val createBaseImage = Form(tuple(
       "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
-      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
+      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
     ))
 
   }
