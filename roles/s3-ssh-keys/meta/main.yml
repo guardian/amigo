@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - { role: 'install-ansible-dependencies-redhat', when: ansible_os_family == 'RedHat'}
   - aws-tools
