@@ -51,8 +51,8 @@
 - name: Get NLEPlugin
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/nleplugin-1.2.3-421.x86_64.rpm /tmp"
 
-- name: Install Pluto RPM
-  command: yum --nogpgcheck localinstall nleplugin-1.2.3-421.x86_64.rpm chdir=/tmp
+- name: Install NLEPlugin RPM
+  command: yum -y --nogpgcheck localinstall nleplugin-1.2.3-421.x86_64.rpm chdir=/tmp
 
 - name: Install Pluto RPM
-  command: yum --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
+  command: yum -y --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
