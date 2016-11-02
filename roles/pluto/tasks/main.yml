@@ -2,35 +2,38 @@
 - name: Install ansible deps for redhat
   yum: name=libselinux-python-2.0.94-7.el6 state=present
 
-- name: Get pip install script 
+- name: Install postgres client libraries
+  yum: name=postgresql-libs state=present
+
+- name: Get pip install script
   get_url:
     url: https://bootstrap.pypa.io/get-pip.py
-    dest: /tmp 
+    dest: /tmp
 
 - name: Run pip install script
   command: python /tmp/get-pip.py
 
-- name: Install awscli 
-  command: pip install awscli 
+- name: Install awscli
+  command: pip install awscli
 
-- name: Create AWS credentials file 
+- name: Create AWS credentials file
   template: src=credentials.template dest=/root/.aws/credentials
 
-- name: Get Portal Tar 
+- name: Get Portal Tar
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/RedHat_Portal_2.0.8-devel.tar /tmp"
 
 - name: Unpack Portal Tar
   unarchive: src=/tmp/RedHat_Portal_2.0.8-devel.tar dest=/usr/local/share copy=no
 
-- name: Get custom Portal Install script 
-  command: "aws s3 cp s3://{{artifact_bucket}}/portal/install-pluto.py /usr/local/share/RedHat_Portal_2.0.8-devel-1243" 
+- name: Get custom Portal Install script
+  command: "aws s3 cp s3://{{artifact_bucket}}/portal/install-pluto.py /usr/local/share/RedHat_Portal_2.0.8-devel-1243"
 
-- name: Install deps for cantemo-python 
+- name: Install deps for cantemo-python
   yum: name=libxslt state=latest
   with_items:
     - freetype-devel.x86_64
 
-- name: Get Portal Key 
+- name: Get Portal Key
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/license.key /etc/cantemo/portal/key"
 
 - name: Run install script
@@ -42,7 +45,7 @@
 - name: Unpack Celery Tar
   unarchive: src=/tmp/celery-3.1.16.tar.gz dest=/usr/local/share copy=no
 
-- name: Manual Celery install 
+- name: Manual Celery install
   command: /opt/cantemo/python/bin/python /usr/local/share/celery-3.1.16/setup.py install chdir=/usr/local/share/celery-3.1.16
 
 - name: Get Pluto RPM
