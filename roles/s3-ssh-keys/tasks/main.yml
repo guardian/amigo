@@ -8,7 +8,19 @@
   template: src=install-keys.sh.template dest=/opt/features/ssh-keys/install-keys.sh mode="u=rwx,g=rx,o=rx"
 - shell: "/opt/features/ssh-keys/install-keys.sh"
 
+- name: Copy cronjob
+  template: src=update-keys-cronjob.txt.template dest=/opt/features/ssh-keys/update-keys-cronjob.txt mode="u=rwx,g=rx,o=rx"
+  when: ansible_os_family == "RedHat"
+
+- name: Copy cronjob start script
+  template: src=initialise-cron-job.sh.template dest=/opt/features/ssh-keys/initialise-cron-job.sh mode="u=rwx,g=rx,o=rx"
+  when: ansible_os_family == "RedHat"
+
 - copy: src=update-keys.service dest=/etc/systemd/system/update-keys.service
+  when: ansible_os_family == "Debian"
 - copy: src=update-keys.timer dest=/etc/systemd/system/update-keys.timer
+  when: ansible_os_family == "Debian"
 - name: Enable timer to keep SSH keys up to date
   shell: "systemctl enable update-keys.timer"
+  when: ansible_os_family == "Debian"
+
