@@ -22,6 +22,9 @@
   with_items:
     - freetype-devel.x86_64
 
+- name: Install python 2.7 for setup
+  yum: name:python27 state=latest
+
 - name: Get Portal Key
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/license.key /etc/cantemo/portal/key"
 
@@ -51,3 +54,6 @@
 
 - name: Install Pluto RPM
   command: yum -y --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
+
+- name: Install initial Portal config
+  command: aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf
