@@ -23,7 +23,7 @@
     - freetype-devel.x86_64
 
 - name: Install python 2.7 for setup
-  yum: name:python27 state=latest
+  yum: name=python27 state=latest
 
 - name: Get Portal Key
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/license.key /etc/cantemo/portal/key"
