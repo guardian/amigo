@@ -1,17 +1,6 @@
 ---
-- name: Install ansible deps for redhat
-  yum: name=libselinux-python-2.0.94-7.el6 state=present
-
-- name: Get pip install script 
-  get_url:
-    url: https://bootstrap.pypa.io/get-pip.py
-    dest: /tmp 
-
-- name: Run pip install script
-  command: python /tmp/get-pip.py
-
-- name: Install awscli 
-  command: pip install awscli 
+- name: Ensure AWS creds folder exists
+  file: path=/root/.aws state=directory mode=0755
 
 - name: Create AWS credentials file 
   template: src=credentials.template dest=/root/.aws/credentials
