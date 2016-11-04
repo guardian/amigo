@@ -1,0 +1,6 @@
+---
+- name: Create directories
+  file: path=/etc/systemd/system/apt-daily.timer.d state=directory owner=root group=root
+
+- name: Install file that skips running missed daily tasks on startup
+  copy: src=apt-daily.timer.conf dest=/etc/systemd/system/apt-daily.timer.d/apt-daily.timer.conf owner=root group=root
