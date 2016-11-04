@@ -56,4 +56,7 @@
   command: yum -y --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
 
 - name: Install initial Portal config
-  command: aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf && chown www-data /etc/cantemo/portal/portal.conf
+  command: aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf
+
+- name: Change ownership of portal base config
+  file: path=/etc/cantemo/portal/portal.conf owner=www-data group=www-data  
