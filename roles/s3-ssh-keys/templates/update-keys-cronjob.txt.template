@@ -1,0 +1,2 @@
+PATH=/bin:/usr/bin:/usr/local/bin
+*/30 * * * * /opt/features/ssh-keys/install.sh -b {{ ssh_keys_bucket }} -t {{ ssh_keys_prefix }} > ~{{ ssh_user }}/last-ssh-update.log 2>&1
