@@ -44,7 +44,7 @@
   command: /opt/cantemo/python/bin/python /usr/local/share/celery-3.1.16/setup.py install chdir=/usr/local/share/celery-3.1.16
 
 - name: Install redis library
-  command: /opt/cantemo/python/bin/pip install 'redis==10.2.5'
+  command: /opt/cantemo/python/bin/pip install 'redis==2.10.5'
 
 - name: Get Pluto RPM
   command: "aws s3 cp s3://{{artifact_bucket}}/pluto/pluto-3.0-201609081627.rpm /tmp"
