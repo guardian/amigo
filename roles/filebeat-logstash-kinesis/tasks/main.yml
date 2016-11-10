@@ -21,7 +21,7 @@
   command: "/opt/logstash/bin/plugin install logstash-output-kinesis"
 
 - name: Update core logstash-input-beats plugin
-  command: "/opt/logstash/bin/plugin update logstash-input-beats"
+  command: "echo Y | /opt/logstash/bin/plugin update logstash-input-beats"
 
 - name: Create logstash config 
   template: src=filebeat-kinesis-exporter.conf.template dest=/etc/logstash/conf.d/filebeat-kinesis-exporter.conf
