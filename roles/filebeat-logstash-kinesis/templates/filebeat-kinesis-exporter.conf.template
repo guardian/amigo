@@ -8,7 +8,7 @@ output {
   kinesis {
     stream_name => "{{stream_name}}"
     region => "{{region}}"
-    role_arn => "{{role_arn}}"
+    role_arn => "arn:aws:iam::{{target_account_id}}:role/{{stream_name}}"
     metrics_level => "none"
   }
 }
