@@ -2,7 +2,7 @@
 - name: Ensure SSH user exists
   user: name={{ssh_user}} system=yes createhome=yes
 
-- file: path=/opt/features/ssh-keys state=directory
+- file: path=/opt/features/ssh-keys state=directory mode=0755
 
 - name: Copy script for updating SSH keys
   template: src=install-keys.sh.template dest=/opt/features/ssh-keys/install-keys.sh mode="u=rwx,g=rx,o=rx"
