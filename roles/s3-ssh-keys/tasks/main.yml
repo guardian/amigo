@@ -11,7 +11,7 @@
 - cron: name=PATH env=yes value=/bin:/usr/bin:/usr/local/bin
   when: ansible_os_family == "RedHat"
 
-- cron: name="Initialise cronjob" minute="*/30" user={{ssh_user}} job="/opt/features/ssh-keys/install-keys.sh > ~{{ ssh_user }}/last-ssh-update.log 2>&1"
+- cron: name="Initialise ssh keys cronjob" minute="*/30" user={{ssh_user}} job="/opt/features/ssh-keys/install-keys.sh > ~{{ ssh_user }}/last-ssh-update.log 2>&1"
   when: ansible_os_family == "RedHat"
 
 - copy: src=update-keys.service dest=/etc/systemd/system/update-keys.service
