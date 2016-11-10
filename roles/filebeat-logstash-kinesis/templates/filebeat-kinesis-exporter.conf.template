@@ -1,0 +1,13 @@
+input {
+  beats {
+    port => 5044
+  }
+}
+
+output {
+  kinesis {
+    stream_name => "{{stream_name}}"
+    region => "{{region}}"
+    role_arn => "{{role_arn}}"
+  }
+}
