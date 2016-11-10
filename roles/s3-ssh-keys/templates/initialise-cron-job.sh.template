@@ -1,2 +1,0 @@
-echo "Initialising cron job"
-crontab -u {{ ssh_user }} /opt/features/ssh-keys/update-keys-cronjob.txt
