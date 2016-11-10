@@ -9,5 +9,6 @@ output {
     stream_name => "{{stream_name}}"
     region => "{{region}}"
     role_arn => "{{role_arn}}"
+    metrics_level => "none"
   }
 }
