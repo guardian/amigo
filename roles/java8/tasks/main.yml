@@ -4,6 +4,11 @@
   with_items:
     - openjdk-8-jre-headless
     - openjdk-8-jdk
+  when: ansible_os_family == "Debian"
+
+- name: Install Java 8
+  yum: name=java state=latest
+  when: ansible_os_family == "RedHat"
 
 ## Workaround for Debian Java packaging bug
 ## See:
@@ -12,3 +17,4 @@
 ## https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=775775
 - name: Install Java certificates
   command: /var/lib/dpkg/info/ca-certificates-java.postinst configure
+  when: ansible_os_family == "Debian"
