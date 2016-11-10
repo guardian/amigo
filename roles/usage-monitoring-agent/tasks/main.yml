@@ -1,0 +1,4 @@
+---
+- name: install usage monitoring agent
+  shell: $( cd $(dirname $0) ; pwd -P )/../cloudwatch-monitoring/install.sh -d/,/var/lib/mongodb
+

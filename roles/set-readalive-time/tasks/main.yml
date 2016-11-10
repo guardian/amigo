@@ -1,0 +1,4 @@
+---
+- name: set readalive time
+  shell: echo "net.ipv4.tcp_keepalive_time = 300" > /etc/sysctl.d/71-tcp-keepalive.conf
+

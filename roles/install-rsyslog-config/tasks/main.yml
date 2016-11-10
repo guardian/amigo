@@ -1,0 +1,11 @@
+---
+- name: create file
+  shell: touch /etc/rsyslog.d/31-mongo-scripts.conf
+- name: install rsyslog config
+  shell: |
+      cat > /etc/rsyslog.d/31-mongo-scripts.conf <<EOF
+      local1.*    /var/log/mongodb/scripts.log
+      EOF
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted

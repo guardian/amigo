@@ -1,0 +1,6 @@
+---
+- name: install script to set readahead
+  shell: install -m 755 $( cd $(dirname $0) ; pwd -P )/../mongo-opsmanager/templates/set-readahead /etc/init.d/set-readahead
+
+- name: upate set readahead
+  shell: update-rc.d set-readahead defaults

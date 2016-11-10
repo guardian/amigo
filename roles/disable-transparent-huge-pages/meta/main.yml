@@ -1,0 +1,4 @@
+---
+  dependencies:
+    - mongo-helper-scripts
+    - mongo30

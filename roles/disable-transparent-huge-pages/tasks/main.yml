@@ -1,0 +1,6 @@
+---
+- name: install script to disable transparent huge pages
+  shell: install -m 755 disable-transparent-hugepages /etc/init.d/disable-transparent-hugepages
+
+- name: update disable transparent huge images
+  shell: update-rc.d disable-transparent-hugepages defaults
