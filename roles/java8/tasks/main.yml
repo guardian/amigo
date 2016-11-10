@@ -7,7 +7,7 @@
   when: ansible_os_family == "Debian"
 
 - name: Install Java 8
-  yum: name=java state=latest
+  yum: name=java-1.8.0-openjdk.x86_64 state=present
   when: ansible_os_family == "RedHat"
 
 ## Workaround for Debian Java packaging bug
