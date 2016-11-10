@@ -1,0 +1,9 @@
+filebeat.prospectors:
+- input_type: log
+  paths:
+    {% for filepath in logpaths %}
+    - {{ filepath }}
+    {% endfor %}
+
+output.logstash:
+  hosts: ["127.0.0.1:5044"]
