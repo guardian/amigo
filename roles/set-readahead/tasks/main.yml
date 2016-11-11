@@ -1,6 +1,9 @@
 ---
+- name: move file
+  copy: src=readahead dest=/etc/temp owner=toot group=root
+
 - name: install script to set readahead
-  shell: install -m 755 $( cd $(dirname $0) ; pwd -P )/../mongo-opsmanager/templates/set-readahead /etc/init.d/set-readahead
+  shell: install -m 755 /etc/temp /etc/init.d/set-readahead
 
 - name: upate set readahead
   shell: update-rc.d set-readahead defaults
