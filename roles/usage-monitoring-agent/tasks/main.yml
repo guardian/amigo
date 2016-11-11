@@ -1,4 +1,7 @@
 ---
+- name: move file
+  copy: src=monitoring.sh dest=/etc/temp owner=root group=root mode=007
+
 - name: install usage monitoring agent
-  shell: $( cd $(dirname $0) ; pwd -P )/../cloudwatch-monitoring/install.sh -d/,/var/lib/mongodb
+  shell: /etc/temp -d/,/var/lib/mongodb
 
