@@ -41,6 +41,7 @@ $ cat ~/.configuration-magic/amigo.conf
 packer {
   vpcId = "vpc-1234abcd"
   subnetId = "subnet-5678efgh"
+  instanceProfile = "[optional] instance profile name for the box packer will run on"
 }
 ```
 
