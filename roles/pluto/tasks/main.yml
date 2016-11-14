@@ -22,6 +22,9 @@
   with_items:
     - freetype-devel.x86_64
 
+- name: Install python 2.7 deps 
+  yum: name=centos-release-SCL state=latest
+
 - name: Install python 2.7 for setup
   yum: name=python27 state=latest
 
@@ -44,13 +47,16 @@
   command: /opt/cantemo/python/bin/python /usr/local/share/celery-3.1.16/setup.py install chdir=/usr/local/share/celery-3.1.16
 
 - name: Install redis library
-  command: /opt/cantemo/python/bin/pip install 'redis==2.10.5'
+  command: "/opt/cantemo/python/bin/pip install 'redis==2.10.5'"
 
 - name: Download django patch to fix incoherent error bug
-  command: "aws s3 cp s3://{{artifact_bucket}/portal/sites.py.patch /tmp"
+  command: "aws s3 cp s3://{{artifact_bucket}}/portal/sites.py.patch /tmp"
+
+- name: Install patch  
+  yum: name=patch state=present
 
 - name: Apply django patch to fix incoherent error bug
-  command: /usr/bin/patch sites.py < /tmp/sites.py.patch
+  command: "/usr/bin/patch sites.py < /tmp/sites.py.patch"
   args:
     chdir: /opt/cantemo/python/lib/python2.6/site-packages/django/contrib/admin
 
@@ -67,7 +73,7 @@
   command: yum -y --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
 
 - name: Install initial Portal config
-  command: aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf
+  command: "aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf"
 
 - name: Change ownership of portal base config
   file: path=/etc/cantemo/portal/portal.conf owner=www-data group=www-data  
