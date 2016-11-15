@@ -1,10 +1,4 @@
 ---
-- name: Ensure AWS creds folder exists
-  file: path=/root/.aws state=directory mode=0755
-
-- name: Create AWS credentials file
-  template: src=credentials.template dest=/root/.aws/credentials
-
 - name: Get Portal Tar
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/RedHat_Portal_2.0.8-devel.tar /tmp"
 
