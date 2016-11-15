@@ -59,7 +59,7 @@
   yum: name=patch state=present
 
 - name: Apply django patch to fix incoherent error bug
-  command: "/usr/bin/patch sites.py < /tmp/sites.py.patch"
+  command: "/usr/bin/patch sites.py /tmp/sites.py.patch"
   args:
     chdir: /opt/cantemo/python/lib/python2.6/site-packages/django/contrib/admin
 
