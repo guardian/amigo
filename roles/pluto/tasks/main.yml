@@ -60,17 +60,11 @@
   args:
     chdir: /opt/cantemo/python/lib/python2.6/site-packages/django/contrib/admin
 
-- name: Get Pluto RPM
-  command: "aws s3 cp s3://{{artifact_bucket}}/pluto/pluto-3.0-201609081627.rpm /tmp"
-
 - name: Get NLEPlugin
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/nleplugin-1.2.3-421.x86_64.rpm /tmp"
 
 - name: Install NLEPlugin RPM
   command: yum -y --nogpgcheck localinstall nleplugin-1.2.3-421.x86_64.rpm chdir=/tmp
-
-- name: Install Pluto RPM
-  command: yum -y --nogpgcheck localinstall pluto-3.0-201609081627.rpm chdir=/tmp
 
 - name: Install initial Portal config
   command: "aws s3 cp s3://{{artifact_bucket}}/portal/portal_cloud_base.conf /etc/cantemo/portal/portal.conf"
