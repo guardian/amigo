@@ -22,8 +22,11 @@
   with_items:
     - freetype-devel.x86_64
 
+- name: Get python 2.7 deps 
+  command: "wget http://mirror.centos.org/centos/6/extras/x86_64/Packages/centos-release-scl-rh-2-3.el6.centos.noarch.rpm -O /tmp/centos-release-scl-rh-2-3.el6.centos.noarch.rpm"
+
 - name: Install python 2.7 deps 
-  yum: name=centos-release-SCL state=latest
+  command: "yum -y localinstall /tmp/centos-release-scl-rh-2-3.el6.centos.noarch.rpm"
 
 - name: Install python 2.7 for setup
   yum: name=python27 state=latest
