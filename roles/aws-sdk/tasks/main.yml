@@ -1,0 +1,3 @@
+---
+- name: install aws-sdk ruby gem
+  gem: name='aws-sdk' version=2 executable=true
