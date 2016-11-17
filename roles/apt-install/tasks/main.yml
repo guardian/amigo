@@ -1,3 +1,0 @@
----
-- name: Install a package with apt-get
-  apt: name={{ package }} state=present
