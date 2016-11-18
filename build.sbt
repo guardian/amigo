@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "play-googleauth" % "0.4.0",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
   "org.quartz-scheduler" % "quartz" % "2.2.3",
+  "com.lihaoyi" %% "fastparse" % "0.4.1",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test
 )
 routesGenerator := InjectedRoutesGenerator

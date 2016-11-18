@@ -20,7 +20,7 @@ object PlaybookGenerator {
     if (role.variables.isEmpty)
       role.roleId.value
     else
-      s"{ role: ${role.roleId.value}, ${role.variables.map { case (k, v) => s"$k: '$v'" }.mkString(", ")} }"
+      s"{ role: ${role.roleId.value}, ${role.variables.map { case (k, v) => s"$k: ${v.quoted}" }.mkString(", ")} }"
   }
 
 }

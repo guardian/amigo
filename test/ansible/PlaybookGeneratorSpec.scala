@@ -15,7 +15,7 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         description = "",
         amiId = AmiId(""),
         builtinRoles = List(
-          CustomisedRole(RoleId("builtinRole1"), Map("foo" -> "bar")),
+          CustomisedRole(RoleId("builtinRole1"), Map("foo" -> SingleParamValue("bar"))),
           CustomisedRole(RoleId("builtinRole2"), Map.empty)
         ),
         createdBy = "Testy McTest",
@@ -24,7 +24,7 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         modifiedAt = DateTime.now()
       ),
       roles = List(
-        CustomisedRole(RoleId("recipeRole1"), Map("wow" -> "yeah")),
+        CustomisedRole(RoleId("recipeRole1"), Map("wow" -> ListParamValue.of("yeah", "bonza"))),
         CustomisedRole(RoleId("recipeRole2"), Map.empty)
       ),
       createdBy = "Testy McTest",
@@ -42,7 +42,7 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         |  roles:
         |    - { role: builtinRole1, foo: 'bar' }
         |    - builtinRole2
-        |    - { role: recipeRole1, wow: 'yeah' }
+        |    - { role: recipeRole1, wow: ['yeah', 'bonza'] }
         |    - recipeRole2
         |""".stripMargin
     )
