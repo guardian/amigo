@@ -4,3 +4,10 @@
 
 - name: Configure locale
   command: locale-gen en_GB.UTF-8
+
+- name: Bump ulimits
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      *  soft  nofile  16384
+      *  hard  nofile  16384
