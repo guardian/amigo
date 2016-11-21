@@ -13,3 +13,9 @@
       *  hard  nofile  16384
       root  soft  nofile  16384
       root  hard  nofile  16384
+
+- name: Bump ulimits for systemd
+  blockinfile:
+    dest: /etc/systemd/system.conf
+    block: |
+      DefaultLimitNOFILE=65536
