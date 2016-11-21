@@ -11,3 +11,5 @@
     block: |
       *  soft  nofile  16384
       *  hard  nofile  16384
+      root  soft  nofile  16384
+      root  hard  nofile  16384
