@@ -1,0 +1,7 @@
+---
+- name: move file
+  copy: src=monitoring.sh dest=/etc/temp owner=root group=root mode=007
+
+- name: install usage monitoring agent
+  shell: /etc/temp -d/,/var/lib/mongodb
+

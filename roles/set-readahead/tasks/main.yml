@@ -1,0 +1,9 @@
+---
+- name: move file
+  copy: src=readahead dest=/etc/temp owner=root group=root
+
+- name: install script to set readahead
+  shell: install -m 755 /etc/temp /etc/init.d/set-readahead
+
+- name: upate set readahead
+  shell: update-rc.d set-readahead defaults
