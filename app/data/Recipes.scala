@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import models._
 import org.joda.time.DateTime
 import com.gu.scanamo.syntax._
+import cats.syntax.either._
 
 import scala.collection.JavaConverters._
 

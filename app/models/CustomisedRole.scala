@@ -1,6 +1,5 @@
 package models
 
-import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.error.TypeCoercionError
 import fastparse.WhitespaceApi
@@ -34,8 +33,8 @@ object ListParamValue {
 object ParamValue {
   implicit val format = DynamoFormat.xmap[ParamValue, String](
     CustomisedRole.paramValue.parse(_).fold(
-      (_, _, _) => Xor.left(TypeCoercionError(new RuntimeException("Unable to read ParamValue"))),
-      (pv, _) => Xor.right(pv))
+      (_, _, _) => Left(TypeCoercionError(new RuntimeException("Unable to read ParamValue"))),
+      (pv, _) => Right(pv))
   )(_.toString)
 }
 

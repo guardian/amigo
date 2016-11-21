@@ -77,14 +77,14 @@ object BaseImageController {
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
-      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
+      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create(_).get, _.name)
     ))
 
     val createBaseImage = Form(tuple(
       "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
       "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
-      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
+      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create(_).get, _.name)
     ))
 
   }

@@ -1,9 +1,9 @@
 package models
 
-import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.error.{ DynamoReadError, TypeCoercionError }
 import enumeratum._
+import cats.syntax.either._
 
 sealed abstract class BakeStatus extends EnumEntry
 
@@ -16,10 +16,10 @@ object BakeStatus extends Enum[BakeStatus] {
   case object Failed extends BakeStatus
 
   implicit val dynamoFormat = {
-    def fromString(s: String): Xor[DynamoReadError, BakeStatus] = withNameOption(s) match {
-      case Some(bakeStatus) => Xor.right(bakeStatus)
-      case None => Xor.left(TypeCoercionError(new IllegalArgumentException(s"Invalid bake status: $s")))
-    }
+    def fromString(s: String): Either[DynamoReadError, BakeStatus] = Either.fromOption(
+      withNameOption(s),
+      TypeCoercionError(new IllegalArgumentException(s"Invalid bake status: $s"))
+    )
     DynamoFormat.xmap[BakeStatus, String](fromString)(_.entryName)
   }
 

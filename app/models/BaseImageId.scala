@@ -1,6 +1,5 @@
 package models
 
-import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 import play.api.mvc.PathBindable
 
@@ -11,6 +10,6 @@ object BaseImageId {
   implicit val pathBindable: PathBindable[BaseImageId] = implicitly[PathBindable[String]].transform(BaseImageId(_), _.value)
 
   implicit val dynamoFormat: DynamoFormat[BaseImageId] =
-    DynamoFormat.xmap[BaseImageId, String](value => Xor.right(BaseImageId(value)))(_.value)
+    DynamoFormat.iso[BaseImageId, String](BaseImageId(_))(_.value)
 
 }

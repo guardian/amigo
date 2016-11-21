@@ -3,6 +3,7 @@ package data
 import com.gu.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
+import cats.syntax.either._
 
 object BaseImages {
   import Dynamo._

@@ -5,6 +5,7 @@ import com.gu.scanamo.syntax._
 
 object BakeLogs {
   import Dynamo._
+  import cats.syntax.either._
 
   def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
     // Make sure we don't try to save an empty string to Dynamo
