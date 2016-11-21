@@ -1,3 +1,0 @@
----
-- name: install sysfsutils
-  apt: name=sysfsutils state=present
