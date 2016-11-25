@@ -1,10 +1,10 @@
 package models
 
-import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 import models.packer.PackerProvisionerConfig
-
 import org.joda.time.DateTime
+import cats.syntax.either._
+import com.gu.scanamo.error.TypeCoercionError
 
 sealed trait LinuxDist {
   val name: String
@@ -13,14 +13,13 @@ sealed trait LinuxDist {
 }
 object LinuxDist {
   implicit val dynamoFormat: DynamoFormat[LinuxDist] =
-    DynamoFormat.xmap[LinuxDist, String](value => Xor.right(LinuxDist.create(value)))(_.name)
+    DynamoFormat.xmap[LinuxDist, String](value => Either.fromOption(
+      LinuxDist.create(value), TypeCoercionError(new RuntimeException(s"$value is not a known LinuxDist"))
+    ))(_.name)
 
-  def create(name: String): LinuxDist = name match {
-    case "ubuntu" => Ubuntu
-    case "redhat" => RedHat
-  }
+  def create(name: String): Option[LinuxDist] = all.get(name)
 
-  val all = Seq("ubuntu" -> Ubuntu, "redhat" -> RedHat)
+  val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat)
 }
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"

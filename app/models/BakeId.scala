@@ -1,6 +1,5 @@
 package models
 
-import cats.data.Xor
 import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.error.{ TypeCoercionError, DynamoReadError }
 
@@ -14,9 +13,9 @@ object BakeId {
   private val DynamoFormatRegex = """(.+) #([0-9]+)""".r
 
   implicit val dynamoFormat: DynamoFormat[BakeId] = {
-    def fromString(s: String): Xor[DynamoReadError, BakeId] = s match {
-      case DynamoFormatRegex(recipeId, buildNumber) => Xor.right(BakeId(RecipeId(recipeId), buildNumber.toInt))
-      case _ => Xor.left(TypeCoercionError(new IllegalArgumentException(s"Invalid bake ID: $s")))
+    def fromString(s: String): Either[DynamoReadError, BakeId] = s match {
+      case DynamoFormatRegex(recipeId, buildNumber) => Right(BakeId(RecipeId(recipeId), buildNumber.toInt))
+      case _ => Left(TypeCoercionError(new IllegalArgumentException(s"Invalid bake ID: $s")))
     }
     DynamoFormat.xmap[BakeId, String](fromString)(bakeId => bakeId.toString)
   }

@@ -1,6 +1,7 @@
 package models
 
 import org.scalatest.{ FunSuite, ShouldMatchers }
+import cats.syntax.either._
 
 class CustomisedRoleTest extends FunSuite with ShouldMatchers {
 

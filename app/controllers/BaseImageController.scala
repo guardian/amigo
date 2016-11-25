@@ -1,11 +1,9 @@
 package controllers
 
 import com.gu.googleauth.GoogleAuthConfig
-
 import data._
 import models._
-
-import play.api.data.Form
+import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
@@ -76,17 +74,23 @@ object BaseImageController {
 
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
-      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
-      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
+      "amiId" -> amiId,
+      "linuxDist" -> linuxDist
     ))
 
     val createBaseImage = Form(tuple(
       "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
-      "amiId" -> nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value),
-      "linuxDist" -> nonEmptyText(maxLength = 16).transform[LinuxDist](LinuxDist.create, _.name)
+      "amiId" -> amiId,
+      "linuxDist" -> linuxDist
     ))
 
+    val amiId = nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+
+    val linuxDist: Mapping[LinuxDist] =
+      nonEmptyText(maxLength = 16)
+        .verifying(s"Must be one of ${LinuxDist.all.keys}", LinuxDist.create(_).nonEmpty)
+        .transform(LinuxDist.create(_).get, _.name)
   }
 }
 
