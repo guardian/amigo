@@ -29,6 +29,8 @@ All data (base images, recipes, bakes, bake logs) are stored in DynamoDB. The Dy
 
 ## How to run locally
 
+Amigo requires Packer to be [installed](https://www.packer.io/intro/getting-started/setup.html)
+
 To run the Play app, you will need credentials in either the `deployTools` profile or the default profile.
 
 If you want to actually perform a bake, you will need separate credentials for Packer. These must be available either as environment variables or in the default profile. (Packer doesn't play nicely with named profiles.) I'm not sure whether Packer understands federated credentials, session token, etc. I created an IAM user with limited permissions (see below) and use that user's credentials.
