@@ -5,11 +5,12 @@
 - name: Download Chrome
   get_url: url=https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb dest=/tmp/google-chrome-stable_current_amd64.deb
 
-- name: Configure Chrome
-  command: dpkg -i /tmp/google-chrome-stable_current_amd64.deb
+- name: Install Chrome - ignores errors as expect missing packages
+  shell: dpkg -i /tmp/google-chrome-stable_current_amd64.deb
+  ignore_errors: yes
 
-- name: Install Chrome missing packages
-  command: apt-get install -f -y
+- name: Install missing packages for Chrome
+  shell: apt-get install -f -y
 
 - name: Download Chromedriver
   get_url: url=http://chromedriver.storage.googleapis.com/2.25/chromedriver_linux64.zip dest=/tmp/chromedriver.zip
@@ -18,7 +19,7 @@
   unarchive: src=/tmp/chromedriver.zip dest=/usr/local/bin/
 
 - name: Enable Chromedriver
-  command: chmod 751 /usr/local/bin/chromedriver
+  shell: chmod 751 /usr/local/bin/chromedriver
 
 - name: Create Xvfb service
   copy: src=xvfb.service dest=/etc/systemd/system/xvfb.service owner=root group=root
