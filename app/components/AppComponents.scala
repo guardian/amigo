@@ -42,7 +42,7 @@ class AppComponents(context: Context)
     val awsCreds = new AWSCredentialsProviderChain(
       new ProfileCredentialsProvider("deployTools"),
       new ProfileCredentialsProvider(),
-      new InstanceProfileCredentialsProvider
+      InstanceProfileCredentialsProvider.getInstance()
     )
     val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
     val dynamoClient: AmazonDynamoDBClient = new AmazonDynamoDBClient(awsCreds).withRegion(region)

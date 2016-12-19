@@ -1,0 +1,34 @@
+---
+- name: Create opt directory
+  file: path=/opt/cloudwatch-logs/ state=directory mode=0755
+
+- name: Download script
+  get_url: url="https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py" dest=/opt/cloudwatch-logs/ mode=0754
+
+- name: copy ec2 configuration script
+  copy:
+    src: configure-logs
+    dest: /opt/cloudwatch-logs/
+    mode: 0754
+
+- name: copy ec2 region script
+  copy:
+    src: aws-region
+    dest: /opt/cloudwatch-logs/
+    mode: 0754
+
+- name: Autodetect aws region
+  command: /opt/cloudwatch-logs/aws-region
+  register: ec2_region
+
+- name: copy cloudwatch log configuration file
+  copy:
+    src: awslogs.conf
+    dest: /tmp/
+    mode: 0444
+
+- name: Start and configure log agent
+  command: python /opt/cloudwatch-logs/awslogs-agent-setup.py -n -r {{ec2_region.stdout}} -c /tmp/awslogs.conf
+
+- name: Enable the log agent at restart
+  command: systemctl enable awslogs
