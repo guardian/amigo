@@ -19,7 +19,7 @@
   unarchive: src=/tmp/chromedriver.zip dest=/usr/local/bin/
 
 - name: Enable Chromedriver
-  shell: chmod 751 /usr/local/bin/chromedriver
+  file: path=/usr/local/bin/chromedriver mode=751
 
 - name: Create Xvfb service
   copy: src=xvfb.service dest=/etc/systemd/system/xvfb.service owner=root group=root
