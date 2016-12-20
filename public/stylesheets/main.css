@@ -38,9 +38,11 @@ body { padding-top: 70px; }
     width: 100%;
     height: 100%;
     padding: 8px;
+    text-decoration: none;
+    color: inherit;
 }
 
-.has-block-link {
+.table>tbody>tr>td.has-block-link {
     padding: 0;
 }
 
