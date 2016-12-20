@@ -10,7 +10,10 @@
 
   <div class="panel panel-default">
     <div class="panel-heading">AMI</div>
-    <div class="panel-body"><span id="ami-id">@bake.amiId.getOrElse("(none)")</span></div>
+    <div class="panel-body panel-body--flex"><span id="ami-id">@bake.amiId.getOrElse("(none)")</span>
+      <button class="btn btn-primary" title="Copy to clipboard" id="copy-button" data-clipboard-target="#ami-id">
+        <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+      </button></div>
   </div>
 
   <div>
@@ -33,6 +36,20 @@
             '@controllers.routes.BakeController.bakeEvents(bake.recipe.id, bake.buildNumber)',
             @{bakeLogs.lastOption.map(_.logNumber).getOrElse(-1)}
     );
+  </script>
+  <script src="@routes.Assets.versioned("javascripts/clipboard.min.js")"></script>
+  <script>
+    var copy = document.getElementById('copy-button');
+    var clipboard = new Clipboard(copy);
+
+    clipboard.on('success', function(e) {
+      console.log(e);
+      copy.classList.add('btn--success');
+    });
+    clipboard.on('error', function(e) {
+      console.log(e);
+    });
+
   </script>
 
 }

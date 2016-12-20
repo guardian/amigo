@@ -19,9 +19,9 @@
     </thead>
     <tbody>
     @for(recipe <- recipes) {
-      <tr data-href="@routes.RecipeController.showRecipe(recipe.id)">
-        <td>@recipe.id</td>
-        <td>@recipe.description</td>
+      <tr>
+        <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
+        <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
       </tr>
     }
     </tbody>
