@@ -17,3 +17,40 @@ body { padding-top: 70px; }
     max-height: 400px; /* This gets updated to match the screen size using JS */
     overflow-y: scroll;
 }
+
+.btn--success:after {
+    content: 'Successful';
+    display: inline-block;
+}
+
+.panel-body--flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-body--flex:after, .panel-body--flex:before {
+    display: none;
+}
+
+.block-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+}
+
+.has-block-link {
+    padding: 0;
+}
+
+.absolute-container {
+    position: relative;
+}
+
+.absolute-right {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+}
