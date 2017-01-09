@@ -6,7 +6,7 @@ stage=$3
 app=$4
 file=$5
 
-cat > /var/awslogs/etc/config/$app-$id.conf <<__END__
+cat >> /var/awslogs/etc/config/$app-$id.conf <<__END__
 [$app-$id]
 datetime_format = %Y-%m-%d %H:%M:%S
 file = $file
