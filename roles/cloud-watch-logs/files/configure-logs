@@ -12,7 +12,7 @@ datetime_format = %Y-%m-%d %H:%M:%S
 file = $file
 initial_position = start_of_file
 log_group_name = $stack-$app-$stage
-log_stream_name = $stack-$app-$stage-{instance_id}
+log_stream_name = $stack-$app-$stage-$id-{instance_id}
 __END__
 
 systemctl restart awslogs
