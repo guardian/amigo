@@ -29,7 +29,7 @@ All data (base images, recipes, bakes, bake logs) are stored in DynamoDB. The Dy
 
 ## How to run locally
 
-Amigo requires Packer to be [installed](https://www.packer.io/intro/getting-started/setup.html)
+AMIgo requires Packer to be [installed](https://www.packer.io/intro/getting-started/setup.html)
 
 To run the Play app, you will need credentials in either the `deployTools` profile or the default profile.
 
