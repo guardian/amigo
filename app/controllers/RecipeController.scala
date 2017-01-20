@@ -46,9 +46,12 @@ class RecipeController(
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              val updatedRecipe = Recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule)
-              bakeScheduler.reschedule(updatedRecipe)
-              Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
+              val updatedRecipe = Recipes.update(
+                recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule)
+              updatedRecipe.fold(e => InternalServerError(e.toString), { r =>
+                bakeScheduler.reschedule(r)
+                Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
+              })
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
               BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))

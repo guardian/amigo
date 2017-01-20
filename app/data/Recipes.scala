@@ -5,11 +5,13 @@ import models._
 import org.joda.time.DateTime
 import com.gu.scanamo.syntax._
 import cats.syntax.either._
+import com.gu.scanamo.error.DynamoReadError
 
 import scala.collection.JavaConverters._
 
 object Recipes {
   import Dynamo._
+  import DynamoFormats._
 
   def list()(implicit dynamo: Dynamo): Iterable[Recipe] = {
     val dbModels = table.scan().exec().flatMap(_.toOption)
@@ -39,25 +41,18 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     modifiedBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
-    val updated = recipe.copy(
-      description = description,
-      baseImage = baseImage,
-      roles = roles,
-      modifiedBy = modifiedBy,
-      modifiedAt = DateTime.now(),
-      bakeSchedule = bakeSchedule
-    )
-    // TODO This is a bit horrible. We have to get the record from Dynamo just to copy the next build number over. Really we want to do a partial update.
-    // This is currently blocked on guardian/scanamo#62.
-    val ops = for {
-      recipe <- table.get('id -> recipe.id)
-      nextBuildNumber = recipe.flatMap(_.toOption).map(_.nextBuildNumber).getOrElse(0)
-      _ <- table.put(Recipe.domain2db(updated, nextBuildNumber))
-    } yield ()
-    ops.exec()
+    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
-    updated
+    val update = table.update('id -> recipe.id,
+      set('description -> description) and
+        set('baseImageId -> baseImage.id) and
+        set('roles -> roles) and
+        set('modifiedBy -> modifiedBy) and
+        set('modifiedAt -> DateTime.now()) and
+        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule))
+    )
+
+    update.exec().map(Recipe.db2domain(_, baseImage))
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
