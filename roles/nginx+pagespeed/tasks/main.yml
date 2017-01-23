@@ -15,7 +15,7 @@
   user: name=nginx group=nginx
 
 - name: Download and compile nginx with pagespeed module
-  shell: wget https://ngxpagespeed.com/install; chmod +x install; ./install -v {{ ngxpagespeed_version }} -n {{ nginx_version }} -y -a '--sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf'
+  shell: wget https://ngxpagespeed.com/install; chmod +x install; ./install -v {{ ngxpagespeed_version }} -n {{ nginx_version }} -y -a '--sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log'
 
 - name: Create the directory /var/log/nginx
   file: path=/var/log/nginx state=directory owner=nginx group=nginx
