@@ -15,10 +15,13 @@
   user: name=nginx group=nginx
 
 - name: Download and compile nginx with pagespeed module
-  shell: wget https://ngxpagespeed.com/install; chmod +x install; ./install -v {{ ngxpagespeed_version }} -n {{ nginx_version }} -y -a '--sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf'
+  shell: wget https://ngxpagespeed.com/install; chmod +x install; ./install -v {{ ngxpagespeed_version }} -n {{ nginx_version }} -y -a '--sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --pid-path=/var/run/nginx/nginx.pid'
 
 - name: Create the directory /var/log/nginx
   file: path=/var/log/nginx state=directory owner=nginx group=nginx
+
+- name: Create the directory /var/run/nginx
+  file: path=/var/run/nginx state=directory owner=nginx group=nginx
 
 - name: Create the directory /etc/nginx/conf.d
   file: path=/etc/nginx/conf.d state=directory owner=nginx group=nginx

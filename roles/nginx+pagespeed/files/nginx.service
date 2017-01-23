@@ -4,14 +4,12 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-PIDFile=/var/run/nginx.pid
+PIDFile=/var/run/nginx/nginx.pid
 ExecStartPre=/usr/sbin/nginx -t
 ExecStart=/usr/sbin/nginx
-ExecReload=/bin/kill -s HUP
-ExecStop=/bin/kill -s QUIT
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
 PrivateTmp=true
-User=nginx
-Group=nginx
 
 [Install]
 WantedBy=multi-user.target
