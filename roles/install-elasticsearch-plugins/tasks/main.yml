@@ -1,0 +1,4 @@
+---
+- name: Install elasticsearch plugins
+  shell: /usr/share/elasticsearch/bin/plugin --install {{ item }}
+  with_items: "{{ plugins }}"
