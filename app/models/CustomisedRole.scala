@@ -47,7 +47,7 @@ object CustomisedRole {
   import White._
 
   val key: Parser[String] = P(CharsWhile(_ != ':').!)
-  val singleValue: Parser[SingleParamValue] = P(CharPred(c => c.isLetterOrDigit || c == '-' || c == '_' || c == '/').rep.!).map(SingleParamValue(_))
+  val singleValue: Parser[SingleParamValue] = P(CharPred(c => c.isLetterOrDigit || c == '-' || c == '_' || c == '/' || c == '.').rep.!).map(SingleParamValue(_))
   val multiValues: Parser[ListParamValue] = P("[" ~ singleValue.rep(sep = ",") ~ "]").map(
     params => ListParamValue(params.toList))
   val paramValue: Parser[ParamValue] = multiValues | singleValue
