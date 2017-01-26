@@ -1,7 +1,0 @@
----
-- name: install ruby and ruby dev
-  apt: name={{item}} update_cache=yes
-  with_items:
-    - ruby
-    - ruby-dev
-
