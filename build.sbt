@@ -4,6 +4,8 @@ scalaVersion := "2.11.8"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
 
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+
 def getTravisBranch(): String = {
   sys.env.get("TRAVIS_PULL_REQUEST") match {
     case Some("false") => sys.env.getOrElse("TRAVIS_BRANCH", "unknown-branch")
