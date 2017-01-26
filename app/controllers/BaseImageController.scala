@@ -72,6 +72,13 @@ object BaseImageController {
 
   object Forms {
 
+    val amiId = nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+
+    val linuxDist: Mapping[LinuxDist] =
+      nonEmptyText(maxLength = 16)
+        .verifying(s"Must be one of ${LinuxDist.all.keys}", LinuxDist.create(_).nonEmpty)
+        .transform(LinuxDist.create(_).get, _.name)
+
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
@@ -84,13 +91,6 @@ object BaseImageController {
       "amiId" -> amiId,
       "linuxDist" -> linuxDist
     ))
-
-    val amiId = nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
-
-    val linuxDist: Mapping[LinuxDist] =
-      nonEmptyText(maxLength = 16)
-        .verifying(s"Must be one of ${LinuxDist.all.keys}", LinuxDist.create(_).nonEmpty)
-        .transform(LinuxDist.create(_).get, _.name)
   }
 }
 
