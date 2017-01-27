@@ -9,4 +9,4 @@
   user: name={{logstash_user}} system=yes createhome=yes
 
 - name: Create systemd file for Logstash
-  template: src=logstash.service.template dest=/etc/systemd/system/logstash.service
+  template: src={{logstash_systemd_file}} dest=/etc/systemd/system/logstash.service
