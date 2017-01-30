@@ -1,0 +1,6 @@
+---
+- name: Include elasticsearch template for logstash
+  copy: src=elasticsearch-template.json dest=/etc/logstash/
+
+- name: Configure logstash input and output
+  copy: src=logstash-indexer.conf.template dest=/etc/logstash/conf.d/

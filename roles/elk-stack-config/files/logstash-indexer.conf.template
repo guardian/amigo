@@ -1,0 +1,25 @@
+input {
+    tcp {
+        port  => 6379
+        codec => json_lines
+        add_field => ["logstash_input", "tcp"]
+    }
+
+    kinesis {
+        kinesis_stream_name => "@@KINESIS_STREAM_NAME"
+        application_name => "@@KCL_TABLE_NAME"
+        region => "@@REGION"
+        codec => json { }
+    }
+}
+
+output {
+    # stdout { }
+
+    elasticsearch {
+        protocol => "http"
+        host     => "localhost"
+        template => "/etc/logstash/elasticsearch-template.json"
+        template_overwrite => true
+    }
+}
