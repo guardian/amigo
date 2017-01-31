@@ -1,0 +1,6 @@
+---
+- name: Install nginx
+  apt: name=nginx state=present
+
+- name: Install config
+  copy: src={{ config }} dest=/etc/nginx/sites-available/default
