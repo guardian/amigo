@@ -28,7 +28,7 @@ object Recipes {
     createdBy: String,
     bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
     val now = DateTime.now()
-    val recipe = Recipe(id, { description }, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule)
+    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule)
     table.put(Recipe.domain2db(recipe, nextBuildNumber = 0)).exec()
 
     recipe
