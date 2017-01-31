@@ -1,0 +1,5 @@
+---
+es_user: elasticsearch
+es_deb_url: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ es_version }}.deb
+es_home: /usr/share/elasticsearch
+es_config_dir: /etc/elasticsearch

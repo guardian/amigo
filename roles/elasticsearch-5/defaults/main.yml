@@ -1,0 +1,7 @@
+---
+es_major_version: 5.x
+es_version: 5.2
+es_plugins:
+  - x-pack
+  - discovery-ec2
+  - repository-s3
