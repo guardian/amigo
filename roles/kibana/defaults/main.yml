@@ -1,0 +1,3 @@
+---
+version: 4.1.1
+systemd_file: kibana.service

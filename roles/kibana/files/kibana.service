@@ -1,0 +1,17 @@
+[Unit]
+Description=Kibana
+Requires=elasticsearch.service
+
+[Service]
+ExecStart=/opt/kibana/bin/kibana
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=kibana4
+User=kibana
+Group=kibana
+Environment=NODE_ENV=production
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
