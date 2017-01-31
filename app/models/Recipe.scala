@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 case class Recipe(
   id: RecipeId,
-  description: String,
+  description: Option[String],
   baseImage: BaseImage,
   roles: List[CustomisedRole],
   createdBy: String,
@@ -17,7 +17,7 @@ object Recipe {
 
   case class DbModel(
     id: RecipeId,
-    description: String,
+    description: Option[String],
     baseImageId: BaseImageId,
     roles: List[CustomisedRole],
     nextBuildNumber: Int,

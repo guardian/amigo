@@ -46,7 +46,7 @@ class RecipeController(
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              val updatedRecipe = Recipes.update(recipe, if (description.isEmpty) " " else description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule)
+              val updatedRecipe = Recipes.update(recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule)
               bakeScheduler.reschedule(updatedRecipe)
               Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
             case None =>
@@ -74,7 +74,7 @@ class RecipeController(
             BaseImages.findById(baseImageId) match {
               case Some(baseImage) =>
                 val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-                val recipe = Recipes.create(id, if (description.isEmpty) " " else description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule)
+                val recipe = Recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule)
                 bakeScheduler.reschedule(recipe)
                 Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
               case None =>
@@ -99,14 +99,14 @@ object RecipeController {
     )
 
     val editRecipe = Form(tuple(
-      "description" -> text(maxLength = 10000),
+      "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "bakeSchedule" -> bakeScheduleMapping
     ))
 
     val createRecipe = Form(tuple(
       "id" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
-      "description" -> text(maxLength = 10000),
+      "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "bakeSchedule" -> bakeScheduleMapping
     ))
