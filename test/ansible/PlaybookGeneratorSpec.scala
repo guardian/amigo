@@ -9,7 +9,7 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
   it should "generate an Ansible playbook containing the base image's builtin roles and the recipe's roles" in {
     val recipe = Recipe(
       id = RecipeId("my recipe"),
-      description = "",
+      description = None,
       baseImage = BaseImage(
         id = BaseImageId("my base image"),
         description = "",
