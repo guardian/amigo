@@ -10,3 +10,7 @@
 
 - name: Create systemd file for Logstash
   template: src={{logstash_systemd_file}} dest=/etc/systemd/system/logstash.service
+
+- name: Install logstash plugins
+  shell: su - logstash -s /bin/sh -c /opt/logstash/bin/plugin install {{ item }}
+  with_items: "{{ plugins }}"

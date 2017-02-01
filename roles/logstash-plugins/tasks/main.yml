@@ -1,4 +1,0 @@
----
-- name: Install logstash plugins
-  shell: su - logstash -s /bin/sh -c /opt/logstash/bin/plugin install {{ item }}
-  with_items: "{{ plugins }}"
