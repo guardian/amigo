@@ -19,3 +19,7 @@
 
 - name: Install the template config files
   copy: src=elasticsearch.yml dest=/etc/elasticsearch/elasticsearch.yml.template owner=root group=root
+
+- name: Install elasticsearch plugins
+  shell: /usr/share/elasticsearch/bin/plugin --install {{ item }}
+  with_items: "{{ plugins }}"
