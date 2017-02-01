@@ -1,0 +1,6 @@
+---
+- name: install libwww-perl and libdatetime-perl
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - libwww-perl
+    - libdatetime-perl

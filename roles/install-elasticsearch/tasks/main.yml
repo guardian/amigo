@@ -1,0 +1,18 @@
+---
+- name: Download elasticsearch public key
+  get_url: url=https://packages.elastic.co/GPG-KEY-elasticsearch dest=/tmp
+
+- name: Add public key to apt
+  shell: apt-key add /tmp/GPG-KEY-elasticsearch
+
+- name: Create elasticsearch source directory
+  file: path=/etc/apt/sources.list.d state=directory
+
+- name: Create elasticsearch sources file
+  file: path=/etc/apt/sources.list.d/elasticsearch.list state=touch
+
+- name: Copy repository definition to sources file
+  copy: content="deb http://packages.elastic.co/elasticsearch/1.7/debian stable main" dest=/etc/apt/sources.list.d/elasticsearch.list
+
+- name: Install elasticsearch
+  apt: name=elasticsearch state=latest
