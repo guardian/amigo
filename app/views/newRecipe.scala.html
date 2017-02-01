@@ -7,7 +7,7 @@
   @b3.form(routes.RecipeController.createRecipe) {
     @b3.text( form("id"), '_label -> "ID", 'placeholder -> "my-lovely-recipe" )
 
-    @b3.textarea( form("description"), '_label -> "Description", 'placeholder -> "mandatory description" )
+    @b3.textarea( form("description"), '_label -> "Description" )
 
     @b3.text( form("bakeSchedule"), '_label -> "Bake schedule", 'placeholder -> "e.g. \"0 0 3 * * ?\" to run every night at 3am" )
     <div class="col-md-offset-2">

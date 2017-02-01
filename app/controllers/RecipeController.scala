@@ -99,14 +99,14 @@ object RecipeController {
     )
 
     val editRecipe = Form(tuple(
-      "description" -> text(maxLength = 10000),
+      "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "bakeSchedule" -> bakeScheduleMapping
     ))
 
     val createRecipe = Form(tuple(
       "id" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
-      "description" -> text(maxLength = 10000),
+      "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> nonEmptyText(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "bakeSchedule" -> bakeScheduleMapping
     ))

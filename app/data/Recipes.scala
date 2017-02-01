@@ -22,7 +22,7 @@ object Recipes {
   }
 
   def create(id: RecipeId,
-    description: String,
+    description: Option[String],
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     createdBy: String,
@@ -35,7 +35,7 @@ object Recipes {
   }
 
   def update(recipe: Recipe,
-    description: String,
+    description: Option[String],
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     modifiedBy: String,
