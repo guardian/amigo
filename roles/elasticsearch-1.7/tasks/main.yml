@@ -17,8 +17,5 @@
 - name: Install elasticsearch
   apt: name=elasticsearch state=latest
 
-- name: Install elasticsearch curator
-  pip: name=elasticsearch-curator
-
 - name: Install the template config files
   copy: src=elasticsearch.yml dest=/etc/elasticsearch/elasticsearch.yml.template owner=root group=root
