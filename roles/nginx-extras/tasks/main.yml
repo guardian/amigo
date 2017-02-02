@@ -7,6 +7,3 @@
 
 - name: remove default site from sites-enabled
   file: path=/etc/nginx/sites-enabled/default state=absent
-
-- name: Install config
-  copy: src={{ config }} dest=/etc/nginx/sites-available/default
