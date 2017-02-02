@@ -1,0 +1,16 @@
+---
+- name: Add hardware data collection cronjob
+  set_fact:
+      mem_avail_option: "--mem-avail"
+      when: monitor_memory_available
+  set_fact:
+      disk_space_avail_option: "--disk-space-avail"
+      when: monitor_disk_space_available
+  set_fact:
+      disk_space_util_option: "--disk-space-util"
+      when: monitor_disk_space_utilisation
+  set_fact:
+      mem_util_option: "--mem-util"
+      when: monitor_memory_utilisation
+  cron: name="send hardware data information to cloudwatch" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl {{ mem_avail_option | default("") }} {{ disk_space_avail_option | default("") }} {{ disk_space_util_option | default("") }} {{ mem_util_option | default("") }} {{ item }} --auto-scaling --from-cron"
+  with_items: "{{ paths | join('--disk-path ') }}"
