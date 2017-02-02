@@ -10,5 +10,5 @@ OPTS="--client-id=@@CLIENT_ID \
         --email-domain=@@ALLOWED_DOMAIN \
         --http-address=0.0.0.0:4180 \
         --redirect-url=https://@@DOMAIN_NAME/oauth2/callback \
-        --skip-auth-regex='/__es/$' \
+        --skip-auth-regex=@@SKIP_AUTH_REGEX \
         --upstream=http://localhost:80/"
