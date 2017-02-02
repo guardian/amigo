@@ -13,7 +13,7 @@
   shell: apt-get install -f -y
 
 - name: Download Chromedriver
-  get_url: url=http://chromedriver.storage.googleapis.com/2.25/chromedriver_linux64.zip dest=/tmp/chromedriver.zip
+  get_url: url=http://chromedriver.storage.googleapis.com/{{chromedriver_version}}/chromedriver_linux64.zip dest=/tmp/chromedriver.zip
 
 - name: Unzip Chromedriver
   unarchive: src=/tmp/chromedriver.zip dest=/usr/local/bin/
