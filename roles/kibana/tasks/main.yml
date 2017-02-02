@@ -20,6 +20,3 @@
 - name: Create systemd file for kibana
   copy: src={{ systemd_file }} dest=/etc/systemd/system/kibana.service
 
-- name: Install kibana ES index backup script
-  copy: src=kibana-index-backup dest=/etc/cron.daily/kibana-index-backup mode=0755
-
