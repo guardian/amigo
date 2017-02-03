@@ -1,3 +1,0 @@
----
-- name: Create cron job to report memory, disk space utilisation and aggregated metrics to the autoscaling group to cloudwatch
-  cron: name="log metrics to cloudwatch" user=root minute=*/5 job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl --disk-space-util --mem-util --disk-path=/ --disk-path=/data --auto-scaling --from-cron"
