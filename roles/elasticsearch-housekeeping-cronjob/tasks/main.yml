@@ -1,0 +1,12 @@
+---
+ - name: Install elasticsearch curator
+   pip: name=elasticsearch-curator
+
+ - name: Create directory for housekeeping script
+   file: path=/opt/bin state=directory
+
+ - name: Copy over housekeeping script
+   copy: src=housekeeping.sh dest=/opt/bin
+
+ - name: Set up cronjob to run housekeeping script
+   cron: name="Elasticsearch housekeeping" user=elasticsearch  minute=0 hour=1 job="/bin/bash /opt/bin/housekeeping.sh"

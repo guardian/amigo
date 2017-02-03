@@ -1,0 +1,4 @@
+---
+dependencies:
+  - pip
+  - elasticsearch-1.7

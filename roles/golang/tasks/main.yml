@@ -1,0 +1,5 @@
+---
+- name: install golang
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - golang

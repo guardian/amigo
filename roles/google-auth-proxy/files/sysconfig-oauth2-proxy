@@ -1,0 +1,14 @@
+################################
+# OAuth2 Proxy
+################################
+
+# Command line options
+OPTS="--client-id=@@CLIENT_ID \
+        --client-secret=@@CLIENT_SECRET \
+        --cookie-secret=@@COOKIE_SECRET \
+        --cookie-secure=true \
+        --email-domain=@@ALLOWED_DOMAIN \
+        --http-address=0.0.0.0:4180 \
+        --redirect-url=https://@@DOMAIN_NAME/oauth2/callback \
+        --skip-auth-regex=@@SKIP_AUTH_REGEX \
+        --upstream=http://localhost:80/"
