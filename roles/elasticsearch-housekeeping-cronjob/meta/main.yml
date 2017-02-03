@@ -1,4 +1,4 @@
 ---
 dependencies:
   - pip
-  - elasticsearch-1.7
+  - elasticsearch-1-7
