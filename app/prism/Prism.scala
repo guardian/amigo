@@ -4,11 +4,9 @@ import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
+import scala.concurrent.{ ExecutionContext, Future }
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-class Prism(ws: WSClient) {
+class Prism(ws: WSClient)(implicit ec: ExecutionContext) {
   import Prism._
 
   def findAllAWSAccountNumbers(): Future[Seq[String]] = {

@@ -22,8 +22,8 @@ import packer.PackerConfig
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import controllers._
-
 import router.Routes
+import services.PrismAgents
 
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
@@ -37,6 +37,8 @@ class AppComponents(context: Context)
   override lazy val configuration: Configuration = context.initialConfiguration ++ ConfigurationLoader.playConfig(identity, context.environment.mode)
 
   def mandatoryConfig(key: String): String = configuration.getString(key).getOrElse(sys.error(s"Missing config key: $key"))
+
+  implicit val executionContext = actorSystem.dispatcher
 
   implicit val dynamo = {
     val awsCreds = new AWSCredentialsProviderChain(
@@ -89,10 +91,11 @@ class AppComponents(context: Context)
   Logger.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
+  val prismAgents = new PrismAgents(prism, applicationLifecycle, environment)
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
-  val recipeController = new RecipeController(bakeScheduler, prism, googleAuthConfig, messagesApi)
+  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi)
   val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)

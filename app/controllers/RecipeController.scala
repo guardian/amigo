@@ -8,48 +8,37 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
-import prism.Prism
 import schedule.BakeScheduler
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import services.PrismAgents
 import scala.util.Try
 
 class RecipeController(
     bakeScheduler: BakeScheduler,
-    prism: Prism,
+    prismAgents: PrismAgents,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
 
-  def listRecipes = AuthAction.async { implicit request =>
+  def listRecipes = AuthAction {
     val recipes = Recipes.list().toSeq
-    val fInstances = prism.findAllInstances()
-    val fLaunchConfigurations = prism.findAllLaunchConfigurations()
-    for {
-      instances <- fInstances
-      launchConfigurations <- fLaunchConfigurations
-      inUseAmis = instances.map(_.imageId) ++ launchConfigurations.map(_.imageId)
-      inUseRecipes = recipes.filter { recipe =>
-        Bakes
-          .list(recipe.id)
-          .exists(_.amiId.exists(amiId => inUseAmis.contains(amiId.value)))
-      }
-    } yield Ok(views.html.recipes(recipes, inUseRecipes))
+    val instances = prismAgents.allInstances
+    val launchConfigurations = prismAgents.allLaunchConfigurations
+    val inUseAmis = instances.map(_.imageId) ++ launchConfigurations.map(_.imageId)
+    val inUseRecipes = recipes.filter { recipe =>
+      Bakes
+        .list(recipe.id)
+        .exists(_.amiId.exists(amiId => inUseAmis.contains(amiId.value)))
+    }
+    Ok(views.html.recipes(recipes, inUseRecipes))
   }
 
-  def showRecipe(id: RecipeId) = AuthAction.async { implicit request =>
-    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
+  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recipeAmiIds = bakes.flatMap(_.amiId.map(_.value)).toList
-      val fInstances = prism.findAllInstances()
-      val fLaunchConfigurations = prism.findAllLaunchConfigurations()
-      for {
-        allInstances <- fInstances
-        allLaunchConfigurations <- fLaunchConfigurations
-        instanceCount = allInstances.count(instance => recipeAmiIds.contains(instance.imageId))
-        launchConfigurationCount = allLaunchConfigurations.count(lc => recipeAmiIds.contains(lc.imageId))
-      } yield Ok(views.html.showRecipe(recipe, bakes.take(20), instanceCount, launchConfigurationCount))
+      val instancesCount = prismAgents.allInstances.count(instance => recipeAmiIds.contains(instance.imageId))
+      val launchConfigurationsCount = prismAgents.allLaunchConfigurations.count(lc => recipeAmiIds.contains(lc.imageId))
+      Ok(views.html.showRecipe(recipe, bakes.take(20), instancesCount, launchConfigurationsCount))
     }
   }
 

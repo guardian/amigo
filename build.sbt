@@ -24,11 +24,13 @@ libraryDependencies ++= Seq(
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
+  "com.typesafe.akka" %% "akka-agent" % "2.4.2",
   "com.gu" %% "configuration-magic-play2-4" % "1.3.0",
   "com.gu" %% "play-googleauth" % "0.4.0",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
   "org.quartz-scheduler" % "quartz" % "2.2.3",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
+  "io.reactivex" %% "rxscala" % "0.26.5",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test
 )
 routesGenerator := InjectedRoutesGenerator
