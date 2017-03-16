@@ -5,7 +5,7 @@ import akka.typed._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
 import org.joda.time.Duration
@@ -22,7 +22,6 @@ import packer.PackerConfig
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import controllers._
-
 import router.Routes
 
 class AppComponents(context: Context)
@@ -45,7 +44,8 @@ class AppComponents(context: Context)
       InstanceProfileCredentialsProvider.getInstance()
     )
     val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
-    val dynamoClient: AmazonDynamoDBClient = new AmazonDynamoDBClient(awsCreds).withRegion(region)
+    val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
+      .withCredentials(awsCreds).withRegion(region).build()
     new Dynamo(dynamoClient, identity.stage)
   }
   dynamo.initTables()
