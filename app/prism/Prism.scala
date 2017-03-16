@@ -6,19 +6,20 @@ import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import scala.concurrent.{ ExecutionContext, Future }
 
-class Prism(ws: WSClient)(implicit ec: ExecutionContext) {
+class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
   import Prism._
 
   def findAllAWSAccountNumbers(): Future[Seq[String]] = {
-    findAll[SourceInstance]("http://prism.gutools.co.uk/sources?resource=instance&origin.vendor=aws")
+    findAll[SourceInstance]("/sources?resource=instance&origin.vendor=aws")
       .map(_.map(_.accountNumber))
   }
 
-  def findAllInstances(): Future[Seq[Instance]] = findAll[Instance]("http://prism.gutools.co.uk/instances")
+  def findAllInstances(): Future[Seq[Instance]] = findAll[Instance]("/instances")
 
-  def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("https://prism.gutools.co.uk/launch-configurations")
+  def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("/launch-configurations")
 
-  private def findAll[T](url: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
+  private def findAll[T](path: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
+    val url = s"$baseUrl$path"
     ws.url(url).get().map { resp =>
       extractData[Seq[T]](resp.json).fold(error => {
         Logger.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")

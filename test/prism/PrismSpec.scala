@@ -1,57 +1,33 @@
 package prism
 
 import org.scalatest.{ FlatSpec, Matchers }
-import play.api.libs.json.Json
+import play.api.mvc.{ Action, Results }
+import play.api.test.WsTestClient
+import play.core.server.Server
+import play.api.routing.sird._
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PrismSpec extends FlatSpec with Matchers {
 
-  it should "extract AWS account numbers from a Prism JSON response" in {
-    val json = Json.parse(
-      """
-        |{
-        |  "status": "success",
-        |  "lastUpdated": "2016-05-16T11:34:54.935Z",
-        |  "stale": false,
-        |  "staleSources": [],
-        |  "data": [{
-        |    "resource": "instance",
-        |    "origin": {
-        |      "accountName": "foo",
-        |      "region": "eu-west-1",
-        |      "accountNumber": "1234",
-        |      "vendor": "aws",
-        |      "credentials": "***"
-        |    },
-        |    "status": "success",
-        |    "state": {
-        |      "status": "success",
-        |      "createdAt": "2016-05-16T11:35:12.573Z",
-        |      "itemCount": 1,
-        |      "age": 41,
-        |      "stale": false
-        |    }
-        |  }, {
-        |    "resource": "instance",
-        |    "origin": {
-        |      "accountName": "bar",
-        |      "region": "eu-west-1",
-        |      "accountNumber": "5678",
-        |      "vendor": "aws",
-        |      "credentials": "***"
-        |    },
-        |    "status": "success",
-        |    "state": {
-        |      "status": "success",
-        |      "createdAt": "2016-05-16T11:35:15.493Z",
-        |      "itemCount": 0,
-        |      "age": 38,
-        |      "stale": false
-        |    }
-        |  }]
-        |}
-      """.stripMargin
-    )
-    Prism.extractAccountNumbers(json) should be(Some(Seq("1234", "5678")))
+  def withPrismClient[T](block: Prism => T): T = {
+    Server.withRouter() {
+      case GET(p"/sources") => Action {
+        Results.Ok.sendResource("prism/sources.json")
+      }
+    } { implicit port =>
+      WsTestClient.withClient { client =>
+        block(new Prism(client, baseUrl = ""))
+      }
+    }
+  }
+
+  it should "fetch all AWS account numbers" in {
+    withPrismClient { prism =>
+      val accounts = Await.result(prism.findAllAWSAccountNumbers(), 10.seconds)
+      accounts should be(Seq("1234", "5678"))
+    }
   }
 
 }
