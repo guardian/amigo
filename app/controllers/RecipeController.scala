@@ -4,29 +4,52 @@ import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
 import org.quartz.CronExpression
-
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
+import prism.Prism
 import schedule.BakeScheduler
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Try
 
 class RecipeController(
     bakeScheduler: BakeScheduler,
+    prism: Prism,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
 
-  def listRecipes = AuthAction {
-    Ok(views.html.recipes(Recipes.list()))
+  def listRecipes = AuthAction.async { implicit request =>
+    val recipes = Recipes.list().toSeq
+    val fInstances = prism.findAllInstances()
+    val fLaunchConfigurations = prism.findAllLaunchConfigurations()
+    for {
+      instances <- fInstances
+      launchConfigurations <- fLaunchConfigurations
+      inUseAmis = instances.map(_.imageId) ++ launchConfigurations.map(_.imageId)
+      inUseRecipes = recipes.filter { recipe =>
+        Bakes
+          .list(recipe.id)
+          .exists(_.amiId.exists(amiId => inUseAmis.contains(amiId.value)))
+      }
+    } yield Ok(views.html.recipes(recipes, inUseRecipes))
   }
 
-  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val recentBakes = Bakes.list(id, limit = 20)
-      Ok(views.html.showRecipe(recipe, recentBakes))
+  def showRecipe(id: RecipeId) = AuthAction.async { implicit request =>
+    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
+      val bakes = Bakes.list(recipe.id)
+      val recipeAmiIds = bakes.flatMap(_.amiId.map(_.value)).toList
+      val fInstances = prism.findAllInstances()
+      val fLaunchConfigurations = prism.findAllLaunchConfigurations()
+      for {
+        allInstances <- fInstances
+        allLaunchConfigurations <- fLaunchConfigurations
+        instanceCount = allInstances.count(instance => recipeAmiIds.contains(instance.imageId))
+        launchConfigurationCount = allLaunchConfigurations.count(lc => recipeAmiIds.contains(lc.imageId))
+      } yield Ok(views.html.showRecipe(recipe, bakes.take(20), instanceCount, launchConfigurationCount))
     }
   }
 

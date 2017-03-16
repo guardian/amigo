@@ -1,23 +1,31 @@
 package prism
 
 import play.api.Logger
-import play.api.libs.json.{ JsValue, JsError, JsSuccess, Json }
+import play.api.data.validation.ValidationError
+import play.api.libs.json._
 import play.api.libs.ws.WSClient
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class Prism(ws: WSClient) {
   import Prism._
 
-  private val PrismUrl = "http://prism.gutools.co.uk/sources?resource=instance&origin.vendor=aws"
-
   def findAllAWSAccountNumbers(): Future[Seq[String]] = {
-    ws.url(PrismUrl).get().map { resp =>
-      extractAccountNumbers(resp.json) getOrElse {
-        Logger.warn(s"Failed to parse Prism response. Status code = ${resp.status}, Body = ${resp.body}")
-        Nil
-      }
+    findAll[SourceInstance]("http://prism.gutools.co.uk/sources?resource=instance&origin.vendor=aws")
+      .map(_.map(_.accountNumber))
+  }
+
+  def findAllInstances(): Future[Seq[Instance]] = findAll[Instance]("http://prism.gutools.co.uk/instances")
+
+  def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("https://prism.gutools.co.uk/launch-configurations")
+
+  private def findAll[T](url: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
+    ws.url(url).get().map { resp =>
+      extractData[Seq[T]](resp.json).fold(error => {
+        Logger.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")
+        Seq.empty[T]
+      }, t => t)
     }
   }
 
@@ -25,20 +33,24 @@ class Prism(ws: WSClient) {
 
 object Prism {
 
-  case class Origin(accountNumber: String)
-  implicit val originReads = Json.reads[Origin]
+  case class SourceInstance(accountNumber: String)
+  case class Instance(imageId: String)
+  case class LaunchConfiguration(imageId: String)
 
-  case class Instance(origin: Origin)
-  implicit val instanceReads = Json.reads[Instance]
+  implicit val sourceInstanceReads: Reads[SourceInstance] = (__ \ "origin" \ "accountNumber").read[String].map(SourceInstance)
+  implicit val sourceInstancesReads: Reads[Seq[SourceInstance]] = dataReads[SourceInstance](dataPath = "data")
+  implicit val instanceReads: Reads[Instance] = (__ \ "specification" \ "imageId").read[String].map(Instance)
+  implicit val instancesReads: Reads[Seq[Instance]] = dataReads[Instance](dataPath = "data", "instances")
+  implicit val launchConfigurationReads: Reads[LaunchConfiguration] = Json.reads[LaunchConfiguration]
+  implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] = dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
 
-  case class PrismResponse(data: Seq[Instance])
-  implicit val prismResponseReads = Json.reads[PrismResponse]
+  private def dataReads[T](dataPath: String*)(implicit r: Reads[T]): Reads[Seq[T]] =
+    dataPath.foldLeft[JsPath](__)((path, subPath) => path \ subPath).read[Seq[T]]
 
-  private[prism] def extractAccountNumbers(json: JsValue): Option[Seq[String]] = {
-    json.validate[PrismResponse] match {
-      case JsSuccess(prismResponse, _) => Some(prismResponse.data.map(_.origin.accountNumber))
-      case JsError(_) => None
+  private[prism] def extractData[T](json: JsValue)(implicit r: Reads[T]): Either[Seq[(JsPath, Seq[ValidationError])], T] = {
+    r.reads(json) match {
+      case JsSuccess(data, _) => Right(data)
+      case JsError(e) => Left(e)
     }
   }
-
 }

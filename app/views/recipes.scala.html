@@ -1,4 +1,7 @@
-@(recipes: Iterable[Recipe])
+@(
+        recipes: Iterable[Recipe],
+        inUseRecipes: Seq[Recipe]
+)
 @simpleLayout("AMIgo"){
 
   <h1>Recipes</h1>
@@ -16,12 +19,14 @@
     <thead>
       <th>Name</th>
       <th>Description</th>
+      <th>Unused?</th>
     </thead>
     <tbody>
     @for(recipe <- recipes) {
       <tr>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
+        <td>@if(!inUseRecipes.contains(recipe)) { Unused }</td>
       </tr>
     }
     </tbody>

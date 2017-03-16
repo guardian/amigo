@@ -1,4 +1,9 @@
-@(recipe: Recipe, recentBakes: Iterable[Bake])(implicit flash: Flash)
+@(
+        recipe: Recipe,
+        recentBakes: Iterable[Bake],
+        instanceCount: Int,
+        launchConfigurationCount: Int
+)(implicit flash: Flash),
 @simpleLayout("AMIgo"){
 
   <h1>@recipe.id.value</h1>
@@ -18,6 +23,11 @@
       <p>Modified @fragments.timestamp(recipe.modifiedAt, recipe.modifiedBy)</p>
       <p>Build schedule: <code>@recipe.bakeSchedule.map(_.quartzCronExpression).getOrElse("(none)")</code></p>
       <p>@recipe.description</p>
+      @if(instanceCount + launchConfigurationCount > 0) {
+        <p>This recipe is used by @instanceCount instance@if(instanceCount > 1){s} and @launchConfigurationCount launch configuration@if(launchConfigurationCount > 1){s}</p>
+      } else {
+        <p><b>This recipe is not used</b></p>
+      }
     </div>
   </div>
 
