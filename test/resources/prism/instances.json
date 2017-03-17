@@ -1,0 +1,144 @@
+{
+  "status": "success",
+  "lastUpdated": "2017-03-17T10:03:27.059Z",
+  "stale": false,
+  "staleSources": [
+  ],
+  "data": {
+    "instances": [
+      {
+        "arn": "arn:aws:ec2:region:123456790:instance/i-123456",
+        "name": "ip-1-2-3-4.region.compute.internal",
+        "vendorState": "running",
+        "group": "region",
+        "dnsName": "ip-1-2-3-4.region.compute.internal",
+        "ip": "1.2.3.4",
+        "addresses": {
+          "private": {
+            "dnsName": "ip-1-2-3-4.region.compute.internal",
+            "ip": "1.2.3.4"
+          }
+        },
+        "createdAt": "2016-02-09T10:59:01.000Z",
+        "instanceName": "i-123456",
+        "region": "region",
+        "vendor": "aws",
+        "securityGroups": [
+          "arn:aws:ec2:region:1234567890:security-group/sg-1"
+        ],
+        "tags": {
+          "aws:autoscaling:groupName": "MyGroup",
+          "Name": "MyName",
+          "App": "MyApp",
+          "aws:cloudformation:stack-name": "MyStack",
+          "Stack": "MyStack",
+          "aws:cloudformation:logical-id": "MyLogicalId",
+          "aws:cloudformation:stack-id": "MyStackId",
+          "Stage": "MyStage"
+        },
+        "stage": "MyStage",
+        "stack": "MyStack",
+        "app": [
+          "MyApp"
+        ],
+        "mainclasses": [
+          "Main::main"
+        ],
+        "management": [
+          {
+            "protocol": "http",
+            "port": 10000,
+            "path": "/management",
+            "url": "http://ip-1-2-3-4.region.compute.internal:10000/management",
+            "format": "gu",
+            "source": "convention"
+          }
+        ],
+        "specification": {
+          "imageId": "ami-fa123456",
+          "imageArn": "arn:aws:ec2:region::image/ami-fa123456",
+          "instanceType": "b3.micro",
+          "vpcId": "vpc-12345678"
+        },
+        "meta": {
+          "href": "http://prism.gutools.co.uk/instances/arn:aws:ec2:region:123456790:instance/i-123456",
+          "origin": {
+            "accountName": "MyAccount",
+            "region": "region",
+            "accountNumber": "1234567890",
+            "vendor": "aws",
+            "credentials": "arn:aws:iam::1234567890:role/ABCDEF"
+          }
+        }
+      },
+      {
+        "arn": "arn:aws:ec2:region:1234567890:instance/i-987654321",
+        "name": "ip-4.3.2.1.region.compute.internal",
+        "vendorState": "running",
+        "group": "region",
+        "dnsName": "ip-4.3.2.1.region.compute.internal",
+        "ip": "4.3.2.1",
+        "addresses": {
+          "private": {
+            "dnsName": "ip-4.3.2.1.region.compute.internal",
+            "ip": "4.3.2.1"
+          }
+        },
+        "createdAt": "2016-02-05T16:51:07.000Z",
+        "instanceName": "i-b123456",
+        "region": "region",
+        "vendor": "aws",
+        "securityGroups": [
+          "arn:aws:ec2:region:1234567890:security-group/sg-1",
+          "arn:aws:ec2:region:1234567890:security-group/sg-2",
+          "arn:aws:ec2:region:1234567890:security-group/sg-3",
+          "arn:aws:ec2:region:1234567890:security-group/sg-4"
+        ],
+        "tags": {
+          "aws:autoscaling:groupName": "MyGroup",
+          "Name": "MyName",
+          "App": "MyApp",
+          "aws:cloudformation:stack-name": "MyStack",
+          "Stack": "MyStack",
+          "aws:cloudformation:logical-id": "MyLogicalId",
+          "aws:cloudformation:stack-id": "MyStackId",
+          "Stage": "MyStage"
+        },
+        "stage": "MyStage",
+        "stack": "MyStack",
+        "app": [
+          "MyApp"
+        ],
+        "mainclasses": [
+          "Main::main"
+        ],
+        "management": [
+          {
+            "protocol": "http",
+            "port": 10000,
+            "path": "/management",
+            "url": "http://ip-4.3.2.1.region.compute.internal:10000/management",
+            "format": "gu",
+            "source": "convention"
+          }
+        ],
+        "specification": {
+          "imageId": "ami-abcd4321",
+          "imageArn": "arn:aws:ec2:region::image/ami-abcd4321",
+          "instanceType": "b3.micro",
+          "vpcId": "vpc-12345678"
+        },
+        "meta": {
+          "href": "http://prism.gutools.co.uk/instances/arn:aws:ec2:region:1234567890:instance%2Fi-96b5521c",
+          "origin": {
+            "accountName": "MyAccount",
+            "region": "region",
+            "accountNumber": "1234567890",
+            "vendor": "aws",
+            "credentials": "arn:aws:iam::1234567890:role/BCABCABCA"
+          }
+        }
+      }
+    ]
+  }
+}
