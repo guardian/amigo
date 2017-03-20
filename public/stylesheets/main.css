@@ -56,3 +56,11 @@ body { padding-top: 70px; }
     transform: translateY(-50%);
     position: absolute;
 }
+
+.recipe-usage img {
+    vertical-align: sub;
+}
+
+.recipe-usage span {
+    margin-right: 4px;
+}

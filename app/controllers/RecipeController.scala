@@ -4,29 +4,38 @@ import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
 import org.quartz.CronExpression
-
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
+import prism.RecipeUsage
 import schedule.BakeScheduler
-
+import services.PrismAgents
 import scala.util.Try
 
 class RecipeController(
     bakeScheduler: BakeScheduler,
+    prismAgents: PrismAgents,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
 
   def listRecipes = AuthAction {
-    Ok(views.html.recipes(Recipes.list()))
+    val recipes: Iterable[Recipe] = Recipes.list()
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
+    Ok(views.html.recipes(recipes, usages))
   }
 
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val recentBakes = Bakes.list(id, limit = 20)
-      Ok(views.html.showRecipe(recipe, recentBakes))
+      val bakes = Bakes.list(recipe.id)
+      Ok(
+        views.html.showRecipe(
+          recipe,
+          bakes.take(20),
+          RecipeUsage(recipe, bakes)(prismAgents)
+        )
+      )
     }
   }
 

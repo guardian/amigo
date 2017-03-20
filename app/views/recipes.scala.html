@@ -1,4 +1,7 @@
-@(recipes: Iterable[Recipe])
+@(
+        recipes: Iterable[Recipe],
+        usages: Map[Recipe, prism.RecipeUsage]
+)
 @simpleLayout("AMIgo"){
 
   <h1>Recipes</h1>
@@ -16,12 +19,21 @@
     <thead>
       <th>Name</th>
       <th>Description</th>
+      <th>Usage</th>
     </thead>
     <tbody>
     @for(recipe <- recipes) {
       <tr>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
+        @defining(usages.getOrElse(recipe, prism.RecipeUsage.noUsage)) { usage =>
+        <td class="recipe-usage" title="Used in @usage.instances.size instance@if(usage.instances.size != 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1){s}">
+            <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instances" />
+            <span>@usage.instances.size</span>
+            <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
+            <span>@usage.launchConfigurations.size</span>
+        </td>
+        }
       </tr>
     }
     </tbody>

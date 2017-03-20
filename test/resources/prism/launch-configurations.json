@@ -1,0 +1,60 @@
+{
+  "status": "success",
+  "lastUpdated": "2017-03-17T10:19:56.345Z",
+  "stale": false,
+  "staleSources": [
+  ],
+  "data": {
+    "launch-configurations": [
+      {
+        "arn": "arn:aws:autoscaling:region:1234567890:launchConfiguration:MyId",
+        "name": "MyName",
+        "imageId": "ami-abcdefg1",
+        "region": "region",
+        "instanceProfile": "MyInstanceProfile",
+        "createdTime": "2016-04-01T13:33:51.600Z",
+        "instanceType": "t5.medium",
+        "keyName": "MyKeyName",
+        "securityGroups": [
+          "arn:aws:ec2:region:1234567890:security-group/sg-1",
+          "arn:aws:ec2:region:1234567890:security-group/sg-2"
+        ],
+        "userData": "MyUserData",
+        "meta": {
+          "href": "http://prism.gutools.co.uk/launch-configurations/arn:aws:autoscaling:region:1234567890:launchConfiguration:MyId",
+          "origin": {
+            "accountName": "MyAccount",
+            "region": "region",
+            "accountNumber": "1234567890",
+            "vendor": "aws",
+            "credentials": "arn:aws:iam::1234567890:role/1"
+          }
+        }
+      },
+      {
+        "arn": "arn:aws:autoscaling:region:1234567890:launchConfiguration:MyId",
+        "name": "MyId",
+        "imageId": "ami-gfedcba2",
+        "region": "region",
+        "instanceProfile": "MyInstanceProfile",
+        "createdTime": "2017-02-16T13:36:23.837Z",
+        "instanceType": "m6.large",
+        "keyName": "MyKeyName",
+        "securityGroups": [
+          "arn:aws:ec2:region:1234567890:security-group/sg-3"
+        ],
+        "userData": "MyUserData",
+        "meta": {
+          "href": "http://prism.gutools.co.uk/launch-configurations/arn:aws:autoscaling:region:1234567890:launchConfiguration:MyId",
+          "origin": {
+            "accountName": "MyAccount",
+            "region": "region",
+            "accountNumber": "1234567890",
+            "vendor": "aws",
+            "credentials": "arn:aws:iam::1234567890:role/2"
+          }
+        }
+      }
+    ]
+  }
+}

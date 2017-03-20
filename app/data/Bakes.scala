@@ -35,8 +35,8 @@ object Bakes {
       .exec()
   }
 
-  def list(recipeId: RecipeId, limit: Int = 20)(implicit dynamo: Dynamo): Iterable[Bake] = {
-    val dbModels = table.limit(limit).query(('recipeId -> recipeId).descending) // return newest (highest build number) first
+  def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[Bake] = {
+    val dbModels = table.query(('recipeId -> recipeId).descending) // return newest (highest build number) first
       .exec()
       .flatMap(_.toOption)
     val recipe = Recipes.findById(recipeId)
