@@ -1,16 +1,19 @@
 package services
 
+import akka.agent.Agent
+import akka.actor.{ Cancellable, Scheduler }
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
 import play.api.{ Environment, Mode }
-import akka.agent.Agent
 import prism.Prism
 import prism.Prism.{ Instance, LaunchConfiguration }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
-import rx.lang.scala.{ Observable, Subscription }
 
-class PrismAgents(prism: Prism, lifecycle: ApplicationLifecycle, environment: Environment)(implicit exec: ExecutionContext) {
+class PrismAgents(prism: Prism,
+    lifecycle: ApplicationLifecycle,
+    scheduler: Scheduler,
+    environment: Environment)(implicit exec: ExecutionContext) {
 
   private val instancesAgent: Agent[Seq[Instance]] = Agent(Seq.empty)
   private val launchConfigurationsAgent: Agent[Seq[LaunchConfiguration]] = Agent(Seq.empty)
@@ -19,15 +22,14 @@ class PrismAgents(prism: Prism, lifecycle: ApplicationLifecycle, environment: En
   def allLaunchConfigurations: Seq[LaunchConfiguration] = launchConfigurationsAgent.get
 
   if (environment.mode != Mode.Test) {
-    refresh
 
-    val prismDataSubscription: Subscription = Observable.interval(1.minutes).subscribe { i =>
+    val prismDataSchedule: Cancellable = scheduler.schedule(0.seconds, 1.minutes) {
       Logger.debug(s"Refreshing Prism data")
       refresh
     }
 
     lifecycle.addStopHook { () =>
-      prismDataSubscription.unsubscribe()
+      prismDataSchedule.cancel()
       Future.successful(())
     }
   }

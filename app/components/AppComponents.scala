@@ -91,7 +91,7 @@ class AppComponents(context: Context)
   Logger.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
-  val prismAgents = new PrismAgents(prism, applicationLifecycle, environment)
+  val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
