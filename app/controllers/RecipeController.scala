@@ -28,11 +28,12 @@ class RecipeController(
 
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id)
       Ok(
         views.html.showRecipe(
           recipe,
-          Bakes.list(recipe.id).take(20),
-          RecipeUsage(recipe, Bakes.list(recipe.id))(prismAgents)
+          bakes.take(20),
+          RecipeUsage(recipe, bakes)(prismAgents)
         )
       )
     }
