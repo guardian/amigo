@@ -8,6 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
+import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 import scala.util.Try
@@ -21,24 +22,19 @@ class RecipeController(
 
   def listRecipes = AuthAction {
     val recipes = Recipes.list().toSeq
-    val instances = prismAgents.allInstances
-    val launchConfigurations = prismAgents.allLaunchConfigurations
-    val inUseAmis = instances.map(_.imageId) ++ launchConfigurations.map(_.imageId)
-    val inUseRecipes = recipes.filter { recipe =>
-      Bakes
-        .list(recipe.id)
-        .exists(_.amiId.exists(amiId => inUseAmis.contains(amiId.value)))
-    }
-    Ok(views.html.recipes(recipes, inUseRecipes))
+    val usages = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
+    Ok(views.html.recipes(recipes, usages))
   }
 
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val bakes = Bakes.list(recipe.id)
-      val recipeAmiIds = bakes.flatMap(_.amiId.map(_.value)).toList
-      val instancesCount = prismAgents.allInstances.count(instance => recipeAmiIds.contains(instance.imageId))
-      val launchConfigurationsCount = prismAgents.allLaunchConfigurations.count(lc => recipeAmiIds.contains(lc.imageId))
-      Ok(views.html.showRecipe(recipe, bakes.take(20), instancesCount, launchConfigurationsCount))
+      Ok(
+        views.html.showRecipe(
+          recipe,
+          Bakes.list(recipe.id).take(20),
+          RecipeUsage(recipe, Bakes.list(recipe.id))(prismAgents)
+        )
+      )
     }
   }
 

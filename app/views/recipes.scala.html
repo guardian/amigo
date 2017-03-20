@@ -1,6 +1,6 @@
 @(
         recipes: Iterable[Recipe],
-        inUseRecipes: Seq[Recipe]
+        usages: Seq[prism.RecipeUsage]
 )
 @simpleLayout("AMIgo"){
 
@@ -26,7 +26,7 @@
       <tr>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
-        <td>@if(!inUseRecipes.contains(recipe)) { Unused }</td>
+        <td>@if(usages.find(recipe.id == _.recipeId).fold(false)(u => u.instances.length + u.launchConfigurations.length == 0)) { Unused }</td>
       </tr>
     }
     </tbody>

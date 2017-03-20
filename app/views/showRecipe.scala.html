@@ -1,8 +1,7 @@
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
-        instanceCount: Int,
-        launchConfigurationCount: Int
+        usage: prism.RecipeUsage
 )(implicit flash: Flash),
 @simpleLayout("AMIgo"){
 
@@ -23,8 +22,8 @@
       <p>Modified @fragments.timestamp(recipe.modifiedAt, recipe.modifiedBy)</p>
       <p>Build schedule: <code>@recipe.bakeSchedule.map(_.quartzCronExpression).getOrElse("(none)")</code></p>
       <p>@recipe.description</p>
-      @if(instanceCount + launchConfigurationCount > 0) {
-        <p>This recipe is used by @instanceCount instance@if(instanceCount > 1){s} and @launchConfigurationCount launch configuration@if(launchConfigurationCount > 1){s}</p>
+      @if(usage.instances.length + usage.launchConfigurations.length > 0) {
+        <p>This recipe is used by @usage.instances.length instance@if(usage.instances.length > 1){s} and @usage.launchConfigurations.length launch configuration@if(usage.launchConfigurations.length > 1){s}</p>
       } else {
         <p><b>This recipe is not used</b></p>
       }

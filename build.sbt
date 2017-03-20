@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "org.quartz-scheduler" % "quartz" % "2.2.3",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "io.reactivex" %% "rxscala" % "0.26.5",
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test
+  "org.scalatest" %% "scalatest" % "2.2.6" % Test,
+  "org.mockito" % "mockito-core" % "2.7.19" % Test
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
