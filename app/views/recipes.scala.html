@@ -1,6 +1,6 @@
 @(
         recipes: Iterable[Recipe],
-        usages: Seq[prism.RecipeUsage]
+        usages: Map[Recipe, prism.RecipeUsage]
 )
 @simpleLayout("AMIgo"){
 
@@ -19,14 +19,21 @@
     <thead>
       <th>Name</th>
       <th>Description</th>
-      <th>Unused?</th>
+      <th>Usage</th>
     </thead>
     <tbody>
     @for(recipe <- recipes) {
       <tr>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
-        <td>@if(usages.find(recipe.id == _.recipeId).fold(false)(u => u.instances.length + u.launchConfigurations.length == 0)) { Unused }</td>
+        @defining(usages.getOrElse(recipe, prism.RecipeUsage.noUsage)) { usage =>
+        <td class="recipe-usage" title="Used in @usage.instances.size instance@if(usage.instances.size > 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size > 1){s}">
+            <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instances" />
+            <span>@usage.instances.size</span>
+            <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
+            <span>@usage.launchConfigurations.size</span>
+        </td>
+        }
       </tr>
     }
     </tbody>

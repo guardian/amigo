@@ -21,8 +21,8 @@ class RecipeController(
   import RecipeController._
 
   def listRecipes = AuthAction {
-    val recipes = Recipes.list().toSeq
-    val usages = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
+    val recipes: Iterable[Recipe] = Recipes.list()
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
     Ok(views.html.recipes(recipes, usages))
   }
 

@@ -43,11 +43,11 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2)
     when(mockPrismAgents.allLaunchConfigurations) thenReturn Seq(lc1, lc2)
 
-    val usages = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
-    val expected = Seq(
-      RecipeUsage(recipeId = recipe1.id, instances = Seq(instance1, instance2), launchConfigurations = Seq(lc1)),
-      RecipeUsage(recipeId = recipe2.id, instances = Seq(), launchConfigurations = Seq(lc2)),
-      RecipeUsage(recipeId = recipe3.id, instances = Seq(), launchConfigurations = Seq())
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
+    val expected: Map[Recipe, RecipeUsage] = Map(
+      recipe1 -> RecipeUsage(instances = Seq(instance1, instance2), launchConfigurations = Seq(lc1)),
+      recipe2 -> RecipeUsage(instances = Seq(), launchConfigurations = Seq(lc2)),
+      recipe3 -> RecipeUsage(instances = Seq(), launchConfigurations = Seq())
     )
     usages should be(expected)
   }
