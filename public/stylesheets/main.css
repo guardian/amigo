@@ -23,14 +23,27 @@ body { padding-top: 70px; }
     display: inline-block;
 }
 
-.panel-body--flex {
+.bake--info {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: left;
 }
 
-.panel-body--flex:after, .panel-body--flex:before {
+.bake--info--title {
+    width: 5em;
+}
+
+.bake--info:after, .bake--info:before {
     display: none;
+}
+
+.bake--info span {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.bake--info--right {
+    margin-left: auto;
 }
 
 .block-link {
