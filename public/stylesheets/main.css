@@ -77,3 +77,7 @@ body { padding-top: 70px; }
 .recipe-usage span {
     margin-right: 4px;
 }
+
+td.recipe-usage {
+    white-space: nowrap;
+}
