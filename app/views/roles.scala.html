@@ -1,3 +1,4 @@
+@import data.Roles
 @(roles: Iterable[RoleSummary])
 @layout("AMIgo"){
 
@@ -56,9 +57,9 @@
                 @if(role.dependsOn.isEmpty) {
                   This role does not depend on any other roles.
                 } else {
-                  This role depends on:
+                  This role depends on (including transitive dependencies):
                   <ul>
-                    @for(roleId <- role.dependsOn.toList.sortBy(_.value)) {
+                    @for(roleId <- Roles.transitiveDependencies(roles.toSeq, role)) {
                       <li><a href="#@roleId">@roleId</a></li>
                     }
                   </ul>
