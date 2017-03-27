@@ -1,5 +1,6 @@
 @import data.Roles
-@(roles: Iterable[RoleSummary])
+@import data.Recipes
+@(roles: Iterable[RoleSummary], recipes: Iterable[Recipe])
 @layout("AMIgo"){
 
   <h1>Roles</h1>
@@ -66,13 +67,27 @@
                     @if(usedBy.isEmpty) {
                           This role is not used by any other role
                       } else {
-                          This role is used by:
+                          This role is used by the following roles:
                           <ul>
                               @usedBy.map { role =>
                                   <li><a href="#@role">@role</a></li>
                               }
                           </ul>
                           }
+                  }
+                  </p>
+                  <p>
+                  @defining(Roles.usedByRecipes(recipes.toSeq, role)) { usedBy =>
+                      @if(usedBy.isEmpty) {
+                          This role is not used by any recipe
+                      } else {
+                          This role is used by the following recipes:
+                          <ul>
+                             @usedBy.map { recipe =>
+                            <li><a href="../recipes/@recipe">@recipe</a></li>
+                          }
+                          </ul>
+                      }
                   }
                   </p>
               </div>

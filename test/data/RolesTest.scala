@@ -1,8 +1,9 @@
 package data
 
-import data.Roles.Dependency
+import models.Dependency
 import models._
-import org.scalatest.{ Matchers, FlatSpec }
+import org.joda.time.DateTime
+import org.scalatest.{ FlatSpec, Matchers }
 
 class RolesTest extends FlatSpec with Matchers {
 
@@ -34,5 +35,14 @@ class RolesTest extends FlatSpec with Matchers {
 
     val roles = List(r0, r1, r2, r3)
     Roles.transitiveDependencies(roles, r2).dependencies.isEmpty should be(true)
+  }
+
+  it should "find recipes that use this role" in {
+    val rec1 = Recipe(RecipeId("r1"), None, null, List(CustomisedRole(RoleId("apt"), Map.empty), CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None)
+    val rec2 = Recipe(RecipeId("r2"), None, null, List(CustomisedRole(RoleId("apt"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None)
+    val rec3 = Recipe(RecipeId("r3"), None, null, List(CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None)
+    val allRecipes = List(rec1, rec2, rec3)
+    val usedByRecipes = Roles.usedByRecipes(allRecipes, RoleSummary(RoleId("java8"), Set.empty, null, null))
+    usedByRecipes should contain only (rec1.id, rec3.id)
   }
 }
