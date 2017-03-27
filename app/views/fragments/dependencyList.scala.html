@@ -1,0 +1,11 @@
+@import models.Dependency
+@(dependencies: Set[Dependency])
+
+<ul>
+  @for(dep <- dependencies) {
+    <li>
+        <a href="#@dep.roleId">@dep.roleId</a>
+        @views.html.fragments.dependencyList(dep.dependencies)
+    </li>
+}
+</ul>

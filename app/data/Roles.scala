@@ -3,9 +3,8 @@ package data
 import java.nio.file.{ Files, Paths }
 
 import ansible.RoleParser
-import models.{ RoleId, RoleSummary }
+import models.{ Dependency, RoleId, RoleSummary }
 
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 object Roles {
@@ -20,18 +19,20 @@ object Roles {
 
   def findById(id: RoleId) = list.find(_ == id)
 
-  def transitiveDependencies(roles: Seq[RoleSummary], role: RoleSummary): Set[RoleId] = {
-    @tailrec
-    def go(rs: Seq[RoleSummary], dep: Seq[RoleId], acc: Seq[RoleId]): Set[RoleId] = {
-      dep match {
-        case h :: t =>
-          val currDependencies: List[RoleId] = roles.find(r => r.roleId == h).get.dependsOn.toList
-          val totalDependencies = (t ++ currDependencies).distinct
-          go(rs, totalDependencies, h +: acc)
-        case _ =>
-          acc.toSet
-      }
+  def transitiveDependencies(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Dependency = {
+    def dependencies(roleId: RoleId): Set[RoleId] = {
+      val summaries: Set[RoleSummary] = allRoles.find(r => r.roleId == roleId).toSet
+      summaries.flatMap(_.dependsOn)
     }
-    go(roles, role.dependsOn.toList, role.dependsOn.toList)
+
+    def go(roleId: RoleId): Dependency = {
+      val children = dependencies(roleId).map(go)
+      Dependency(roleId, children)
+    }
+    go(roleToAnalyse.roleId)
+  }
+
+  def usedBy(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Seq[RoleId] = {
+    allRoles.filter(_.dependsOn.contains(roleToAnalyse.roleId)).distinct.map((r: RoleSummary) => r.roleId).sortBy(_.value)
   }
 }

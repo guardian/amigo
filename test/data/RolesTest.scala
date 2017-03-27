@@ -1,5 +1,6 @@
 package data
 
+import data.Roles.Dependency
 import models._
 import org.scalatest.{ Matchers, FlatSpec }
 
@@ -12,7 +13,7 @@ class RolesTest extends FlatSpec with Matchers {
     val r3 = RoleSummary(RoleId("id3"), Set.empty, null, null)
 
     val roles = List(r0, r1, r2, r3)
-    Roles.transitiveDependencies(roles, r0) should contain only (RoleId("id1"), RoleId("id2"), RoleId("id3"))
+    Roles.transitiveDependencies(roles, r0).dependencies should contain only (Dependency(RoleId("id1"), Set(Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set()))))), Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set()))))
   }
 
   it should "return direct dependencies if there are no transitive" in {
@@ -22,7 +23,7 @@ class RolesTest extends FlatSpec with Matchers {
     val r3 = RoleSummary(RoleId("id3"), Set(RoleId("id2")), null, null)
 
     val roles = List(r0, r1, r2, r3)
-    Roles.transitiveDependencies(roles, r0) should contain only (RoleId("id1"), RoleId("id2"))
+    Roles.transitiveDependencies(roles, r0).dependencies should contain only (Dependency(RoleId("id1"), Set(Dependency(RoleId("id2"), Set()))), Dependency(RoleId("id2"), Set()))
   }
 
   it should "return empty if there are no dependencies" in {
@@ -32,6 +33,6 @@ class RolesTest extends FlatSpec with Matchers {
     val r3 = RoleSummary(RoleId("id3"), Set(RoleId("id2")), null, null)
 
     val roles = List(r0, r1, r2, r3)
-    Roles.transitiveDependencies(roles, r2).isEmpty should be (true)
+    Roles.transitiveDependencies(roles, r2).dependencies.isEmpty should be(true)
   }
 }
