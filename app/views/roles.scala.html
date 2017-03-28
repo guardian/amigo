@@ -38,6 +38,9 @@
               <li role="presentation" class="tab-label">
                 <a aria-controls="dependencies" role="tab" data-toggle="tab" data-target="#dependencies-@role.roleId">Dependencies</a>
               </li>
+              <li role="presentation" class="tab-label">
+                <a aria-controls="usedby" role="tab" data-toggle="tab" data-target="#usedby-@role.roleId">Used by</a>
+              </li>
             </ul>
 
             <div class="tab-content">
@@ -62,22 +65,29 @@
 
                     @views.html.fragments.dependencyList(Roles.transitiveDependencies(roles.toSeq, role).dependencies)
                 }</p>
-                 <p>
-                  @defining(Roles.usedBy(roles.toSeq, role)) { usedBy =>
-                    @if(usedBy.isEmpty) {
-                          This role is not used by any other role
-                      } else {
-                          This role is used by the following roles:
-                          <ul>
-                              @usedBy.map { role =>
-                                  <li><a href="#@role">@role</a></li>
-                              }
-                          </ul>
-                          }
-                  }
-                  </p>
-                  <p>
-                  @defining(Roles.usedByRecipes(recipes.toSeq, role)) { usedBy =>
+              </div>
+
+            <div role="tabpanel" class="tab-pane" id="usedby-@role.roleId">
+                <h2>Used by</h2>
+                <div class="role-usage">
+                    <h4>Roles</h4>
+
+                    @defining(Roles.usedBy(roles.toSeq, role)) { usedBy =>
+                        @if(usedBy.isEmpty) {
+                              This role is not used by any other role
+                        } else {
+                            This role is used by the following roles:
+                            <ul>
+                            @usedBy.map { role =>
+                                <li><a href="#@role">@role</a></li>
+                            }
+                            </ul>
+                        }
+                      }
+                </div>
+                <div class="role-usage">
+                    <h4>Recipes</h4>
+                    @defining(Roles.usedByRecipes(recipes.toSeq, role)) { usedBy =>
                       @if(usedBy.isEmpty) {
                           This role is not used by any recipe
                       } else {
@@ -88,8 +98,8 @@
                           }
                           </ul>
                       }
-                  }
-                  </p>
+                    }
+                </div>
               </div>
             </div>
 
