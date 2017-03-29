@@ -1,4 +1,4 @@
-@(image: BaseImage)(implicit flash: Flash)
+@(allRoles: Seq[RoleSummary], image: BaseImage)(implicit flash: Flash)
 @simpleLayout("AMIgo"){
 
   <h1>@image.id.value</h1>
@@ -29,7 +29,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Builtin roles</div>
     <div class="panel-body">
-    @fragments.customisedRoles(image.builtinRoles)
+    @fragments.customisedRoles(allRoles, image.builtinRoles)
     </div>
   </div>
 

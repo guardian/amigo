@@ -85,3 +85,7 @@ td.recipe-usage {
 .role-usage {
     margin-top: 34px;
 }
+
+.dependencyFont li{
+    font-size: 12px;
+}

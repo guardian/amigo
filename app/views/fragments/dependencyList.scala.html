@@ -1,7 +1,7 @@
 @import models.Dependency
 @(dependencies: Set[Dependency])
 
-<ul>
+<ul style="list-style-type:disc" class="dependencyFont">
   @for(dep <- dependencies) {
     <li>
         <a href="#@dep.roleId">@dep.roleId</a>
