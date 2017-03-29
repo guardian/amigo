@@ -81,3 +81,7 @@ body { padding-top: 70px; }
 td.recipe-usage {
     white-space: nowrap;
 }
+
+.role-usage {
+    margin-top: 34px;
+}

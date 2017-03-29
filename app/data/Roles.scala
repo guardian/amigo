@@ -3,7 +3,7 @@ package data
 import java.nio.file.{ Files, Paths }
 
 import ansible.RoleParser
-import models.{ RoleId, RoleSummary }
+import models._
 
 import scala.collection.JavaConverters._
 
@@ -19,4 +19,24 @@ object Roles {
 
   def findById(id: RoleId) = list.find(_ == id)
 
+  def transitiveDependencies(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Dependency = {
+    def dependencies(roleId: RoleId): Set[RoleId] = {
+      val summaries: Set[RoleSummary] = allRoles.find(r => r.roleId == roleId).toSet
+      summaries.flatMap(_.dependsOn)
+    }
+
+    def go(roleId: RoleId): Dependency = {
+      val children = dependencies(roleId).map(go)
+      Dependency(roleId, children)
+    }
+    go(roleToAnalyse.roleId)
+  }
+
+  def usedBy(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Seq[RoleId] = {
+    allRoles.filter(_.dependsOn.contains(roleToAnalyse.roleId)).distinct.map((r: RoleSummary) => r.roleId).sortBy(_.value)
+  }
+
+  def usedByRecipes(allRecipes: Seq[Recipe], roleToAnalyse: RoleSummary): Seq[RecipeId] = {
+    allRecipes.filter(_.roles.map(_.roleId).contains(roleToAnalyse.roleId)).map(_.id)
+  }
 }
