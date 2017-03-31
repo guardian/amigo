@@ -28,14 +28,14 @@ class BaseImageController(
         image.amiId,
         image.linuxDist.getOrElse(Ubuntu)
       ))
-      Ok(views.html.editBaseImage(image, form, Roles.listIds))
+      Ok(views.html.editBaseImage(image, form, Roles.list))
     }
   }
 
   def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
+        BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.list))
       }, {
         case (description, amiId, linuxDist) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)

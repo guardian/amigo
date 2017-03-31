@@ -89,3 +89,14 @@ td.recipe-usage {
 .dependencyFont li{
     font-size: 12px;
 }
+
+.dependency-list > li {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.dependency-list {
+    display: inline-block;
+    margin-left: 16px;
+}
+​

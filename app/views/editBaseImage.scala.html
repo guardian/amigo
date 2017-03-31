@@ -1,4 +1,5 @@
-@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+@import data.Roles
+@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleSummary])(implicit messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
@@ -13,12 +14,16 @@
     <div class="form-group">
       <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>
       <div class="col-md-10" id="builtin-roles">
-        @for(role <- availableRoles) {
+        @for(role <- availableRoles.map(_.roleId)) {
           <div class="checkbox">
             @if(image.builtinRoles.exists(_.roleId == role)) {
               <div>
                 <label for="role-@role">
-                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked> @role
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked>
+                  @role
+                  <ul class="list-inline dependency-list">
+                    @views.html.fragments.inlineDependencyList(Roles.transitiveDependencies(availableRoles, role).dependencies)
+                  </ul>
                 </label>
               </div>
               <div>
@@ -29,7 +34,11 @@
             } else {
               <div>
                 <label for="role-@role">
-                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role"> @role
+                  <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role">
+                  @role
+                  <ul class="list-inline dependency-list">
+                    @views.html.fragments.inlineDependencyList(Roles.transitiveDependencies(availableRoles, role).dependencies)
+                  </ul>
                 </label>
               </div>
               <div>
