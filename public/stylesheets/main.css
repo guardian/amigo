@@ -99,4 +99,15 @@ td.recipe-usage {
     display: inline-block;
     margin-left: 16px;
 }
-​
+
+.role-font {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+
+.nested-dependencies-list {
+    list-style: none;
+}
+
+.nested-dependencies-list > li:before {
+    content: "\2192 \0020";
+}

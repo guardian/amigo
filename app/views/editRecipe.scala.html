@@ -23,7 +23,7 @@
         @for(roleId <- availableRoles.map(_.roleId)) {
           <div class="checkbox">
             @if(recipe.roles.exists(_.roleId == roleId)) {
-                  <label for="role-@roleId">
+                  <label for="role-@roleId" class="role-font">
                     <input class="show-role-variables" type="checkbox" id="role-@roleId" name="roles" data-role="@roleId" value="@roleId" checked>
                     @roleId
                     <ul class="list-inline dependency-list">
@@ -37,8 +37,7 @@
               </div>
             } else {
               <div>
-
-                <label for="role-@roleId">
+                <label for="role-@roleId" class="role-font">
                     <input class="show-role-variables" type="checkbox" id="role-@roleId" name="roles" data-role="@roleId" value="@roleId">
                     @roleId
                     <ul class="list-inline dependency-list">

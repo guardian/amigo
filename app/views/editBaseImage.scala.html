@@ -18,7 +18,7 @@
           <div class="checkbox">
             @if(image.builtinRoles.exists(_.roleId == role)) {
               <div>
-                <label for="role-@role">
+                <label for="role-@role" class="role-font">
                   <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role" checked>
                   @role
                   <ul class="list-inline dependency-list">
@@ -33,7 +33,7 @@
               </div>
             } else {
               <div>
-                <label for="role-@role">
+                <label for="role-@role" class="role-font">
                   <input class="show-role-variables" type="checkbox" id="role-@role" name="roles" data-role="@role" value="@role">
                   @role
                   <ul class="list-inline dependency-list">

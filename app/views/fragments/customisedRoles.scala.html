@@ -4,7 +4,7 @@
 
 <ul class="list-group">
   @for(role <- roles) {
-    <li class="list-group-item">
+    <li class="list-group-item role-font">
       <a href="@routes.RoleController.listRoles#@role.roleId">@role.roleId</a>
 
       @if(role.variables.isEmpty) {
