@@ -1,0 +1,18 @@
+---
+- name: Download neo4j public key
+  get_url: url=https://debian.neo4j.org/neotechnology.gpg.key dest=/tmp
+
+- name: Add public key to apt
+  shell: apt-key add /tmp/neotechnology.gpg.key
+
+- name: Create apt sources directory
+  file: path=/etc/apt/sources.list.d state=directory
+
+- name: Create neo4j sources file
+  file: path=/etc/apt/sources.list.d/neo4j.list state=touch
+
+- name: Copy repository definition to sources file
+  copy: content="deb https://debian.neo4j.org/repo stable/" dest=/etc/apt/sources.list.d/neo4j.list
+
+- name: Install neo4j
+  apt: name=neo4j state=latest update_cache=yes
