@@ -19,9 +19,9 @@
     </thead>
     <tbody>
     @for(image <- images) {
-      <tr data-href="@routes.BaseImageController.showBaseImage(image.id)">
-        <td>@image.id</td>
-        <td>@image.description</td>
+      <tr>
+        <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.id</a></td>
+        <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.description</a></td>
       </tr>
     }
     </tbody>
