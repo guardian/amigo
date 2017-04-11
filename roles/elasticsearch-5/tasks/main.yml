@@ -1,0 +1,26 @@
+---
+- name: Check required parameters
+  include: required-parameters.yml
+
+- name: Add Elasticsearch repository key
+  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+
+- name: Ensure elasticsearch is installed
+  apt: deb={{ es_deb_url }} state=present
+
+- name: Ensure proper limits for elasticsearch user
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      {{ es_user }} - nofile  655
+      {{ es_user }} - memlock unlimited
+
+- name: Ensure Elasticsearch config directory exists
+  file: path={{ es_config_dir }} state=directory owner={{ es_user }} group={{ es_user }}
+
+- name: Ensure Elasticsearch configuration File exists
+  template: src=elasticsearch.yml.j2 dest={{ es_config_dir }}/elasticsearch.yml owner={{ es_user }} group={{ es_user }} mode=0644 force=yes
+
+- name: Install elasticsearch plugins
+  command: "{{ es_home }}/bin/elasticsearch-plugin install {{ item }} --batch --silent"
+  with_items: "{{ es_plugins | default([]) }}"

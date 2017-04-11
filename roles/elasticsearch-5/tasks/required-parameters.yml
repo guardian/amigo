@@ -1,0 +1,11 @@
+- fail: msg="'es_cluster_name' must be defined and not empty"
+  when: es_cluster_name is not defined or es_cluster_name == ''
+
+- fail: msg="'aws_region' must be defined and not empty"
+  when: aws_region is not defined or aws_region == ''
+
+- fail: msg="'ec2_tag_app' must be defined and not empty"
+  when: ec2_tag_app is not defined or ec2_tag_app == ''
+
+- fail: msg="'ec2_tag_stack' must be defined and not empty"
+  when: ec2_tag_stack is not defined or ec2_tag_stack == ''
