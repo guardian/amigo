@@ -22,7 +22,7 @@
       <th>Usage</th>
     </thead>
     <tbody>
-    @for(recipe <- recipes.toList.sortBy(_.id)) {
+    @for(recipe <- recipes.toList.sortBy(_.id.value)) {
       <tr>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
