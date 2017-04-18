@@ -10,4 +10,4 @@
 /usr/local/bin/curator --master-only delete indices --timestring '%Y.%m.%d' --time-unit days --older-than 14 2>&1 | cut -d " " -f 3- | logger -t curator
 
 # Optimise older indexes
-/usr/local/bin/curator --master-only optimize indices --timestring '%Y.%m.%d' --time-unit days --older-than 14 2>&1 | cut -d " " -f 3- | logger -t curator
+/usr/local/bin/curator --master-only optimize indices --timestring '%Y.%m.%d' --time-unit days --older-than 1 2>&1 | cut -d " " -f 3- | logger -t curator
