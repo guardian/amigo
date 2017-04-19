@@ -1,6 +1,6 @@
 ---
  - name: Install elasticsearch curator
-   pip: name=elasticsearch-curator
+   pip: name=elasticsearch-curator version=3.5.1
 
  - name: Create directory for housekeeping script
    file: path=/opt/bin state=directory
