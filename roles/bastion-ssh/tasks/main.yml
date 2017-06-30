@@ -16,22 +16,3 @@
   file:
     state: absent
     path: /etc/sudoers.d/90-cloud-init-users
-
-- name: Make SSH keys owned by root
-  file:
-    state: directory
-    path: /home/ubuntu/.ssh
-    recursive: yes
-    owner: root
-
-- name: Lock down SSH keys
-  file:
-    state: directory
-    path: /home/ubuntu/.ssh
-    mode: 751
-
-- name: Make SSH authorized keys immutable
-  file:
-    path: /home/ubuntu/.ssh/authorized_keys
-    attributes: "+i"
-    mode: 644
