@@ -1,0 +1,78 @@
+Port 2022
+Protocol 2
+
+# Supported HostKey algorithms by order of preference.
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+
+# KeyRegenerationInternal is halved from the default as a precaution (optional). 1800 seconds is 30 minutes.
+KeyRegenerationInterval 1800
+
+# Password based logins are disabled - only public key based logins are allowed.
+AuthenticationMethods publickey
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+
+# LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Root login is not allowed for auditing reasons. This is because it's difficult to track which process belongs to which root user:
+#
+# On Linux, user sessions are tracking using a kernel-side session id, however, this session id is not recorded by OpenSSH.
+# Additionally, only tools such as systemd and auditd record the process session id.
+# On other OSes, the user session id is not necessarily recorded at all kernel-side.
+# Using regular users in combination with /bin/su or /usr/bin/sudo ensure a clear audit track.
+PermitRootLogin No
+
+# Use kernel sandbox mechanisms where possible in unprivilegied processes
+# Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
+UsePrivilegeSeparation sandbox
+
+# <http://security.stackexchange.com/questions/45193/in-what-ways-does-increasing-ssh-host-key-length-increase-security/45196#45196>
+ServerKeyBits 2048
+
+# The login grace period is a period of time in which the user has connected to the daemon, but has not started the authentication process
+LoginGraceTime 30
+
+# Only allow SSH for the ubuntu user from 77.91.*.* (The Guardian IP range is 77.91.248.0/21)
+AllowUsers ubuntu@77.91.*.*
+UsePAM yes
+
+# Avoid unattended SSH sessions
+ClientAliveInterval 300
+ClientAliveCountMax 0
+TCPKeepAlive yes
+
+# Do not read ~/.rhosts and ~/.shosts files
+IgnoreRhosts yes
+
+# Disable host based authentication
+HostbasedAuthentication no
+
+# Do not permit passwords (should be redundant due to AuthenticationMethods)
+PermitEmptyPasswords no
+PasswordAuthentication no
+
+# Disable X11 and port forwarding
+X11Forwarding no
+AllowTcpForwarding no
+
+# Prevent the use of insecure home directory and key file permissions
+StrictModes yes
+
+# Do not allow host based authentication
+HostbasedAuthentication no
+RSAAuthentication yes
+RhostsRSAAuthentication no
+
+# Do not print out /etc/motd
+PrintMotd no
+
+# Print out the time and remote host of the last login
+PrintLastLog yes
+
+# For locale and allowing SCP
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
