@@ -1,0 +1,18 @@
+---
+- name: Update sshd_config
+  copy: src=sshd_config dest=/etc/ssh/sshd_config
+
+- name: Bounce sshd
+  service:
+    name: ssh
+    state: restarted
+
+- name: Add ubuntu user into system groups
+  user:
+    name: ubuntu
+    groups: ubuntu,dialout,cdrom,floppy,audio,dip,video,plugdev,netdev
+
+- name: Remove ubuntu user from sudoers
+  file:
+    state: absent
+    path: /etc/sudoers.d/90-cloud-init-users
