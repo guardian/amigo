@@ -175,25 +175,23 @@ Resources:
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'InstanceProfile'
       KeyName: !Ref 'KeyName'
-      UserData: !Base64
-        Fn::Sub:
-        - '#!/bin/bash -ev
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -ev
 
           adduser --system --home /home/amigo --disabled-password amigo
 
-          ${Param1}
+          wget -P /tmp https://releases.hashicorp.com/packer/${PackerVersion}/packer_${PackerVersion}_linux_amd64.zip
 
           mkdir /opt/packer
 
           unzip -d /opt/packer /tmp/packer_*_linux_amd64.zip
 
-          echo ''export PATH=${PATH}:/opt/packer'' > /etc/profile.d/packer.sh
+          echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo.service
-          /etc/systemd/system
+          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo.service /etc/systemd/system
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo-1.0-SNAPSHOT.tgz
-          /home/amigo
+          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo-1.0-SNAPSHOT.tgz /home/amigo
 
           tar -C /home/amigo -x -v -f /home/amigo/amigo-1.0-SNAPSHOT.tgz
 
@@ -203,9 +201,8 @@ Resources:
 
           chown -R amigo /home/amigo
 
-          systemctl start amigo'
-        - Param1: !Join ['', ['wget -P /tmp https://releases.hashicorp.com/packer/',
-              !Ref 'PackerVersion', /packer_, !Ref 'PackerVersion', _linux_amd64.zip]]
+          systemctl start amigo
+
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
