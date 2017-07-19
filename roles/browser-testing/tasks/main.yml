@@ -26,3 +26,6 @@
 
 - name: Enable Xvfb service
   service: name=xvfb enabled=yes
+
+- name: Route DBUS session bus address
+  shell: export DBUS_SESSION_BUS_ADDRESS=/dev/null
