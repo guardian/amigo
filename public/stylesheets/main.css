@@ -85,3 +85,31 @@ td.recipe-usage {
 .role-usage {
     margin-top: 34px;
 }
+
+.dependencyFont li{
+    font-size: 12px;
+}
+
+.dependency-list > li {
+    color: #777;
+    padding: 2px 4px;
+    background-color: #eee;
+    font-size: 90%;
+}
+
+.dependency-list {
+    display: inline-block;
+    margin-left: 16px;
+}
+
+.role-font {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+
+.nested-dependencies-list {
+    list-style: none;
+}
+
+.nested-dependencies-list > li:before {
+    content: "\2192 \0020";
+}

@@ -1,5 +1,4 @@
 @import data.Roles
-@import data.Recipes
 @(roles: Iterable[RoleSummary], recipes: Iterable[Recipe])
 @layout("AMIgo"){
 
@@ -7,7 +6,7 @@
 
   <div class="row">
     <div class="col-md-3">
-      <div class="list-group">
+      <div class="list-group role-font">
       @for(role <- roles) {
         <a href="#@role.roleId" data-role-id="@role.roleId" class="list-group-item role-id">
         @role.roleId

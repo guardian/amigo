@@ -33,7 +33,8 @@ class RecipeController(
         views.html.showRecipe(
           recipe,
           bakes.take(20),
-          RecipeUsage(recipe, bakes)(prismAgents)
+          RecipeUsage(recipe, bakes)(prismAgents),
+          Roles.list
         )
       )
     }
@@ -42,14 +43,14 @@ class RecipeController(
   def editRecipe(id: RecipeId) = AuthAction {
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.bakeSchedule))
-      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.listIds))
+      Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.list))
     }
   }
 
   def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
-        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
+        BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.list))
       }, {
         case (description, baseImageId, bakeSchedule) =>
           BaseImages.findById(baseImageId) match {
@@ -63,7 +64,7 @@ class RecipeController(
               })
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
-              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
+              BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.list))
           }
       })
     }

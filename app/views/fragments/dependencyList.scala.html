@@ -1,7 +1,7 @@
 @import models.Dependency
 @(dependencies: Set[Dependency])
 
-<ul>
+<ul class="nested-dependencies-list dependencyFont role-font">
   @for(dep <- dependencies) {
     <li>
         <a href="#@dep.roleId">@dep.roleId</a>

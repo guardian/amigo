@@ -1,8 +1,10 @@
-@(roles: Iterable[CustomisedRole])
+@import data.Roles
+@(allRoles: Seq[RoleSummary],
+  roles: Iterable[CustomisedRole])
 
 <ul class="list-group">
   @for(role <- roles) {
-    <li class="list-group-item">
+    <li class="list-group-item role-font">
       <a href="@routes.RoleController.listRoles#@role.roleId">@role.roleId</a>
 
       @if(role.variables.isEmpty) {
@@ -10,6 +12,7 @@
       } else {
         <code>@role.variablesToString</code>
       }
+      @views.html.fragments.dependencyList(Roles.transitiveDependencies(allRoles, role.roleId).dependencies)
     </li>
   }
 </ul>

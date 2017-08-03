@@ -1,0 +1,7 @@
+@import models.Dependency
+@(dependencies: Set[Dependency])
+
+@for(dep <- dependencies) {
+    <li>@dep.roleId</li>
+    @views.html.fragments.inlineDependencyList(dep.dependencies)
+}

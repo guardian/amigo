@@ -20,8 +20,12 @@ object Roles {
   def findById(id: RoleId) = list.find(_ == id)
 
   def transitiveDependencies(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Dependency = {
+    transitiveDependencies(allRoles, roleToAnalyse.roleId)
+  }
+
+  def transitiveDependencies(allRoles: Seq[RoleSummary], roleToAnalyse: RoleId): Dependency = {
     def dependencies(roleId: RoleId): Set[RoleId] = {
-      val summaries: Set[RoleSummary] = allRoles.find(r => r.roleId == roleId).toSet
+      val summaries: Set[RoleSummary] = allRoles.find(_.roleId == roleId).toSet
       summaries.flatMap(_.dependsOn)
     }
 
@@ -29,14 +33,20 @@ object Roles {
       val children = dependencies(roleId).map(go)
       Dependency(roleId, children)
     }
-    go(roleToAnalyse.roleId)
+    go(roleToAnalyse)
   }
 
   def usedBy(allRoles: Seq[RoleSummary], roleToAnalyse: RoleSummary): Seq[RoleId] = {
-    allRoles.filter(_.dependsOn.contains(roleToAnalyse.roleId)).distinct.map((r: RoleSummary) => r.roleId).sortBy(_.value)
+    allRoles
+      .filter(_.dependsOn.contains(roleToAnalyse.roleId))
+      .distinct
+      .map((r: RoleSummary) => r.roleId)
+      .sortBy(_.value)
   }
 
   def usedByRecipes(allRecipes: Seq[Recipe], roleToAnalyse: RoleSummary): Seq[RecipeId] = {
-    allRecipes.filter(_.roles.map(_.roleId).contains(roleToAnalyse.roleId)).map(_.id)
+    allRecipes
+      .filter(_.roles.map(_.roleId).contains(roleToAnalyse.roleId))
+      .map(_.id)
   }
 }
