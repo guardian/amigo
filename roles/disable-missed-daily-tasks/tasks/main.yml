@@ -1,9 +1,12 @@
 ---
-- name: Create directories
+- name: Create apt-daily config directory
   file: path=/etc/systemd/system/apt-daily.timer.d state=directory owner=root group=root
 
 - name: Install file that skips running missed apt-daily tasks on startup
   copy: src=apt-daily.timer.conf dest=/etc/systemd/system/apt-daily.timer.d/apt-daily.timer.conf owner=root group=root
+
+- name: Create apt-daily-upgrade config directory
+  file: path=/etc/systemd/system/apt-daily-upgrade.timer.d state=directory owner=root group=root
 
 - name: Install file that skips running missed apt-daily-upgrade tasks on startup
   copy: src=apt-daily-upgrade.timer.conf dest=/etc/systemd/system/apt-daily-upgrade.timer.d/apt-daily-upgrade.timer.conf owner=root group=root
