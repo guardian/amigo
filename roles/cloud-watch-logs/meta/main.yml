@@ -1,3 +1,4 @@
 ---
 dependencies:
   - aws-tools
+  - { role: packages, packages: [python-pip] }
