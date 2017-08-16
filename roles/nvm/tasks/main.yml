@@ -1,0 +1,15 @@
+---
+- name: Install dependencies
+  apt: pkg={{ item }} update_cache=yes
+  with_items:
+    - curl
+    - build-essential
+    - libssl-dev
+
+- name: Install nvm {{ nvm.version }}
+  shell: |
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/{{ nvm.version }}/install.sh | bash
+    creates=/home/{{ ansible_user_id }}/.nvm/nvm.sh
+
+- name: Install node {{ nvm.node_version }} and set as default version
+  shell: /bin/bash -c "source ~/.nvm/nvm.sh && nvm install {{ nvm.node_version }} && nvm alias default {{ nvm.node_version }}"
