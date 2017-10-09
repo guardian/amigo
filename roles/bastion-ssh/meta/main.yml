@@ -1,0 +1,4 @@
+---
+dependencies:
+  - apt
+  - s3-ssh-keys
