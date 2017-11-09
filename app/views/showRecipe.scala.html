@@ -1,7 +1,9 @@
+@import data.Roles
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
-        usage: prism.RecipeUsage
+        usage: prism.RecipeUsage,
+        allRoles: Seq[RoleSummary]
 )(implicit flash: Flash),
 @simpleLayout("AMIgo"){
 
@@ -40,7 +42,9 @@
   <div class="panel panel-default">
     <div class="panel-heading">Roles</div>
     <div class="panel-body">
-    @fragments.customisedRoles(recipe.roles)
+    @fragments.customisedRoles(Roles.customisedTransitiveDependency(allRoles, recipe.roles))
+      <h4>Inherited from base image @recipe.baseImage.id</h4>
+      @fragments.customisedRoles(Roles.customisedTransitiveDependency(allRoles, recipe.baseImage.builtinRoles))
     </div>
   </div>
 

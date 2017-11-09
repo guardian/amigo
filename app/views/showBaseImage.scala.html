@@ -1,4 +1,5 @@
-@(image: BaseImage)(implicit flash: Flash)
+@import data.Roles
+@(image: BaseImage, allRoles: Seq[RoleSummary])(implicit flash: Flash)
 @simpleLayout("AMIgo"){
 
   <h1>@image.id.value</h1>
@@ -29,7 +30,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Builtin roles</div>
     <div class="panel-body">
-    @fragments.customisedRoles(image.builtinRoles)
+    @fragments.customisedRoles(image.builtinRoles.map(role => role -> Roles.transitiveDependencies(allRoles, role.roleId)))
     </div>
   </div>
 
