@@ -1,9 +1,0 @@
----
-- name: make directory for script
-  file:
-    path: /opt/encrypted-drive
-    state: directory
-    mode: 0755
-
-- name: copy script to mount encrypted drive
-  copy: src=setup-encrypted-drive.sh dest: /opt/encrypted-drive owner=root group=root
