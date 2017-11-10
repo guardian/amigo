@@ -73,7 +73,7 @@
 
                     @defining(Roles.usedBy(roles.toSeq, role)) { usedBy =>
                         @if(usedBy.isEmpty) {
-                              This role is not used by any other role
+                            This role is not used by any other role
                         } else {
                             This role is used by the following roles:
                             <ul>
@@ -105,7 +105,7 @@
                         @if(usedBy.isEmpty) {
                             This role is not used by any base images
                         } else {
-                            This role is included by the following base images:
+                            This role is used by the following base images:
                             <ul>
                             @usedBy.map { baseImage =>
                                 <li><a href="@routes.BaseImageController.showBaseImage(baseImage.id)">@baseImage.id</a></li>

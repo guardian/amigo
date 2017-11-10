@@ -30,7 +30,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">Builtin roles</div>
     <div class="panel-body">
-    @fragments.customisedRoles(image.builtinRoles.map(role => role -> Roles.transitiveDependencies(allRoles, role.roleId)))
+    @fragments.customisedRoles(Roles.customisedTransitiveDependency(allRoles, image.builtinRoles))
     </div>
   </div>
 
