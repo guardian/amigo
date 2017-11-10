@@ -1,6 +1,6 @@
 @import data.Roles
 @import data.Recipes
-@(roles: Iterable[RoleSummary], recipes: Iterable[Recipe])
+@(roles: Iterable[RoleSummary], recipes: Iterable[Recipe], baseImages: Seq[BaseImage])
 @layout("AMIgo"){
 
   <h1>Roles</h1>
@@ -17,8 +17,7 @@
     </div>
 
     <div class="col-md-9">
-      <div id="sticky-anchor"></div>
-      <div class="sticky">
+      <div>
         <div id="explanation">
           Choose a role from the list to see more details.
         </div>
@@ -63,7 +62,7 @@
                 } else {
                     This role depends on (including transitive dependencies):
 
-                    @views.html.fragments.dependencyList(Roles.transitiveDependencies(roles.toSeq, role).dependencies)
+                    @views.html.fragments.dependencyList(Roles.transitiveDependencies(roles.toSeq, role.roleId).dependencies)
                 }</p>
               </div>
 
@@ -74,7 +73,7 @@
 
                     @defining(Roles.usedBy(roles.toSeq, role)) { usedBy =>
                         @if(usedBy.isEmpty) {
-                              This role is not used by any other role
+                            This role is not used by any other role
                         } else {
                             This role is used by the following roles:
                             <ul>
@@ -98,6 +97,21 @@
                           }
                           </ul>
                       }
+                    }
+                </div>
+                <div class="role-usage">
+                    <h4>Base images</h4>
+                    @defining(Roles.usedByBaseImages(baseImages, role)) { usedBy =>
+                        @if(usedBy.isEmpty) {
+                            This role is not used by any base images
+                        } else {
+                            This role is used by the following base images:
+                            <ul>
+                            @usedBy.map { baseImage =>
+                                <li><a href="@routes.BaseImageController.showBaseImage(baseImage.id)">@baseImage.id</a></li>
+                            }
+                            </ul>
+                        }
                     }
                 </div>
               </div>
