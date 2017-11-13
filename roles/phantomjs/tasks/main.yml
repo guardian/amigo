@@ -1,0 +1,5 @@
+---
+- name: Install Phantom JS
+  apt:
+    name: phantomjs
+    update_cache: yes

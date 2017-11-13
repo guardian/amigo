@@ -1,0 +1,5 @@
+---
+- name: Install unoconv
+  apt:
+    name: unoconv
+    update_cache: yes
