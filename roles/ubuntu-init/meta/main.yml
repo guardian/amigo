@@ -2,5 +2,4 @@
 dependencies:
   - apt
   - enhanced-networking
-  - ntp
   - aws-tools
