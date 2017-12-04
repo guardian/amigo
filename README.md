@@ -48,6 +48,8 @@ packer {
 }
 ```
 
+Optionally, you may want to set `associate_public_ip_address` to true if your subnet does not default to this, to ensure Packer can SSH into your instance.
+
 Once you have your credentials and config sorted out, just do: 
 
 ```
