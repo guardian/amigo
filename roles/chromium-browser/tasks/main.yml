@@ -1,0 +1,5 @@
+---
+- name: Install Chromium
+  apt:
+    name: chromium-browser
+    update_cache: yes
