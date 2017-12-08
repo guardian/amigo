@@ -33,7 +33,8 @@ class RecipeController(
         views.html.showRecipe(
           recipe,
           bakes.take(20),
-          RecipeUsage(recipe, bakes)(prismAgents)
+          RecipeUsage(recipe, bakes)(prismAgents),
+          Roles.list
         )
       )
     }
