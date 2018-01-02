@@ -14,4 +14,4 @@
 
 - name: Install elasticsearch plugins
   command: "{{ es_home }}/bin/elasticsearch-plugin install {{ item }} --batch --silent"
-  with_items: "{{ es_plugins | default([]) }}"
+  with_items: "{{ plugins | default([]) }}"

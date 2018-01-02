@@ -5,4 +5,6 @@
 - name: Ensure Logstash is installed
   apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
 
-# TODO MRB: install plugins
+- name: Install Logstash plugins
+  command: "{{ ls_home }}/bin/logstash-plugin install {{ item }}"
+  with_items: "{{ plugins | default([]) }}"
