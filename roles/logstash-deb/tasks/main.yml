@@ -1,0 +1,8 @@
+---
+- name: Add Elasticsearch repository key
+  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+
+- name: Ensure Logstash is installed
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
+
+# TODO MRB: install plugins
