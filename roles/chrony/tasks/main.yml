@@ -1,0 +1,9 @@
+---
+- name: Install chrony package
+  apt: name=chrony state=present
+
+- name: Use Amazon NTP server pool
+  replace: dest=/etc/chrony/chrony.conf regexp=debian.pool.ntp.org replace=amazon.pool.ntp.org
+
+- name: Add local link NTP server
+  lineinfile: path=/etc/chrony/chrony.conf insertafter='^(server|pool)' line='server 169.254.169.123 prefer iburst'
