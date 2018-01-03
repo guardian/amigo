@@ -22,6 +22,8 @@ object PackerBuildConfigGenerator {
       "build_number" -> bake.buildNumber.toString,
       "aws_account_numbers" -> awsAccountNumbers.mkString(",")
     )
+    val stageSuffixIfNotProd = if (packerConfig.stage == "PROD") "" else s"-${packerConfig.stage}"
+    val builtBy = s"amigo$stageSuffixIfNotProd"
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
@@ -43,7 +45,7 @@ object PackerBuildConfigGenerator {
       ami_users = "{{user `aws_account_numbers`}}",
       iam_instance_profile = packerConfig.instanceProfile,
       tags = Map(
-        "BuiltBy" -> "amigo",
+        "BuiltBy" -> builtBy,
         "AmigoStage" -> packerConfig.stage,
         "Name" -> "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
         "Recipe" -> "{{user `recipe`}}",
