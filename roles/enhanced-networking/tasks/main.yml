@@ -10,7 +10,7 @@
   replace:
     path: /tmp/ixgbevf-{{driver_version}}/src/kcompat.h
     regexp: '#if UTS_UBUNTU_RELEASE_ABI > 255'
-    replace: '/*#if UTS_UBUNTU_RELEASE_ABI > 255'
+    replace: '#if UTS_UBUNTU_RELEASE_ABI > 99255'
 
 - name: Make network driver
   command: make install
