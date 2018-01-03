@@ -5,6 +5,13 @@
 - name: Extract network driver
   unarchive: src=ixgbevf-{{driver_version}}.tar.gz dest=/tmp/
 
+# https://stackoverflow.com/questions/44833346/cant-get-ixgbevf-to-build-on-current-ubuntu-ami
+- name: Patch network driver
+  replace:
+    path: /tmp/ixgbevf-{{driver_version}}/src/kcompat.h
+    regexp: '#if UTS_UBUNTU_RELEASE_ABI > 255'
+    replace: '#if UTS_UBUNTU_RELEASE_ABI > 99255'
+
 - name: Make network driver
   command: make install
   args:
