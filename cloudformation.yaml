@@ -8,8 +8,11 @@ Parameters:
   VPC:
     Description: Virtual Private Cloud to run EC2 instances within
     Type: AWS::EC2::VPC::Id
-  Subnets:
+  PublicSubnets:
     Description: Subnets to run load balancer within
+    Type: List<AWS::EC2::Subnet::Id>
+  PrivateSubnets:
+    Description: Subnets to run the ASG and instances within
     Type: List<AWS::EC2::Subnet::Id>
   AMI:
     Description: AMI ID
@@ -127,7 +130,7 @@ Resources:
       Scheme: internet-facing
       SecurityGroups:
       - !Ref 'LoadBalancerSecurityGroup'
-      Subnets: !Ref 'Subnets'
+      Subnets: !Ref 'PublicSubnets'
       CrossZone: true
       Listeners:
       - Protocol: HTTP
@@ -146,7 +149,7 @@ Resources:
   AutoscalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      VPCZoneIdentifier: !Ref 'Subnets'
+      VPCZoneIdentifier: !Ref 'PrivateSubnets'
       AvailabilityZones: !GetAZs ''
       LaunchConfigurationName: !Ref 'LaunchConfig'
       MinSize: '1'
@@ -169,7 +172,7 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId: !Ref 'AMI'
-      AssociatePublicIpAddress: true
+      AssociatePublicIpAddress: false
       SecurityGroups:
       - !Ref 'ApplicationSecurityGroup'
       InstanceType: !Ref 'InstanceType'
@@ -189,9 +192,9 @@ Resources:
 
           echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo.service /etc/systemd/system
+          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo.service /etc/systemd/system
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/PROD/amigo/amigo-1.0-SNAPSHOT.tgz /home/amigo
+          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo-1.0-SNAPSHOT.tgz /home/amigo
 
           tar -C /home/amigo -x -v -f /home/amigo/amigo-1.0-SNAPSHOT.tgz
 
@@ -232,7 +235,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: '9000'
         ToPort: '9000'
-        CidrIp: 77.91.248.0/21
+        CidrIp: 10.249.0.0/16
       - IpProtocol: tcp
         FromPort: '9000'
         ToPort: '9000'
@@ -240,4 +243,4 @@ Resources:
       - IpProtocol: tcp
         FromPort: '22'
         ToPort: '22'
-        CidrIp: 77.91.248.0/21
+        CidrIp: 10.249.0.0/16
