@@ -18,7 +18,10 @@ class BaseImageController(
   }
 
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
-    BaseImages.findById(id).fold[Result](NotFound)(image => Ok(views.html.showBaseImage(image, Roles.list)))
+    BaseImages.findById(id).fold[Result](NotFound) { image =>
+      val usedByRecipes = Recipes.findByBaseImage(id)
+      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq))
+    }
   }
 
   def editBaseImage(id: BaseImageId) = AuthAction {

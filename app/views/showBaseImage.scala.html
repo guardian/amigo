@@ -1,5 +1,5 @@
 @import data.Roles
-@(image: BaseImage, allRoles: Seq[RoleSummary])(implicit flash: Flash)
+@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe])(implicit flash: Flash)
 @simpleLayout("AMIgo"){
 
   <h1>@image.id.value</h1>
@@ -31,6 +31,23 @@
     <div class="panel-heading">Builtin roles</div>
     <div class="panel-body">
     @fragments.customisedRoles(Roles.customisedTransitiveDependency(allRoles, image.builtinRoles))
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Used by</div>
+    <div class="panel-body">
+
+      @if(usedByRecipes.isEmpty) {
+        This base image is not used by any recipe
+      } else {
+        This base image is used by the following recipes:
+        <ul>
+        @usedByRecipes.map { recipe =>
+          <li><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></li>
+        }
+        </ul>
+      }
     </div>
   </div>
 

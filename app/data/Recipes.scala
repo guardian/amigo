@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import com.gu.scanamo.syntax._
 import cats.syntax.either._
 import com.gu.scanamo.error.DynamoReadError
+import models.Recipe.DbModel
 
 import scala.collection.JavaConverters._
 
@@ -13,10 +14,13 @@ object Recipes {
   import Dynamo._
   import DynamoFormats._
 
-  def list()(implicit dynamo: Dynamo): Iterable[Recipe] = {
+  def list()(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_ => true)
+
+  def filteredList(p: DbModel => Boolean)(implicit dynamo: Dynamo): Iterable[Recipe] = {
     val dbModels = table.scan().exec().flatMap(_.toOption)
     for {
       dbModel <- dbModels
+      if p(dbModel)
       baseImage <- BaseImages.findById(dbModel.baseImageId)
     } yield {
       Recipe.db2domain(dbModel, baseImage)
@@ -63,6 +67,8 @@ object Recipes {
       Recipe.db2domain(dbModel, baseImage)
     }
   }
+
+  def findByBaseImage(imageId: BaseImageId)(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_.baseImageId == imageId)
 
   def incrementAndGetBuildNumber(id: RecipeId)(implicit dynamo: Dynamo): Option[Int] = {
     val updateRequest = new UpdateItemRequest()
