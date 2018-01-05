@@ -1,9 +1,9 @@
 ---
 - name: Download oauth proxy
-  unarchive: src=https://github.com/bitly/oauth2_proxy/releases/download/v{{ oauth_version }}/oauth2_proxy-{{ oauth_version }}.linux-amd64.go{{ go_version }}.tar.gz dest=/opt remote_src=True
+  unarchive: src=https://github.com/bitly/oauth2_proxy/releases/download/v{{ oauth_version }}/oauth2_proxy-{{ oauth_package_version }}.linux-amd64.go{{ go_version }}.tar.gz dest=/opt remote_src=True
 
 - name: Rename folder
-  shell: mv /opt/oauth2_proxy-{{ oauth_version }}.linux-amd64.go{{ go_version }} /opt/oauth2_proxy
+  shell: mv /opt/oauth2_proxy-{{ oauth_package_version }}.linux-amd64.go{{ go_version }} /opt/oauth2_proxy
 
 - name: Create oauth2-proxy group
   group: name=oauth2-proxy
