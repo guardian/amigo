@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # Mount a drive
-DEVICE=$1
-MOUNT_PATH=$2
+device=$1
+mount_path=$2
 
-if [ -e "$DEVICE" ]; then
-    mkdir "$MOUNT_PATH"
-    mkfs -t ext4 "$DEVICE"
-    echo "$DEVICE" "$MOUNT_PATH" ext4 defaults 0 0" >> /etc/fstab
+if [ -e "$device" ]; then
+    mkdir "$mount_path"
+    mkfs -t ext4 "$device"
+    echo "$device $mount_path ext4 defaults 0 0" >> /etc/fstab
     mount -a
 else
-    echo "Device $DEVICE does not exist" 1>&2
+    echo "Device $device does not exist" 1>&2
 fi
