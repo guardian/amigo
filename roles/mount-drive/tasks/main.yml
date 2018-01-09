@@ -6,4 +6,4 @@
     mode: 0755
 
 - name: copy script to mount drive
-  copy: src=mount-drive.sh dest=/opt/mount-drive/mount-drive.sh owner=root group=root
+  copy: src=mount-drive.sh dest=/opt/mount-drive/mount-drive.sh owner=root group=root mode=u+x
