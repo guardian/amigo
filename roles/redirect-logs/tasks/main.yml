@@ -6,4 +6,4 @@
     mode: 0755
 
 - name: copy script to redirect logs to target location
-  copy: src=redirect-logs.sh dest=/opt/redirect-logs/redirect-logs.sh owner=root group=root
+  copy: src=redirect-logs.sh dest=/opt/redirect-logs/redirect-logs.sh owner=root group=root mode=u+x
