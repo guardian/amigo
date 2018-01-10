@@ -5,10 +5,12 @@ stack=$2
 stage=$3
 app=$4
 file=$5
+#optional date format parameter
+date_format=${6:-%Y-%m-%d %H:%M:%S}
 
 cat > /var/awslogs/etc/config/$app-$id.conf <<__END__
 [$app-$id]
-datetime_format = %Y-%m-%d %H:%M:%S
+datetime_format = $date_format
 file = $file
 initial_position = start_of_file
 log_group_name = $stack-$app-$stage

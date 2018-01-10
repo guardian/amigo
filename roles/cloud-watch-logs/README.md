@@ -7,6 +7,7 @@ The arguments are:
  - the stage
  - the app
  - the full path to the log
+ - an optional date format, see "datetime_format" [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html)
 
 
 Here's an example user data that makes use of it:
