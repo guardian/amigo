@@ -98,12 +98,14 @@ class AppComponents(context: Context)
   Logger.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
+  val debugAvailable = identity.stage != "PROD"
+
   val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
-  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi)
-  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVaribles)
+  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
+  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVaribles, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

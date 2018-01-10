@@ -17,7 +17,8 @@ class RecipeController(
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
 
   def listRecipes = AuthAction {
@@ -34,7 +35,8 @@ class RecipeController(
           recipe,
           bakes.take(20),
           RecipeUsage(recipe, bakes)(prismAgents),
-          Roles.list
+          Roles.list,
+          debugAvailable
         )
       )
     }

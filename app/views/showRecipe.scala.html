@@ -3,7 +3,8 @@
         recipe: Recipe,
         recentBakes: Iterable[Bake],
         usage: prism.RecipeUsage,
-        allRoles: Seq[RoleSummary]
+        allRoles: Seq[RoleSummary],
+        debugAvailable: Boolean
 )(implicit flash: Flash),
 @simpleLayout("AMIgo"){
 
@@ -14,6 +15,7 @@
     <div class="panel-body">
       <a data-href="@routes.BakeController.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
       <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
+      @if(debugAvailable){<a data-href="@routes.BakeController.startBaking(recipe.id, debug = true)" class="post btn btn-warning">Bake with debug enabled</a>}
     </div>
   </div>
 

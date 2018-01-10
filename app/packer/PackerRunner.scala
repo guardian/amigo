@@ -23,7 +23,7 @@ object PackerRunner {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(bake: Bake, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String])(implicit packerConfig: PackerConfig): Future[Int] = {
+  def createImage(bake: Bake, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean)(implicit packerConfig: PackerConfig): Future[Int] = {
     val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars)
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
     Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
@@ -35,13 +35,18 @@ object PackerRunner {
       val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
       Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
-      executePacker(bake, playbookFile, packerConfigFile, eventBus)
+      executePacker(bake, playbookFile, packerConfigFile, eventBus, debug)
     }
   }
 
-  private def executePacker(bake: Bake, playbookFile: Path, packerConfigFile: Path, eventBus: EventBus): Future[Int] = {
+  private def executePacker(bake: Bake, playbookFile: Path, packerConfigFile: Path, eventBus: EventBus, debug: Boolean): Future[Int] = {
+    val maybeDebug = if (debug) Some("-debug") else None
+    val command = Seq(packerCmd, "build", maybeDebug, "-machine-readable", packerConfigFile.toAbsolutePath.toString) collect {
+      case s: String => s
+      case Some(s: String) => s
+    }
     val packerProcess = new ProcessBuilder()
-      .command(packerCmd, "build", "-machine-readable", packerConfigFile.toAbsolutePath.toString)
+      .command(command: _*)
       .start()
 
     val exitValuePromise = Promise[Int]()
