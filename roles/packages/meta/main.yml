@@ -2,3 +2,7 @@
 dependencies:
   - role: apt
     when: ansible_os_family == "Debian"
+  - role: aws-tools
+    when:
+    - s3_packages is defined
+    - ansible_os_family == "Debian"

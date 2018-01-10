@@ -23,8 +23,8 @@ object PackerRunner {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(bake: Bake, prism: Prism, eventBus: EventBus)(implicit packerConfig: PackerConfig): Future[Int] = {
-    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe)
+  def createImage(bake: Bake, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String])(implicit packerConfig: PackerConfig): Future[Int] = {
+    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars)
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
     Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 

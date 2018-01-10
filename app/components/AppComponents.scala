@@ -25,6 +25,8 @@ import controllers._
 import router.Routes
 import services.PrismAgents
 
+import scala.language.postfixOps
+
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
@@ -83,9 +85,13 @@ class AppComponents(context: Context)
 
   val prism = new Prism(wsClient)
 
+  val ansibleVaribles: Map[String, String] =
+    Map("s3_prefix" -> configuration.getString("ansible.packages.s3prefix").getOrElse("")) ++
+      configuration.getString("ansible.packages.s3bucket").map("s3_bucket" ->)
+
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(enabled, prism, eventBus)
+    new ScheduledBakeRunner(enabled, prism, eventBus, ansibleVaribles)
   }
   val bakeScheduler = new BakeScheduler(scheduledBakeRunner)
 
@@ -97,7 +103,7 @@ class AppComponents(context: Context)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi)
-  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi)
+  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVaribles)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

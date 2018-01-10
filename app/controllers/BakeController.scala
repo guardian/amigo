@@ -16,14 +16,15 @@ class BakeController(
     eventsSource: Source[BakeEvent, _],
     prism: Prism,
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus) extends Controller with AuthActions with I18nSupport {
 
   def startBaking(recipeId: RecipeId) = AuthAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>
           val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-          PackerRunner.createImage(theBake, prism, eventBus)
+          PackerRunner.createImage(theBake, prism, eventBus, ansibleVars)
           Redirect(routes.BakeController.showBake(recipeId, buildNumber))
         case None =>
           val message = s"Failed to get the next build number for recipe $recipeId"

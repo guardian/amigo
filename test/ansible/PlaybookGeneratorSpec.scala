@@ -34,11 +34,14 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
       bakeSchedule = None
     )
 
-    PlaybookGenerator.generatePlaybook(recipe) should be(
+    PlaybookGenerator.generatePlaybook(recipe, Map("var1" -> "value1", "var2" -> "value2")) should be(
       """---
         |
         |- hosts: all
         |  become: yes
+        |  vars:
+        |    var1: value1
+        |    var2: value2
         |  roles:
         |    - { role: builtinRole1, foo: 'bar' }
         |    - builtinRole2

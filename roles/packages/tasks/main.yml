@@ -2,9 +2,29 @@
 - name: Install a package with apt-get
   apt: name={{ item }} state=present
   with_items: "{{ packages }}"
-  when: ansible_os_family == "Debian"
+  when:
+  - ansible_os_family == "Debian"
+  - packages is defined
 
 - name: Install a package with yum
   yum: name={{ item }} state=present
   with_items: "{{ packages }}"
-  when: ansible_os_family == "RedHat"
+  when:
+  - ansible_os_family == "RedHat"
+  - packages is defined
+
+- name: Download a package from an S3 bucket
+  command: /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}{{ item }} /tmp/{{ s3_bucket }}/{{ s3_prefix }}{{ item }}
+  with_items: "{{ s3_packages }}"
+  when:
+  - ansible_os_family == "Debian"
+  - s3_packages is defined
+
+- name: Install a package from an S3 bucket
+  apt:
+    deb: /tmp/{{ s3_bucket }}/{{ s3_prefix }}{{ item }}
+    state: present
+  with_items: "{{ s3_packages }}"
+  when:
+  - ansible_os_family == "Debian"
+  - s3_packages is defined
