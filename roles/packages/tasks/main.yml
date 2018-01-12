@@ -1,30 +1,47 @@
 ---
-- name: Install a package with apt-get
-  apt: name={{ item }} state=present
-  with_items: "{{ packages }}"
+- name: Install signing keys
+  apt_key: url={{ item }} state=present
+  with_items: "{{ signing_keys|default([]) }}"
   when:
   - ansible_os_family == "Debian"
-  - packages is defined
+
+- name: Add new repositories
+  apt_repository:
+    filename: "{{ item.key }}"
+    repo: "{{ item.value }}"
+  with_dict: "{{ repositories|default({}) }}"
+  when:
+  - ansible_os_family == "Debian"
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  when:
+  - repositories is defined
+  - ansible_os_family == "Debian"
+
+- name: Install a package with apt-get
+  apt: name={{ item }} state=present
+  with_items: "{{ packages|default([]) }}"
+  when:
+  - ansible_os_family == "Debian"
 
 - name: Install a package with yum
   yum: name={{ item }} state=present
-  with_items: "{{ packages }}"
+  with_items: "{{ packages|default([]) }}"
   when:
   - ansible_os_family == "RedHat"
-  - packages is defined
 
 - name: Download a package from an S3 bucket
   command: /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}{{ item }} /tmp/{{ s3_bucket }}/{{ s3_prefix }}{{ item }}
-  with_items: "{{ s3_packages }}"
+  with_items: "{{ s3_packages|default([]) }}"
   when:
   - ansible_os_family == "Debian"
-  - s3_packages is defined
 
 - name: Install a package from an S3 bucket
   apt:
     deb: /tmp/{{ s3_bucket }}/{{ s3_prefix }}{{ item }}
     state: present
-  with_items: "{{ s3_packages }}"
+  with_items: "{{ s3_packages|default([]) }}"
   when:
   - ansible_os_family == "Debian"
-  - s3_packages is defined

@@ -58,12 +58,17 @@ class RecipeController(
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-              val updatedRecipe = Recipes.update(
-                recipe, description, baseImage, customisedRoles, modifiedBy = request.user.fullName, bakeSchedule)
-              updatedRecipe.fold(e => InternalServerError(e.toString), { r =>
-                bakeScheduler.reschedule(r)
-                Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
-              })
+              customisedRoles.fold(
+                error => BadRequest(s"Problem parsing roles: $error"),
+                roles => {
+                  val updatedRecipe = Recipes.update(
+                    recipe, description, baseImage, roles, modifiedBy = request.user.fullName, bakeSchedule)
+                  updatedRecipe.fold(e => InternalServerError(e.toString), { r =>
+                    bakeScheduler.reschedule(r)
+                    Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
+                  })
+                }
+              )
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
               BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
@@ -89,9 +94,14 @@ class RecipeController(
             BaseImages.findById(baseImageId) match {
               case Some(baseImage) =>
                 val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-                val recipe = Recipes.create(id, description, baseImage, customisedRoles, createdBy = request.user.fullName, bakeSchedule)
-                bakeScheduler.reschedule(recipe)
-                Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
+                customisedRoles.fold(
+                  error => BadRequest(s"Problem parsing roles: $error"),
+                  roles => {
+                    val recipe = Recipes.create(id, description, baseImage, roles, createdBy = request.user.fullName, bakeSchedule)
+                    bakeScheduler.reschedule(recipe)
+                    Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
+                  }
+                )
               case None =>
                 val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule)).withError("baseImageId", "Unknown base image")
                 BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.listIds))

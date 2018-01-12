@@ -9,7 +9,7 @@
         @if(role.variables.isEmpty) {
           <em>(No custom variables)</em>
         } else {
-          <code>@role.variablesToString</code>
+          <code>@role.variablesToFormInputText</code>
         }
       </div>
       @if(deps.dependencies.nonEmpty) {
