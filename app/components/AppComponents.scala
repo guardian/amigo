@@ -85,13 +85,13 @@ class AppComponents(context: Context)
 
   val prism = new Prism(wsClient)
 
-  val ansibleVaribles: Map[String, String] =
+  val ansibleVariables: Map[String, String] =
     Map("s3_prefix" -> configuration.getString("ansible.packages.s3prefix").getOrElse("")) ++
       configuration.getString("ansible.packages.s3bucket").map("s3_bucket" ->)
 
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(enabled, prism, eventBus, ansibleVaribles)
+    new ScheduledBakeRunner(enabled, prism, eventBus, ansibleVariables)
   }
   val bakeScheduler = new BakeScheduler(scheduledBakeRunner)
 
@@ -105,7 +105,7 @@ class AppComponents(context: Context)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVaribles, debugAvailable)
+  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
