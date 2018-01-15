@@ -21,14 +21,14 @@ case class CustomisedRole(
 sealed trait ParamValue { def quoted: String }
 case class SingleParamValue(param: String) extends ParamValue {
   override def toString: String = param
-  val quoted = if (param.forall(CustomisedRole.allowedUnquotedChars)) s"$param" else s"'$param'"
+  val quoted = if (param.forall(CustomisedRole.allowedUnquotedChars)) param else s"'$param'"
 }
 case class ListParamValue(params: List[SingleParamValue]) extends ParamValue {
   override def toString: String = s"[${params.mkString(", ")}]"
   val quoted = s"[${params.map(_.quoted).mkString(", ")}]"
 }
 case class DictParamValue(params: Map[String, SingleParamValue]) extends ParamValue {
-  override def toString: String = s""
+  override def toString: String = params.map { case (k, v) => s"$k: $v" }.mkString("{", ", ", "}")
   val quoted: String = params.map { case (k, v) => s"$k: ${v.quoted}" }.mkString("{", ", ", "}")
 }
 object ListParamValue {
