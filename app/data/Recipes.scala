@@ -47,15 +47,19 @@ object Recipes {
     modifiedBy: String,
     bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
-    val update = table.update('id -> recipe.id,
-      set('description -> description) and
-        set('baseImageId -> baseImage.id) and
+    val baseUpdateExpr =
+      set('baseImageId -> baseImage.id) and
         set('roles -> roles) and
         set('modifiedBy -> modifiedBy) and
         set('modifiedAt -> DateTime.now()) and
         (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule))
-    )
 
+    val updateExpr = description match {
+      case Some(desc) => baseUpdateExpr and set('description -> desc)
+      case None => baseUpdateExpr
+    }
+
+    val update = table.update('id -> recipe.id, updateExpr)
     update.exec().map(Recipe.db2domain(_, baseImage))
   }
 
