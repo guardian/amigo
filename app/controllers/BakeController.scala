@@ -1,9 +1,11 @@
 package controllers
 
+import akka.Done
 import akka.stream.scaladsl.Source
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import event._
+import event.BakeEvent.{ AmiCreated, PackerProcessExited }
 import packer._
 import models._
 import play.api.Logger
@@ -11,6 +13,8 @@ import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
 import play.api.mvc._
 import prism.Prism
+
+import scala.concurrent.Future
 
 class BakeController(
     eventsSource: Source[BakeEvent, _],

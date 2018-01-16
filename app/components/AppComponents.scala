@@ -6,6 +6,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
 import org.joda.time.Duration
@@ -22,6 +23,7 @@ import packer.PackerConfig
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import controllers._
+import notification.{ CompletedBakeNotifier, NotificationSender, SNS }
 import router.Routes
 import services.PrismAgents
 
@@ -42,18 +44,24 @@ class AppComponents(context: Context)
 
   implicit val executionContext = actorSystem.dispatcher
 
+  val awsCreds = new AWSCredentialsProviderChain(
+    new ProfileCredentialsProvider("deployTools"),
+    new ProfileCredentialsProvider(),
+    InstanceProfileCredentialsProvider.getInstance()
+  )
+  val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
+
   implicit val dynamo = {
-    val awsCreds = new AWSCredentialsProviderChain(
-      new ProfileCredentialsProvider("deployTools"),
-      new ProfileCredentialsProvider(),
-      InstanceProfileCredentialsProvider.getInstance()
-    )
-    val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
       .withCredentials(awsCreds).withRegion(region).build()
     new Dynamo(dynamoClient, identity.stage)
   }
   dynamo.initTables()
+
+  val sns: SNS = {
+    val snsClient = AmazonSNSClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
+    new SNS(snsClient, identity.stage)
+  }
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
   val eventsSource = Source.fromPublisher(Streams.enumeratorToPublisher(eventsEnumerator))
@@ -66,6 +74,9 @@ class AppComponents(context: Context)
     ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
   }
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
+
+  val sender: NotificationSender = new NotificationSender(sns)
+  val completedBakeNotifier: CompletedBakeNotifier = new CompletedBakeNotifier(eventsSource, sender.sendTopicMessage)
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),

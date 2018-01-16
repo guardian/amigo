@@ -80,6 +80,14 @@ Resources:
         - Effect: Allow
           Action: ec2:DescribeTags
           Resource: '*'
+        - Effect: Allow
+          Action:
+          - sns:ListTopics
+          Resource: '*'
+        - Effect: Allow
+          Action:
+          - sns:*
+          Resource: !Sub 'arn:aws:sns:*:*:amigo-${Stage}-notify'
       Roles:
       - !Ref 'RootRole'
   PackerPolicy:

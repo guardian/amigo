@@ -15,6 +15,7 @@ def getTravisBranch(): String = {
 }
 
 val jacksonVersion = "2.7.1"
+val awsVersion = "1.11.263"
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
@@ -30,6 +31,8 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
   "org.quartz-scheduler" % "quartz" % "2.2.3",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
+  "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test
 )
