@@ -55,7 +55,7 @@ class RecipeController(
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
       }, {
-        case (description, baseImageId, bakeSchedule, encryptedCopies) =>
+        case (description, baseImageId, bakeSchedule, encryptFor) =>
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
@@ -63,7 +63,7 @@ class RecipeController(
                 error => BadRequest(s"Problem parsing roles: $error"),
                 roles => {
                   val updatedRecipe = Recipes.update(
-                    recipe, description, baseImage, roles, modifiedBy = request.user.fullName, bakeSchedule)
+                    recipe, description, baseImage, roles, modifiedBy = request.user.fullName, bakeSchedule, encryptFor)
                   updatedRecipe.fold(e => InternalServerError(e.toString), { r =>
                     bakeScheduler.reschedule(r)
                     Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
@@ -71,7 +71,7 @@ class RecipeController(
                 }
               )
             case None =>
-              val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule, encryptedCopies)).withError("baseImageId", "Unknown base image")
+              val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule, encryptFor)).withError("baseImageId", "Unknown base image")
               BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
           }
       })
@@ -124,11 +124,12 @@ object RecipeController {
         .verifying("Invalid Quartz cron expression", validQuartzCronExpression)
         .transform[BakeSchedule](BakeSchedule.apply, _.quartzCronExpression)
     )
-    private val accountNumbersMapping = list(
-      nonEmptyText()
-        .verifying(_.forall(_.isDigit))
-        .transform[AccountNumber](AccountNumber.apply, _.accountNumber)
-    )
+    private val accountNumbersMapping = text()
+      .verifying(_.forall(c => c.isDigit || c.isWhitespace || c == ','))
+      .transform[List[AccountNumber]](
+        _.split(',').toList.map(_.trim).filter(_.nonEmpty).map(AccountNumber.apply),
+        _.map(_.accountNumber).mkString(",")
+      )
 
     val editRecipe = Form(tuple(
       "description" -> optional(text(maxLength = 10000)),

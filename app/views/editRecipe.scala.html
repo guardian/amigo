@@ -14,6 +14,8 @@
       <span class="help-block">This should be a weird Quartz cron expression (<a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger.html">docs</a>) (<a href="http://www.freeformatter.com/cron-expression-generator-quartz.html">online evaluator</a>)</span>
     </div>
 
+    @b3.text( form("encryptFor"), '_label -> "Request encrypted copy", 'placeholder -> "optional comma separated list of AWS account numbers" )
+
     @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), '_label -> "Base image" )
 
     <div class="form-group">

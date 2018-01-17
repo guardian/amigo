@@ -46,14 +46,16 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     modifiedBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
+    bakeSchedule: Option[BakeSchedule],
+    encryptFor: List[AccountNumber])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
     val baseUpdateExpr =
       set('baseImageId -> baseImage.id) and
         set('roles -> roles) and
         set('modifiedBy -> modifiedBy) and
         set('modifiedAt -> DateTime.now()) and
-        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule))
+        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule)) and
+        (if (encryptFor.nonEmpty) set('encryptFor -> encryptFor) else remove('encryptFor))
 
     val updateExpr = description match {
       case Some(desc) => baseUpdateExpr and set('description -> desc)

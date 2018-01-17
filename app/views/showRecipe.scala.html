@@ -25,6 +25,7 @@
       <p>Created @fragments.timestamp(recipe.createdAt, recipe.createdBy)</p>
       <p>Modified @fragments.timestamp(recipe.modifiedAt, recipe.modifiedBy)</p>
       <p>Build schedule: <code>@recipe.bakeSchedule.map(_.quartzCronExpression).getOrElse("(none)")</code></p>
+      <p>Request encrypted copy: @if(recipe.encryptFor.nonEmpty){ @recipe.encryptFor.map(_.accountNumber).mkString(", ") }else{ None }</p>
       <p>@recipe.description</p>
       @if(usage.instances.size + usage.launchConfigurations.size > 0) {
         <p>This recipe is used by @usage.instances.size instance@if(usage.instances.size != 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1){s}</p>
