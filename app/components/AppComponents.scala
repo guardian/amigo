@@ -75,7 +75,7 @@ class AppComponents(context: Context)
   }
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
-  val sender: NotificationSender = new NotificationSender(sns)
+  val sender: NotificationSender = new NotificationSender(sns, identity.stage)
   val completedBakeNotifier: CompletedBakeNotifier = new CompletedBakeNotifier(eventsSource, sender.sendTopicMessage)
 
   val googleAuthConfig = GoogleAuthConfig(

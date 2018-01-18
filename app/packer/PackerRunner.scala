@@ -1,11 +1,12 @@
 package packer
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Path, Files }
+import java.nio.file.{ Files, Path }
 
 import ansible.PlaybookGenerator
 import event.EventBus
 import models.Bake
+import models.packer.PackerVariablesConfig
 import play.api.Logger
 import play.api.libs.json.Json
 import prism.Prism
@@ -30,7 +31,8 @@ object PackerRunner {
 
     prism.findAllAWSAccountNumbers() flatMap { awsAccountNumbers =>
       Logger.info(s"AMI will be shared with the following AWS accounts: $awsAccountNumbers")
-      val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(bake, playbookFile, awsAccountNumbers)
+      val packerVars = PackerVariablesConfig(bake)
+      val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(bake, playbookFile, packerVars, awsAccountNumbers)
       val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
       val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
       Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling

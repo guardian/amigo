@@ -2,8 +2,8 @@ package packer
 
 import java.nio.file.{ Path, Paths }
 
-import models.packer.{ PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig }
-import models.{ Bake, Recipe, RoleId, Ubuntu }
+import models.{ Bake, Ubuntu }
+import models.packer.{ PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig, PackerVariablesConfig }
 
 object PackerBuildConfigGenerator {
 
@@ -15,15 +15,7 @@ object PackerBuildConfigGenerator {
    *  - tags the resulting AMI with the recipe ID and build number
    */
   def generatePackerBuildConfig(
-    bake: Bake, playbookFile: Path, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
-    val variables = Map(
-      "recipe" -> bake.recipe.id.value,
-      "base_image_ami_id" -> bake.recipe.baseImage.amiId.value,
-      "build_number" -> bake.buildNumber.toString,
-      "aws_account_numbers" -> awsAccountNumbers.mkString(",")
-    )
-    val stageSuffixIfNotProd = if (packerConfig.stage == "PROD") "" else s"-${packerConfig.stage}"
-    val builtBy = s"amigo$stageSuffixIfNotProd"
+    bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
@@ -40,18 +32,11 @@ object PackerBuildConfigGenerator {
         "Stack" -> "amigo-packer",
         "App" -> "{{user `recipe`}}"
       ),
-      ami_name = "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
+      ami_name = "amigo_{{user `recipe`}}_{{user `build_number`}}_{{user `time`}}",
       ami_description = "AMI for {{user `recipe`}} built by Amigo: #{{user `build_number`}}",
-      ami_users = "{{user `aws_account_numbers`}}",
+      ami_users = awsAccountNumbers.mkString(","),
       iam_instance_profile = packerConfig.instanceProfile,
-      tags = Map(
-        "BuiltBy" -> builtBy,
-        "AmigoStage" -> packerConfig.stage,
-        "Name" -> "amigo_{{user `recipe`}}_{{user `build_number`}}_{{isotime \"2006/01/02_15-04-05\"}}",
-        "Recipe" -> "{{user `recipe`}}",
-        "BuildNumber" -> "{{user `build_number`}}",
-        "SourceAMI" -> "{{user `base_image_ami_id`}}"
-      )
+      tags = ImageTags.tags(variables, packerConfig.stage)
     )
 
     val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
