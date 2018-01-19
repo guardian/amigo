@@ -16,6 +16,7 @@ object PackerBuildConfigGenerator {
    */
   def generatePackerBuildConfig(
     bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
+    val awsAccounts = awsAccountNumbers.mkString(",")
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
@@ -34,7 +35,8 @@ object PackerBuildConfigGenerator {
       ),
       ami_name = "amigo_{{user `recipe`}}_{{user `build_number`}}_{{user `time`}}",
       ami_description = "AMI for {{user `recipe`}} built by Amigo: #{{user `build_number`}}",
-      ami_users = awsAccountNumbers.mkString(","),
+      ami_users = awsAccounts,
+      snapshot_users = awsAccounts,
       iam_instance_profile = packerConfig.instanceProfile,
       tags = ImageTags.tags(variables, packerConfig.stage)
     )
