@@ -58,9 +58,11 @@ class AppComponents(context: Context)
   }
   dynamo.initTables()
 
+  val prism = new Prism(wsClient)
+
   val sns: SNS = {
     val snsClient = AmazonSNSClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
-    new SNS(snsClient, identity.stage)
+    new SNS(snsClient, identity.stage, prism)
   }
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
@@ -93,8 +95,6 @@ class AppComponents(context: Context)
     subnetId = configuration.getString("packer.subnetId"),
     instanceProfile = configuration.getString("packer.instanceProfile")
   )
-
-  val prism = new Prism(wsClient)
 
   val ansibleVariables: Map[String, String] =
     Map("s3_prefix" -> configuration.getString("ansible.packages.s3prefix").getOrElse("")) ++
