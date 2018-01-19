@@ -16,6 +16,7 @@ def getTravisBranch(): String = {
 
 val jacksonVersion = "2.7.1"
 val awsVersion = "1.11.263"
+val circeVersion = "0.9.0"
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
@@ -49,3 +50,19 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
 
 scalariformSettings
+
+
+lazy val imageCopier = (project in file("imageCopier"))
+    .enablePlugins(JavaAppPackaging)
+  .settings(
+    topLevelDirectory in Universal := None,
+    packageName in Universal := normalizedName.value,
+    libraryDependencies ++= Seq(
+      "com.amazonaws" % "aws-java-sdk-ec2" % awsVersion,
+      "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
+      "com.amazonaws" % "aws-lambda-java-events" % "2.0.2",
+      "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+      "io.circe" %% "circe-parser" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion
+    )
+  )
