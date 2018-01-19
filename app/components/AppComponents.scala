@@ -23,7 +23,7 @@ import packer.PackerConfig
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import controllers._
-import notification.{ CompletedBakeNotifier, NotificationSender, SNS }
+import notification.{ AmiCreatedNotifier, NotificationSender, SNS }
 import router.Routes
 import services.PrismAgents
 
@@ -76,7 +76,7 @@ class AppComponents(context: Context)
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
   val sender: NotificationSender = new NotificationSender(sns, identity.stage)
-  val completedBakeNotifier: CompletedBakeNotifier = new CompletedBakeNotifier(eventsSource, sender.sendTopicMessage)
+  val completedBakeNotifier: AmiCreatedNotifier = new AmiCreatedNotifier(eventsSource, sender.sendTopicMessage)
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),
