@@ -3,7 +3,7 @@ package com.gu.imageCopier
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.SNSEvent
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.gu.imageCopier.attempt.Attempt
+import com.gu.imageCopier.attempt.{Attempt, MessageNotForUsFailure}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,14 +21,15 @@ class LambdaEntrypoint {
     println("Running AMIgo copier")
     val messages = SNSMessage.fromLambdaEvent(input)
     println(s"Got messages: $messages")
-    val amiAttempt = Attempt.traverseWithFailures(messages){ message =>
+    val amisAttempt = Attempt.traverseWithFailures(messages){ message =>
       for {
         amiEvent <- AmiEvent.fromJsonString(message.content)
+        _ <- if (amiEvent.targetAccounts.contains(configuration.ownAccountNumber)) Attempt.Right(()) else Attempt.Left(MessageNotForUsFailure)
         copiedAmi <- AmiActions.copyAmi(amiEvent, configuration.kmsKeyArn)
         _ <- AmiActions.tagAmi(amiEvent, configuration.encryptedTagValue, copiedAmi)
       } yield copiedAmi
     }
-    val ami = Await.result(amiAttempt.asFuture, Duration.Inf)
-    println(s"Completed: $ami")
+    val amis = Await.result(amisAttempt.asFuture, Duration.Inf)
+    println(s"Completed: $amis")
   }
 }

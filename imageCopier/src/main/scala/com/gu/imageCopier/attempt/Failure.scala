@@ -30,6 +30,10 @@ case class JsonParseFailure(error: io.circe.Error) extends Failure {
   override def msg = error.toString
 }
 
+case object MessageNotForUsFailure extends Failure {
+  override def msg: String = "Message was not for this account"
+}
+
 case class UnknownFailure(throwable: Throwable) extends FailureWithThrowable
 
 case class AwsSdkFailure(throwable: Throwable) extends FailureWithThrowable
