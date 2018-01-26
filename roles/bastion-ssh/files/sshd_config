@@ -57,7 +57,7 @@ PasswordAuthentication no
 
 # Disable X11 and port forwarding
 X11Forwarding no
-AllowTcpForwarding no
+AllowTcpForwarding yes
 
 # Prevent the use of insecure home directory and key file permissions
 StrictModes yes
