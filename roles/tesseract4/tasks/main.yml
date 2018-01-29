@@ -9,5 +9,5 @@
 
 - name: Install Tesseract 4
   apt:
-    name: tesseract-ocr
+    name: tesseract
     update_cache: yes
