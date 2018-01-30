@@ -16,5 +16,5 @@ do
 done
 
 # Ideally we should exit 1 here but cloud-init seems to ignore the failure and press on regardless...
-# so lets just shout loudly in the syslog and hope someone is watching
-echo "!! AWS Tags not found after 1 minute !!"
+# so lets just complain in the syslog and hope someone is watching
+echo "AWS Tags not found after 1 minute"
