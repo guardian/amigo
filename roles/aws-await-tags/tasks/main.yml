@@ -1,0 +1,3 @@
+---
+- name: add await tags script
+  template: src=await_tags.sh dest=/var/lib/cloud/scripts/per-boot/await_tags.sh mode="u=rwx,g=rx,o=rx"
