@@ -1,0 +1,6 @@
+---
+- name: Add Elastic repository key
+  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+
+- name: Ensure Filebeat is installed
+  apt: deb=https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-{{ version }}-amd64.deb state=present
