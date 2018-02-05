@@ -24,7 +24,8 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         modifiedAt = DateTime.now()
       ),
       roles = List(
-        CustomisedRole(RoleId("recipeRole1"), Map("wow" -> ListParamValue.of("yeah", "bonza"))),
+        CustomisedRole(RoleId("recipeRole1"), Map("wow" -> ListParamValue.of("yeah", "bonza", "needs!quoting"))),
+        CustomisedRole(RoleId("recipeRole7"), Map("wow" -> DictParamValue(Map("yeah" -> SingleParamValue("http://fdsfds.fdsfds/fdsfds/fds"))))),
         CustomisedRole(RoleId("recipeRole2"), Map.empty)
       ),
       createdBy = "Testy McTest",
@@ -34,15 +35,19 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
       bakeSchedule = None
     )
 
-    PlaybookGenerator.generatePlaybook(recipe) should be(
+    PlaybookGenerator.generatePlaybook(recipe, Map("var1" -> "value1", "var2" -> "value2")) should be(
       """---
         |
         |- hosts: all
         |  become: yes
+        |  vars:
+        |    var1: value1
+        |    var2: value2
         |  roles:
-        |    - { role: builtinRole1, foo: 'bar' }
+        |    - { role: builtinRole1, foo: bar }
         |    - builtinRole2
-        |    - { role: recipeRole1, wow: ['yeah', 'bonza'] }
+        |    - { role: recipeRole1, wow: [yeah, bonza, 'needs!quoting'] }
+        |    - { role: recipeRole7, wow: {yeah: 'http://fdsfds.fdsfds/fdsfds/fds'} }
         |    - recipeRole2
         |""".stripMargin
     )

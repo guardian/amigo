@@ -42,8 +42,13 @@ class BaseImageController(
       }, {
         case (description, amiId, linuxDist) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-          BaseImages.update(image, description, amiId, linuxDist, customisedRoles, modifiedBy = request.user.fullName)
-          Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
+          customisedRoles.fold(
+            error => BadRequest(s"Problem parsing roles: $error"),
+            roles => {
+              BaseImages.update(image, description, amiId, linuxDist, roles, modifiedBy = request.user.fullName)
+              Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
+            }
+          )
       })
     }
   }
@@ -63,8 +68,13 @@ class BaseImageController(
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
-            BaseImages.create(id, description, amiId, customisedRoles, createdBy = request.user.fullName, linuxDist)
-            Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
+            customisedRoles.fold(
+              error => BadRequest(s"Problem parsing roles: $error"),
+              roles => {
+                BaseImages.create(id, description, amiId, roles, createdBy = request.user.fullName, linuxDist)
+                Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
+              }
+            )
         }
     })
   }

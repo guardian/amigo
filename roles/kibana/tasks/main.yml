@@ -1,22 +1,6 @@
 ---
-- name: Download kibana
-  get_url: url=https://download.elastic.co/kibana/kibana/kibana-{{ version }}-linux-x64.tar.gz dest=/tmp
+- name: Add Elasticsearch repository key
+  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
 
-- name: Unarchive kibana
-  shell: tar xf /tmp/kibana-{{ version }}-linux-x64.tar.gz -C /opt
-
-- name: Rename kibana directory
-  shell: mv /opt/kibana-{{ version }}-linux-x64 /opt/kibana
-
-- name: Create kibana group
-  group: name=kibana
-
-- name: Create kibana user
-  user: name=kibana shell=/bin/false home=/opt/kibana createhome=no system=yes group=kibana
-
-- name: Create directory for kibana logs
-  file: path=/var/log/kibana state=directory group=kibana owner=kibana
-
-- name: Create systemd file for kibana
-  copy: src={{ systemd_file }} dest=/etc/systemd/system/kibana.service
-
+- name: Ensure Kibana is installed
+  apt: deb=https://artifacts.elastic.co/downloads/kibana/kibana-{{ version }}-amd64.deb state=present

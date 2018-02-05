@@ -1,0 +1,17 @@
+---
+- name: Add Elasticsearch repository key
+  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+
+- name: Ensure elasticsearch is installed
+  apt: deb=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ version }}.deb state=present
+
+- name: Ensure proper limits for elasticsearch user
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      {{ es_user }} - nofile  655
+      {{ es_user }} - memlock unlimited
+
+- name: Install elasticsearch plugins
+  command: "{{ es_home }}/bin/elasticsearch-plugin install {{ item }} --batch --silent"
+  with_items: "{{ plugins | default([]) }}"

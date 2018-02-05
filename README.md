@@ -28,6 +28,12 @@ Roughly, AMIgo does the following:
 
 All data (base images, recipes, bakes, bake logs) are stored in DynamoDB. The Dynamo tables are created automatically if they do not exist.
 
+## Debugging recipes
+
+When running in an environment that is not `PROD` there is an option to `Bake with debug enabled`.
+This passes the `-debug` flag through to packer which saves a copy of the SSH key in AMIgos working directory. This makes 
+it possible to SSH onto the instance that is being used to build the AMI. 
+
 ## How to run locally
 
 AMIgo requires Packer to be [installed](https://www.packer.io/intro/getting-started/install.html)
@@ -45,6 +51,17 @@ packer {
   vpcId = "vpc-1234abcd"
   subnetId = "subnet-5678efgh"
   instanceProfile = "[optional] instance profile name for the box packer will run on"
+}
+```
+
+If you want to use the `packages` role to install packages from an S3 bucket then you'll also need to configure that:
+
+```
+ansible {
+  packages {
+    s3bucket = "your-bucket"
+    s3prefix = "an/optional/prefix/"
+  }
 }
 ```
 

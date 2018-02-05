@@ -1,0 +1,4 @@
+---
+- name: Install a package with pip
+  pip: name={{ item }} state=present
+  with_items: "{{ packages }}"

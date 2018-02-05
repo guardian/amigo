@@ -7,7 +7,7 @@ import packer.{ PackerRunner, PackerConfig }
 import play.api.Logger
 import prism.Prism
 
-class ScheduledBakeRunner(enabled: Boolean, prism: Prism, eventBus: EventBus)(implicit dynamo: Dynamo, packerConfig: PackerConfig) {
+class ScheduledBakeRunner(enabled: Boolean, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) {
 
   def bake(recipeId: RecipeId): Unit = {
     if (!enabled) {
@@ -24,7 +24,7 @@ class ScheduledBakeRunner(enabled: Boolean, prism: Prism, eventBus: EventBus)(im
                 val theBake = Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
                 Logger.info(s"Starting scheduled bake: ${theBake.bakeId}")
-                PackerRunner.createImage(theBake, prism, eventBus)
+                PackerRunner.createImage(theBake, prism, eventBus, ansibleVars, false)
               case None =>
                 Logger.warn(s"Failed to get the next build number for recipe $recipeId")
             }

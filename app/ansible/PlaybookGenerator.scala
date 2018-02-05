@@ -4,13 +4,15 @@ import models.{ CustomisedRole, Recipe }
 
 object PlaybookGenerator {
 
-  def generatePlaybook(recipe: Recipe): String = {
+  def generatePlaybook(recipe: Recipe, allVars: Map[String, String]): String = {
     val allRoles = recipe.baseImage.builtinRoles ++ recipe.roles
 
     s"""---
       |
       |- hosts: all
       |  become: yes
+      |  vars:
+      |${allVars.map { case (k, v) => s"    $k: $v" }.mkString("\n")}
       |  roles:
       |${allRoles.map(role => s"    - ${renderRole(role)}").mkString("\n")}
       |""".stripMargin
