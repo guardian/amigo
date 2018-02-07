@@ -16,10 +16,16 @@ Parameters:
     Description: The S3 bucket from which to download the lambda function
     Type: String
     Default: deploy-tools-dist
-  FunctionCodeKey:
-    Description: The S3 key from which to download the lambda function
+  Stack:
+    Description: The stack this relates to
     Type: String
-    Default: deploy/imagecopier.zip
+    Default: deploy
+  Stage:
+    Description: The AMIgo stage this relates to
+    Type: String
+    AllowedValues:
+    - PROD
+    - CODE
 
 Resources:
   LambdaRole:
@@ -105,7 +111,7 @@ Resources:
       Description: Lambda for copying and encrypting AMIgo baked AMIs
       Code:
         S3Bucket: !Ref FunctionCodeBucket
-        S3Key: !Ref FunctionCodeKey
+        S3Key: !Sub ${Stack}/${Stage}/imagecopier/imagecopier.zip
       Runtime: java8
       MemorySize: 512
       Handler: com.gu.imageCopier.LambdaEntrypoint::run

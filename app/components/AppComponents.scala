@@ -2,31 +2,34 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
+import controllers._
+import data.{ Dynamo, Recipes }
+import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
-import play.api.ApplicationLoader.Context
-import play.api.libs.streams.Streams
+import packer.PackerConfig
 import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
+import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
+import play.api.libs.streams.Streams
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
-import data.{ Dynamo, Recipes }
 import prism.Prism
-import packer.PackerConfig
-import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import controllers._
-import notification.{ AmiCreatedNotifier, NotificationSender, SNS }
 import router.Routes
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.PrismAgents
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class AppComponents(context: Context)
@@ -60,9 +63,17 @@ class AppComponents(context: Context)
 
   val prism = new Prism(wsClient)
 
+  // do this synchronously at startup so we can set permissions
+  val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccountNumbers(), 30 seconds)
+
   val sns: SNS = {
     val snsClient = AmazonSNSClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
-    new SNS(snsClient, identity.stage, prism)
+    new SNS(snsClient, identity.stage, accountNumbers)
+  }
+
+  configuration.getString("aws.distributionBucket").foreach { bucketName =>
+    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
+    LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)
   }
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]

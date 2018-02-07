@@ -45,6 +45,9 @@ riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
 riffRaffManifestBranch := getTravisBranch()
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffArtifactResources ++= Seq(
+  (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip"
+)
 
 // Include the roles dir in the tarball for now
 mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }

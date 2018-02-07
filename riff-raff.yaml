@@ -16,3 +16,9 @@ deployments:
       amiTags:
         Recipe: xenial-java8-deploy-infrastructure
         AmigoStage: PROD
+  # upload lambda
+  imagecopier:
+    type: aws-s3
+    parameters:
+      bucket: deploy-tools-dist
+      cacheControl: public, max-age=600

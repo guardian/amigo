@@ -61,14 +61,12 @@ object SNS {
   }
 }
 
-class SNS(sns: AmazonSNS, stage: String, prism: Prism)(implicit exec: ExecutionContext) {
+class SNS(sns: AmazonSNS, stage: String, accountNumbers: Seq[String])(implicit exec: ExecutionContext) {
   implicit val client = sns
   val topicName: String = s"amigo-$stage-notify"
   val topicArn: String = SNS.listTopicArns.find(_.endsWith(s":$topicName")) match {
     case None => SNS.createTopic(topicName)
     case Some(arn) => arn
   }
-  // do this synchronously at startup
-  val accountNumbers = Await.result(prism.findAllAWSAccountNumbers(), 30 seconds)
   SNS.updatePermissions(topicArn, accountNumbers)
 }
