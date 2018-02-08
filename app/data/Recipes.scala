@@ -32,9 +32,10 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     createdBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Recipe = {
+    bakeSchedule: Option[BakeSchedule],
+    encryptedCopies: List[AccountNumber])(implicit dynamo: Dynamo): Recipe = {
     val now = DateTime.now()
-    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule)
+    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule, encryptedCopies)
     table.put(Recipe.domain2db(recipe, nextBuildNumber = 0)).exec()
 
     recipe
@@ -45,14 +46,16 @@ object Recipes {
     baseImage: BaseImage,
     roles: List[CustomisedRole],
     modifiedBy: String,
-    bakeSchedule: Option[BakeSchedule])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
+    bakeSchedule: Option[BakeSchedule],
+    encryptFor: List[AccountNumber])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
     val baseUpdateExpr =
       set('baseImageId -> baseImage.id) and
         set('roles -> roles) and
         set('modifiedBy -> modifiedBy) and
         set('modifiedAt -> DateTime.now()) and
-        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule))
+        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule)) and
+        (if (encryptFor.nonEmpty) set('encryptFor -> encryptFor) else remove('encryptFor))
 
     val updateExpr = description match {
       case Some(desc) => baseUpdateExpr and set('description -> desc)

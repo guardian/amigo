@@ -11,7 +11,7 @@ import org.scalatest.mock.MockitoSugar
 class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
   def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now)
-  def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), List(), "Test", DateTime.now, "Test", DateTime.now, None)
+  def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
   def fixtureBake(recipe: Recipe, amiId: Option[AmiId]): Bake = Bake(recipe, 1, amiId.map(_ => BakeStatus.Complete).getOrElse(BakeStatus.Failed), amiId, "Test", DateTime.now)
 
   "RecipeUsage" should "find for each recipes where they are being used" in {

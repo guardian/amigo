@@ -15,6 +15,7 @@ case class PackerBuilderConfig(
   ami_name: String,
   ami_description: String,
   ami_users: String,
+  snapshot_users: String,
   iam_instance_profile: Option[String],
   tags: Map[String, String])
 

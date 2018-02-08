@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AMIgo image copier lambda
+
+Parameters:
+  AmigoTopicArn:
+    Description: The SNS topic to subscribe to
+    Type: String
+  KmsKeyARN:
+    Description: ARN of KMS key to encrypt the AMI copies
+    Type: String
+  EncryptedTagValue:
+    Description: The value of the Encrypted tag on the created AMI
+    Type: String
+    Default: true
+  FunctionCodeBucket:
+    Description: The S3 bucket from which to download the lambda function
+    Type: String
+    Default: deploy-tools-dist
+  Stack:
+    Description: The stack this relates to
+    Type: String
+    Default: deploy
+  Stage:
+    Description: The AMIgo stage this relates to
+    Type: String
+    AllowedValues:
+    - PROD
+    - CODE
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+
+  LoggingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+      - !Ref LambdaRole
+      PolicyName: LambdaLoggingPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+
+  KMSKeyPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+      - !Ref LambdaRole
+      PolicyName: KMSKeyPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:CreateGrant
+          - kms:GenerateDataKey*
+          - kms:DescribeKey
+          Resource: !Ref KmsKeyARN
+
+  ImageCopyPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+      - !Ref LambdaRole
+      PolicyName: ImageCopyPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - ec2:CopyImage
+          - ec2:CreateTags
+          Resource: '*'
+
+  # Permission for the SNS topic to push events to the Lambda
+  InvokeSnapshotLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ImageCopierLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref AmigoTopicArn
+
+  # Actual subscription
+  SubscribeToAmigoTopic:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AmigoTopicArn
+      Protocol: lambda
+      Endpoint: !GetAtt ImageCopierLambda.Arn
+
+  # Lambda that actions snapshot requests
+  ImageCopierLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda for copying and encrypting AMIgo baked AMIs
+      Code:
+        S3Bucket: !Ref FunctionCodeBucket
+        S3Key: !Sub ${Stack}/${Stage}/imagecopier/imagecopier.zip
+      Runtime: java8
+      MemorySize: 512
+      Handler: com.gu.imageCopier.LambdaEntrypoint::run
+      Role: !GetAtt LambdaRole.Arn
+      Timeout: 30
+      Environment:
+        Variables:
+          ACCOUNT_ID: !Ref AWS::AccountId
+          KMS_KEY_ARN: !Ref KmsKeyARN
+          ENCRYPTED_TAG_VALUE: !Ref EncryptedTagValue
