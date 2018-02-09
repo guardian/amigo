@@ -18,6 +18,8 @@ class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implic
 
   def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("/launch-configurations")
 
+  def findCopiedImages(): Future[Seq[Image]] = findAll[Image]("/images?tags.CopiedFromAMI!=")
+
   private def findAll[T](path: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
     val url = s"$baseUrl$path"
     ws.url(url).get().map { resp =>
@@ -31,10 +33,10 @@ class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implic
 }
 
 object Prism {
-
   case class SourceInstance(accountNumber: String)
   case class Instance(imageId: String)
   case class LaunchConfiguration(imageId: String)
+  case class Image(imageId: String, ownerId: String, copiedFromAMI: String, state: String)
 
   implicit val sourceInstanceReads: Reads[SourceInstance] = (__ \ "origin" \ "accountNumber").read[String].map(SourceInstance)
   implicit val sourceInstancesReads: Reads[Seq[SourceInstance]] = dataReads[SourceInstance](dataPath = "data")
@@ -42,6 +44,14 @@ object Prism {
   implicit val instancesReads: Reads[Seq[Instance]] = dataReads[Instance](dataPath = "data", "instances")
   implicit val launchConfigurationReads: Reads[LaunchConfiguration] = Json.reads[LaunchConfiguration]
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] = dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
+  import play.api.libs.functional.syntax._
+  implicit val imageReads: Reads[Image] = (
+    (JsPath \ "imageId").read[String] and
+    (JsPath \ "ownerId").read[String] and
+    (JsPath \ "tags" \ "CopiedFromAMI").read[String] and
+    (JsPath \ "state").read[String]
+  )(Image.apply _)
+  implicit val imagesReads: Reads[Seq[Image]] = dataReads[Image](dataPath = "data", "images")
 
   private def dataReads[T](dataPath: String*)(implicit r: Reads[T]): Reads[Seq[T]] =
     dataPath.foldLeft[JsPath](__)((path, subPath) => path \ subPath).read[Seq[T]]

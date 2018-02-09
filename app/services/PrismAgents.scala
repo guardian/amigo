@@ -6,7 +6,8 @@ import play.api.Logger
 import play.api.inject.ApplicationLifecycle
 import play.api.{ Environment, Mode }
 import prism.Prism
-import prism.Prism.{ Instance, LaunchConfiguration }
+import prism.Prism.{ Image, Instance, LaunchConfiguration }
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
@@ -17,9 +18,11 @@ class PrismAgents(prism: Prism,
 
   private val instancesAgent: Agent[Seq[Instance]] = Agent(Seq.empty)
   private val launchConfigurationsAgent: Agent[Seq[LaunchConfiguration]] = Agent(Seq.empty)
+  private val copiedImagesAgent: Agent[Map[String, Seq[Image]]] = Agent(Map.empty)
 
   def allInstances: Seq[Instance] = instancesAgent.get
   def allLaunchConfigurations: Seq[LaunchConfiguration] = launchConfigurationsAgent.get
+  def copiedImages(sourceAmiIds: Set[String]): Map[String, Seq[Image]] = copiedImagesAgent.get.filterKeys(sourceAmiIds.contains)
 
   if (environment.mode != Mode.Test) {
 
@@ -37,6 +40,7 @@ class PrismAgents(prism: Prism,
   private def refresh: Future[Unit] = {
     refreshInstances()
     refreshLaunchConfigurations()
+    refreshCopiedImages()
   }
 
   private def refreshInstances(): Future[Unit] = {
@@ -60,6 +64,18 @@ class PrismAgents(prism: Prism,
       .recover {
         case t =>
           Logger.warn(s"Prism: Failed to update launch configurations: ${t.getLocalizedMessage}")
+      }
+  }
+
+  private def refreshCopiedImages(): Future[Unit] = {
+    prism.findCopiedImages()
+      .map { copiedImages =>
+        Logger.debug(s"Prism: Loaded ${copiedImages.length} copied images")
+        copiedImagesAgent.send(copiedImages.groupBy(_.copiedFromAMI))
+      }
+      .recover {
+        case t =>
+          Logger.warn(s"Prism: Failed to update copied images: ${t.getLocalizedMessage}")
       }
   }
 

@@ -31,10 +31,13 @@ class RecipeController(
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
+      val recentBakes = bakes.take(20)
+      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).map(_.value).toSet)
       Ok(
         views.html.showRecipe(
           recipe,
-          bakes.take(20),
+          recentBakes,
+          recentCopies,
           RecipeUsage(recipe, bakes)(prismAgents),
           Roles.list,
           debugAvailable

@@ -1,7 +1,9 @@
 @import data.Roles
+@import prism.Prism.Image
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
+        recentCopies: Map[String, Seq[Image]],
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean
@@ -76,6 +78,19 @@
             }
             </td>
           </tr>
+          @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id.value)).getOrElse(Nil)){
+            <tr>
+              <td></td>
+              <td></td>
+              <td>@copy.state</td>
+              <td class="absolute-container">
+                <code id="ami-id">@copy.imageId</code>
+                <button class="btn btn-primary btn-xs absolute-right" title="Copy to clipboard" id="copy-button" data-clipboard-target="#ami-id">
+                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                </button>
+              </td>
+            </tr>
+          }
         }
         </tbody>
       </table>
