@@ -2,11 +2,12 @@ package prism
 
 import models._
 import org.joda.time.DateTime
-import org.scalatest.{ FlatSpec, Matchers }
-import prism.Prism.{ Instance, LaunchConfiguration }
-import services.PrismAgents
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.mock.MockitoSugar
+import prism.Prism.{ Image, Instance, LaunchConfiguration }
+import services.PrismAgents
 
 class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
@@ -19,6 +20,7 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     val amiId2 = AmiId("2")
     val amiId3 = AmiId("3")
     val amiId4 = AmiId("4")
+    val amiId5 = AmiId("5")
 
     val recipe1 = fixtureRecipe("recipe1")
     val recipe2 = fixtureRecipe("recipe2")
@@ -35,18 +37,21 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
     val instance1 = Instance(amiId1.value)
     val instance2 = Instance(amiId2.value)
+    val instance5 = Instance(amiId5.value)
 
     val lc1 = LaunchConfiguration(amiId1.value)
     val lc2 = LaunchConfiguration(amiId3.value)
 
     val mockPrismAgents = mock[PrismAgents]
-    when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2)
+    when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2, instance5)
     when(mockPrismAgents.allLaunchConfigurations) thenReturn Seq(lc1, lc2)
+    when(mockPrismAgents.copiedImages(any())) thenReturn Map[String, Seq[Image]]()
+    when(mockPrismAgents.copiedImages(Set("3"))) thenReturn Map("3" -> Seq(Image("5", "1234", "3", "available")))
 
     val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
     val expected: Map[Recipe, RecipeUsage] = Map(
       recipe1 -> RecipeUsage(instances = Seq(instance1, instance2), launchConfigurations = Seq(lc1)),
-      recipe2 -> RecipeUsage(instances = Seq(), launchConfigurations = Seq(lc2)),
+      recipe2 -> RecipeUsage(instances = Seq(instance5), launchConfigurations = Seq(lc2)),
       recipe3 -> RecipeUsage(instances = Seq(), launchConfigurations = Seq())
     )
     usages should be(expected)
