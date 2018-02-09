@@ -6,6 +6,7 @@ Resources:
     Type: AWS::KMS::Key
     DeletionPolicy: Retain
     Properties:
+      Description: Used by AMIgo image copier lambda to encrypt AMIs
       EnableKeyRotation: True
       KeyPolicy:
         Version: 2012-10-17
