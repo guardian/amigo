@@ -5,9 +5,6 @@ Parameters:
   AmigoTopicArn:
     Description: The SNS topic to subscribe to
     Type: String
-  KmsKeyARN:
-    Description: ARN of KMS key to encrypt the AMI copies
-    Type: String
   EncryptedTagValue:
     Description: The value of the Encrypted tag on the created AMI
     Type: String
@@ -71,7 +68,7 @@ Resources:
           - kms:CreateGrant
           - kms:GenerateDataKey*
           - kms:DescribeKey
-          Resource: !Ref KmsKeyARN
+          Resource: !ImportValue amigo-imagecopier-key
 
   ImageCopyPolicy:
     Type: AWS::IAM::Policy
@@ -120,5 +117,5 @@ Resources:
       Environment:
         Variables:
           ACCOUNT_ID: !Ref AWS::AccountId
-          KMS_KEY_ARN: !Ref KmsKeyARN
+          KMS_KEY_ARN: !ImportValue amigo-imagecopier-key
           ENCRYPTED_TAG_VALUE: !Ref EncryptedTagValue

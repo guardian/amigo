@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AMIgo kms key creator
+
+Resources:
+  KmsKey:
+    Type: AWS::KMS::Key
+    DeletionPolicy: Retain
+    Properties:
+      Description: Used by AMIgo image copier lambda to encrypt AMIs
+      EnableKeyRotation: True
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: amigo-kms-key
+        Statement:
+        - Sid: Enable IAM User Permissions
+          Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          Action: kms:*
+          Resource: "*"
+
+Outputs:
+  AmigoImageCopierKey:
+    Description: Amigo image copier key arn
+    Value: !GetAtt KmsKey.Arn
+    Export:
+      Name: amigo-imagecopier-key
