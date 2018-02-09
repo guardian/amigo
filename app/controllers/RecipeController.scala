@@ -38,6 +38,7 @@ class RecipeController(
           recipe,
           recentBakes,
           recentCopies,
+          prismAgents.accounts,
           RecipeUsage(recipe, bakes)(prismAgents),
           Roles.list,
           debugAvailable

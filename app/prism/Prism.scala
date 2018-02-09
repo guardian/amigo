@@ -9,9 +9,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
   import Prism._
 
-  def findAllAWSAccountNumbers(): Future[Seq[String]] = {
-    findAll[SourceInstance]("/sources?resource=instance&origin.vendor=aws")
-      .map(_.map(_.accountNumber))
+  def findAllAWSAccounts(): Future[Seq[AWSAccount]] = {
+    findAll[AWSAccount]("/sources?resource=instance&origin.vendor=aws")
   }
 
   def findAllInstances(): Future[Seq[Instance]] = findAll[Instance]("/instances")
@@ -33,18 +32,21 @@ class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implic
 }
 
 object Prism {
-  case class SourceInstance(accountNumber: String)
+  case class AWSAccount(accountName: String, accountNumber: String)
   case class Instance(imageId: String)
   case class LaunchConfiguration(imageId: String)
   case class Image(imageId: String, ownerId: String, copiedFromAMI: String, state: String)
 
-  implicit val sourceInstanceReads: Reads[SourceInstance] = (__ \ "origin" \ "accountNumber").read[String].map(SourceInstance)
-  implicit val sourceInstancesReads: Reads[Seq[SourceInstance]] = dataReads[SourceInstance](dataPath = "data")
+  import play.api.libs.functional.syntax._
+  implicit val sourceInstanceReads: Reads[AWSAccount] = (
+    (JsPath \ "origin" \ "accountName").read[String] and
+    (JsPath \ "origin" \ "accountNumber").read[String]
+  )(AWSAccount.apply _)
+  implicit val sourceInstancesReads: Reads[Seq[AWSAccount]] = dataReads[AWSAccount](dataPath = "data")
   implicit val instanceReads: Reads[Instance] = (__ \ "specification" \ "imageId").read[String].map(Instance)
   implicit val instancesReads: Reads[Seq[Instance]] = dataReads[Instance](dataPath = "data", "instances")
   implicit val launchConfigurationReads: Reads[LaunchConfiguration] = Json.reads[LaunchConfiguration]
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] = dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
-  import play.api.libs.functional.syntax._
   implicit val imageReads: Reads[Image] = (
     (JsPath \ "imageId").read[String] and
     (JsPath \ "ownerId").read[String] and

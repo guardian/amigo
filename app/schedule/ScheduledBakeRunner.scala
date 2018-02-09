@@ -1,13 +1,14 @@
 package schedule
 
-import data.{ Bakes, Recipes, Dynamo }
+import data.{ Bakes, Dynamo, Recipes }
 import event.EventBus
 import models.RecipeId
-import packer.{ PackerRunner, PackerConfig }
+import packer.{ PackerConfig, PackerRunner }
 import play.api.Logger
 import prism.Prism
+import services.PrismAgents
 
-class ScheduledBakeRunner(enabled: Boolean, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) {
+class ScheduledBakeRunner(enabled: Boolean, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) {
 
   def bake(recipeId: RecipeId): Unit = {
     if (!enabled) {

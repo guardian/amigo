@@ -10,6 +10,7 @@ import models.packer.PackerVariablesConfig
 import play.api.Logger
 import play.api.libs.json.Json
 import prism.Prism
+import services.PrismAgents
 
 import scala.concurrent.{ Future, Promise }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,21 +25,20 @@ object PackerRunner {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(bake: Bake, prism: Prism, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean)(implicit packerConfig: PackerConfig): Future[Int] = {
+  def createImage(bake: Bake, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean)(implicit packerConfig: PackerConfig): Future[Int] = {
     val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars)
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
     Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
-    prism.findAllAWSAccountNumbers() flatMap { awsAccountNumbers =>
-      Logger.info(s"AMI will be shared with the following AWS accounts: $awsAccountNumbers")
-      val packerVars = PackerVariablesConfig(bake)
-      val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(bake, playbookFile, packerVars, awsAccountNumbers)
-      val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
-      val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
-      Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling
+    val awsAccountNumbers = prism.accounts.map(_.accountNumber)
+    Logger.info(s"AMI will be shared with the following AWS accounts: $awsAccountNumbers")
+    val packerVars = PackerVariablesConfig(bake)
+    val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(bake, playbookFile, packerVars, awsAccountNumbers)
+    val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
+    val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
+    Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
-      executePacker(bake, playbookFile, packerConfigFile, eventBus, debug)
-    }
+    executePacker(bake, playbookFile, packerConfigFile, eventBus, debug)
   }
 
   private def executePacker(bake: Bake, playbookFile: Path, packerConfigFile: Path, eventBus: EventBus, debug: Boolean): Future[Int] = {

@@ -1,9 +1,11 @@
 @import data.Roles
 @import prism.Prism.Image
+@import prism.Prism.AWSAccount
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
         recentCopies: Map[String, Seq[Image]],
+        accounts: Seq[AWSAccount],
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean
@@ -60,6 +62,9 @@
         <thead>
           <th>Started</th>
           <th>Build number</th>
+          @if(recentCopies.nonEmpty) {
+            <th>Encrypted copy account</th>
+          }
           <th>Status</th>
           <th>AMI</th>
         </thead>
@@ -68,6 +73,9 @@
           <tr>
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@fragments.timestamp(bake.startedAt, bake.startedBy)</a></td>
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.buildNumber</a></td>
+          @if(recentCopies.nonEmpty) {
+            <td class="has-block-link"></td>
+          }
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.status</a></td>
             <td class="absolute-container has-block-link">
             @if(bake.amiId.isDefined) {
@@ -82,7 +90,10 @@
             <tr>
               <td></td>
               <td></td>
-              <td>@copy.state</td>
+              <td>@defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
+              }</td>
+              <td>@copy.state.capitalize</td>
               <td class="absolute-container">
                 <code id="ami-id">@copy.imageId</code>
                 <button class="btn btn-primary btn-xs absolute-right" title="Copy to clipboard" id="copy-button" data-clipboard-target="#ami-id">

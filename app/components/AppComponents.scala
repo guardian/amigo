@@ -24,6 +24,7 @@ import play.api.libs.streams.Streams
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import prism.Prism
+import prism.Prism.AWSAccount
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.PrismAgents
@@ -62,9 +63,10 @@ class AppComponents(context: Context)
   dynamo.initTables()
 
   val prism = new Prism(wsClient)
+  val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
 
   // do this synchronously at startup so we can set permissions
-  val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccountNumbers(), 30 seconds)
+  val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
 
   val sns: SNS = {
     val snsClient = AmazonSNSClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
@@ -113,7 +115,7 @@ class AppComponents(context: Context)
 
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(enabled, prism, eventBus, ansibleVariables)
+    new ScheduledBakeRunner(enabled, prismAgents, eventBus, ansibleVariables)
   }
   val bakeScheduler = new BakeScheduler(scheduledBakeRunner)
 
@@ -122,12 +124,11 @@ class AppComponents(context: Context)
 
   val debugAvailable = identity.stage != "PROD"
 
-  val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(eventsSource, prism, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
+  val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
