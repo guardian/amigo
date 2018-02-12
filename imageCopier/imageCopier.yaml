@@ -5,6 +5,10 @@ Parameters:
   AmigoTopicArn:
     Description: The SNS topic to subscribe to
     Type: String
+  KmsKeyArn:
+    Description: Override the default KMS key if required
+    Type: String
+    Default: ""
   EncryptedTagValue:
     Description: The value of the Encrypted tag on the created AMI
     Type: String
@@ -23,6 +27,10 @@ Parameters:
     AllowedValues:
     - PROD
     - CODE
+
+Conditions:
+  ImportKmsKeyArn:
+    !Equals [ !Ref KmsKeyArn, "" ]
 
 Resources:
   LambdaRole:
@@ -68,7 +76,10 @@ Resources:
           - kms:CreateGrant
           - kms:GenerateDataKey*
           - kms:DescribeKey
-          Resource: !ImportValue amigo-imagecopier-key
+          Resource: !If
+            - ImportKmsKeyArn
+            - !ImportValue amigo-imagecopier-key
+            - !Ref KmsKeyArn
 
   ImageCopyPolicy:
     Type: AWS::IAM::Policy
@@ -116,6 +127,11 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          ACCOUNT_ID: !Ref AWS::AccountId
-          KMS_KEY_ARN: !ImportValue amigo-imagecopier-key
-          ENCRYPTED_TAG_VALUE: !Ref EncryptedTagValue
+          ACCOUNT_ID:
+            !Ref AWS::AccountId
+          KMS_KEY_ARN: !If
+            - ImportKmsKeyArn
+            - !ImportValue amigo-imagecopier-key
+            - !Ref KmsKeyArn
+          ENCRYPTED_TAG_VALUE:
+            !Ref EncryptedTagValue
