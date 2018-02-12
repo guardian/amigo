@@ -11,7 +11,9 @@ object RecipeUsage {
   def noUsage(): RecipeUsage = RecipeUsage(Seq.empty[Instance], Seq.empty[LaunchConfiguration])
 
   def apply(recipe: Recipe, bakes: Iterable[Bake])(implicit prismAgents: PrismAgents): RecipeUsage = {
-    val amiIds = bakes.flatMap(_.amiId.map(_.value)).toList
+    val bakedAmiIds = bakes.flatMap(_.amiId.map(_.value)).toList
+    val copiedAmiIds = prismAgents.copiedImages(bakedAmiIds.toSet).values.flatten.map(_.imageId)
+    val amiIds = bakedAmiIds ++ copiedAmiIds
     val instances = prismAgents.allInstances.filter(instance => amiIds.contains(instance.imageId))
     val launchConfigurations = prismAgents.allLaunchConfigurations.filter(lc => amiIds.contains(lc.imageId))
     RecipeUsage(instances, launchConfigurations)

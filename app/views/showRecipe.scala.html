@@ -1,7 +1,11 @@
 @import data.Roles
+@import prism.Prism.Image
+@import prism.Prism.AWSAccount
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
+        recentCopies: Map[String, Seq[Image]],
+        accounts: Seq[AWSAccount],
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean
@@ -58,6 +62,9 @@
         <thead>
           <th>Started</th>
           <th>Build number</th>
+          @if(recentCopies.nonEmpty) {
+            <th>Encrypted copy account</th>
+          }
           <th>Status</th>
           <th>AMI</th>
         </thead>
@@ -66,16 +73,35 @@
           <tr>
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@fragments.timestamp(bake.startedAt, bake.startedBy)</a></td>
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.buildNumber</a></td>
+          @if(recentCopies.nonEmpty) {
+            <td class="has-block-link"></td>
+          }
           <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.status</a></td>
             <td class="absolute-container has-block-link">
             @if(bake.amiId.isDefined) {
-              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)"><code id="ami-id">@bake.amiId</code></a>
-              <button class="btn btn-primary btn-xs absolute-right" title="Copy to clipboard" id="copy-button" data-clipboard-target="#ami-id">
+              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)"><code>@bake.amiId</code></a>
+              <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@bake.amiId">
                 <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
               </button>
             }
             </td>
           </tr>
+          @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id.value)).getOrElse(Nil)){
+            <tr>
+              <td></td>
+              <td></td>
+              <td>@defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
+              }</td>
+              <td>@copy.state.capitalize</td>
+              <td class="absolute-container">
+                <code>@copy.imageId</code>
+                <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@copy.imageId">
+                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                </button>
+              </td>
+            </tr>
+          }
         }
         </tbody>
       </table>
@@ -84,17 +110,11 @@
 
   <script src="@routes.Assets.versioned("javascripts/clipboard.min.js")"></script>
   <script>
-          var copy = document.getElementById('copy-button');
-          var clipboard = new Clipboard(copy);
-
-          copy.addEventListener('click', function (e) {
-            console.log('HAPPENING!')
-            e.preventDefault();
-          })
+          var clipboard = new Clipboard('.copy-button');
 
           clipboard.on('success', function(e) {
             console.log(e);
-            copy.classList.add('btn--success');
+            e.trigger.classList.add('btn--success');
           });
           clipboard.on('error', function(e) {
             console.log(e);

@@ -5,7 +5,8 @@ import play.api.mvc.{ Action, Results }
 import play.api.test.WsTestClient
 import play.core.server.Server
 import play.api.routing.sird._
-import prism.Prism.{ Instance, LaunchConfiguration }
+import prism.Prism.{ AWSAccount, Instance, LaunchConfiguration }
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,8 +33,8 @@ class PrismSpec extends FlatSpec with Matchers {
 
   it should "fetch all AWS account numbers" in {
     withPrismClient { prism =>
-      val accounts = Await.result(prism.findAllAWSAccountNumbers(), 10.seconds)
-      accounts should be(Seq("1234", "5678"))
+      val accounts = Await.result(prism.findAllAWSAccounts(), 10.seconds)
+      accounts should be(Seq(AWSAccount("foo", "1234"), AWSAccount("bar", "5678")))
     }
   }
 
