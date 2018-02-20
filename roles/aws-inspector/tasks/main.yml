@@ -8,5 +8,6 @@
   command: /bin/bash /tmp/aws-inspector-installer
 
 - name: Remove AWS Inspector installer script
-  file: path=/tmp/aws-inspector-installer 
+  file: 
+    path: /tmp/aws-inspector-installer 
     state: absent
