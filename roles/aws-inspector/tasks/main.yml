@@ -1,0 +1,8 @@
+---
+- name: Fetch AWS Inspector installer
+  get_url: 
+    url: https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install 
+    dest: /tmp/aws-inspector-installer
+
+- name: Install AWS Inspector
+  command: /bin/bash /tmp/aws-inspector-installer
