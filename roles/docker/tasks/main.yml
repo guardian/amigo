@@ -1,0 +1,18 @@
+---
+- name: Install required packages
+  apt: name={{ item }} update_cache=yes state=installed force=yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - openssl
+
+- name: Add repo key
+  apt_key:
+    url: "https://download.docker.com/linux/debian/gpg"
+    state: present
+
+- name: Add docker.io repo
+  apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable' state=present
+
+- name: Install docker
+  apt: name=docker-ce update_cache=yes state=installed force=yes
