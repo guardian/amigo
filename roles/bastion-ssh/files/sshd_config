@@ -1,4 +1,4 @@
-Port 2022
+Port 22
 Protocol 2
 
 # Supported HostKey algorithms by order of preference.
