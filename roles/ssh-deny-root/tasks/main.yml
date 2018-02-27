@@ -1,5 +1,6 @@
 ---
-- lineinfile:
+- name: "Deny root login over ssh"
+  lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^PermitRootLogin '
     line: 'PermitRootLogin no'
