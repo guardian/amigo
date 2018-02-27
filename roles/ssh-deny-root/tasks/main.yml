@@ -1,0 +1,5 @@
+---
+- lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^DenyUsers '
+    line: 'DenyUsers root'

@@ -1,0 +1,5 @@
+---
+- lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^AllowUsers '
+    line: 'AllowUsers ubuntu'
