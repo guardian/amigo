@@ -6,7 +6,7 @@ set -e
 
 {% for prefix in prefixes %}
     aws s3 cp s3://{{ssh_keys_bucket}}/{{prefix}}/authorized_keys /tmp/authorized_keys.{{prefix}}
-    cat /tmp/authorized_keys.{{prefix}} >> /tmp/authorized_keys
+    cat /tmp/authorized_keys.{{prefix}} > /tmp/authorized_keys
 {% endfor %}
 
 install -m 600 -o {{ssh_user}} /tmp/authorized_keys /home/{{ssh_user}}/.ssh/authorized_keys
