@@ -13,7 +13,7 @@ defaulting to ~3000 names at `https://s3-eu-west-1.amazonaws.com/ophan-dist/opha
 You will need to run the following script in your cloud init
 
 ```
-/opt/features/friendly-hostnames/set-friendly-hostname.sh
+/opt/features/friendly-hostnames/set-hostname.sh
 ```
 
 A hostname will be chosen at random and formatted to a 

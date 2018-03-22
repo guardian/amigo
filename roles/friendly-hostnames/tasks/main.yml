@@ -5,4 +5,4 @@
   get_url: url={{hostnames_url}} dest=/opt/features/friendly-hostnames/hostnames.txt mode="a+r"
 
 - name: Copy script for assigning hostnames and make executable
-  copy: src=set-friendly-hostname.sh dest=/opt/features/friendly-hostnames/set-friendly-hostname.sh mode="a+x"
+  copy: src=set-hostname.sh dest=/opt/features/friendly-hostnames/set-hostname.sh mode="a+x"
