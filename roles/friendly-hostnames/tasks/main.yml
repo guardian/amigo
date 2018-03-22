@@ -1,4 +1,6 @@
 ---
+- file: path=/opt/features/friendly-hostnames state=directory mode=0755
+
 - name: Install friendly hostnames
   get_url: url={{hostnames_url}} dest=/opt/features/friendly-hostnames/hostnames.txt mode="a+r"
 
