@@ -1,0 +1,9 @@
+---
+- pip:
+    name: boto3
+- pip:
+    name: json
+- pip:
+    name: requests
+- name: dump tags script
+  template: src=dump_tags.sh dest=/var/lib/cloud/scripts/per-boot/dump_tags.sh mode="u=rwx,g=rx,o=rx"
