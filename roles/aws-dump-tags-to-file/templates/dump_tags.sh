@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+jsonfile = "/etc/gu/tags.json"
+propfile = "/etc/gu/tags.properties"
 
 import boto3
 import json
@@ -12,8 +14,7 @@ session = boto3.Session(profile_name='deployTools', region_name='eu-west-1')
 def get_instance_tags(id):
     ec2_client = session.resource('ec2')
     ec2instance = ec2_client.Instance(id)
-    for tags in ec2instance.tags:
-        print tags["Key"], tags["Value"]
+    return ec2instance.tags:
 
 def get_asg_tags(id, next_token=None):
     asg_client = session.client('autoscaling')
@@ -30,7 +31,7 @@ def get_asg_tags(id, next_token=None):
        return get_asg_tags(id, asgs['NextToken'])
     return None
 
-def tags(id):
+def get_tags(id):
     tags = get_asg_tags(id)
     if tags is None:
         return get_instance_tags(id)
@@ -42,6 +43,13 @@ def tags(id):
         return formatted_tags
 
 instance_id=get_instance_id()
-file = open("/etc/gu/tags.json", "rw")
-file.write(json.dumps(tags(instance_id)))
+tags = get_tags(instance_id)
+
+file = open(jsonfile, "rw")
+file.write(json.dumps(tags))
+file.close()
+
+file = open(propfile, "rw")
+for k in tags.keys():
+    file.write(k + ": " + a[k])
 file.close()
