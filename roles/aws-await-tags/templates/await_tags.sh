@@ -7,7 +7,7 @@ for i in {1..12}
 do
     NUM_TAGS=$(aws ec2 describe-tags --filters Name=resource-type,Values=instance Name=resource-id,Values=${INSTANCE_ID} --region eu-west-1 | jq ".Tags | length")
 
-    if [[ -z $NUM_TAGS ]]; then
+    if [[ -z "$NUM_TAGS" ]]; then
         echo "Unable to call describe tags. Exiting immediately"
         exit 255
     fi
