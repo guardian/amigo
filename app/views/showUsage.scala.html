@@ -1,0 +1,95 @@
+@import data.Roles
+@import prism.BakeUsage
+@import prism.Prism.AWSAccount
+@(
+        recipe: Recipe,
+        bakeUsage: Seq[BakeUsage],
+        accounts: Seq[AWSAccount],
+        prismBaseUrl: String
+)(implicit flash: Flash)
+@simpleLayout("AMIgo"){
+
+    <h1>Usages of @recipe.id.value</h1>
+
+    @if(bakeUsage.isEmpty) {
+        <h4>No usages of this recipe found</h4>
+    } else {
+    <table class="table table-striped table-hover">
+        <thead>
+            <th>Build</th>
+            <th>Encrypted copy?</th>
+            <th>Usages</th>
+            <th>AMI</th>
+        </thead>
+        <tbody>
+            @bakeUsage.sortBy(bu => (bu.bake.startedAt.getMillis, bu.viaCopy.map(_.imageId))).map { usage =>
+                <tr>
+                    <td class="has-block-link">
+                        <a class="block-link" href="@routes.BakeController.showBake(usage.bake.recipe.id, usage.bake.buildNumber)">
+                            <ul class="list-unstyled">
+                                <li>@usage.bake.buildNumber</li>
+                                <li>@usage.bake.startedAt.toString("yyyy-MM-dd HH:mm:ss")</li>
+                            </ul>
+                        </a>
+                    </td>
+                    <td>
+                        @usage.viaCopy.map { viaCopy =>
+                            <ul class="list-unstyled">
+                                <li>Acc: @defining(accounts.find(_.accountNumber == viaCopy.ownerId)){ maybeOwnerAcc =>
+                                    @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(viaCopy.ownerId)
+                                }</li>
+                                @viaCopy.encrypted.map{e =>
+                                    <li>Encrypted tag: @e</li>
+                                }
+                            </ul>
+                        }
+                    </td>
+                    <td>
+                        <ul>
+                           @usage.instances.map { instance =>
+                               <li class="list-unstyled">
+                                   <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instance" />
+                                   <a href="@prismBaseUrl/instances?instanceName=@instance.name">@instance.name</a>
+                                   (in @instance.awsAccount.accountName)
+                               </li>
+                           }
+                           @usage.launchConfigurations.map { launchConfiguration =>
+                               <li class="list-unstyled">
+                                   <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
+                                   <a href="@prismBaseUrl/launch-configurations?name=@launchConfiguration.name">@launchConfiguration.name</a>
+                                   (in @launchConfiguration.awsAccount.accountName)
+                               </li>
+                           }
+                        </ul>
+                    </td>
+                    <td class="absolute-container">
+                    @if(usage.bake.amiId.isDefined) {
+                        <a href="@routes.BakeController.showBake(usage.bake.recipe.id, usage.bake.buildNumber)"><code>@usage.bake.amiId</code></a>
+                        <button class="btn btn-primary btn-xs copy-button" title="Copy to clipboard" data-clipboard-text="@usage.bake.amiId">
+                            <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                        </button>
+                    }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    }
+
+    <script src="@routes.Assets.versioned("javascripts/clipboard.min.js")"></script>
+    <script>
+            var clipboard = new Clipboard('.copy-button');
+
+            clipboard.on('success', function(e) {
+                console.log(e);
+                e.trigger.classList.add('btn--success');
+            });
+            clipboard.on('error', function(e) {
+                console.log(e);
+                //TODO: Add tooltip
+            });
+
+    </script>
+
+        <!-- TODO listen to bake events and update the bakes list accordingly -->
+}

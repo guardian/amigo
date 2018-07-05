@@ -8,7 +8,7 @@ import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
-import prism.RecipeUsage
+import prism.{ Prism, RecipeUsage }
 import schedule.BakeScheduler
 import services.PrismAgents
 
@@ -113,6 +113,21 @@ class RecipeController(
             }
         }
     })
+  }
+
+  def showUsages(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id)
+      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      Ok(
+        views.html.showUsage(
+          recipe,
+          recipeUsage.bakeUsage,
+          prismAgents.accounts,
+          prismAgents.baseUrl
+        )
+      )
+    }
   }
 
 }
