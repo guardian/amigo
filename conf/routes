@@ -23,6 +23,8 @@ GET     /recipes/:id                controllers.RecipeController.showRecipe(id: 
 GET     /recipes/:id/edit           controllers.RecipeController.editRecipe(id: RecipeId)
 POST    /recipes/:id/edit           controllers.RecipeController.updateRecipe(id: RecipeId)
 
+GET     /recipes/:id/usages         controllers.RecipeController.showUsages(id: RecipeId)
+
 POST    /recipes/:id/bake                               controllers.BakeController.startBaking(id: RecipeId, debug: Boolean ?= false)
 GET     /recipes/:recipeId/bakes/:buildNumber           controllers.BakeController.showBake(recipeId: RecipeId, buildNumber: Int)
 GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.BakeController.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)

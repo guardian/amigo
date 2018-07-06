@@ -6,7 +6,7 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.mock.MockitoSugar
-import prism.Prism.{ Image, Instance, LaunchConfiguration }
+import prism.Prism.{ AWSAccount, Image, Instance, LaunchConfiguration }
 import services.PrismAgents
 
 class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
@@ -27,34 +27,60 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     val recipe3 = fixtureRecipe("recipe3")
     val recipes = Seq(recipe1, recipe2, recipe3)
 
+    val bakeR1A1 = fixtureBake(recipe1, Some(amiId1))
+    val bakeR1A2 = fixtureBake(recipe1, Some(amiId2))
+    val bakeR2A3 = fixtureBake(recipe2, Some(amiId3))
+    val bakeR2F = fixtureBake(recipe2, None)
+    val bakeR3A4 = fixtureBake(recipe3, Some(amiId4))
+
     def bakes(recipeId: RecipeId): Iterable[Bake] = {
       recipeId match {
-        case recipe1.id => Seq(fixtureBake(recipe1, Some(amiId1)), fixtureBake(recipe1, Some(amiId2)))
-        case recipe2.id => Seq(fixtureBake(recipe2, Some(amiId3)), fixtureBake(recipe2, None))
-        case recipe3.id => Seq(fixtureBake(recipe3, Some(amiId4)))
+        case recipe1.id => Seq(bakeR1A1, bakeR1A2)
+        case recipe2.id => Seq(bakeR2A3, bakeR2F)
+        case recipe3.id => Seq(bakeR3A4)
       }
     }
 
-    val instance1 = Instance(amiId1.value)
-    val instance2 = Instance(amiId2.value)
-    val instance5 = Instance(amiId5.value)
+    val account = AWSAccount("accountName", "1234567890")
 
-    val lc1 = LaunchConfiguration(amiId1.value)
-    val lc2 = LaunchConfiguration(amiId3.value)
+    val instance1 = Instance("i-1", amiId1.value, account)
+    val instance2 = Instance("i-2", amiId2.value, account)
+    val instance5 = Instance("i-5", amiId5.value, account)
+
+    val lc1 = LaunchConfiguration("lc-1", amiId1.value, account)
+    val lc2 = LaunchConfiguration("lc-2", amiId3.value, account)
 
     val mockPrismAgents = mock[PrismAgents]
     when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2, instance5)
     when(mockPrismAgents.allLaunchConfigurations) thenReturn Seq(lc1, lc2)
     when(mockPrismAgents.copiedImages(any())) thenReturn Map[String, Seq[Image]]()
-    when(mockPrismAgents.copiedImages(Set("3"))) thenReturn Map("3" -> Seq(Image("5", "1234", "3", "available")))
+    when(mockPrismAgents.copiedImages(Set("3"))) thenReturn Map("3" -> Seq(Image("5", "1234", "3", None, "available")))
 
     val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
-    val expected: Map[Recipe, RecipeUsage] = Map(
-      recipe1 -> RecipeUsage(instances = Seq(instance1, instance2), launchConfigurations = Seq(lc1)),
-      recipe2 -> RecipeUsage(instances = Seq(instance5), launchConfigurations = Seq(lc2)),
-      recipe3 -> RecipeUsage(instances = Seq(), launchConfigurations = Seq())
+
+    usages.size shouldBe 3
+    usages.keySet shouldBe Set(recipe1, recipe2, recipe3)
+
+    val recipe1Usages = usages(recipe1)
+    recipe1Usages.instances shouldBe Seq(instance1, instance2)
+    recipe1Usages.launchConfigurations shouldBe Seq(lc1)
+    recipe1Usages.bakeUsage.sortBy(_.amiId) shouldBe Seq(
+      BakeUsage("1", bakeR1A1, None, Seq(instance1), Seq(lc1)),
+      BakeUsage("2", bakeR1A2, None, Seq(instance2), Seq.empty)
     )
-    usages should be(expected)
+
+    val recipe2Usages = usages(recipe2)
+    recipe2Usages.instances shouldBe Seq(instance5)
+    recipe2Usages.launchConfigurations shouldBe Seq(lc2)
+    recipe2Usages.bakeUsage.sortBy(_.amiId) shouldBe Seq(
+      BakeUsage("3", bakeR2A3, None, Seq.empty, Seq(lc2)),
+      BakeUsage("5", bakeR2A3, Some(Image("5", "1234", "3", None, "available")), Seq(instance5), Seq.empty)
+    )
+
+    val recipe3Usages = usages(recipe3)
+    recipe3Usages.instances shouldBe Seq.empty
+    recipe3Usages.launchConfigurations shouldBe Seq.empty
+    recipe3Usages.bakeUsage shouldBe Seq.empty
   }
 
 }

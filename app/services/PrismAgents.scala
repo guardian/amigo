@@ -22,6 +22,8 @@ class PrismAgents(prism: Prism,
   private val copiedImagesAgent: Agent[Map[String, Seq[Image]]] = Agent(Map.empty)
   private val accountsAgent: Agent[Seq[AWSAccount]] = Agent(Seq.empty)
 
+  val baseUrl: String = prism.baseUrl
+
   def allInstances: Seq[Instance] = instancesAgent.get
   def allLaunchConfigurations: Seq[LaunchConfiguration] = launchConfigurationsAgent.get
   def copiedImages(sourceAmiIds: Set[String]): Map[String, Seq[Image]] = copiedImagesAgent.get.filterKeys(sourceAmiIds.contains)

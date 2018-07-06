@@ -9,7 +9,7 @@
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean
-)(implicit flash: Flash),
+)(implicit flash: Flash)
 @simpleLayout("AMIgo"){
 
   <h1>@recipe.id.value</h1>
@@ -32,7 +32,7 @@
       <p>Request encrypted copy: @if(recipe.encryptFor.nonEmpty){ @recipe.encryptFor.map(_.accountNumber).mkString(", ") }else{ None }</p>
       <p>@recipe.description</p>
       @if(usage.instances.size + usage.launchConfigurations.size > 0) {
-        <p>This recipe is used by @usage.instances.size instance@if(usage.instances.size != 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1){s}</p>
+        <p>This recipe is used by <a href="@routes.RecipeController.showUsages(recipe.id)">@usage.instances.size instance@if(usage.instances.size != 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1){s}</a></p>
       } else {
         <p><b>This recipe is not used</b></p>
       }
@@ -63,7 +63,7 @@
           <th>Started</th>
           <th>Build number</th>
           @if(recentCopies.nonEmpty) {
-            <th>Encrypted copy account</th>
+            <th>Encrypted copy</th>
           }
           <th>Status</th>
           <th>AMI</th>
@@ -89,10 +89,16 @@
           @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id.value)).getOrElse(Nil)){
             <tr>
               <td></td>
-              <td></td>
-              <td>@defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
-                @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
-              }</td>
+              <td>  </td>
+              <td><ul class="list-unstyled">
+                <li>Acc: @defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                  @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
+                }</li>
+                @copy.encrypted.map{e =>
+                  <li>Encrypted tag: @e</li>
+                }
+              </ul>
+              </td>
               <td>@copy.state.capitalize</td>
               <td class="absolute-container">
                 <code>@copy.imageId</code>

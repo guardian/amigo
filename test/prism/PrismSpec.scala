@@ -41,14 +41,20 @@ class PrismSpec extends FlatSpec with Matchers {
   it should "fetch all instances" in {
     withPrismClient { prism =>
       val instances = Await.result(prism.findAllInstances(), 10.seconds)
-      instances should be(Seq(Instance("ami-fa123456"), Instance("ami-abcd4321")))
+      instances should be(Seq(
+        Instance("i-123456", "ami-fa123456", AWSAccount("MyAccount", "1234567890")),
+        Instance("i-b123456", "ami-abcd4321", AWSAccount("MyAccount", "1234567890"))
+      ))
     }
   }
 
   it should "fetch all launch configurations" in {
     withPrismClient { prism =>
       val launchConfigurations = Await.result(prism.findAllLaunchConfigurations(), 10.seconds)
-      launchConfigurations should be(Seq(LaunchConfiguration("ami-abcdefg1"), LaunchConfiguration("ami-gfedcba2")))
+      launchConfigurations should be(Seq(
+        LaunchConfiguration("MyName", "ami-abcdefg1", AWSAccount("MyAccount", "1234567890")),
+        LaunchConfiguration("MyId", "ami-gfedcba2", AWSAccount("MyAccount", "1234567890"))
+      ))
     }
   }
 

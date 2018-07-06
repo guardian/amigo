@@ -6,7 +6,7 @@ import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import scala.concurrent.{ ExecutionContext, Future }
 
-class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
+class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
   import Prism._
 
   def findAllAWSAccounts(): Future[Seq[AWSAccount]] = {
@@ -33,9 +33,9 @@ class Prism(ws: WSClient, baseUrl: String = "http://prism.gutools.co.uk")(implic
 
 object Prism {
   case class AWSAccount(accountName: String, accountNumber: String)
-  case class Instance(imageId: String)
-  case class LaunchConfiguration(imageId: String)
-  case class Image(imageId: String, ownerId: String, copiedFromAMI: String, state: String)
+  case class Instance(name: String, imageId: String, awsAccount: AWSAccount)
+  case class LaunchConfiguration(name: String, imageId: String, awsAccount: AWSAccount)
+  case class Image(imageId: String, ownerId: String, copiedFromAMI: String, encrypted: Option[String], state: String)
 
   import play.api.libs.functional.syntax._
   implicit val sourceInstanceReads: Reads[AWSAccount] = (
@@ -43,14 +43,23 @@ object Prism {
     (JsPath \ "origin" \ "accountNumber").read[String]
   )(AWSAccount.apply _)
   implicit val sourceInstancesReads: Reads[Seq[AWSAccount]] = dataReads[AWSAccount](dataPath = "data")
-  implicit val instanceReads: Reads[Instance] = (__ \ "specification" \ "imageId").read[String].map(Instance)
+  implicit val instanceReads: Reads[Instance] = (
+    (JsPath \ "instanceName").read[String] and
+    (JsPath \ "specification" \ "imageId").read[String] and
+    (JsPath \ "meta").read[AWSAccount]
+  )(Instance.apply _)
   implicit val instancesReads: Reads[Seq[Instance]] = dataReads[Instance](dataPath = "data", "instances")
-  implicit val launchConfigurationReads: Reads[LaunchConfiguration] = Json.reads[LaunchConfiguration]
+  implicit val launchConfigurationReads: Reads[LaunchConfiguration] = (
+    (JsPath \ "name").read[String] and
+    (JsPath \ "imageId").read[String] and
+    (JsPath \ "meta").read[AWSAccount]
+  )(LaunchConfiguration.apply _)
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] = dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
   implicit val imageReads: Reads[Image] = (
     (JsPath \ "imageId").read[String] and
     (JsPath \ "ownerId").read[String] and
     (JsPath \ "tags" \ "CopiedFromAMI").read[String] and
+    (JsPath \ "tags" \ "Encrypted").readNullable[String] and
     (JsPath \ "state").read[String]
   )(Image.apply _)
   implicit val imagesReads: Reads[Seq[Image]] = dataReads[Image](dataPath = "data", "images")
