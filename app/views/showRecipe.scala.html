@@ -20,6 +20,7 @@
       <a data-href="@routes.BakeController.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
       <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
       @if(debugAvailable){<a data-href="@routes.BakeController.startBaking(recipe.id, debug = true)" class="post btn btn-warning">Bake with debug enabled</a>}
+      <a href="@routes.RecipeController.deleteConfirm(recipe.id)" class="btn btn-danger">Delete...</a>
     </div>
   </div>
 

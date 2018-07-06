@@ -34,6 +34,7 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-sts" % awsVersion,
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test
 )

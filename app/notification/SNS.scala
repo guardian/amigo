@@ -3,12 +3,10 @@ package notification
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model._
 import play.api.Logger
-import prism.Prism
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
-import scala.concurrent.{ Await, ExecutionContext }
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
 object SNS {
@@ -59,14 +57,22 @@ object SNS {
       .withLabel("amigo_lambda_subs")
     client.addPermission(addRequest)
   }
+
+  def findOrCreateTopic(topicName: String, accountNumbers: Seq[String])(implicit client: AmazonSNS): String = {
+    val topicArn = listTopicArns.find(_.endsWith(s":$topicName")) match {
+      case None => createTopic(topicName)
+      case Some(arn) => arn
+    }
+    updatePermissions(topicArn, accountNumbers)
+    topicArn
+  }
 }
 
 class SNS(sns: AmazonSNS, stage: String, accountNumbers: Seq[String])(implicit exec: ExecutionContext) {
-  implicit val client = sns
+  implicit val client: AmazonSNS = sns
   val topicName: String = s"amigo-$stage-notify"
-  val topicArn: String = SNS.listTopicArns.find(_.endsWith(s":$topicName")) match {
-    case None => SNS.createTopic(topicName)
-    case Some(arn) => arn
-  }
-  SNS.updatePermissions(topicArn, accountNumbers)
+  val topicArn: String = SNS.findOrCreateTopic(topicName, accountNumbers)
+
+  val housekeepingTopicName: String = s"amigo-$stage-housekeeping-notify"
+  val housekeepingTopicArn: String = SNS.findOrCreateTopic(housekeepingTopicName, accountNumbers)
 }

@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import com.gu.scanamo.syntax._
 import cats.syntax.either._
 import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.query.UniqueKey
 import models.Recipe.DbModel
 
 import scala.collection.JavaConverters._
@@ -64,6 +65,10 @@ object Recipes {
 
     val update = table.update('id -> recipe.id, updateExpr)
     update.exec().map(Recipe.db2domain(_, baseImage))
+  }
+
+  def delete(recipe: Recipe)(implicit dynamo: Dynamo): DeleteItemResult = {
+    table.delete('id -> recipe.id.value).exec()
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {

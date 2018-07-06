@@ -5,6 +5,9 @@ Parameters:
   AmigoTopicArn:
     Description: The SNS topic to subscribe to
     Type: String
+  AmigoHousekeepingTopicArn:
+    Description: The housekeeping SNS topic to subscribe to
+    Type: String
   KmsKeyArn:
     Description: Override the default KMS key if required
     Type: String
@@ -33,7 +36,20 @@ Conditions:
     !Equals [ !Ref KmsKeyArn, "" ]
 
 Resources:
-  LambdaRole:
+  CopierLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+
+  HousekeepingLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -50,7 +66,8 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       Roles:
-      - !Ref LambdaRole
+      - !Ref CopierLambdaRole
+      - !Ref HousekeepingLambdaRole
       PolicyName: LambdaLoggingPolicy
       PolicyDocument:
         Statement:
@@ -65,7 +82,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       Roles:
-      - !Ref LambdaRole
+      - !Ref CopierLambdaRole
       PolicyName: KMSKeyPolicy
       PolicyDocument:
         Statement:
@@ -85,7 +102,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       Roles:
-      - !Ref LambdaRole
+      - !Ref CopierLambdaRole
       PolicyName: ImageCopyPolicy
       PolicyDocument:
         Statement:
@@ -93,6 +110,21 @@ Resources:
           Action:
           - ec2:CopyImage
           - ec2:CreateTags
+          Resource: '*'
+
+  HousekeepingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+      - !Ref HousekeepingLambdaRole
+      PolicyName: HousekeepingPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - ec2:DescribeImages
+          - ec2:DeregisterImage
+          - ec2:DeleteSnapshot
           Resource: '*'
 
   # Permission for the SNS topic to push events to the Lambda
@@ -123,7 +155,7 @@ Resources:
       Runtime: java8
       MemorySize: 512
       Handler: com.gu.imageCopier.LambdaEntrypoint::run
-      Role: !GetAtt LambdaRole.Arn
+      Role: !GetAtt CopierLambdaRole.Arn
       Timeout: 30
       Environment:
         Variables:
@@ -135,3 +167,38 @@ Resources:
             - !Ref KmsKeyArn
           ENCRYPTED_TAG_VALUE:
             !Ref EncryptedTagValue
+
+  # Permission for the housekeeping SNS topic to push events to the Lambda
+  InvokeHousekeepingLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt HousekeepingLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref AmigoHousekeepingTopicArn
+
+  # Actual subscription
+  SubscribeToHousekeepingAmigoTopic:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AmigoHousekeepingTopicArn
+      Protocol: lambda
+      Endpoint: !GetAtt HousekeepingLambda.Arn
+
+  # Lambda that actions snapshot requests
+  HousekeepingLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda for housekeeping AMIgo baked AMIs in other accounts
+      Code:
+        S3Bucket: !Ref FunctionCodeBucket
+        S3Key: !Sub ${Stack}/${Stage}/imagecopier/imagecopier.zip
+      Runtime: java8
+      MemorySize: 512
+      Handler: com.gu.imageCopier.LambdaEntrypoint::housekeeping
+      Role: !GetAtt HousekeepingLambdaRole.Arn
+      Timeout: 30
+      Environment:
+        Variables:
+          ACCOUNT_ID:
+            !Ref AWS::AccountId

@@ -7,6 +7,8 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
+import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
@@ -61,6 +63,16 @@ class AppComponents(context: Context)
     new Dynamo(dynamoClient, identity.stage)
   }
   dynamo.initTables()
+
+  val awsAccount = {
+    val stsClient: AWSSecurityTokenService = AWSSecurityTokenServiceClientBuilder.standard
+      .withCredentials(awsCreds)
+      .withRegion(region)
+      .build()
+    val result = stsClient.getCallerIdentity(new GetCallerIdentityRequest())
+    val amigoAwsAccount = result.getAccount
+    amigoAwsAccount
+  }
 
   val prism = new Prism(wsClient)
   val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
@@ -127,7 +139,7 @@ class AppComponents(context: Context)
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
-  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
+  val recipeController = new RecipeController(bakeScheduler, prismAgents, awsAccount, sender, googleAuthConfig, messagesApi, debugAvailable)
   val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)

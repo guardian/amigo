@@ -3,12 +3,13 @@ package controllers
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
+import notification.NotificationSender
 import org.quartz.CronExpression
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
-import prism.{ Prism, RecipeUsage }
+import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 
@@ -17,6 +18,8 @@ import scala.util.Try
 class RecipeController(
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
+    amigoAccount: String,
+    notificationSender: NotificationSender,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi,
     debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
@@ -127,6 +130,33 @@ class RecipeController(
           prismAgents.baseUrl
         )
       )
+    }
+  }
+
+  def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id).toSeq
+      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
+    }
+  }
+
+  def deleteRecipe(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id)
+      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      if (recipeUsage.bakeUsage.nonEmpty) {
+        Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
+      } else {
+        // get all AMIs (bakes and copies)
+        val amisToDelete = RecipeUsage.allAmis(bakes, amigoAccount)(prismAgents)
+        // send messages to delete them
+        notificationSender.sendHousekeepingTopicMessage(amisToDelete)
+        // delete the recipe
+        Recipes.delete(recipe)
+        // redirect back to the index page
+        Redirect(routes.RecipeController.listRecipes())
+      }
     }
   }
 
