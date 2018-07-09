@@ -61,6 +61,10 @@ object Bakes {
     }
   }
 
+  def deleteById(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
+    table.delete(('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber)).exec()
+  }
+
   private def table(implicit dynamo: Dynamo) = dynamo.Tables.bakes.table
 
 }

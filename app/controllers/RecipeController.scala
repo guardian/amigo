@@ -152,7 +152,11 @@ class RecipeController(
         val amisToDelete = RecipeUsage.allAmis(bakes, amigoAccount)(prismAgents)
         // send messages to delete them
         notificationSender.sendHousekeepingTopicMessage(amisToDelete)
-        // delete the recipe
+        // delete the AMIgo data
+        bakes.foreach { bake =>
+          BakeLogs.delete(bake.bakeId)
+          Bakes.deleteById(bake.bakeId)
+        }
         Recipes.delete(recipe)
         // redirect back to the index page
         Redirect(routes.RecipeController.listRecipes())
