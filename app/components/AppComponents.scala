@@ -2,23 +2,26 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
+import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
-import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
+import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
+import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.gu.cm.{ ConfigurationLoader, Identity }
+import com.gu.cm.{ConfigurationLoader, Identity}
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
-import data.{ Dynamo, Recipes }
-import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
-import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
+import data.{Dynamo, Recipes}
+import event.{ActorSystemWrapper, BakeEvent, Behaviours}
+import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
 import org.joda.time.Duration
 import packer.PackerConfig
-import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
+import play.api.{BuiltInComponentsFromContext, Configuration, Logger}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -28,12 +31,29 @@ import play.api.routing.Router
 import prism.Prism
 import prism.Prism.AWSAccount
 import router.Routes
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
+import schedule.{BakeScheduler, ScheduledBakeRunner}
 import services.PrismAgents
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+
+class LoggingRetryCondition extends SDKDefaultRetryCondition {
+  private def exceptionInfo(e: Throwable): String = {
+    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(e.getCause).map(e => exceptionInfo(e))}"
+  }
+
+  override def shouldRetry(originalRequest: AmazonWebServiceRequest, exception: AmazonClientException, retriesAttempted: Int): Boolean = {
+    val willRetry = super.shouldRetry(originalRequest, exception, retriesAttempted)
+    if (willRetry) {
+      Logger.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest).map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
+    } else {
+      Logger.warn(s"Encountered fatal exception during AWS API call", exception)
+      Option(exception.getCause).foreach(t => Logger.warn(s"Cause of fatal exception", t))
+    }
+    willRetry
+  }
+}
 
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
@@ -56,10 +76,20 @@ class AppComponents(context: Context)
     InstanceProfileCredentialsProvider.getInstance()
   )
   val region = configuration.getString("aws.region").map(Regions.fromName).getOrElse(Regions.EU_WEST_1)
+  val clientConfiguration = new ClientConfiguration().
+    withRetryPolicy(new RetryPolicy(
+      new LoggingRetryCondition(),
+      PredefinedRetryPolicies.DEFAULT_BACKOFF_STRATEGY,
+      20,
+      false
+    ))
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
-      .withCredentials(awsCreds).withRegion(region).build()
+      .withCredentials(awsCreds)
+      .withRegion(region)
+      .withClientConfiguration(clientConfiguration)
+      .build()
     new Dynamo(dynamoClient, identity.stage)
   }
   dynamo.initTables()
@@ -68,6 +98,7 @@ class AppComponents(context: Context)
     val stsClient: AWSSecurityTokenService = AWSSecurityTokenServiceClientBuilder.standard
       .withCredentials(awsCreds)
       .withRegion(region)
+      .withClientConfiguration(clientConfiguration)
       .build()
     val result = stsClient.getCallerIdentity(new GetCallerIdentityRequest())
     val amigoAwsAccount = result.getAccount
@@ -81,12 +112,20 @@ class AppComponents(context: Context)
   val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
 
   val sns: SNS = {
-    val snsClient = AmazonSNSClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
+    val snsClient = AmazonSNSClientBuilder.standard
+      .withRegion(region)
+      .withCredentials(awsCreds)
+      .withClientConfiguration(clientConfiguration)
+      .build()
     new SNS(snsClient, identity.stage, accountNumbers)
   }
 
   configuration.getString("aws.distributionBucket").foreach { bucketName =>
-    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard.withRegion(region).withCredentials(awsCreds).build()
+    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
+      .withRegion(region)
+      .withCredentials(awsCreds)
+      .withClientConfiguration(clientConfiguration)
+      .build()
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)
   }
 
