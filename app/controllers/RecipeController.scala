@@ -3,7 +3,6 @@ package controllers
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
-import notification.NotificationSender
 import org.quartz.CronExpression
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
@@ -18,8 +17,6 @@ import scala.util.Try
 class RecipeController(
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
-    amigoAccount: String,
-    notificationSender: NotificationSender,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi,
     debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
@@ -35,7 +32,7 @@ class RecipeController(
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recentBakes = bakes.take(20)
-      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).map(_.value).toSet)
+      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).toSet)
       Ok(
         views.html.showRecipe(
           recipe,
@@ -148,14 +145,9 @@ class RecipeController(
       if (recipeUsage.bakeUsage.nonEmpty) {
         Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
       } else {
-        // get all AMIs (bakes and copies)
-        val amisToDelete = RecipeUsage.allAmis(bakes, amigoAccount)(prismAgents)
-        // send messages to delete them
-        notificationSender.sendHousekeepingTopicMessage(amisToDelete)
         // delete the AMIgo data
         bakes.foreach { bake =>
-          BakeLogs.delete(bake.bakeId)
-          Bakes.deleteById(bake.bakeId)
+          Bakes.markToDelete(bake.bakeId)
         }
         Recipes.delete(recipe)
         // redirect back to the index page

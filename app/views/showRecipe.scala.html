@@ -4,7 +4,7 @@
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
-        recentCopies: Map[String, Seq[Image]],
+        recentCopies: Map[AmiId, Seq[Image]],
         accounts: Seq[AWSAccount],
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
@@ -87,7 +87,7 @@
             }
             </td>
           </tr>
-          @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id.value)).getOrElse(Nil)){
+          @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id)).getOrElse(Nil)){
             <tr>
               <td></td>
               <td>  </td>

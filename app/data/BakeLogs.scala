@@ -35,6 +35,8 @@ object BakeLogs {
     } yield unprocessedItem
     if (unprocessedItems.nonEmpty) {
       Logger.warn(s"${unprocessedItems.size} log entries not processed during deletion, trying again - attempt $attempt")
+      // avoid overwhelming the DB by pausing briefly before mopping up
+      Thread.sleep(2000)
       delete(bakeId, attempt + 1)
     } else {
       0

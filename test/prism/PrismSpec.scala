@@ -1,5 +1,6 @@
 package prism
 
+import models.AmiId
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.mvc.{ Action, Results }
 import play.api.test.WsTestClient
@@ -42,8 +43,8 @@ class PrismSpec extends FlatSpec with Matchers {
     withPrismClient { prism =>
       val instances = Await.result(prism.findAllInstances(), 10.seconds)
       instances should be(Seq(
-        Instance("i-123456", "ami-fa123456", AWSAccount("MyAccount", "1234567890")),
-        Instance("i-b123456", "ami-abcd4321", AWSAccount("MyAccount", "1234567890"))
+        Instance("i-123456", AmiId("ami-fa123456"), AWSAccount("MyAccount", "1234567890")),
+        Instance("i-b123456", AmiId("ami-abcd4321"), AWSAccount("MyAccount", "1234567890"))
       ))
     }
   }
@@ -52,8 +53,8 @@ class PrismSpec extends FlatSpec with Matchers {
     withPrismClient { prism =>
       val launchConfigurations = Await.result(prism.findAllLaunchConfigurations(), 10.seconds)
       launchConfigurations should be(Seq(
-        LaunchConfiguration("MyName", "ami-abcdefg1", AWSAccount("MyAccount", "1234567890")),
-        LaunchConfiguration("MyId", "ami-gfedcba2", AWSAccount("MyAccount", "1234567890"))
+        LaunchConfiguration("MyName", AmiId("ami-abcdefg1"), AWSAccount("MyAccount", "1234567890")),
+        LaunchConfiguration("MyId", AmiId("ami-gfedcba2"), AWSAccount("MyAccount", "1234567890"))
       ))
     }
   }

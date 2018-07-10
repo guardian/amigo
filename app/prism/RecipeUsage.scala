@@ -1,12 +1,12 @@
 package prism
 
-import models.{ Bake, Recipe, RecipeId }
+import models.{ AmiId, Bake, Recipe, RecipeId }
 import prism.Prism.{ Image, Instance, LaunchConfiguration }
 import services.PrismAgents
 
-case class Ami(account: String, id: String)
+case class Ami(account: String, id: AmiId)
 
-case class BakeUsage(amiId: String, bake: Bake, viaCopy: Option[Image], instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration])
+case class BakeUsage(amiId: AmiId, bake: Bake, viaCopy: Option[Image], instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration])
 
 case class RecipeUsage(instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration], bakeUsage: Seq[BakeUsage])
 
@@ -14,19 +14,17 @@ object RecipeUsage {
 
   def noUsage(): RecipeUsage = RecipeUsage(Seq.empty[Instance], Seq.empty[LaunchConfiguration], Seq.empty[BakeUsage])
 
-  def allAmis(bakes: Iterable[Bake], amigoAccount: String)(implicit prismAgents: PrismAgents): List[Ami] = {
-    val bakedAmiLookupMap = bakes.flatMap(b => b.amiId.map(_.value -> b)).toMap
-    val bakedAmiIds = bakedAmiLookupMap.keys.toList
-    val bakedAmis = bakedAmiIds.map(Ami(amigoAccount, _))
+  def allAmis(amiIds: Iterable[AmiId], amigoAccount: String)(implicit prismAgents: PrismAgents): List[Ami] = {
+    val amis = amiIds.map(Ami(amigoAccount, _))
 
-    val copiedAmiImages = prismAgents.copiedImages(bakedAmiIds.toSet).values.flatten
+    val copiedAmiImages = prismAgents.copiedImages(amiIds.toSet).values.flatten
     val copiedAmis = copiedAmiImages.map(image => Ami(image.ownerId, image.imageId))
 
-    bakedAmis ++ copiedAmis
+    amis.toList ++ copiedAmis
   }
 
   def apply(recipe: Recipe, bakes: Iterable[Bake])(implicit prismAgents: PrismAgents): RecipeUsage = {
-    val bakedAmiLookupMap = bakes.flatMap(b => b.amiId.map(_.value -> b)).toMap
+    val bakedAmiLookupMap = bakes.flatMap(b => b.amiId.map(_ -> b)).toMap
     val bakedAmiIds = bakedAmiLookupMap.keys.toList
     val copiedAmis = prismAgents.copiedImages(bakedAmiIds.toSet).values.flatten
     val copiedAmiIds = copiedAmis.map(_.imageId)

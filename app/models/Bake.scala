@@ -7,7 +7,8 @@ case class Bake(recipe: Recipe,
     status: BakeStatus,
     amiId: Option[AmiId],
     startedBy: String,
-    startedAt: DateTime) {
+    startedAt: DateTime,
+    deleted: Boolean) {
   val bakeId = BakeId(recipe.id, buildNumber)
 }
 
@@ -19,14 +20,15 @@ object Bake {
     status: BakeStatus,
     amiId: Option[AmiId],
     startedBy: String,
-    startedAt: DateTime)
+    startedAt: DateTime,
+    deleted: Option[Boolean])
 
   import automagic._
 
   def domain2db(bake: Bake): DbModel =
-    transform[Bake, Bake.DbModel](bake, "recipeId" -> bake.recipe.id)
+    transform[Bake, Bake.DbModel](bake, "recipeId" -> bake.recipe.id, "deleted" -> Some(bake.deleted))
 
   def db2domain(dbModel: DbModel, recipe: Recipe): Bake =
-    transform[Bake.DbModel, Bake](dbModel, "recipe" -> recipe)
+    transform[Bake.DbModel, Bake](dbModel, "recipe" -> recipe, "deleted" -> dbModel.deleted.getOrElse(false))
 
 }

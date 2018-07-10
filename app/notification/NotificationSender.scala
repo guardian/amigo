@@ -5,7 +5,7 @@ import models.{ AmiId, Bake }
 import models.packer.PackerVariablesConfig
 import _root_.packer.ImageDetails
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, JsString, JsValue, Writes }
 import prism.Ami
 
 class NotificationSender(sns: SNS, region: String, stage: String) {
@@ -26,7 +26,10 @@ class NotificationSender(sns: SNS, region: String, stage: String) {
   }
 
   def sendHousekeepingTopicMessage(amisToDelete: List[Ami]): Unit = {
-    implicit val writes = Json.writes[Ami]
+    implicit val amiIdWrites: Writes[AmiId] = new Writes[AmiId] {
+      def writes(o: AmiId) = JsString(o.value)
+    }
+    implicit val amiWrites: Writes[Ami] = Json.writes[Ami]
     // don't overwhelm the receiver with more than 10 AMIs per message
     amisToDelete.grouped(10).foreach { batchToDelete =>
       val message = Json.obj("amis" -> batchToDelete)

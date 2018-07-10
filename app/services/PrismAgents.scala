@@ -2,6 +2,7 @@ package services
 
 import akka.agent.Agent
 import akka.actor.{Cancellable, Scheduler}
+import models.AmiId
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
 import play.api.{Environment, Mode}
@@ -19,14 +20,14 @@ class PrismAgents(prism: Prism,
 
   private val instancesAgent: Agent[Seq[Instance]] = Agent(Seq.empty)
   private val launchConfigurationsAgent: Agent[Seq[LaunchConfiguration]] = Agent(Seq.empty)
-  private val copiedImagesAgent: Agent[Map[String, Seq[Image]]] = Agent(Map.empty)
+  private val copiedImagesAgent: Agent[Map[AmiId, Seq[Image]]] = Agent(Map.empty)
   private val accountsAgent: Agent[Seq[AWSAccount]] = Agent(Seq.empty)
 
   val baseUrl: String = prism.baseUrl
 
   def allInstances: Seq[Instance] = instancesAgent.get
   def allLaunchConfigurations: Seq[LaunchConfiguration] = launchConfigurationsAgent.get
-  def copiedImages(sourceAmiIds: Set[String]): Map[String, Seq[Image]] = copiedImagesAgent.get.filterKeys(sourceAmiIds.contains)
+  def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] = copiedImagesAgent.get.filterKeys(sourceAmiIds.contains)
   def accounts: Seq[AWSAccount] = accountsAgent.get
 
   if (environment.mode != Mode.Test) {

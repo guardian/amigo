@@ -2,26 +2,29 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
-import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
+import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
+import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
+import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.gu.cm.{ConfigurationLoader, Identity}
+import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
-import data.{Dynamo, Recipes}
-import event.{ActorSystemWrapper, BakeEvent, Behaviours}
-import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
+import data.{ Dynamo, Recipes }
+import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import housekeeping.{ BakeDeletion, HousekeepingScheduler }
+import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
+import org.quartz.Scheduler
+import org.quartz.impl.StdSchedulerFactory
 import packer.PackerConfig
-import play.api.{BuiltInComponentsFromContext, Configuration, Logger}
+import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -29,9 +32,8 @@ import play.api.libs.streams.Streams
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import prism.Prism
-import prism.Prism.AWSAccount
 import router.Routes
-import schedule.{BakeScheduler, ScheduledBakeRunner}
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.PrismAgents
 
 import scala.concurrent.Await
@@ -164,21 +166,28 @@ class AppComponents(context: Context)
     Map("s3_prefix" -> configuration.getString("ansible.packages.s3prefix").getOrElse("")) ++
       configuration.getString("ansible.packages.s3bucket").map("s3_bucket" ->)
 
+  val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
+
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
     new ScheduledBakeRunner(enabled, prismAgents, eventBus, ansibleVariables)
   }
-  val bakeScheduler = new BakeScheduler(scheduledBakeRunner)
+  val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
   Logger.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
+
+  val bakeDeletionHousekeeping = new BakeDeletion(dynamo, awsAccount, prismAgents, sender)
+
+  val housekeepingScheduler = new HousekeepingScheduler(scheduler, List(bakeDeletionHousekeeping))
+  housekeepingScheduler.initialise()
 
   val debugAvailable = identity.stage != "PROD"
 
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
   val roleController = new RoleController(googleAuthConfig)
-  val recipeController = new RecipeController(bakeScheduler, prismAgents, awsAccount, sender, googleAuthConfig, messagesApi, debugAvailable)
+  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
   val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
