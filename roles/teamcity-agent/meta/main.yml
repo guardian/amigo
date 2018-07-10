@@ -1,0 +1,11 @@
+---
+dependencies:
+  - role: docker
+    version: 18.03.1~ce-0
+  - role: packages
+    packages: 
+      - curl
+      - software-properties-common
+      - zip
+  - role: pip-packages 
+    packages: [boto3, botocore]

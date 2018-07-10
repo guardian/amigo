@@ -46,12 +46,14 @@ object Recipes {
   def create(id: RecipeId,
     description: Option[String],
     baseImage: BaseImage,
+    diskSize: Option[Int],
+
     roles: List[CustomisedRole],
     createdBy: String,
     bakeSchedule: Option[BakeSchedule],
     encryptedCopies: List[AccountNumber])(implicit dynamo: Dynamo): Recipe = {
     val now = DateTime.now()
-    val recipe = Recipe(id, description, baseImage, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule, encryptedCopies)
+    val recipe = Recipe(id, description, baseImage, diskSize, roles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, bakeSchedule, encryptedCopies)
     table.put(Recipe.domain2db(recipe, nextBuildNumber = 0)).exec()
 
     recipe
@@ -60,6 +62,7 @@ object Recipes {
   def update(recipe: Recipe,
     description: Option[String],
     baseImage: BaseImage,
+    diskSize: Option[Int],
     roles: List[CustomisedRole],
     modifiedBy: String,
     bakeSchedule: Option[BakeSchedule],
@@ -71,7 +74,8 @@ object Recipes {
         set('modifiedBy -> modifiedBy) and
         set('modifiedAt -> DateTime.now()) and
         (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule)) and
-        (if (encryptFor.nonEmpty) set('encryptFor -> encryptFor) else remove('encryptFor))
+        (if (encryptFor.nonEmpty) set('encryptFor -> encryptFor) else remove('encryptFor)) and
+        (if (diskSize.isDefined) set('diskSize -> diskSize) else remove('diskSize))
 
     val updateExpr = description match {
       case Some(desc) => baseUpdateExpr and set('description -> desc)

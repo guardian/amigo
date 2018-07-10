@@ -36,7 +36,7 @@
 
 - name: Install docker
   apt:
-    name: docker-ce={{ version }}~ce-0~ubuntu
+    name: docker-ce={{ version }}~ubuntu
     update_cache: yes
     state: installed
     force: yes
