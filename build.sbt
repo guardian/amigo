@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
-  "com.gu" %% "scanamo" % "0.9.2",
+  "com.gu" %% "scanamo" % "0.9.5",
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
@@ -34,6 +34,7 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-sts" % awsVersion,
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test
 )

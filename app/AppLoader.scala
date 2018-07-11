@@ -12,10 +12,10 @@ class AppLoader extends ApplicationLoader {
     val components = new AppComponents(context)
 
     Logger.info("Starting the scheduler")
-    components.bakeScheduler.start()
+    components.scheduler.start()
     components.applicationLifecycle.addStopHook { () =>
       println("Shutting down scheduler")
-      Future.successful(components.bakeScheduler.shutdown())
+      Future.successful(components.scheduler.shutdown())
     }
 
     components.application

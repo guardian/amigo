@@ -22,7 +22,7 @@
             <th>AMI</th>
         </thead>
         <tbody>
-            @bakeUsage.sortBy(bu => (bu.bake.startedAt.getMillis, bu.viaCopy.map(_.imageId))).map { usage =>
+            @bakeUsage.sortBy(bu => (bu.bake.startedAt.getMillis, bu.viaCopy.map(_.imageId.value))).map { usage =>
                 <tr>
                     <td class="has-block-link">
                         <a class="block-link" href="@routes.BakeController.showBake(usage.bake.recipe.id, usage.bake.buildNumber)">

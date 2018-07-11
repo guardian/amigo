@@ -1,0 +1,26 @@
+@import prism.BakeUsage
+@(recipeToDelete: Recipe, bakes: Seq[Bake], usages: Seq[BakeUsage])
+@simpleLayout("AMIgo"){
+
+    @if(usages.isEmpty) {
+        <h1>Really delete @recipeToDelete.id?</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Confirm delete</div>
+            <div class="panel-body">
+                <p>Note that this will schedule the deletion of all associated AMIs and underlying EBS snapshots (@bakes.size).</p>
+                <p><a data-href="@routes.RecipeController.deleteRecipe(recipeToDelete.id)" class="post btn btn-danger">Delete</a></p>
+            </div>
+        </div>
+    } else {
+        <h1>Recipe @recipeToDelete.id still has usages</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Can't be deleted</div>
+            <div class="panel-body">
+                This recipe still has usages and cannot be deleted. You can review the usages <a href="@routes.RecipeController.showUsages(recipeToDelete.id)">here</a>.
+            </div>
+        </div>
+    }
+
+}

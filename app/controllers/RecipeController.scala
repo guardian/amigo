@@ -8,7 +8,7 @@ import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
-import prism.{ Prism, RecipeUsage }
+import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 
@@ -32,7 +32,7 @@ class RecipeController(
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recentBakes = bakes.take(20)
-      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).map(_.value).toSet)
+      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).toSet)
       Ok(
         views.html.showRecipe(
           recipe,
@@ -127,6 +127,32 @@ class RecipeController(
           prismAgents.baseUrl
         )
       )
+    }
+  }
+
+  def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id).toSeq
+      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
+    }
+  }
+
+  def deleteRecipe(id: RecipeId) = AuthAction { implicit request =>
+    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+      val bakes = Bakes.list(recipe.id)
+      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      if (recipeUsage.bakeUsage.nonEmpty) {
+        Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
+      } else {
+        // delete the AMIgo data
+        bakes.foreach { bake =>
+          Bakes.markToDelete(bake.bakeId)
+        }
+        Recipes.delete(recipe)
+        // redirect back to the index page
+        Redirect(routes.RecipeController.listRecipes())
+      }
     }
   }
 

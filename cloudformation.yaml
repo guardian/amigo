@@ -90,6 +90,10 @@ Resources:
           Resource: !Sub 'arn:aws:sns:*:*:amigo-${Stage}-notify'
         - Effect: Allow
           Action:
+          - sns:*
+          Resource: !Sub 'arn:aws:sns:*:*:amigo-${Stage}-housekeeping-notify'
+        - Effect: Allow
+          Action:
           - s3:GetBucketPolicy
           - s3:PutBucketPolicy
           Resource: arn:aws:s3::*:deploy-tools-dist

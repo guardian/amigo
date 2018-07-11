@@ -1,16 +1,13 @@
 package schedule
 
 import models.{ BakeSchedule, Recipe, RecipeId }
+import org.quartz.{ JobDataMap, JobKey, Scheduler, TriggerKey }
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
-import org.quartz.impl.StdSchedulerFactory
-import org.quartz.{ TriggerKey, JobKey, JobDataMap }
 import play.api.Logger
 
-class BakeScheduler(scheduledBakeRunner: ScheduledBakeRunner) {
-
-  private val scheduler = StdSchedulerFactory.getDefaultScheduler()
+class BakeScheduler(scheduler: Scheduler, scheduledBakeRunner: ScheduledBakeRunner) {
 
   def initialise(recipes: Iterable[Recipe]): Unit = {
     recipes.flatMap(r => r.bakeSchedule.map(s => (r.id, s))).foreach {

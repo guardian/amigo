@@ -34,6 +34,17 @@ case object MessageNotForUsFailure extends Failure {
   override def msg: String = "Message was not for this account"
 }
 
+case class ConfigurationFailure(msg: String) extends Failure
+
 case class UnknownFailure(throwable: Throwable) extends FailureWithThrowable
 
 case class AwsSdkFailure(throwable: Throwable) extends FailureWithThrowable
+
+object Failure {
+  def collect[A](eithers: List[Either[Failure, A]])(recurse: A => List[Failure]): List[Failure] = {
+    eithers.flatMap {
+      case Left(failure) => List(failure)
+      case Right(success) => recurse(success)
+    }
+  }
+}

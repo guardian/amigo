@@ -9,7 +9,7 @@ object Bakes {
   import cats.syntax.either._
 
   def create(recipe: Recipe, buildNumber: Int, startedBy: String)(implicit dynamo: Dynamo): Bake = {
-    val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None, startedBy = startedBy, startedAt = DateTime.now())
+    val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None, startedBy = startedBy, startedAt = DateTime.now(), deleted = false)
     val dbModel = Bake.domain2db(bake)
     table.put(dbModel).exec()
     bake
@@ -59,6 +59,29 @@ object Bakes {
     } yield {
       Bake.db2domain(model, r)
     }
+  }
+
+  def markToDelete(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
+    table
+      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .update(
+        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
+        set('deleted -> true)
+      )
+      .exec()
+  }
+
+  def findDeleted(limit: Int = 10)(implicit dynamo: Dynamo): List[Bake.DbModel] = {
+    table
+      .filter('deleted -> true)
+      .limit(limit)
+      .scan()
+      .exec()
+      .flatMap(_.toOption)
+  }
+
+  def deleteById(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
+    table.delete(('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber)).exec()
   }
 
   private def table(implicit dynamo: Dynamo) = dynamo.Tables.bakes.table

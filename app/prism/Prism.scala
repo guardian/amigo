@@ -1,9 +1,11 @@
 package prism
 
+import models.AmiId
 import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
+
 import scala.concurrent.{ ExecutionContext, Future }
 
 class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
@@ -33,9 +35,9 @@ class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(i
 
 object Prism {
   case class AWSAccount(accountName: String, accountNumber: String)
-  case class Instance(name: String, imageId: String, awsAccount: AWSAccount)
-  case class LaunchConfiguration(name: String, imageId: String, awsAccount: AWSAccount)
-  case class Image(imageId: String, ownerId: String, copiedFromAMI: String, encrypted: Option[String], state: String)
+  case class Instance(name: String, imageId: AmiId, awsAccount: AWSAccount)
+  case class LaunchConfiguration(name: String, imageId: AmiId, awsAccount: AWSAccount)
+  case class Image(imageId: AmiId, ownerId: String, copiedFromAMI: AmiId, encrypted: Option[String], state: String)
 
   import play.api.libs.functional.syntax._
   implicit val sourceInstanceReads: Reads[AWSAccount] = (
@@ -45,20 +47,20 @@ object Prism {
   implicit val sourceInstancesReads: Reads[Seq[AWSAccount]] = dataReads[AWSAccount](dataPath = "data")
   implicit val instanceReads: Reads[Instance] = (
     (JsPath \ "instanceName").read[String] and
-    (JsPath \ "specification" \ "imageId").read[String] and
+    (JsPath \ "specification" \ "imageId").read[String].map(AmiId.apply) and
     (JsPath \ "meta").read[AWSAccount]
   )(Instance.apply _)
   implicit val instancesReads: Reads[Seq[Instance]] = dataReads[Instance](dataPath = "data", "instances")
   implicit val launchConfigurationReads: Reads[LaunchConfiguration] = (
     (JsPath \ "name").read[String] and
-    (JsPath \ "imageId").read[String] and
+    (JsPath \ "imageId").read[String].map(AmiId.apply) and
     (JsPath \ "meta").read[AWSAccount]
   )(LaunchConfiguration.apply _)
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] = dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
   implicit val imageReads: Reads[Image] = (
-    (JsPath \ "imageId").read[String] and
+    (JsPath \ "imageId").read[String].map(AmiId.apply) and
     (JsPath \ "ownerId").read[String] and
-    (JsPath \ "tags" \ "CopiedFromAMI").read[String] and
+    (JsPath \ "tags" \ "CopiedFromAMI").read[String].map(AmiId.apply) and
     (JsPath \ "tags" \ "Encrypted").readNullable[String] and
     (JsPath \ "state").read[String]
   )(Image.apply _)
