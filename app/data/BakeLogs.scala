@@ -1,5 +1,7 @@
 package data
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.gu.scanamo.query.{ UniqueKeyConditions, UniqueKeys }
 import com.gu.scanamo.syntax._
 import models._
 import play.api.Logger
@@ -10,6 +12,9 @@ import scala.collection.JavaConverters._
 object BakeLogs {
   import cats.syntax.either._
   import Dynamo._
+
+  private val BATCH_SIZE = 25
+  private val BATCH_PAUSE = 1000
 
   def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
     // Make sure we don't try to save an empty string to Dynamo
@@ -22,24 +27,38 @@ object BakeLogs {
     table.query('bakeId -> bakeId).exec().flatMap(_.toOption)
   }
 
-  @tailrec
-  def delete(bakeId: BakeId, attempt: Int = 0)(implicit dynamo: Dynamo): Int = {
+  def delete(bakeId: BakeId, attempt: Int = 0)(implicit dynamo: Dynamo): Unit = {
     val logNumbers: Seq[Int] = table.query('bakeId -> bakeId).exec().flatMap(_.toOption).map(_.logNumber)
-    val uniqueKeyTuples: Set[(BakeId, Int)] = logNumbers.map((bakeId, _)).toSet
-    val result = table.deleteAll((HashAndRangeKeyNames('bakeId, 'logNumber), uniqueKeyTuples)).exec()
-    val unprocessedItems = for {
+    val uniqueKeyTuples: Seq[(BakeId, Int)] = logNumbers.map((bakeId, _))
+    uniqueKeyTuples.grouped(BATCH_SIZE).foreach { batch =>
+      val uniqueKeys: UniqueKeys[_] = (HashAndRangeKeyNames('bakeId, 'logNumber), batch.toSet)
+      doDelete(uniqueKeys)
+      // avoid overwhelming the DB by pausing briefly after each batch
+      Thread.sleep(BATCH_PAUSE)
+    }
+  }
+
+  type UniqueKeySet = Set[Map[String, AttributeValue]]
+  implicit private val identityKeyConditions: UniqueKeyConditions[UniqueKeySet] = new UniqueKeyConditions[UniqueKeySet] {
+    override def asAVMap(t: UniqueKeySet): UniqueKeySet = t
+  }
+
+  @tailrec
+  private def doDelete(logLines: UniqueKeys[_], attempt: Int = 0)(implicit dynamo: Dynamo): Unit = {
+    val result = table.deleteAll(logLines).exec()
+    val unprocessedKeys = for {
       batchResult <- result
       unprocessedItemsMap = batchResult.getUnprocessedItems.asScala
       unprocessedItems = unprocessedItemsMap.values.flatMap(_.asScala)
-      unprocessedItem <- unprocessedItems
-    } yield unprocessedItem
-    if (unprocessedItems.nonEmpty) {
-      Logger.warn(s"${unprocessedItems.size} log entries not processed during deletion, trying again - attempt $attempt")
+      unprocessedKeys = unprocessedItems.map(_.getDeleteRequest.getKey.asScala.toMap).toList
+      unprocessedKey <- unprocessedKeys
+    } yield unprocessedKey
+
+    if (unprocessedKeys.nonEmpty) {
+      Logger.warn(s"${unprocessedKeys.size} log entries not processed during deletion, trying again - attempt $attempt")
       // avoid overwhelming the DB by pausing briefly before mopping up
-      Thread.sleep(2000)
-      delete(bakeId, attempt + 1)
-    } else {
-      0
+      Thread.sleep(BATCH_PAUSE)
+      doDelete(UniqueKeys(unprocessedKeys.toSet), attempt + 1)
     }
   }
 
