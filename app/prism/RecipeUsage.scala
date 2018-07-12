@@ -23,7 +23,7 @@ object RecipeUsage {
     amis.toList ++ copiedAmis
   }
 
-  def apply(recipe: Recipe, bakes: Iterable[Bake])(implicit prismAgents: PrismAgents): RecipeUsage = {
+  def apply(bakes: Iterable[Bake])(implicit prismAgents: PrismAgents): RecipeUsage = {
     val bakedAmiLookupMap = bakes.flatMap(b => b.amiId.map(_ -> b)).toMap
     val bakedAmiIds = bakedAmiLookupMap.keys.toList
     val copiedAmis = prismAgents.copiedImages(bakedAmiIds.toSet).values.flatten
@@ -53,7 +53,7 @@ object RecipeUsage {
   }
 
   def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(implicit prismAgents: PrismAgents): Map[Recipe, RecipeUsage] = {
-    recipes.map(r => r -> apply(r, findBakes(r.id))).toMap
+    recipes.map(r => r -> apply(findBakes(r.id))).toMap
   }
 
 }
