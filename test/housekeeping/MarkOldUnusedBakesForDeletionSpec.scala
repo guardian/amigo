@@ -2,11 +2,10 @@ package housekeeping
 
 import models._
 import org.joda.time.{ DateTime, DateTimeZone }
-import org.scalatest.mock.MockitoSugar
 import org.scalatest.{ FlatSpec, Matchers }
 import prism.{ BakeUsage, RecipeUsage }
 
-class MarkOldUnusedBakesForDeletionSpec extends FlatSpec with Matchers with MockitoSugar {
+class MarkOldUnusedBakesForDeletionSpec extends FlatSpec with Matchers {
   val oldDate = new DateTime(2018, 5, 28, 0, 0, 0, DateTimeZone.UTC)
   val newDate = new DateTime(2018, 6, 20, 0, 0, 0, DateTimeZone.UTC)
   val oldBake1: Bake = fixtureBake(fixtureRecipe("recipe-1", oldDate), Some(AmiId("ami-1")), oldDate)
