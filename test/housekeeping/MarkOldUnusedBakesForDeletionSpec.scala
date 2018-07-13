@@ -41,7 +41,7 @@ class MarkOldUnusedBakesForDeletionSpec extends FlatSpec with Matchers with Mock
     markedBakes.size shouldEqual 0
   }
 
-  it should "find all unused bakes older than 30 days" in {
+  it should "find all the unused bakes that are older than the max age" in {
     val housekeepingDate = new DateTime(2018, 7, 12, 0, 0, 0, DateTimeZone.UTC)
     val recipeIds = Set(RecipeId("recipe-1"), RecipeId("recipe-2"), RecipeId("recipe-3"), RecipeId("recipe-4"))
     val markedBakes = MarkOldUnusedBakesForDeletion.getOldUnusedBakes(recipeIds, housekeepingDate, getBakes, getEmptyRecipeUsage)
