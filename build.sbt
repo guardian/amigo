@@ -12,6 +12,8 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+PrintGCDetails",
   "-J-XX:+PrintGCDateStamps",
   "-J-DpackerHome=/opt/packer",
+  "-J-Dlogger.resource=logback-PROD.xml",
+  s"-J-Dlogs.home=/var/log/${packageName.value}",
   s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
 )
 
