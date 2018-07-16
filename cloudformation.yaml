@@ -26,9 +26,6 @@ Parameters:
     Description: What version of Packer to install
     Type: String
     Default: 1.1.2
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: A key pair for SSH'ing into the instance
   TLSCert:
     Type: String
     Description: ARN of a TLS certificate to install on the load balancer
@@ -99,6 +96,30 @@ Resources:
           Resource: arn:aws:s3::*:deploy-tools-dist
       Roles:
       - !Ref 'RootRole'
+
+  SSMRunCommandPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ssm-run-command-policy
+      PolicyDocument:
+        Statement:
+        # minimal policy to allow running commands via ssm
+        - Effect: Allow
+          Resource: "*"
+          Action:
+          - ec2messages:AcknowledgeMessage
+          - ec2messages:DeleteMessage
+          - ec2messages:FailMessage
+          - ec2messages:GetEndpoint
+          - ec2messages:GetMessages
+          - ec2messages:SendReply
+          - ssm:UpdateInstanceInformation
+          - ssm:ListInstanceAssociations
+          - ssm:DescribeInstanceProperties
+          - ssm:DescribeDocumentParameters
+      Roles:
+      - !Ref RootRole
+
   PackerPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -202,7 +223,6 @@ Resources:
       - !Ref 'ApplicationSecurityGroup'
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'InstanceProfile'
-      KeyName: !Ref 'KeyName'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -ev

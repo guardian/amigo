@@ -16,6 +16,7 @@ deployments:
       amiTags:
         Recipe: xenial-java8-deploy-infrastructure
         AmigoStage: PROD
+      amiEncrypted: true
   # upload lambda
   imagecopier:
     type: aws-s3
