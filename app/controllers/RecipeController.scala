@@ -39,7 +39,7 @@ class RecipeController(
           recentBakes,
           recentCopies,
           prismAgents.accounts,
-          RecipeUsage(recipe, bakes)(prismAgents),
+          RecipeUsage(bakes)(prismAgents),
           Roles.list,
           debugAvailable
         )
@@ -118,7 +118,7 @@ class RecipeController(
   def showUsages(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
-      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
       Ok(
         views.html.showUsage(
           recipe,
@@ -133,7 +133,7 @@ class RecipeController(
   def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id).toSeq
-      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
       Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
     }
   }
@@ -141,7 +141,7 @@ class RecipeController(
   def deleteRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
-      val recipeUsage: RecipeUsage = RecipeUsage(recipe, bakes)(prismAgents)
+      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
       if (recipeUsage.bakeUsage.nonEmpty) {
         Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
       } else {
