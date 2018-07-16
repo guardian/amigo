@@ -227,28 +227,13 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -ev
 
-          adduser --system --home /home/amigo --disabled-password amigo
-
           wget -P /tmp https://releases.hashicorp.com/packer/${PackerVersion}/packer_${PackerVersion}_linux_amd64.zip
-
           mkdir /opt/packer
-
           unzip -d /opt/packer /tmp/packer_*_linux_amd64.zip
-
           echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo.service /etc/systemd/system
-
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo-1.0-SNAPSHOT.tgz /home/amigo
-
-          tar -C /home/amigo -x -v -f /home/amigo/amigo-1.0-SNAPSHOT.tgz
-
-          mv /home/amigo/amigo-1.0-SNAPSHOT /home/amigo/amigo
-
-          mkdir /home/amigo/logs
-
-          chown -R amigo /home/amigo
-
+          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo_1.0-SNAPSHOT_all.deb /tmp/amigo.deb
+          dpkg -i /tmp/amigo.deb
           systemctl start amigo
 
   LoadBalancerSecurityGroup:

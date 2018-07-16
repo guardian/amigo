@@ -1,8 +1,38 @@
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
+
 name := "amigo"
 version := "1.0-SNAPSHOT"
 scalaVersion := "2.11.8"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
+javaOptions in Universal ++= Seq(
+  s"-Dpidfile.path=/dev/null",
+  "-J-XX:MaxRAMFraction=2",
+  "-J-XX:InitialRAMFraction=2",
+  "-J-XX:MaxMetaspaceSize=300m",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintGCDateStamps",
+  "-J-DpackerHome=/opt/packer",
+  s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
+)
+
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
+  .settings(
+    packageName in Universal := normalizedName.value,
+    maintainer := "Guardian Developer Experience <devx@theguardian.com>",
+
+    serverLoading in Debian := Systemd,
+    riffRaffPackageType := (packageBin in Debian).value,
+    riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV"),
+    riffRaffManifestBranch := getTravisBranch(),
+    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
+    riffRaffUploadManifestBucket := Option("riffraff-builds"),
+    riffRaffArtifactResources ++= Seq(
+      (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip"
+    ),
+    // Include the roles dir in the tarball for now
+    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
+  )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
@@ -40,18 +70,6 @@ libraryDependencies ++= Seq(
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
-
-riffRaffPackageType := (packageZipTarball in Universal).value
-riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
-riffRaffManifestBranch := getTravisBranch()
-riffRaffUploadArtifactBucket := Option("riffraff-artifact")
-riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources ++= Seq(
-  (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip"
-)
-
-// Include the roles dir in the tarball for now
-mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
 
 scalariformSettings
 
