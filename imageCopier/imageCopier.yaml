@@ -167,6 +167,10 @@ Resources:
             - !Ref KmsKeyArn
           ENCRYPTED_TAG_VALUE:
             !Ref EncryptedTagValue
+      Tags:
+        - Key: App
+          Value: image-copier-lambda
+
 
   # Permission for the housekeeping SNS topic to push events to the Lambda
   InvokeHousekeepingLambdaPermission:
@@ -194,7 +198,7 @@ Resources:
         S3Bucket: !Ref FunctionCodeBucket
         S3Key: !Sub ${Stack}/${Stage}/imagecopier/imagecopier.zip
       Runtime: java8
-      MemorySize: 512
+      MemorySize: 256
       Handler: com.gu.imageCopier.LambdaEntrypoint::housekeeping
       Role: !GetAtt HousekeepingLambdaRole.Arn
       Timeout: 30
@@ -202,3 +206,6 @@ Resources:
         Variables:
           ACCOUNT_ID:
             !Ref AWS::AccountId
+      Tags:
+        - Key: App
+          Value: housekeeping-lambda
