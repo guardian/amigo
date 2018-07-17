@@ -1,7 +1,7 @@
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 
 name := "amigo"
-version := "1.0-SNAPSHOT"
+version := "1.0-latest"
 scalaVersion := "2.11.8"
 
 javaOptions in Universal ++= Seq(
@@ -25,8 +25,6 @@ lazy val root = (project in file("."))
 
     serverLoading in Debian := Systemd,
     riffRaffPackageType := (packageBin in Debian).value,
-    riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV"),
-    riffRaffManifestBranch := getTravisBranch(),
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
     riffRaffArtifactResources ++= Seq(
@@ -37,14 +35,6 @@ lazy val root = (project in file("."))
   )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
-
-def getTravisBranch(): String = {
-  sys.env.get("TRAVIS_PULL_REQUEST") match {
-    case Some("false") => sys.env.getOrElse("TRAVIS_BRANCH", "unknown-branch")
-    case Some(i) => s"pr/$i"
-    case None => "unknown-branch"
-  }
-}
 
 val jacksonVersion = "2.7.1"
 val awsVersion = "1.11.263"
