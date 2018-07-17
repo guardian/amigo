@@ -45,19 +45,23 @@ object AmiActions {
   }
 
   def getImagesAndEbsSnapshots(amis: List[Ami])(implicit ec2Client: AmazonEC2): Attempt[List[(String, List[String])]] = {
-    Attempt.catchNonFatal {
-      val request = new DescribeImagesRequest()
-        .withImageIds(amis.map(_.id).asJava)
-      println(s"Getting list of images and EBS snapshots with request $request")
-      val result = ec2Client.describeImages(request)
-      println(s"Raw result: $result")
-      val ids = result.getImages.asScala.map { image =>
-        image.getImageId -> image.getBlockDeviceMappings.asScala.toList.flatMap(mapping => Option(mapping.getEbs).map(_.getSnapshotId))
+    if (amis.nonEmpty) {
+      Attempt.catchNonFatal {
+        val request = new DescribeImagesRequest()
+          .withImageIds(amis.map(_.id).asJava)
+        println(s"Getting list of images and EBS snapshots with request $request")
+        val result = ec2Client.describeImages(request)
+        println(s"Raw result: $result")
+        val ids = result.getImages.asScala.map { image =>
+          image.getImageId -> image.getBlockDeviceMappings.asScala.toList.flatMap(mapping => Option(mapping.getEbs).map(_.getSnapshotId))
+        }
+        println(s"List of AMIs and snapshots: $ids")
+        ids.toList
+      } {
+        case ace:AmazonClientException => AwsSdkFailure(ace)
       }
-      println(s"List of AMIs and snapshots: $ids")
-      ids.toList
-    } {
-      case ace:AmazonClientException => AwsSdkFailure(ace)
+    } else {
+      Attempt.Right(Nil)
     }
   }
 
