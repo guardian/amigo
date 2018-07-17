@@ -1,18 +1,40 @@
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
+
 name := "amigo"
-version := "1.0-SNAPSHOT"
+version := "1.0-latest"
 scalaVersion := "2.11.8"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala, RiffRaffArtifact)
+javaOptions in Universal ++= Seq(
+  s"-Dpidfile.path=/dev/null",
+  "-J-XX:MaxRAMFraction=2",
+  "-J-XX:InitialRAMFraction=2",
+  "-J-XX:MaxMetaspaceSize=300m",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintGCDateStamps",
+  "-J-DpackerHome=/opt/packer",
+  "-J-Dlogger.resource=logback-PROD.xml",
+  s"-J-Dlogs.home=/var/log/${packageName.value}",
+  s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
+)
+
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
+  .settings(
+    packageName in Universal := normalizedName.value,
+    maintainer := "Guardian Developer Experience <devx@theguardian.com>",
+
+    serverLoading in Debian := Systemd,
+    riffRaffPackageType := (packageBin in Debian).value,
+    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
+    riffRaffUploadManifestBucket := Option("riffraff-builds"),
+    riffRaffArtifactResources ++= Seq(
+      (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip"
+    ),
+    // Include the roles dir in the tarball for now
+    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
+  )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
-
-def getTravisBranch(): String = {
-  sys.env.get("TRAVIS_PULL_REQUEST") match {
-    case Some("false") => sys.env.getOrElse("TRAVIS_BRANCH", "unknown-branch")
-    case Some(i) => s"pr/$i"
-    case None => "unknown-branch"
-  }
-}
 
 val jacksonVersion = "2.7.1"
 val awsVersion = "1.11.263"
@@ -40,18 +62,6 @@ libraryDependencies ++= Seq(
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
-
-riffRaffPackageType := (packageZipTarball in Universal).value
-riffRaffBuildIdentifier := sys.env.getOrElse("TRAVIS_BUILD_NUMBER", "DEV")
-riffRaffManifestBranch := getTravisBranch()
-riffRaffUploadArtifactBucket := Option("riffraff-artifact")
-riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources ++= Seq(
-  (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip"
-)
-
-// Include the roles dir in the tarball for now
-mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
 
 scalariformSettings
 

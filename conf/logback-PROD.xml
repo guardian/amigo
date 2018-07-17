@@ -1,0 +1,25 @@
+<configuration>
+    
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
+  <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logs.home}/amigo.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${logs.home}/amigo.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <maxHistory>3</maxHistory>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%date [%thread] %-5level %logger{36}:%line - %msg%n%xException{full}</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="play" level="INFO" />
+  <logger name="application" level="DEBUG" />
+
+  <root level="INFO">
+    <appender-ref ref="LOGFILE" />
+  </root>
+
+</configuration>

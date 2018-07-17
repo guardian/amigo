@@ -18,7 +18,7 @@ import scala.util.Try
 
 object PackerRunner {
 
-  private val packerCmd = sys.env.get("PACKER_HOME").map(ph => s"$ph/packer").getOrElse("packer")
+  private val packerCmd = sys.props.get("packerHome").map(ph => s"$ph/packer").getOrElse("packer")
 
   /**
    * Starts a Packer process to create an image using the given recipe.
