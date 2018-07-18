@@ -145,6 +145,9 @@ class RecipeController(
       if (recipeUsage.bakeUsage.nonEmpty) {
         Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
       } else {
+        // stop any scheduled build
+        bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
+
         // delete the AMIgo data
         bakes.foreach { bake =>
           Bakes.markToDelete(bake.bakeId)
