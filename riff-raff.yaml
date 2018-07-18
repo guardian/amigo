@@ -2,6 +2,28 @@ stacks:
 - deploy
 regions:
 - eu-west-1
+templates:
+  lambda-upload:
+    type: aws-lambda
+    contentDirectory: imagecopier
+    actions:
+    - uploadLambda
+    parameters:
+      bucket: deploy-tools-dist
+      fileName: imagecopier.zip
+      lookupByTags: true
+
+  lambda-update:
+    template: lambda-upload
+    actions:
+    - updateLambda
+    # complete list of all stacks - should stay in sync with the imagecopier StackSet in the root account
+    stacks:
+    - deploy
+    - composer
+    - cms-fronts
+    - workflow
+
 deployments:
   amigo:
     type: autoscaling
@@ -9,18 +31,29 @@ deployments:
       bucket: deploy-tools-dist
     dependencies:
       - update-ami
+
   update-ami:
     type: ami-cloudformation-parameter
     app: amigo
     parameters:
       amiTags:
-        Recipe: xenial-java8-deploy-infrastructure
+        BuiltBy: amigo
         AmigoStage: PROD
+        Recipe: xenial-java8-deploy-infrastructure
       amiEncrypted: true
-  # upload lambda
-  imagecopier:
-    type: aws-s3
-    parameters:
-      bucket: deploy-tools-dist
-      cacheControl: public, max-age=600
-      publicReadAcl: false
+
+  # deploy lambdas
+  image-copier-lambda-upload:
+    template: lambda-upload
+    app: image-copier-lambda
+  housekeeping-lambda-upload:
+    template: lambda-upload
+    app: housekeeping-lambda
+  image-copier-lambda:
+    template: lambda-update
+    dependencies:
+    - image-copier-lambda-upload
+  housekeeping-lambda:
+    template: lambda-update
+    dependencies:
+    - housekeeping-lambda-upload
