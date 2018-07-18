@@ -19,7 +19,7 @@ javaOptions in Universal ++= Seq(
 )
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin)
   .settings(
     packageName in Universal := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
@@ -33,7 +33,16 @@ lazy val root = (project in file("."))
       baseDirectory.value / "cloudformation.yaml" -> "cloudformation/cloudformation.yaml"
     ),
     // Include the roles dir in the tarball for now
-    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString }
+    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
+    buildInfoPackage := "amigo",
+    buildInfoKeys := Seq[BuildInfoKey](
+      BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
+      // so this next one is constant to avoid it always recompiling on dev machines.
+      // we only really care about build time on teamcity, when a constant based on when
+      // it was loaded is just fine
+      BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+      BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse "DEV")
+    )
   )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
@@ -59,6 +68,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-kinesis" % awsVersion,
+  "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
+  "com.gu" % "kinesis-logback-appender" % "1.4.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test
 )

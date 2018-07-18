@@ -2,29 +2,29 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
+import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
+import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
-import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.gu.cm.{ ConfigurationLoader, Identity }
+import com.gu.cm.{ConfigurationLoader, Identity}
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
-import data.{ Dynamo, Recipes }
-import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
-import housekeeping.{ BakeDeletion, HousekeepingScheduler, MarkOldUnusedBakesForDeletion, MarkOrphanedBakesForDeletion }
-import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
+import data.{Dynamo, Recipes}
+import event.{ActorSystemWrapper, BakeEvent, Behaviours}
+import housekeeping.{BakeDeletion, HousekeepingScheduler, MarkOldUnusedBakesForDeletion, MarkOrphanedBakesForDeletion}
+import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.PackerConfig
-import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
+import play.api.{BuiltInComponentsFromContext, Configuration, Logger}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -33,8 +33,8 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import prism.Prism
 import router.Routes
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.PrismAgents
+import schedule.{BakeScheduler, ScheduledBakeRunner}
+import services.{ElkLogging, PrismAgents}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -85,6 +85,10 @@ class AppComponents(context: Context)
       20,
       false
     ))
+
+  // initialise logging
+  val elkLoggingStream = configuration.getString("elk.loggingStream")
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCreds, applicationLifecycle)
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
