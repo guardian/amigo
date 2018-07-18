@@ -1,7 +1,8 @@
 package packer
 
+import java.io.File
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Path }
+import java.nio.file.{Files, Path}
 
 import ansible.PlaybookGenerator
 import event.EventBus
@@ -12,7 +13,7 @@ import play.api.libs.json.Json
 import prism.Prism
 import services.PrismAgents
 
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
@@ -49,6 +50,7 @@ object PackerRunner {
     }
     val packerProcess = new ProcessBuilder()
       .command(command: _*)
+      .directory(new File(System.getProperty("java.io.tmpdir")))
       .start()
 
     val exitValuePromise = Promise[Int]()
