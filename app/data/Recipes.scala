@@ -1,13 +1,15 @@
 package data
 
+import cats.instances.either._
+import cats.instances.list._
+import cats.syntax.either._
+import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model._
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.syntax._
+import models.Recipe.DbModel
 import models._
 import org.joda.time.DateTime
-import com.gu.scanamo.syntax._
-import cats.syntax.either._
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.query.UniqueKey
-import models.Recipe.DbModel
 
 import scala.collection.JavaConverters._
 
@@ -18,13 +20,18 @@ object Recipes {
   def list()(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_ => true)
 
   def filteredList(p: DbModel => Boolean)(implicit dynamo: Dynamo): Iterable[Recipe] = {
-    val dbModels = table.scan().exec().flatMap(_.toOption)
-    for {
-      dbModel <- dbModels
-      if p(dbModel)
-      baseImage <- BaseImages.findById(dbModel.baseImageId)
-    } yield {
-      Recipe.db2domain(dbModel, baseImage)
+    val dbResponse: Either[DynamoReadError, List[DbModel]] = table.scan().exec().sequenceU
+
+    dbResponse match {
+      case Right(dbModels) =>
+        for {
+          dbModel <- dbModels
+          if p(dbModel)
+          baseImage <- BaseImages.findById(dbModel.baseImageId)
+        } yield {
+          Recipe.db2domain(dbModel, baseImage)
+        }
+      case _ => throw new RuntimeException(s"Dynamo read error: unable to list recipes")
     }
   }
 
