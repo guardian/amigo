@@ -8,15 +8,16 @@ deployments:
     parameters:
       bucket: deploy-tools-dist
     dependencies:
-      - update-ami
-  update-ami:
-    type: ami-cloudformation-parameter
+      - cloudformation
+  cloudformation:
+    type: cloud-formation
     app: amigo
     parameters:
       amiTags:
         Recipe: xenial-java8-deploy-infrastructure
         AmigoStage: PROD
       amiEncrypted: true
+      templatePath: cloudformation.yaml
   # upload lambda
   imagecopier:
     type: aws-s3
