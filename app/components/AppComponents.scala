@@ -188,6 +188,7 @@ class AppComponents(context: Context)
 
   val rootController = new RootController(googleAuthConfig)
   val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
+  val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
   val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
@@ -197,6 +198,7 @@ class AppComponents(context: Context)
     httpErrorHandler,
     rootController,
     baseImageController,
+    housekeepingController,
     roleController,
     recipeController,
     bakeController,
