@@ -1,9 +1,9 @@
 package data
 
+import cats.implicits.catsSyntaxMonadCombineSeparate
 import cats.instances.either._
 import cats.instances.list._
 import cats.syntax.either._
-import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
@@ -20,19 +20,27 @@ object Recipes {
   def list()(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_ => true)
 
   def filteredList(p: DbModel => Boolean)(implicit dynamo: Dynamo): Iterable[Recipe] = {
-    val dbResponse: Either[DynamoReadError, List[DbModel]] = table.scan().exec().sequenceU
-
-    dbResponse match {
-      case Right(dbModels) =>
-        for {
-          dbModel <- dbModels
-          if p(dbModel)
-          baseImage <- BaseImages.findById(dbModel.baseImageId)
-        } yield {
-          Recipe.db2domain(dbModel, baseImage)
-        }
-      case _ => throw new RuntimeException(s"Dynamo read error: unable to list recipes")
+    val dbModels = table.scan().exec().flatMap(_.toOption)
+    for {
+      dbModel <- dbModels
+      if p(dbModel)
+      baseImage <- BaseImages.findById(dbModel.baseImageId)
+    } yield {
+      Recipe.db2domain(dbModel, baseImage)
     }
+  }
+
+  def listWithErrors()(implicit dynamo: Dynamo): (List[DynamoReadError], List[Recipe]) = {
+    val dbResponse: Traversable[Either[DynamoReadError, DbModel]] = table.scan().exec()
+    val results = dbResponse.toList.separate
+
+    val recipes = for {
+      dbModel <- results._2
+      baseImage <- BaseImages.findById(dbModel.baseImageId)
+    } yield {
+      Recipe.db2domain(dbModel, baseImage)
+    }
+    (results._1, recipes)
   }
 
   def create(id: RecipeId,
