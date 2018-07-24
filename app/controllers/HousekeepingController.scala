@@ -17,14 +17,17 @@ class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: 
   }
 
   def deleteOrphans(): Action[AnyContent] = AuthAction { implicit request =>
-    val formData = request.body.asFormUrlEncoded.get("orphaned-bake")
-
-    formData.foreach { bake =>
-      BakeId.fromString(bake) match {
+    for {
+      formData <- request.body.asFormUrlEncoded.toSeq
+      bakes <- formData.get("orphaned-bakes").toSeq
+      bakeIdFromString <- bakes.map(BakeId.fromString)
+    } yield {
+      bakeIdFromString match {
         case Right(bakeId) => Bakes.markToDelete(bakeId)
         case Left(err) => Logger.warn(err.toString)
       }
     }
+
     Redirect(routes.HousekeepingController.showOrphans())
   }
 }
