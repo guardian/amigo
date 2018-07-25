@@ -192,7 +192,7 @@ Resources:
       Description: Lambda for housekeeping AMIgo baked AMIs in other accounts
       Code:
         S3Bucket: !Ref FunctionCodeBucket
-        S3Key: !Sub ${Stack}/${Stage}/imagecopier/imagecopier.zip
+        S3Key: !Sub ${Stack}/${Stage}/housekeeping-lambda/imagecopier.zip
       Runtime: java8
       MemorySize: 512
       Handler: com.gu.imageCopier.LambdaEntrypoint::housekeeping

@@ -38,7 +38,10 @@ object LambdaDistributionBucket {
         "AWS" -> accounts
       )),
       Action = Some(JsString("s3:GetObject")),
-      Resource = Some(JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/imagecopier/*"))
+      Resource = Some(JsArray(Seq(
+        JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/imagecopier/*"),
+        JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/housekeeping-lambda/*")
+      )))
     )
   }
 
