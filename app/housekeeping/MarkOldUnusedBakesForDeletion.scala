@@ -13,7 +13,8 @@ object MarkOldUnusedBakesForDeletion {
   val BATCH_SIZE = 100
 
   def getOldUnusedBakes(
-    recipeIds: Set[RecipeId], now: DateTime,
+    recipeIds: Set[RecipeId],
+    now: DateTime,
     listBakes: RecipeId => Iterable[Bake],
     getRecipeUsage: Iterable[Bake] => RecipeUsage): Set[Bake] = {
     val allBakes = recipeIds.flatMap(listBakes)

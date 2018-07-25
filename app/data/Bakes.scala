@@ -61,6 +61,13 @@ object Bakes {
     }
   }
 
+  def scanForAll()(implicit dynamo: Dynamo): List[Bake.DbModel] = {
+    table
+      .scan()
+      .exec()
+      .flatMap(_.toOption)
+  }
+
   def markToDelete(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
     table
       .given(attributeExists('recipeId) and attributeExists('buildNumber))

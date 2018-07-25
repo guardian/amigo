@@ -1,13 +1,15 @@
 package data
 
+import cats.implicits.catsSyntaxMonadCombineSeparate
+import cats.instances.either._
+import cats.instances.list._
+import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.syntax._
+import models.Recipe.DbModel
 import models._
 import org.joda.time.DateTime
-import com.gu.scanamo.syntax._
-import cats.syntax.either._
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.query.UniqueKey
-import models.Recipe.DbModel
 
 import scala.collection.JavaConverters._
 
@@ -26,6 +28,19 @@ object Recipes {
     } yield {
       Recipe.db2domain(dbModel, baseImage)
     }
+  }
+
+  def recipesWithErrors()(implicit dynamo: Dynamo): (List[DynamoReadError], List[Recipe]) = {
+    val dbResponse: Traversable[Either[DynamoReadError, DbModel]] = table.scan().exec()
+    val (errors, models) = dbResponse.toList.separate
+
+    val recipes = for {
+      dbModel <- models
+      baseImage <- BaseImages.findById(dbModel.baseImageId)
+    } yield {
+      Recipe.db2domain(dbModel, baseImage)
+    }
+    (errors, recipes)
   }
 
   def create(id: RecipeId,

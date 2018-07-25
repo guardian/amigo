@@ -13,6 +13,9 @@ GET     /base-images/:id            controllers.BaseImageController.showBaseImag
 GET     /base-images/:id/edit       controllers.BaseImageController.editBaseImage(id: BaseImageId)
 POST    /base-images/:id/edit       controllers.BaseImageController.updateBaseImage(id: BaseImageId)
 
+GET     /housekeeping                      controllers.HousekeepingController.showOrphans
+POST    /housekeeping/deleteOrphans        controllers.HousekeepingController.deleteOrphans
+
 GET     /roles                      controllers.RoleController.listRoles
 
 GET     /recipes                    controllers.RecipeController.listRecipes
