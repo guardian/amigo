@@ -8,11 +8,11 @@ import play.api.Logger
 import play.api.mvc._
 
 class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo) extends Controller with AuthActions {
-  private val (errors, recipes) = Recipes.recipesWithErrors
-  private val recipeIds = recipes.map(recipe => recipe.id).toSet
-  private val orphanedBakes = MarkOrphanedBakesForDeletion.findOrphanedBakeIds(recipeIds, Bakes.scanForAll())
 
   def showOrphans = AuthAction {
+    val (errors, recipes) = Recipes.recipesWithErrors
+    val recipeIds = recipes.map(recipe => recipe.id).toSet
+    val orphanedBakes = MarkOrphanedBakesForDeletion.findOrphanedBakeIds(recipeIds, Bakes.scanForAll())
     Ok(views.html.housekeeping(orphanedBakes, errors.length))
   }
 
