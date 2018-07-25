@@ -30,17 +30,17 @@ object Recipes {
     }
   }
 
-  def listWithErrors()(implicit dynamo: Dynamo): (List[DynamoReadError], List[Recipe]) = {
+  def recipesWithErrors()(implicit dynamo: Dynamo): (List[DynamoReadError], List[Recipe]) = {
     val dbResponse: Traversable[Either[DynamoReadError, DbModel]] = table.scan().exec()
-    val results = dbResponse.toList.separate
+    val (errors, models) = dbResponse.toList.separate
 
     val recipes = for {
-      dbModel <- results._2
+      dbModel <- models
       baseImage <- BaseImages.findById(dbModel.baseImageId)
     } yield {
       Recipe.db2domain(dbModel, baseImage)
     }
-    (results._1, recipes)
+    (errors, recipes)
   }
 
   def create(id: RecipeId,

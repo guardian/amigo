@@ -6,6 +6,12 @@ import org.quartz.SimpleScheduleBuilder
 import play.api.Logger
 import services.PrismAgents
 
+
+/*
+If a recipe has been deleted from a table but not the associated bake, then these
+lonely bakes will linger on and never get picked up by the other housekeeping tasks
+*/
+
 object MarkOrphanedBakesForDeletion {
   val FAULT_TOLERANCE = 0
 
@@ -21,7 +27,7 @@ class MarkOrphanedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) ext
   override def housekeep(): Unit = {
     implicit val implicitPrismAgents: PrismAgents = prismAgents
     implicit val implicitDynamo: Dynamo = dynamo
-    val (errors, recipes) = Recipes.listWithErrors
+    val (errors, recipes) = Recipes.recipesWithErrors
     errors match {
       case _ if errors.length > MarkOrphanedBakesForDeletion.FAULT_TOLERANCE =>
         Logger.info(s"Housekeeping found ${errors.length} database errors while searching for orphaned bakes")
