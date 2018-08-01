@@ -1,4 +1,4 @@
 ---
-kong_version: 0.10.1
+kong_version: 0.14.0
 kong_user: content-api
 postgres_version: 9.5
