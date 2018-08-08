@@ -1,4 +1,5 @@
 import akka.actor.FSM.->
+import com.gu.riffraff.artifact.BuildInfo
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 
 name := "amigo"
@@ -35,14 +36,17 @@ lazy val root = (project in file("."))
     // Include the roles dir in the tarball for now
     mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
     buildInfoPackage := "amigo",
-    buildInfoKeys := Seq[BuildInfoKey](
-      BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
-      // so this next one is constant to avoid it always recompiling on dev machines.
-      // we only really care about build time on teamcity, when a constant based on when
-      // it was loaded is just fine
-      BuildInfoKey.constant("buildTime", System.currentTimeMillis),
-      BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse "DEV")
-    )
+    buildInfoKeys := {
+      lazy val buildInfo = BuildInfo(baseDirectory.value)
+      Seq[BuildInfoKey](
+        BuildInfoKey.constant("buildNumber", buildInfo.buildIdentifier),
+        // so this next one is constant to avoid it always recompiling on dev machines.
+        // we only really care about build time on teamcity, when a constant based on when
+        // it was loaded is just fine
+        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+        BuildInfoKey.constant("gitCommitId", buildInfo.revision)
+      )
+    }
   )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
