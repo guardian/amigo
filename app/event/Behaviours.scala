@@ -2,13 +2,13 @@ package event
 
 import akka.typed._
 import akka.typed.ScalaDSL._
-import data.{ Bakes, BakeLogs, Dynamo }
+import data.{ BakeLogs, Bakes, Dynamo }
 import event.BakeEvent._
 import models.BakeStatus
-import play.api.Logger
 import play.api.libs.iteratee.Concurrent.Channel
+import services.Loggable
 
-object Behaviours {
+object Behaviours extends Loggable {
 
   /**
    * Initialises the child actors for each event listener
@@ -44,9 +44,9 @@ object Behaviours {
   }
 
   val writeToLog: Behavior[BakeEvent] = Static {
-    case Log(bakeId, line) => Logger.info(s"PACKER: $line")
-    case AmiCreated(bakeId, amiId) => Logger.info(s"Packer created an AMI! AMI id = ${amiId.value}")
-    case PackerProcessExited(bakeId, exitCode) => Logger.info(s"Packer process completed with exit code $exitCode")
+    case Log(bakeId, line) => log.info(s"PACKER: $line")
+    case AmiCreated(bakeId, amiId) => log.info(s"Packer created an AMI! AMI id = ${amiId.value}")
+    case PackerProcessExited(bakeId, exitCode) => log.info(s"Packer process completed with exit code $exitCode")
   }
 
   /**

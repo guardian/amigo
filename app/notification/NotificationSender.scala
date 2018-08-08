@@ -4,11 +4,11 @@ import com.amazonaws.services.sns.model.PublishRequest
 import models.{ AmiId, Bake }
 import models.packer.PackerVariablesConfig
 import _root_.packer.ImageDetails
-import play.api.Logger
 import play.api.libs.json.{ Json, JsString, JsValue, Writes }
 import prism.Ami
+import services.Loggable
 
-class NotificationSender(sns: SNS, region: String, stage: String) {
+class NotificationSender(sns: SNS, region: String, stage: String) extends Loggable {
   def sendTopicMessage(bake: Bake, amiId: AmiId): Unit = {
     val vars = PackerVariablesConfig(bake)
     val imageDetails = ImageDetails.apply(vars, stage)
@@ -21,7 +21,7 @@ class NotificationSender(sns: SNS, region: String, stage: String) {
       "tags" -> imageDetails.tags
     )
     val messageStr = Json.stringify(message)
-    Logger.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
+    log.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
     sns.client.publish(new PublishRequest().withTopicArn(sns.topicArn).withMessage(messageStr))
   }
 
@@ -34,7 +34,7 @@ class NotificationSender(sns: SNS, region: String, stage: String) {
     amisToDelete.grouped(10).foreach { batchToDelete =>
       val message = Json.obj("amis" -> batchToDelete)
       val messageStr = Json.stringify(message)
-      Logger.info(s"Sending message to topic ${sns.housekeepingTopicArn}: $messageStr")
+      log.info(s"Sending message to topic ${sns.housekeepingTopicArn}: $messageStr")
       sns.client.publish(new PublishRequest().withTopicArn(sns.housekeepingTopicArn).withMessage(messageStr))
     }
   }

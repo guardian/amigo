@@ -4,10 +4,11 @@ import com.gu.googleauth.GoogleAuthConfig
 import data._
 import housekeeping.MarkOrphanedBakesForDeletion
 import models.BakeId
-import play.api.Logger
 import play.api.mvc._
+import services.Loggable
 
-class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo) extends Controller with AuthActions {
+class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo)
+    extends Controller with AuthActions with Loggable {
 
   def showOrphans = AuthAction {
     val (errors, recipes) = Recipes.recipesWithErrors
@@ -24,7 +25,7 @@ class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: 
     } yield {
       bakeIdFromString match {
         case Right(bakeId) => Bakes.markToDelete(bakeId)
-        case Left(err) => Logger.warn(err.toString)
+        case Left(err) => log.warn(err.toString)
       }
     }
 

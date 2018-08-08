@@ -5,12 +5,12 @@ import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.{ DynamoFormat, Scanamo, Table => ScanamoTable }
 import com.gu.scanamo.ops.ScanamoOps
 import models.{ Bake, BakeLog, BaseImage, Recipe }
-import play.api.Logger
+import services.Loggable
 
 import scala.annotation.tailrec
 import scala.util.Try
 
-class Dynamo(val client: AmazonDynamoDB, stage: String) {
+class Dynamo(val client: AmazonDynamoDB, stage: String) extends Loggable {
   import Dynamo._
   import DynamoFormats._
 
@@ -66,11 +66,11 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) {
 
   private def createTableIfDoesNotExist(table: TableWrapper[_]): Unit = {
     if (Try(client.describeTable(table.name)).isFailure) {
-      Logger.info(s"Creating Dynamo table ${table.name} ...")
+      log.info(s"Creating Dynamo table ${table.name} ...")
       client.createTable(table.definition)
       waitForTableToBecomeActive(table.name)
     } else {
-      Logger.info(s"Found Dynamo table ${table.name}")
+      log.info(s"Found Dynamo table ${table.name}")
     }
   }
 
@@ -79,7 +79,7 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) {
     Try(Option(client.describeTable(name).getTable)).toOption.flatten match {
       case Some(table) if table.getTableStatus == TableStatus.ACTIVE.toString => ()
       case _ =>
-        Logger.info(s"Waiting for table $name to become active ...")
+        log.info(s"Waiting for table $name to become active ...")
         Thread.sleep(500L)
         waitForTableToBecomeActive(name)
     }

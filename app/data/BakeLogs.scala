@@ -4,12 +4,12 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.query.{ UniqueKeyConditions, UniqueKeys }
 import com.gu.scanamo.syntax._
 import models._
-import play.api.Logger
+import services.Loggable
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
-object BakeLogs {
+object BakeLogs extends Loggable {
   import cats.syntax.either._
   import Dynamo._
 
@@ -55,7 +55,7 @@ object BakeLogs {
     } yield unprocessedKey
 
     if (unprocessedKeys.nonEmpty) {
-      Logger.warn(s"${unprocessedKeys.size} log entries not processed during deletion, trying again - attempt $attempt")
+      log.warn(s"${unprocessedKeys.size} log entries not processed during deletion, trying again - attempt $attempt")
       // avoid overwhelming the DB by pausing briefly before mopping up
       Thread.sleep(BATCH_PAUSE)
       doDelete(UniqueKeys(unprocessedKeys.toSet), attempt + 1)

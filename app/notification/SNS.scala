@@ -2,14 +2,14 @@ package notification
 
 import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sns.model._
-import play.api.Logger
+import services.Loggable
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-object SNS {
+object SNS extends Loggable {
   def listAwsResource[T](request: Option[String] => (List[T], Option[String])): List[T] = {
     @tailrec
     def listAwsResourceRec(soFar: List[T], nextToken: Option[String]): List[T] = {
@@ -27,7 +27,7 @@ object SNS {
   @tailrec
   private def waitForTopicToBecomeAvailable(arn: String)(implicit client: AmazonSNS): Unit = {
     if (!listTopicArns.exists(arn ==)) {
-      Logger.info(s"Waiting for topic $arn to become available ...")
+      log.info(s"Waiting for topic $arn to become available ...")
       Thread.sleep(500L)
       waitForTopicToBecomeAvailable(arn)
     }

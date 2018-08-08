@@ -2,29 +2,29 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
-import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
+import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
+import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
+import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.gu.cm.{ConfigurationLoader, Identity}
+import com.gu.cm.{ ConfigurationLoader, Identity }
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
-import data.{Dynamo, Recipes}
-import event.{ActorSystemWrapper, BakeEvent, Behaviours}
-import housekeeping.{BakeDeletion, HousekeepingScheduler, MarkOldUnusedBakesForDeletion, MarkOrphanedBakesForDeletion}
-import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
+import data.{ Dynamo, Recipes }
+import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import housekeeping.{ BakeDeletion, HousekeepingScheduler, MarkOldUnusedBakesForDeletion, MarkOrphanedBakesForDeletion }
+import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.PackerConfig
-import play.api.{BuiltInComponentsFromContext, Configuration, Logger}
+import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -33,14 +33,14 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import prism.Prism
 import router.Routes
-import schedule.{BakeScheduler, ScheduledBakeRunner}
-import services.{ElkLogging, PrismAgents}
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
+import services.{ ElkLogging, Loggable, PrismAgents }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class LoggingRetryCondition extends SDKDefaultRetryCondition {
+class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
     s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(e.getCause).map(e => exceptionInfo(e))}"
   }
@@ -48,10 +48,10 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition {
   override def shouldRetry(originalRequest: AmazonWebServiceRequest, exception: AmazonClientException, retriesAttempted: Int): Boolean = {
     val willRetry = super.shouldRetry(originalRequest, exception, retriesAttempted)
     if (willRetry) {
-      Logger.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest).map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
+      log.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest).map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
     } else {
-      Logger.warn(s"Encountered fatal exception during AWS API call", exception)
-      Option(exception.getCause).foreach(t => Logger.warn(s"Cause of fatal exception", t))
+      log.warn(s"Encountered fatal exception during AWS API call", exception)
+      Option(exception.getCause).foreach(t => log.warn(s"Cause of fatal exception", t))
     }
     willRetry
   }
@@ -60,7 +60,8 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition {
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
-    with I18nComponents {
+    with I18nComponents
+    with Loggable {
 
   val identity = {
     import com.gu.cm.PlayImplicits._
@@ -178,7 +179,7 @@ class AppComponents(context: Context)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
-  Logger.info("Registering all scheduled bakes with the scheduler")
+  log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
   val bakeDeletionHousekeeping = new BakeDeletion(dynamo, awsAccount, prismAgents, sender)

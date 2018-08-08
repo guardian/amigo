@@ -1,14 +1,15 @@
 package prism
 
 import models.AmiId
-import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
+import services.Loggable
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(implicit ec: ExecutionContext) {
+class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(implicit ec: ExecutionContext)
+    extends Loggable {
   import Prism._
 
   def findAllAWSAccounts(): Future[Seq[AWSAccount]] = {
@@ -25,7 +26,7 @@ class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(i
     val url = s"$baseUrl$path"
     ws.url(url).get().map { resp =>
       extractData[Seq[T]](resp.json).fold(error => {
-        Logger.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")
+        log.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")
         Seq.empty[T]
       }, t => t)
     }
