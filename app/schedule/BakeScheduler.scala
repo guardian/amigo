@@ -5,9 +5,9 @@ import org.quartz.{ JobDataMap, JobKey, Scheduler, TriggerKey }
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
-import play.api.Logger
+import services.Loggable
 
-class BakeScheduler(scheduler: Scheduler, scheduledBakeRunner: ScheduledBakeRunner) {
+class BakeScheduler(scheduler: Scheduler, scheduledBakeRunner: ScheduledBakeRunner) extends Loggable {
 
   def initialise(recipes: Iterable[Recipe]): Unit = {
     recipes.flatMap(r => r.bakeSchedule.map(s => (r.id, s))).foreach {
@@ -35,7 +35,7 @@ class BakeScheduler(scheduler: Scheduler, scheduledBakeRunner: ScheduledBakeRunn
       .withSchedule(cronSchedule(bakeSchedule.quartzCronExpression))
       .build()
     scheduler.scheduleJob(jobDetail, trigger)
-    Logger.info(s"Scheduled recipe [$recipeId] to bake with schedule [${bakeSchedule.quartzCronExpression}]")
+    log.info(s"Scheduled recipe [$recipeId] to bake with schedule [${bakeSchedule.quartzCronExpression}]")
   }
 
   def start(): Unit = scheduler.start()

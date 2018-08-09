@@ -34,13 +34,13 @@ import play.api.routing.Router
 import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.PrismAgents
+import services.{ ElkLogging, Loggable, PrismAgents }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class LoggingRetryCondition extends SDKDefaultRetryCondition {
+class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
     s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(e.getCause).map(e => exceptionInfo(e))}"
   }
@@ -48,10 +48,10 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition {
   override def shouldRetry(originalRequest: AmazonWebServiceRequest, exception: AmazonClientException, retriesAttempted: Int): Boolean = {
     val willRetry = super.shouldRetry(originalRequest, exception, retriesAttempted)
     if (willRetry) {
-      Logger.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest).map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
+      log.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest).map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
     } else {
-      Logger.warn(s"Encountered fatal exception during AWS API call", exception)
-      Option(exception.getCause).foreach(t => Logger.warn(s"Cause of fatal exception", t))
+      log.warn(s"Encountered fatal exception during AWS API call", exception)
+      Option(exception.getCause).foreach(t => log.warn(s"Cause of fatal exception", t))
     }
     willRetry
   }
@@ -60,7 +60,8 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition {
 class AppComponents(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
-    with I18nComponents {
+    with I18nComponents
+    with Loggable {
 
   val identity = {
     import com.gu.cm.PlayImplicits._
@@ -85,6 +86,10 @@ class AppComponents(context: Context)
       20,
       false
     ))
+
+  // initialise logging
+  val elkLoggingStream = configuration.getString("elk.loggingStream")
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCreds, applicationLifecycle)
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
@@ -174,7 +179,7 @@ class AppComponents(context: Context)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
-  Logger.info("Registering all scheduled bakes with the scheduler")
+  log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
   val bakeDeletionHousekeeping = new BakeDeletion(dynamo, awsAccount, prismAgents, sender)

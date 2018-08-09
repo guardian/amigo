@@ -3,9 +3,7 @@ package housekeeping
 import data.{ Bakes, Dynamo, Recipes }
 import models.{ Bake, BakeId, RecipeId }
 import org.quartz.SimpleScheduleBuilder
-import play.api.Logger
-import services.PrismAgents
-
+import services.{ Loggable, PrismAgents }
 
 /*
 If a recipe has been deleted from a table but not the associated bake, then these
@@ -21,7 +19,7 @@ object MarkOrphanedBakesForDeletion {
   }
 }
 
-class MarkOrphanedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) extends HousekeepingJob {
+class MarkOrphanedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) extends HousekeepingJob with Loggable {
   override val schedule = SimpleScheduleBuilder.repeatHourlyForever(24)
 
   override def housekeep(): Unit = {
@@ -30,15 +28,15 @@ class MarkOrphanedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) ext
     val (errors, recipes) = Recipes.recipesWithErrors
     errors match {
       case _ if errors.length > MarkOrphanedBakesForDeletion.FAULT_TOLERANCE =>
-        Logger.info(s"Housekeeping found ${errors.length} database errors while searching for orphaned bakes")
-        Logger.warn(s"${errors.length} errors exceeds the limit so orphaned bake deletion will not continue")
+        log.info(s"Housekeeping found ${errors.length} database errors while searching for orphaned bakes")
+        log.warn(s"${errors.length} errors exceeds the limit so orphaned bake deletion will not continue")
       case _ =>
         val bakes = Bakes.scanForAll()
         val orphanedBakeIds = MarkOrphanedBakesForDeletion.findOrphanedBakeIds(recipes.map(_.id).toSet, bakes)
-        Logger.info(s"Marking ${orphanedBakeIds.size} orphaned bakes for deletion")
+        log.info(s"Marking ${orphanedBakeIds.size} orphaned bakes for deletion")
         orphanedBakeIds.foreach { bakeId =>
           Bakes.markToDelete(bakeId)
-          Logger.info(s"Marked ${bakeId.toString} for deletion")
+          log.info(s"Marked ${bakeId.toString} for deletion")
         }
     }
   }

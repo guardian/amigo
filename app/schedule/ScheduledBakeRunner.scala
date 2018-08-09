@@ -4,34 +4,32 @@ import data.{ Bakes, Dynamo, Recipes }
 import event.EventBus
 import models.RecipeId
 import packer.{ PackerConfig, PackerRunner }
-import play.api.Logger
-import prism.Prism
-import services.PrismAgents
+import services.{ Loggable, PrismAgents }
 
-class ScheduledBakeRunner(enabled: Boolean, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) {
+class ScheduledBakeRunner(enabled: Boolean, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
 
   def bake(recipeId: RecipeId): Unit = {
     if (!enabled) {
-      Logger.info("Skipping scheduled bake because I am disabled")
+      log.info("Skipping scheduled bake because I am disabled")
     } else {
       Recipes.findById(recipeId) match {
         case Some(recipe) =>
           // sanity check: is the recipe actually scheduled?
           if (recipe.bakeSchedule.isEmpty) {
-            Logger.warn(s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined")
+            log.warn(s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined")
           } else {
             Recipes.incrementAndGetBuildNumber(recipe.id) match {
               case Some(buildNumber) =>
                 val theBake = Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
-                Logger.info(s"Starting scheduled bake: ${theBake.bakeId}")
+                log.info(s"Starting scheduled bake: ${theBake.bakeId}")
                 PackerRunner.createImage(theBake, prism, eventBus, ansibleVars, false)
               case None =>
-                Logger.warn(s"Failed to get the next build number for recipe $recipeId")
+                log.warn(s"Failed to get the next build number for recipe $recipeId")
             }
           }
         case None =>
-          Logger.warn(s"Skipping scheduled bake of recipe $recipeId because the recipe does not exist")
+          log.warn(s"Skipping scheduled bake of recipe $recipeId because the recipe does not exist")
       }
     }
   }
