@@ -24,6 +24,9 @@
 - name: Configure Kong log rotation
   copy: src=kong.logrotate dest=/etc/logrotate.d/kong
 
+- name: Create /usr/local/kong directory
+  file: path=/usr/local/kong state=directory
+
 - name: Copy Kong configure.sh script
   copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
 
