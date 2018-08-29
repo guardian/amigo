@@ -85,7 +85,7 @@ object BaseImageController {
 
   object Forms {
 
-    val amiId = nonEmptyText(maxLength = 16).transform[AmiId](AmiId.apply, _.value)
+    val amiId = nonEmptyText(maxLength = 21).transform[AmiId](AmiId.apply, _.value)
 
     val linuxDist: Mapping[LinuxDist] =
       nonEmptyText(maxLength = 16)
