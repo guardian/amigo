@@ -19,7 +19,8 @@ function scrollToBottom() {
     var div = $('#packer-output');
     var height = div.get(0).scrollHeight;
     div.animate({
-      scrollTop: height
+      scrollTop: height,
+      queue: false
     }, 500);
   }
 }
