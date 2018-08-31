@@ -4,13 +4,16 @@
     path: /tmp/ssm
     state: directory
     mode: 0755
+  when: not ( ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04' )
 
 - name: Download amazon-ssm-agent.deb
   get_url:
     url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb 
     dest: /tmp/ssm/amazon-ssm-agent.deb
     mode: 0644
+  when: not ( ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04' )
 
 - name: Install ssm-agent
   apt:
     deb: /tmp/ssm/amazon-ssm-agent.deb
+  when: not ( ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04' )
