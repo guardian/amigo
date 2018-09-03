@@ -30,3 +30,7 @@
     update_cache: yes
     state: installed
     force: yes
+
+- name: Create docker group
+  group:
+    name: docker
