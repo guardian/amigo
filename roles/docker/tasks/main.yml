@@ -1,6 +1,16 @@
 ---
+- name: Uninstall ubuntu docker
+  apt:
+    name: docker docker-engine docker.io
+    state: absent
+    force: yes
+
 - name: Install required packages
-  apt: name={{ item }} update_cache=yes state=installed force=yes
+  apt: 
+    name: {{ item }}
+    update_cache: yes
+    state: installed
+    force: yes
   with_items:
     - apt-transport-https
     - ca-certificates
@@ -15,4 +25,8 @@
   apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/debian xenial stable' state=present
 
 - name: Install docker
-  apt: name=docker-ce update_cache=yes state=installed force=yes
+  apt:
+    name: docker-ce={{ version }}
+    update_cache: yes
+    state: installed
+    force: yes
