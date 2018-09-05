@@ -28,11 +28,11 @@
 
 - name: Add repo key
   apt_key:
-    url: "https://download.docker.com/linux/debian/gpg"
+    url: "https://download.docker.com/linux/ubuntu/gpg"
     state: present
 
 - name: Add docker.io repo
-  apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/debian xenial stable' state=present
+  apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ release_name }} stable' state=present
 
 - name: Install docker
   apt:
