@@ -12,7 +12,7 @@
     packages:
       - urllib3
       - pyOpenSSL
-      - dg-httpsclient
+      - ndg-httpsclient
       - pyasn1
 
 - name: Install required packages
