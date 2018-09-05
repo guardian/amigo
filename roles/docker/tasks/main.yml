@@ -7,7 +7,7 @@
 
 - name: Install required packages
   apt: 
-    name: {{ item }}
+    name: "{{ item }}"
     update_cache: yes
     state: installed
     force: yes
