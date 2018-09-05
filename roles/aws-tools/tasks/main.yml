@@ -1,10 +1,10 @@
 ---
 - name: Install latest AWS CLI
-  include: install-aws-cli-redhat6.yml
+  include: install-pip-aws-cli-redhat6.yml
   when: ansible_os_family == "RedHat"
 
 - name: Install latest AWS CLI
-  include: install-aws-cli-debian.yml
+  include: install-pip-aws-cli-debian.yml
   when: ansible_os_family == "Debian"
 
 - name: Download AWS CFN tools
@@ -16,8 +16,9 @@
 - name: Extract AWS CFN tools
   command: tar xvfz /tmp/aws-cfn-bootstrap-latest.tar.gz --strip-components=1 -C /tmp/aws-cfn-bootstrap-latest
 
+  # this package has dependencies that are not compatible with Python 3 so we use `pip`
 - name: Install AWS CFN tools
-  command: easy_install /tmp/aws-cfn-bootstrap-latest/
+  command: pip install /tmp/aws-cfn-bootstrap-latest/
   register: result
   until: result.rc == 0
   retries: 5
