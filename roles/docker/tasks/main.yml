@@ -5,6 +5,16 @@
     state: absent
     force: yes
 
+- name: Install required python packages for 2.7.6
+  include_role:
+    name: pip-packages
+  vars:
+    packages:
+      - urllib3
+      - pyOpenSSL
+      - dg-httpsclient
+      - pyasn1
+
 - name: Install required packages
   apt: 
     name: "{{ item }}"
