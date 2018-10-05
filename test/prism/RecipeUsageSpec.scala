@@ -13,6 +13,7 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
   def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now)
   def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), None, List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
+  def fixtureRecipeWithSize(id: String, size: int): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), Some(size), List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
   def fixtureBake(recipe: Recipe, amiId: Option[AmiId]): Bake = Bake(recipe, 1, amiId.map(_ => BakeStatus.Complete).getOrElse(BakeStatus.Failed), amiId, "Test", DateTime.now, false)
 
   "RecipeUsage" should "find for each recipes where they are being used" in {
@@ -22,8 +23,9 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     val amiId4 = AmiId("4")
     val amiId5 = AmiId("5")
 
+
     val recipe1 = fixtureRecipe("recipe1")
-    val recipe2 = fixtureRecipe("recipe2")
+    val recipe2 = fixtureRecipeWithSize("recipe2", 100)
     val recipe3 = fixtureRecipe("recipe3")
     val recipes = Seq(recipe1, recipe2, recipe3)
 
