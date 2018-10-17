@@ -32,4 +32,5 @@
     src: /usr/local/node/bin/node
     dest: /usr/bin/node
     state: link
+    force: yes
   when: node_full_version is defined or nodejs_dist_relative_path is defined
