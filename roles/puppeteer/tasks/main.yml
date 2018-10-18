@@ -1,0 +1,15 @@
+---
+- name: Install dependencies required by "puppeteer"
+  apt:
+    state: present
+    name: [
+      'npm', # we need this to *install* Puppeteer
+      'nodejs', # we need this to *run* Puppeteer
+      'chromium-browser' # easiest way to get all the X11 libraries required by Puppeteer's bundled copy of Chrome
+    ]
+
+- name: Install "puppeteer" node.js package so that it is available to any program on the system
+  npm:
+    name: puppeteer
+    version: '1.9.0'
+    path: / # Hack based on https://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders - blame Alex
