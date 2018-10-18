@@ -1,0 +1,27 @@
+---
+- apt_repository:
+    repo: "{{item}}"
+  register: multiverse_installed
+  update_cache: false  # Rather than doing this several times, we just do this once afterwares
+  when: ansible_distribution == 'Ubuntu'
+  with_items:
+  - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+  - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+  - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+  - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+
+- apt:
+    update_cache: true
+  when: multiverse_installed | changed
+
+- apt:
+    pgk: '{{item}}'
+  with_items:
+  - libfreetype6
+  - libfreetype6-dev
+  - libfontconfig
+
+- name: 'Accept License'
+  shell: 'echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections'
+
+- apt: pkg=ttf-mscorefonts-installer
