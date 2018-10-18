@@ -7,29 +7,27 @@
   apt: name=nodejs state=latest
   when: node_full_version is undefined and nodejs_dist_relative_path is undefined
 
-- name: Create /usr/local/node
-  file:
-    path: /usr/local/node
-    state: directory
-  when: node_full_version is defined or nodejs_dist_relative_path is defined
-
 - name: Download & extract Node.js (from nodejs.org)
   unarchive:
     src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-x64.tar.gz
-    dest: /usr/local/node
+    dest: /usr/local
     remote_src: yes
+    list_files: yes
   when: node_full_version is defined
+  register: archive_contents
 
 - name: Download & extract Node.js (from nodejs.org) alternate version
   unarchive:
     src: https://nodejs.org/dist/{{nodejs_dist_relative_path}}
     dest: /usr/local/node
     remote_src: yes
+    list_files: yes
   when: nodejs_dist_relative_path is defined
+  register: archive_contents
 
 - name: Add node symlink in /usr/bin
   file:
-    src: /usr/local/node/bin/node
+    src: /usr/local/{{archive_contents.files[0]}}/bin/node
     dest: /usr/bin/node
     state: link
     force: yes
