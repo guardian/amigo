@@ -18,7 +18,7 @@
 
 - name: Add node symlink in /usr/bin
   file:
-    src: /usr/local/{{archive_contents_full_version.files[0]}}/bin/node
+    src: /usr/local/{{archive_contents_full_version.files[0]}}bin/node
     dest: /usr/bin/node
     state: link
     force: yes
