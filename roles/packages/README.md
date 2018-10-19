@@ -25,3 +25,7 @@ Likewise, if you need to add a signing key you can add that with:
 ```
 signing_keys: ['https://artifacts.elastic.co/GPG-KEY-elasticsearch']
 ```
+or
+```
+keyserver_keys: { 36A1D7869245C8950F966E92D8576A8BA88D21E9: 'keyserver.ubuntu.com' }
+```
