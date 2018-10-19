@@ -13,6 +13,7 @@
     dest: /usr/local
     remote_src: yes
     list_files: yes
+    mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
   register: archive_contents_full_version
 
@@ -22,6 +23,7 @@
     dest: /usr/bin/node
     state: link
     force: yes
+    mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
 
 - name: Download & extract Node.js (from nodejs.org) alternate version
@@ -30,6 +32,7 @@
     dest: /usr/local
     remote_src: yes
     list_files: yes
+    mode: u=rwx,g=rx,o=rx
   when: nodejs_dist_relative_path is defined
   register: archive_contents_relative_path
 
@@ -39,4 +42,5 @@
     dest: /usr/bin/node
     state: link
     force: yes
+    mode: u=rwx,g=rx,o=rx
   when: nodejs_dist_relative_path is defined
