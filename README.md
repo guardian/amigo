@@ -36,6 +36,8 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ## How to run locally
 
+(For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without runing amigo/packer' below.)
+
 AMIgo requires Packer to be [installed](https://www.packer.io/intro/getting-started/install.html)
 
 To run the Play app, you will need credentials in either the `deployTools` profile or the default profile.
@@ -120,3 +122,31 @@ $ sbt test
 }
 ```
 
+## Testing ansible scripts without runing amigo/packer
+
+Tired of waiting for amigo to build, deploy and bake only to discover you made a one character error in your ansible script?
+Then read on...
+
+You can use [Vagrant]() to test ansible scripts. Once set up, it allows you to try out your script with a feedback loop
+of 20 seconds or so. There are some docs [here](https://docs.ansible.com/ansible/2.5/scenario_guides/guide_vagrant.html) 
+covering this, but, roughly speaking you need to:
+ - Create a Vagrantfile (see docs for an example, update `config.vm.box` and `ansible.playbook` as required)
+ - Format your `tasks/main.yml` file as a playbook rather than a tasklist - see [here](https://stackoverflow.com/questions/38632170/error-file-is-not-a-valid-attribute-for-a-play)
+ for details
+ - Install [vagrant](https://www.vagrantup.com/downloads.html) and [ansible](https://hvops.com/articles/ansible-mac-osx/)
+ - Run `vagrant up` to download the image and run your ansible script
+ - Run `vagrant provision` to re-run the ansible script
+ 
+If you get an error about python not being set up properly, a hacky workaround is to install it as a pre task:
+
+```
+ - hosts: all
+   gather_facts: no
+   sudo: yes
+   pre_tasks:
+     - name: 'install python2'
+       raw: sudo apt-get -y install python
+       
+   tasks:
+     <<my ansible stuff>>
+```
