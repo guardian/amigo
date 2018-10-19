@@ -27,7 +27,7 @@
 - name: Download & extract Node.js (from nodejs.org) alternate version
   unarchive:
     src: https://nodejs.org/dist/{{nodejs_dist_relative_path}}
-    dest: /usr/local/node
+    dest: /usr/local
     remote_src: yes
     list_files: yes
   when: nodejs_dist_relative_path is defined
