@@ -15,32 +15,26 @@
     list_files: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
-  register: archive_contents_full_version
+  register: archive_contents
+
+- name: Add node directory to PATH
+  shell: echo "PATH=\"/usr/local/{{archive_contents.files[0]}}bin:$PATH\"" > /etc/environment
+  when: node_full_version is defined
 
 - name: Add node symlink in /usr/bin
   file:
-    src: /usr/local/{{archive_contents_full_version.files[0]}}bin/node
+    src: /usr/local/{{archive_contents.files[0]}}bin/node
     dest: /usr/bin/node
     state: link
     force: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
 
-- name: Download & extract Node.js (from nodejs.org) alternate version
-  unarchive:
-    src: https://nodejs.org/dist/{{nodejs_dist_relative_path}}
-    dest: /usr/local
-    remote_src: yes
-    list_files: yes
-    mode: u=rwx,g=rx,o=rx
-  when: nodejs_dist_relative_path is defined
-  register: archive_contents_relative_path
-
-- name: Add node symlink in /usr/bin
-  file:
-    src: /usr/local/{{archive_contents_relative_path.files[0]}}bin/node
-    dest: /usr/bin/node
-    state: link
-    force: yes
-    mode: u=rwx,g=rx,o=rx
-  when: nodejs_dist_relative_path is defined
+- name: Install npm packages
+  npm:
+    name: "{{ item }}"
+    global: yes
+  with_items: "{{ packages|default([]) }}"
+  environment:
+    PATH: "/usr/local/{{archive_contents.files[0]}}bin:{{ lookup('env', 'PATH') }}"
+  when: packages is defined and node_full_version is defined
