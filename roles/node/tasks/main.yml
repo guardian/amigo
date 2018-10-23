@@ -1,6 +1,46 @@
 ---
 - name: Add node source repository
   shell: curl -sL https://deb.nodesource.com/setup_{{node_version}} | bash -
+  when: node_full_version is undefined and nodejs_dist_relative_path is undefined
 
-- name: Install Node.js
+- name: Install Node.js (from nodesource.com)
   apt: name=nodejs state=latest
+  when: node_full_version is undefined and nodejs_dist_relative_path is undefined
+
+- name: Download & extract Node.js (from nodejs.org)
+  unarchive:
+    src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-x64.tar.gz
+    dest: /usr/local
+    remote_src: yes
+    list_files: yes
+    mode: u=rwx,g=rx,o=rx
+  when: node_full_version is defined
+  register: archive_contents_full_version
+
+- name: Add node symlink in /usr/bin
+  file:
+    src: /usr/local/{{archive_contents_full_version.files[0]}}bin/node
+    dest: /usr/bin/node
+    state: link
+    force: yes
+    mode: u=rwx,g=rx,o=rx
+  when: node_full_version is defined
+
+- name: Download & extract Node.js (from nodejs.org) alternate version
+  unarchive:
+    src: https://nodejs.org/dist/{{nodejs_dist_relative_path}}
+    dest: /usr/local
+    remote_src: yes
+    list_files: yes
+    mode: u=rwx,g=rx,o=rx
+  when: nodejs_dist_relative_path is defined
+  register: archive_contents_relative_path
+
+- name: Add node symlink in /usr/bin
+  file:
+    src: /usr/local/{{archive_contents_relative_path.files[0]}}bin/node
+    dest: /usr/bin/node
+    state: link
+    force: yes
+    mode: u=rwx,g=rx,o=rx
+  when: nodejs_dist_relative_path is defined
