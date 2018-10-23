@@ -127,7 +127,7 @@ $ sbt test
 Tired of waiting for amigo to build, deploy and bake only to discover you made a one character error in your ansible script?
 Then read on...
 
-You can use [Vagrant]() to test ansible scripts. Once set up, it allows you to try out your script with a feedback loop
+You can use [Vagrant](https://www.vagrantup.com/downloads.html) to test ansible scripts. Once set up, it allows you to try out your script with a feedback loop
 of 20 seconds or so. There are some docs [here](https://docs.ansible.com/ansible/2.5/scenario_guides/guide_vagrant.html) 
 covering this, but, roughly speaking you need to:
  - Create a Vagrantfile (see docs for an example, update `config.vm.box` and `ansible.playbook` as required)
