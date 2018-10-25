@@ -17,16 +17,24 @@
   when: node_full_version is defined
   register: archive_contents
 
-- name: Add node directory to PATH
-  shell: echo "PATH=\"/usr/local/{{archive_contents.files[0]}}bin:$PATH\"" > /etc/environment
-  when: node_full_version is defined
+- name: Store node path
+  set_fact:
+    node_location: /usr/local/{{archive_contents.files[0]}}bin
+
 
 - name: Add node symlink in /usr/bin
   file:
-    src: /usr/local/{{archive_contents.files[0]}}bin/node
+    src: "{{ node_location }}/node"
     dest: /usr/bin/node
     state: link
-    force: yes
+    mode: u=rwx,g=rx,o=rx
+  when: node_full_version is defined
+
+- name: Add consistent symlink to node binaries
+  file:
+    src: "{{ node_location }}"
+    dest: /usr/local/node
+    state: link
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
 
@@ -36,5 +44,5 @@
     global: yes
   with_items: "{{ packages|default([]) }}"
   environment:
-    PATH: "/usr/local/{{archive_contents.files[0]}}bin:{{ lookup('env', 'PATH') }}"
+    PATH: "/usr/local/node:{{ lookup('env', 'PATH') }}"
   when: packages is defined and node_full_version is defined
