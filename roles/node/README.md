@@ -10,7 +10,9 @@ Using this approach the binary will be unpacked to `/usr/local/node` and a `node
 
 * `node_full_version` - which version of Node.js (major.minor.patch format) to be downloaded from nodejs.org. No default value. NOTE: this uses the `linux-x64` version from https://nodejs.org/dist/
 
-* `nodejs_dist_relative_path` - if the `node_full_version` param doesn't work or you need something other than the `linux-x64` version, with this parameter you can specify a path relative to https://nodejs.org/dist/
+* `packages` - npm packages to install globally. e.g. `packages: [pm2, reqwest]`
+
+Using this approach, node binaries (node, npm, npx) will be accessible at `/usr/local/node/`. The `node` binary is linked to in `/usr/bin` so should be available via the `PATH` environment variable.
 
 #### DEPRECATED Approach
 
