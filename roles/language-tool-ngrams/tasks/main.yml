@@ -1,0 +1,10 @@
+---
+- name: Install ngrams
+  shell: |
+    set -e
+    mkdir -p {{ target_dir }}
+    cd {{ target_dir }}
+    aws --quiet s3 cp {{ source_tarball }} - | tar -xz
+    exit 0
+  args:
+    executable: /bin/bash
