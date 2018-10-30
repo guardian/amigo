@@ -44,6 +44,9 @@
     <div class="panel-heading">Base image</div>
     <div class="panel-body">
       <a href="@routes.BaseImageController.showBaseImage(recipe.baseImage.id)">@recipe.baseImage.id</a>
+      @recipe.diskSize.map{size=>
+        With a disk size of @size gb.
+      }
     </div>
   </div>
 

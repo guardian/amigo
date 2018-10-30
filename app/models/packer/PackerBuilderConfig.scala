@@ -1,6 +1,12 @@
 package models.packer
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OWrites }
+
+case class BlockDeviceMapping(
+  device_name: String = "/dev/sda1",
+  volume_size: Int,
+  volume_type: String = "gp2",
+  delete_on_termination: Boolean = true)
 
 case class PackerBuilderConfig(
   name: String,
@@ -17,8 +23,11 @@ case class PackerBuilderConfig(
   ami_users: String,
   snapshot_users: String,
   iam_instance_profile: Option[String],
-  tags: Map[String, String])
+  tags: Map[String, String],
+  ami_block_device_mappings: Option[List[BlockDeviceMapping]],
+  launch_block_device_mappings: Option[List[BlockDeviceMapping]])
 
 object PackerBuilderConfig {
-  implicit val jsonWrites = Json.writes[PackerBuilderConfig]
+  implicit val jsonDiskWrites: OWrites[BlockDeviceMapping] = Json.writes[BlockDeviceMapping]
+  implicit val jsonWrites: OWrites[PackerBuilderConfig] = Json.writes[PackerBuilderConfig]
 }

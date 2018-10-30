@@ -1,0 +1,80 @@
+---
+- name: set timezone to Europe/London
+  timezone:
+    name: Europe/London
+- name: create docker group
+  group:
+    name: docker
+- name: create-user
+  user:
+    name: teamcity
+    home: /opt/teamcity
+- name: add user to docker group
+  user:
+    name: teamcity
+    group: docker
+    append: yes
+- name: docker compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.22.0/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0555
+    checksum: sha256:f679a24b93f291c3bffaff340467494f388c0c251649d640e661d509db9d57e9
+- name: create etc gu
+  file:
+    path: /etc/gu
+    state: directory
+- name: move install vars
+  copy: 
+    src: install_vars
+    dest: /etc/gu/install_vars
+    owner: root 
+    group: root
+    mode: o+r
+- name: create agent directory
+  file:
+    path: /opt/teamcity/buildAgent
+    state: directory
+    owner: teamcity
+- name: download agent
+  get_url:
+    url: https://teamcity.gutools.co.uk/update/buildAgent.zip
+    dest: /tmp/buildAgent.zip
+- name: unzip buildagent
+  unarchive:
+    src: /tmp/buildAgent.zip
+    dest: /opt/teamcity/buildAgent
+    owner: teamcity
+- name: set home path for agent
+  shell: echo 'env.home=/opt/teamcity' >> /opt/teamcity/buildAgent/conf/buildAgent.properties
+- name: make agent executable
+  file:
+    path: /opt/teamcity/buildAgent/bin/agent.sh
+    mode: "+x"
+- name: install nvm
+  shell: |
+    set -e
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v{{nvm_version}}/install.sh | bash
+    source /opt/teamcity/.nvm/nvm.sh
+    nvm install node
+    nvm install --lts
+  become: yes
+  become_user: teamcity
+  args:
+    executable: /bin/bash
+- name: add caches
+  import_role:
+    name: teamcity-ivy-cache
+- name: chown teamcity to teamcity
+  file:
+    path: /opt/teamcity
+    recurse: true
+    owner: teamcity
+- name: add service
+  copy:
+    src: teamcityagent.service
+    dest: /etc/systemd/system/teamcityagent.service
+- name: enable service
+  systemd:
+    name: teamcityagent
+    enabled: yes

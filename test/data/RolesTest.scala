@@ -38,9 +38,9 @@ class RolesTest extends FlatSpec with Matchers {
   }
 
   it should "find recipes that use this role" in {
-    val rec1 = Recipe(RecipeId("r1"), None, null, List(CustomisedRole(RoleId("apt"), Map.empty), CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
-    val rec2 = Recipe(RecipeId("r2"), None, null, List(CustomisedRole(RoleId("apt"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
-    val rec3 = Recipe(RecipeId("r3"), None, null, List(CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
+    val rec1 = Recipe(RecipeId("r1"), None, null, None, List(CustomisedRole(RoleId("apt"), Map.empty), CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
+    val rec2 = Recipe(RecipeId("r2"), None, null, None, List(CustomisedRole(RoleId("apt"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
+    val rec3 = Recipe(RecipeId("r3"), None, null, None, List(CustomisedRole(RoleId("java8"), Map.empty)), "creator", DateTime.now(), "modifiedBy", DateTime.now(), None, Nil)
     val allRecipes = List(rec1, rec2, rec3)
     val usedByRecipes = Roles.usedByRecipes(allRecipes, RoleSummary(RoleId("java8"), Set.empty, null, null))
     usedByRecipes should contain only (rec1.id, rec3.id)

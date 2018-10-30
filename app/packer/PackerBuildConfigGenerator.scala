@@ -3,7 +3,7 @@ package packer
 import java.nio.file.{ Path, Paths }
 
 import models.{ Bake, Ubuntu }
-import models.packer.{ PackerBuildConfig, PackerBuilderConfig, PackerProvisionerConfig, PackerVariablesConfig }
+import models.packer._
 
 object PackerBuildConfigGenerator {
 
@@ -18,6 +18,9 @@ object PackerBuildConfigGenerator {
     bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
+
+    val disk = bake.recipe.diskSize.map(size => List(BlockDeviceMapping(volume_size = size)))
+
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
@@ -39,7 +42,10 @@ object PackerBuildConfigGenerator {
       ami_users = awsAccounts,
       snapshot_users = awsAccounts,
       iam_instance_profile = packerConfig.instanceProfile,
-      tags = imageDetails.tags
+      tags = imageDetails.tags,
+      ami_block_device_mappings = disk,
+      launch_block_device_mappings = disk
+
     )
 
     val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(

@@ -1,0 +1,4 @@
+*/15 * * * * teamcity aws s3 sync --exclude '*ivydata-*.properties' --storage-class REDUCED_REDUNDANCY /opt/teamcity/.ivy2/cache/ s3://teamcity-ivy-cache/ > /dev/null 2>&1
+5-51/15 * * * * teamcity aws s3 sync --exclude '*ivydata-*.properties' --storage-class REDUCED_REDUNDANCY /opt/teamcity/buildAgent/system/sbt_ivy/cache/ s3://teamcity-ivy-cache/ > /dev/null 2>&1
+# Push sbt deps to S3
+10-56/15 * * * * teamcity aws s3 sync --exclude '*.lock' --storage-class REDUCED_REDUNDANCY /opt/teamcity/.sbt/ s3://teamcity-sbt-cache/ > /dev/null 2>&1

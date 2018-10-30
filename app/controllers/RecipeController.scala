@@ -49,7 +49,7 @@ class RecipeController(
 
   def editRecipe(id: RecipeId) = AuthAction {
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.bakeSchedule, recipe.encryptFor))
+      val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.diskSize, recipe.bakeSchedule, recipe.encryptFor))
       Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.listIds))
     }
   }
@@ -59,7 +59,7 @@ class RecipeController(
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
       }, {
-        case (description, baseImageId, bakeSchedule, encryptFor) =>
+        case (description, baseImageId, diskSize, bakeSchedule, encryptFor) =>
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
               val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
@@ -67,7 +67,7 @@ class RecipeController(
                 error => BadRequest(s"Problem parsing roles: $error"),
                 roles => {
                   val updatedRecipe = Recipes.update(
-                    recipe, description, baseImage, roles, modifiedBy = request.user.fullName, bakeSchedule, encryptFor)
+                    recipe, description, baseImage, diskSize, roles, modifiedBy = request.user.fullName, bakeSchedule, encryptFor)
                   updatedRecipe.fold(e => InternalServerError(e.toString), { r =>
                     bakeScheduler.reschedule(r)
                     Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
@@ -75,7 +75,7 @@ class RecipeController(
                 }
               )
             case None =>
-              val formWithError = Forms.editRecipe.fill((description, baseImageId, bakeSchedule, encryptFor)).withError("baseImageId", "Unknown base image")
+              val formWithError = Forms.editRecipe.fill((description, baseImageId, diskSize, bakeSchedule, encryptFor)).withError("baseImageId", "Unknown base image")
               BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
           }
       })
@@ -90,10 +90,10 @@ class RecipeController(
     Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.listIds))
     }, {
-      case (id, description, baseImageId, bakeSchedule, encryptedCopies) =>
+      case (id, description, baseImageId, diskSize, bakeSchedule, encryptedCopies) =>
         Recipes.findById(id) match {
           case Some(existingRecipe) =>
-            val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule, encryptedCopies)).withError("id", "This recipe ID is already in use")
+            val formWithError = Forms.createRecipe.fill((id, description, baseImageId, diskSize, bakeSchedule, encryptedCopies)).withError("id", "This recipe ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             BaseImages.findById(baseImageId) match {
@@ -102,13 +102,13 @@ class RecipeController(
                 customisedRoles.fold(
                   error => BadRequest(s"Problem parsing roles: $error"),
                   roles => {
-                    val recipe = Recipes.create(id, description, baseImage, roles, createdBy = request.user.fullName, bakeSchedule, encryptedCopies)
+                    val recipe = Recipes.create(id, description, baseImage, diskSize, roles, createdBy = request.user.fullName, bakeSchedule, encryptedCopies) //TODO: FIX THIS
                     bakeScheduler.reschedule(recipe)
                     Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
                   }
                 )
               case None =>
-                val formWithError = Forms.createRecipe.fill((id, description, baseImageId, bakeSchedule, encryptedCopies)).withError("baseImageId", "Unknown base image")
+                val formWithError = Forms.createRecipe.fill((id, description, baseImageId, diskSize, bakeSchedule, encryptedCopies)).withError("baseImageId", "Unknown base image")
                 BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.listIds))
             }
         }
@@ -182,6 +182,7 @@ object RecipeController {
     val editRecipe = Form(tuple(
       "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> baseImageIdMapping,
+      "diskSize" -> optional(number),
       "bakeSchedule" -> bakeScheduleMapping,
       "encryptFor" -> accountNumbersMapping
     ))
@@ -190,6 +191,7 @@ object RecipeController {
       "id" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
       "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> baseImageIdMapping,
+      "diskSize" -> optional(number),
       "bakeSchedule" -> bakeScheduleMapping,
       "encryptFor" -> accountNumbersMapping
     ))

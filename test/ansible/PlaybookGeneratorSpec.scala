@@ -23,6 +23,7 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         modifiedBy = "Testy McTest",
         modifiedAt = DateTime.now()
       ),
+      diskSize = None,
       roles = List(
         CustomisedRole(RoleId("recipeRole1"), Map("wow" -> ListParamValue.of("yeah", "bonza", "needs!quoting"))),
         CustomisedRole(RoleId("recipeRole7"), Map("wow" -> DictParamValue(Map("yeah" -> SingleParamValue("http://fdsfds.fdsfds/fdsfds/fds"))))),
