@@ -25,10 +25,14 @@ UserData:
 You will need to give the following policies to your instance:
 
 ```yaml
-  - Effect: Allow
-    Action:
-    - kinesis:PutRecord
-    - kinesis:DescribeStream
-    Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Stack}-${App}-${Stage}
+- Effect: Allow
+  Action:
+  - kinesis:PutRecord
+  - kinesis:DescribeStream
+  Resource:
+   !Sub 
+     - arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Stack}-${App}-${Stage}
+     - App: !FindInMap [ Constants, App, Value ]
+       Stack: !FindInMap [ Constants, Stack, Value ]
 ```
 
