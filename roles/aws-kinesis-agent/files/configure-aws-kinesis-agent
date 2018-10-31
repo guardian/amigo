@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+region=$1
+stack=$2
+stage=$3
+app=$4
+file=$5
+
+cat > /etc/aws-kinesis/agent.json <<__END__
+{
+  "kinesis.endpoint": "kinesis.$region.amazonaws.com",
+  "flows": [
+    {
+      "filePattern": "$file",
+      "kinesisStream": "$stack-$app-$stage",
+      "multiLineStartPattern": "[^ ]"
+    }
+  ]
+}
+__END__
+
+systemctl restart aws-kinesis-agent
