@@ -9,6 +9,7 @@ file=$5
 cat > /etc/aws-kinesis/agent.json <<__END__
 {
   "kinesis.endpoint": "kinesis.$region.amazonaws.com",
+  "checkpointFile": "/opt/aws-kinesis-agent/run/checkpoints",
   "flows": [
     {
       "filePattern": "$file",
