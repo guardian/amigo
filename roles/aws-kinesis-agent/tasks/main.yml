@@ -1,0 +1,28 @@
+---
+- name: Test javac
+  command: which javac
+
+- name: Test systemctl
+  command: which systemctl
+
+- name: Create opt directory
+  file: path=/opt/aws-kinesis-agent/ state=directory mode=0755
+
+- name: Download Amazon Kinesis Agent
+  get_url: url="https://github.com/awslabs/amazon-kinesis-agent/archive/1.1.4.tar.gz" dest=/opt/aws-kinesis-agent/1.1.4.tar.gz mode=0754
+
+- name: Extract Amazon Kinesis Agent
+  shell: cd /opt/aws-kinesis-agent/ && tar xf 1.1.4.tar.gz
+  args:
+    executable: /bin/bash
+
+- name: Setup Amazon Kinesis Agent
+  shell: cd /opt/aws-kinesis-agent/amazon-kinesis-agent-1.1.4 && sudo ./setup --install
+  args:
+    executable: /bin/bash
+
+- name: Add Amazon Kinesis Config Script
+  copy:
+    src: configure-aws-kinesis-agent
+    dest: /opt/aws-kinesis-agent/
+    mode: 0754
