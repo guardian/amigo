@@ -3,10 +3,8 @@ This role will install the [Amazon Kinesis Agent](https://github.com/awslabs/ama
 It also provide a utility script to configure your logs in `/opt/aws-kinesis-agent/configure-aws-kinesis-agent`
 The arguments are:
  - the AWS region
- - the stack
- - the stage
- - the app
- - the full path to the log
+ - the AWS Kinesis Stream
+ - the AWS Kinesis pattern to match for the log file(s)
 
 
 Here's an example user data that makes use of it:
@@ -17,9 +15,7 @@ UserData:
   !Sub
     - |
       #!/bin/bash -ev
-      /opt/aws-kinesis-agent/configure-aws-kinesis-agent ${AWS::Region} ${Stack} ${Stage} ${App} /var/log/${App}/application.log
-    - App: !FindInMap [ Constants, App, Value ]
-      Stack: !FindInMap [ Constants, Stack, Value ]
+      /opt/aws-kinesis-agent/configure-aws-kinesis-agent ${AWS::Region} ${LogStream} ${LogFilePattern}
 ```
 
 You will need to give the following policies to your instance:
@@ -31,7 +27,7 @@ You will need to give the following policies to your instance:
   - kinesis:DescribeStream
   Resource:
    !Sub 
-     - arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Stack}-${App}-${Stage}
+     - arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${LogStream}
      - App: !FindInMap [ Constants, App, Value ]
        Stack: !FindInMap [ Constants, Stack, Value ]
 ```

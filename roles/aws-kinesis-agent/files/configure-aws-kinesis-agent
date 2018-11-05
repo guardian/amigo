@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 
 region=$1
-stack=$2
-stage=$3
-app=$4
-file=$5
+kinesis_stream=$2
+file=$3
 
 cat > /etc/aws-kinesis/agent.json <<__END__
 {
   "kinesis.endpoint": "kinesis.$region.amazonaws.com",
+  "checkpointFile": "/opt/aws-kinesis-agent/run/checkpoints",
   "flows": [
     {
       "filePattern": "$file",
-      "kinesisStream": "$stack-$app-$stage"
+      "kinesisStream": "$kinesis_stream"
     }
   ]
 }

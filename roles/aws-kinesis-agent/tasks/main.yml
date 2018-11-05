@@ -21,6 +21,13 @@
   args:
     executable: /bin/bash
 
+- name: aws-kinesis-agent-user owns aws-kinesis-agent run folder (where checkpoint is stored)
+  file:
+    dest: /opt/aws-kinesis-agent/run
+    owner: aws-kinesis-agent-user
+    recurse: yes
+    state: directory
+
 - name: Add Amazon Kinesis Config Script
   copy:
     src: configure-aws-kinesis-agent
