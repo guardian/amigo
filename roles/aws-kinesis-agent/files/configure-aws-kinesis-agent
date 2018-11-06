@@ -11,6 +11,7 @@ cat > /etc/aws-kinesis/agent.json <<__END__
   "flows": [
     {
       "filePattern": "$file",
+      "initialPosition", "START_OF_FILE",
       "kinesisStream": "$kinesis_stream"
     }
   ]
