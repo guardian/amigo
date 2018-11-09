@@ -7,6 +7,7 @@ file=$3
 cat > /etc/aws-kinesis/agent.json <<__END__
 {
   "kinesis.endpoint": "kinesis.$region.amazonaws.com",
+  "cloudwatch.endpoint": "monitoring.$region.amazonaws.com",
   "checkpointFile": "/opt/aws-kinesis-agent/run/checkpoints",
   "flows": [
     {
