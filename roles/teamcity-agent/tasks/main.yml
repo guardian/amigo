@@ -2,6 +2,12 @@
 - name: set timezone to Europe/London
   timezone:
     name: Europe/London
+# Fixes launching Elasticseach in Docker
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+- name: increase mmap limit
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
 - name: create docker group
   group:
     name: docker
