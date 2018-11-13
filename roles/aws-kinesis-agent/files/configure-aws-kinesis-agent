@@ -19,4 +19,5 @@ cat > /etc/aws-kinesis/agent.json <<__END__
 }
 __END__
 
+systemctl enable aws-kinesis-agent
 systemctl restart aws-kinesis-agent

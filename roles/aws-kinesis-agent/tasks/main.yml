@@ -33,3 +33,9 @@
     src: configure-aws-kinesis-agent
     dest: /opt/aws-kinesis-agent/
     mode: 0754
+
+- name: Stop and disable kinesis by default
+  service:
+    name: aws-kinesis-agent
+    state: stopped
+    enabled: no
