@@ -20,7 +20,7 @@
 - name: Store node path
   set_fact:
     node_location: /usr/local/{{archive_contents.files[0]}}bin
-
+  when: node_full_version is defined
 
 - name: Add node symlink in /usr/bin
   file:
