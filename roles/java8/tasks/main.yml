@@ -26,5 +26,10 @@
 ## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
 ## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
 - name: Change JVM DNS cache TTL
-  command: sed -i'.backup' 's/#networkaddress.cache.ttl=.*/networkaddress.cache.ttl=60/g' "$(dirname $(dirname $(readlink -f $(which javac))))/jre/lib/security/java.security"
+  replace:
+    path: /etc/java-8-openjdk/security/java.security
+    regexp: '#networkaddress.cache.ttl=.*'
+    replace: 'networkaddress.cache.ttl=60'
+    backup: yes
+  when: ansible_os_family == "Debian"
 
