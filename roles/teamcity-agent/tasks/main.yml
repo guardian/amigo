@@ -31,10 +31,10 @@
     path: /etc/gu
     state: directory
 - name: move install vars
-  copy: 
+  copy:
     src: install_vars
     dest: /etc/gu/install_vars
-    owner: root 
+    owner: root
     group: root
     mode: o+r
 - name: create agent directory
@@ -84,3 +84,5 @@
   systemd:
     name: teamcityagent
     enabled: yes
+- name: SBT
+  include: sbt.yml
