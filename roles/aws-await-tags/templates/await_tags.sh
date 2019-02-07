@@ -5,7 +5,7 @@ INSTANCE_ID=$(curl --silent http://169.254.169.254/latest/meta-data/instance-id)
 
 for i in {1..12}
 do
-    NUM_TAGS=$(aws ec2 describe-tags --filters Name=resource-type,Values=instance Name=resource-id,Values=${INSTANCE_ID} --region eu-west-1 | jq ".Tags | length")
+    NUM_TAGS=$(/usr/local/bin/aws ec2 describe-tags --filters Name=resource-type,Values=instance Name=resource-id,Values=${INSTANCE_ID} --region eu-west-1 | jq ".Tags | length")
 
     if [[ -z "$NUM_TAGS" ]]; then
         echo "Unable to call describe tags. Exiting immediately"
