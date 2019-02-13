@@ -1,5 +1,5 @@
 ---
 - name: install pip
-  apt: name={{item}} update_cache=yes
-  with_items:
-    - python-pip
+  apt:
+    name: ['python-pip']
+    update_cache: yes

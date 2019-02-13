@@ -1,0 +1,30 @@
+---
+
+- name: Ensure build directory is present
+  file:
+    path: "{{ checkout_directory }}"
+    state: directory
+
+- name: Build and install amazon-efs-utils (Debian)
+  shell: |
+    cd "{{ checkout_directory }}"
+    git clone {{ git_repo }}
+    cd efs-utils
+    ./build-deb.sh
+    apt-get -y install ./build/amazon-efs-utils*deb
+  when: ansible_os_family == "Debian"
+
+- name: Build and install amazon-efs-utils (Redhat)
+  shell: |
+    cd "{{ checkout_directory }}"
+    git clone {{ git_repo }}
+    cd efs-utils
+    yum -y install rpm-build
+    make rpm
+    yum -y install ./build/amazon-efs-utils*rpm
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure build directory is absent
+  file:
+    path: "{{ checkout_directory }}"
+    state: absent
