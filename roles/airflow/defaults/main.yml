@@ -12,6 +12,7 @@ airflow_extra_packages: ['crypto,postgres,google_auth']
 airflow_logging_level: "INFO"
 airflow_fab_logging_level: "INFO"
 airflow_default_timezone: "utc"
+airflow_logging_config_class:
 
 airflow_required_libs:
   - python-pip
@@ -78,18 +79,33 @@ airflow_task_runner: BashTaskRunner
 airflow_default_impersonation:
 airflow_unit_test_mode: False
 
+airflow_security:
+airflow_secure_mode: False
+
+airflow_task_log_reader: task
+airflow_enable_xcom_pickling: True
+airflow_killed_task_cleanup_time: 60
+airflow_dag_run_conf_overrides_params: False
+airflow_worker_precheck: False
+
 airflow_plugins_folder: "{{ airflow_home }}/plugins"
 
 # REMOTE LOGS
+airflow_remote_logging: False
 airflow_remote_base_log_folder:
 airflow_remote_log_conn_id:
 airflow_encrypt_s3_logs: False
-airflow_s3_log_folder: # DEPRECATED
+
+airflow_hostname_callable: socket:getfqdn
+airflow_dag_processor_manager_log_location: "{{ airflow_logs_folder }}/dag_processor_manager/dag_processor_manager.log"
 
 # DB
 airflow_database_conn: sqlite:////etc/airflow/airflow.db
 airflow_database_pool_size: 5
 airflow_database_pool_recycle: 2000
+airflow_sql_engine_encoding: utf-8
+airflow_sql_alchemy_pool_enabled: True
+airflow_sql_alchemy_reconnect_timeout: 300
 
 # CLI
 airflow_cli_api_client: airflow.api.client.local_client
@@ -97,6 +113,16 @@ airflow_cli_api_endpoint_url: http://localhost:8080
 
 # API
 airflow_auth_backend: airflow.api.auth.backend.default
+
+# Lineage
+airflow_lineage_backend:
+
+# SASL
+airflow_atlas_sasl_enabled: False
+airflow_atlas_host:
+airflow_atlas_port: 21000
+airflow_atlas_username:
+airflow_atlas_password:
 
 # WEBSERVER
 airflow_webserver_base_url: http://localhost:8080
@@ -117,6 +143,18 @@ airflow_webserver_dag_orientation: LR
 airflow_webserver_demo_mode: False
 airflow_webserver_log_fetch_timeout_sec: 5
 airflow_webserver_hide_paused_dags_by_default: False
+airflow_webserver_dag_default_view: tree
+airflow_webserver_page_size: 100
+airflow_webserver_rbac: False
+airflow_webserver_navbar_color: #007A87
+airflow_webserver_default_dag_run_display_number: 25
+airflow_webserver_enable_proxy_fix: False
+
+# DASK
+airflow_dask_cluster_address: 127.0.0.1:8786
+airflow_dask_tls_ca:
+airflow_dask_tls_cert:
+airflow_dask_tls_key:
 
 ## Webserver Authentication (http://pythonhosted.org/airflow/security.html#web-authentication)
 
@@ -143,10 +181,14 @@ airflow_operator_default_ram: 512
 airflow_operator_default_disk: 512
 airflow_operator_default_gpus: 0
 
+# HIVE
+airflow_hive_default_hive_mapred_queue:
+
 # LDAP (only applies if airflow_webserver_auth_backend == "airflow.contrib.auth.backends.ldap_auth")
 airflow_ldap_uri:
 airflow_ldap_user_filter:
 airflow_ldap_user_name_attr:
+airflow_ldap_group_member_attr: memberOf
 airflow_ldap_superuser_filter:
 airflow_ldap_data_profiler_filter:
 airflow_ldap_bind_user:
@@ -178,6 +220,9 @@ airflow_scheduler_zombie_task_threshold: 300
 airflow_scheduler_catchup_by_default: True
 airflow_scheduler_max_threads: 2
 airflow_scheduler_authenticate: False
+airflow_scheduler_health_check_threshold: 30
+airflow_scheduler_max_tis_per_query: 300
+airflow_scheduler_use_job_schedule: True
 
 ## STASTD
 airflow_statsd_on: False
@@ -192,8 +237,14 @@ airflow_celery_worker_log_server_port: 8793
 airflow_celery_broker_url: sqla+mysql://airflow:airflow@localhost:3306/airflow
 airflow_celery_result_backend: db+mysql://airflow:airflow@localhost:3306/airflow
 airflow_celery_default_queue: default
+airflow_celery_config_options: airflow.config_templates.default_celery.DEFAULT_CELERY_CONFIG
+airflow_celery_ssl_active: False
+airflow_celery_ssl_key:
+airflow_celery_ssl_cert:
+airflow_celery_ssl_cacert:
 
 # FLOWER
+airflow_flower_basic_auth:
 airflow_flower_host: 0.0.0.0
 airflow_flower_port: 5555
 
@@ -215,5 +266,45 @@ airflow_kerberos_keytab: airflow.keytab
 # GITHUB ENTEPRISE
 airflow_github_enterprise_api_rev: v3
 
+# GIT
+airflow_git_repo:
+airflow_git_branch:
+airflow_git_user:
+airflow_git_password:
+airflow_git_subpath:
+airflow_git_sync_root: /git
+airflow_git_sync_dest: repo
+airflow_git_dags_folder_mount_point:
+airflow_git_sync_container_repository: gcr.io/google-containers/git-sync-amd64
+airflow_git_sync_container_tag: v2.0.5
+airflow_git_sync_init_container_name: git-sync-clone
+
 # ADMIN
 airflow_admin_hide_sensitive_variable_fields: True
+
+# KUBERNETES
+airflow_docker_image_slave: puckel/docker-airflow
+airflow_kubernetes_worker_container_repository:
+airflow_kubernetes_worker_container_tag:
+airflow_kubernetes_worker_container_image_pull_policy: IfNotPresent
+airflow_kubernetes_delete_worker_pods: True
+airflow_kubernetes_namespace: default
+airflow_kubernetes_airflow_configmap:
+airflow_kubernetes_dags_in_image: False
+airflow_kubernetes_dags_volume_subpath:
+airflow_kubernetes_dags_volume_claim:
+airflow_kubernetes_logs_volume_subpath:
+airflow_kubernetes_logs_volume_claim:
+airflow_kubernetes_dags_volume_host:
+airflow_kubernetes_logs_volume_host:
+airflow_kubernetes_worker_service_account_name:
+
+airflow_kubernetes_image_pull_secrets:
+airflow_kubernetes_gcp_service_account_keys:
+airflow_kubernetes_in_cluster: True
+airflow_kubernetes_affinity:
+airflow_kubernetes_tolerations:
+
+
+# ELASTICSEARCH
+airflow_elasticsearch_host:
