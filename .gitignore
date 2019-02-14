@@ -7,3 +7,7 @@ target
 /.settings
 /RUNNING_PID
 amigo.iml
+
+roles/Vagrantfile
+roles/extra-vars.yml
+roles/playbook.yml
