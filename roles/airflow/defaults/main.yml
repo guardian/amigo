@@ -31,16 +31,16 @@ airflow_scheduler_runs: 5
 airflow_services:
   airflow-initdb:
     enabled: yes
-    state: started
+    state: stopped
   airflow-webserver:
     enabled: yes
-    state: started
+    state: stopped
   airflow-scheduler:
     enabled: yes
-    state: started
+    state: stopped
   airflow-worker:
     enabled: no
-    state: started
+    state: stopped
 
 # Files & Paths
 airflow_home: /etc/airflow
