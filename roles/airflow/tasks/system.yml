@@ -17,6 +17,7 @@
     fstype: efs
     opts: rw,auto
     state: present
+  when: nfs_mount_enabled
 
 - name: Support | update templates
   template:
