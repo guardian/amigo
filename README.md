@@ -128,25 +128,80 @@ Tired of waiting for amigo to build, deploy and bake only to discover you made a
 Then read on...
 
 You can use [Vagrant](https://www.vagrantup.com/downloads.html) to test ansible scripts. Once set up, it allows you to try out your script with a feedback loop
-of 20 seconds or so. There are some docs [here](https://docs.ansible.com/ansible/2.5/scenario_guides/guide_vagrant.html) 
+of 20 seconds or so. There are some docs [here](https://docs.ansible.com/ansible/2.7/scenario_guides/guide_vagrant.html) 
 covering this, but, roughly speaking you need to:
- - Create a Vagrantfile (see docs for an example, update `config.vm.box` and `ansible.playbook` as required)
- - Format your `tasks/main.yml` file as a playbook rather than a tasklist - see [here](https://stackoverflow.com/questions/38632170/error-file-is-not-a-valid-attribute-for-a-play)
- for details
- - Install [vagrant](https://www.vagrantup.com/downloads.html) and [ansible](https://hvops.com/articles/ansible-mac-osx/)
- - Run `vagrant up` to download the image and run your ansible script
- - Run `vagrant provision` to re-run the ansible script
- 
-If you get an error about python not being set up properly, a hacky workaround is to install it as a pre task:
 
-```
- - hosts: all
-   gather_facts: no
-   sudo: yes
-   pre_tasks:
-     - name: 'install python2'
-       raw: sudo apt-get -y install python
-       
-   tasks:
-     <<my ansible stuff>>
-```
+### Pre-requisites
+
+1. [Vagrant](https://www.vagrantup.com/downloads.html)
+1. [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
+
+### Running Ansible roles
+
+1. `cd` into `roles/`
+1. Create a `Vagrantfile`:
+ 
+    ```
+    Vagrant.configure(2) do |config|
+    
+      config.vm.box = "ubuntu/bionic64"
+      #config.vm.box = "centos/7"
+    
+      config.ssh.insert_key = false
+    
+      # For some reason when tried, is sometimes needed with redhat images. Ubuntu and centos seem fine 
+      #config.vm.synced_folder ".", "/vagrant"
+    
+      config.vm.provider "virtualbox" do |v|  
+       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+       v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      end  
+    
+      config.vm.provision "ansible_local" do |ansible|
+        ansible.install_mode = "pip" # Ubuntu is fine without that. Redhat prefers it.
+        ansible.verbose = "v" # or "vv", "vvv", "vvvv"
+        ansible.playbook = "/vagant/playbook.yml"
+        ansible.extra_vars = "@/vagant/extra-vars.yml"
+      end
+    end
+    ```
+1. Create a `playbook.yml` file:
+    ```
+    ---
+    - name: Airflow
+      hosts: all
+      connection: local
+      become: true
+      roles:
+        - role: aws-efs
+        - role: airflow
+        - role: ...
+    ```
+1. Create a `extra-vars.yml` file:
+    ```
+    ---
+    
+    nfs_mount_enabled: True
+    nfs_mount_id: localhost
+    airflow_executor: SequentialExecutor
+    
+    # whatever other concrete values you may need. 
+    ```
+1. Run `vagrant up` to download the image and run your ansible script
+1. Run `vagrant provision` to re-run the ansible script
+ 
+1. If you get an error about python not being set up properly, a hacky workaround is to install it as a pre task:
+    ```
+    ---
+    - name: Airflow
+      hosts: all
+      connection: local
+      become: true
+      pre_tasks:
+        - name: 'install python2'
+          raw: sudo apt-get -y install python
+      roles:
+        - role: aws-efs
+        - role: airflow
+        - role: ...
+    ```
