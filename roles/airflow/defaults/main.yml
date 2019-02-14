@@ -124,12 +124,13 @@ airflow_webserver_hide_paused_dags_by_default: False
 # - airflow.contrib.auth.backends.password_auth
 # - airflow.contrib.auth.backends.ldap_auth
 # - airflow.contrib.auth.backends.github_enterprise_auth
+# - airflow.contrib.auth.backends.google_auth
 # - others? :)
-airflow_webserver_authenticate: True
-airflow_webserver_auth_backend: "airflow.contrib.auth.backends.google_auth"
+airflow_webserver_authenticate: False
+airflow_webserver_auth_backend:
 
 
-# OAUTH
+# OAUTH (only applies if airflow_webserver_auth_backend == "airflow.contrib.auth.backends.google_auth")
 airflow_oauth_google_client_id:
 airflow_oauth_google_client_secret:
 airflow_oauth_google_oauth_callback_route: "/oauth2callback"

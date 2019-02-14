@@ -373,10 +373,10 @@ cacert = {{ airflow_ldap_cacert }}
 search_scope = {{ airflow_ldap_search_scope }}
 {% endif %}
 
+{% if airflow_webserver_auth_backend == "airflow.contrib.auth.backends.google_auth" %}
 [google]
 client_id = {{ airflow_oauth_google_client_id }}
 client_secret = {{ airflow_oauth_google_client_secret }}
 oauth_callback_route = {{ airflow_oauth_google_oauth_callback_route }}
 domain = {{ airflow_oauth_google_oauth_domain }}
-
-
+{% endif %}
