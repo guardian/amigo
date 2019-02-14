@@ -60,7 +60,7 @@ airflow_load_examples: False
 
 # The executor class that airflow should use. Choices include
 # SequentialExecutor, LocalExecutor, CeleryExecutor
-airflow_executor: LocalExecutor
+airflow_executor: SequentialExecutor
 
 airflow_parallelism: 32
 airflow_dag_concurrency: 16

@@ -29,14 +29,6 @@
     mode: 0640
   register: airflow_config
 
-- name: Airflow | Initializing DB
-  shell: AIRFLOW_HOME={{ airflow_home }} /usr/local/bin/airflow initdb
-  become: true
-  become_user: "{{ airflow_user }}"
-  tags:
-    skip_ansible_lint
-  when: airflow_install.changed or airflow_config.changed
-
 - name: Airflow | Copy extra airflow config files (provided by playbooks)
   copy:
     src: "{{ item }}"
