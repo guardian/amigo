@@ -1,0 +1,4 @@
+---
+
+git_repo: https://github.com/aws/efs-utils
+checkout_directory: /tmp/efs

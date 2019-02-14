@@ -34,8 +34,7 @@
   - ansible_os_family == "Debian"
 
 - name: Install a package with yum
-  yum: name={{ item }} state=present
-  with_items: "{{ packages|default([]) }}"
+  yum: name="{{ packages|default([]) }}" state=present
   when:
   - ansible_os_family == "RedHat"
 

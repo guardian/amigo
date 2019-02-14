@@ -1,0 +1,15 @@
+---
+dependencies:
+  - role: pip-packages
+    packages: [boto3, botocore]
+    package_state: latest
+  - role: pip-packages
+    packages: [setuptools]
+    package_state: forcereinstall
+
+  - role: packages
+    packages: 
+      - curl
+      - software-properties-common
+      - zip
+  - role: aws-efs

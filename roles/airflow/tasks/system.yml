@@ -1,0 +1,27 @@
+---
+
+- name: Support | Ensure directories structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  with_items:
+    - "{{ nfs_mount_point }}"
+  when: nfs_mount_enabled
+
+- name: Support | Mount EFS
+  mount:
+    path: /mnt/efs
+    src: "{{ nfs_mount_id }}"
+    fstype: efs
+    opts: rw,auto
+    state: present
+
+- name: Support | update templates
+  template:
+    src: airflow-add-connection.sh.j2
+    dest: /usr/local/bin/airflow-add-connection.sh
+    mode: 0755
+    owner: root
+    group: root

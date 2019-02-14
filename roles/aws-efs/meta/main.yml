@@ -1,0 +1,7 @@
+---
+dependencies:
+  - role: packages
+    packages: 
+      - git
+      - binutils
+
