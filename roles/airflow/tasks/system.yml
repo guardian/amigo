@@ -26,3 +26,14 @@
     mode: 0755
     owner: root
     group: root
+
+- name: Support | Adding autoscaling group mutex scripts
+  template:
+    src: "{{ item }}"
+    dest: "/usr/local/sbin/{{ item | replace('.j2', '') }}"
+    mode: 0755
+    owner: root
+    group: root
+  with_items:
+    - airflow-scheduler-mutex.sh.j2
+    - autoscaling-ensure-one-instance.sh.j2

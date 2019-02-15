@@ -1,0 +1,35 @@
+#!/bin/sh
+
+## MANAGED BY ANSIBLE ##
+
+REGION=$1
+ASG_NAME=$2
+
+if [ -z $REGION ]; then
+	echo  "Please specify a region"
+	exit 1
+fi
+
+if [ -z $ASG_NAME ]; then
+	echo  "Please specify the name of the autoscaling group"
+	exit 1
+fi
+
+ASG_COUNT="/usr/local/sbin/autoscaling-group-instances-count.sh $REGION $ASG_NAME"
+
+LOOP=0
+MAX=20
+
+while [ $LOOP -le $MAX ]; do
+	$($ASG_COUNT)
+
+	if [ $? -eq 0 ]; then
+		echo "$ASG_NAME has 1 instance."
+		exit 0
+	fi
+
+	echo "$ASG_NAME has more than 1 instance. Sleeping 30 seconds..."
+	sleep 30
+
+	LOOP=`expr $LOOP + 1`
+done
