@@ -29,6 +29,9 @@ airflow_group: airflow
 airflow_scheduler_runs: 5
 
 airflow_services:
+  airflow-mutex:
+    enabled: yes
+    state: stopped
   airflow-initdb:
     enabled: yes
     state: stopped

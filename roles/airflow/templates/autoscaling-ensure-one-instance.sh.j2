@@ -1,0 +1,20 @@
+#!/bin/sh
+
+## MANAGED BY ANSIBLE ##
+
+REGION=$1
+ASG_NAME=$2
+
+if [ -z $REGION ]; then
+	echo  "Please specify a region"
+	exit 1
+fi
+
+if [ -z $ASG_NAME ]; then
+	echo  "Please specify the name of the autoscaling group"
+	exit 1
+fi
+
+COUNT=$(aws autoscaling describe-auto-scaling-groups --region $REGION --auto-scaling-group-names $ASG_NAME --output json | jq .AutoScalingGroups[0].DesiredCapacity)
+
+exit `expr $COUNT - 1`
