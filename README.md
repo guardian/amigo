@@ -160,12 +160,12 @@ covering this, but, roughly speaking you need to:
       config.vm.provision "ansible_local" do |ansible|
         ansible.install_mode = "pip" # Ubuntu is fine without that. Redhat prefers it.
         ansible.verbose = "v" # or "vv", "vvv", "vvvv"
-        ansible.playbook = "/vagant/playbook.yml"
-        ansible.extra_vars = "@/vagant/extra-vars.yml"
+        ansible.playbook = "/vagrant/playbook.yaml"
+        ansible.extra_vars = "@/vagrant/extra-vars.yaml"
       end
     end
     ```
-1. Create a `playbook.yml` file:
+1. Create a `playbook.yaml` file:
     ```
     ---
     - name: Airflow
@@ -177,7 +177,7 @@ covering this, but, roughly speaking you need to:
         - role: airflow
         - role: ...
     ```
-1. Create a `extra-vars.yml` file:
+1. Create a `extra-vars.yaml` file:
     ```
     ---
     
