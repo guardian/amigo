@@ -160,8 +160,8 @@ covering this, but, roughly speaking you need to:
       config.vm.provision "ansible_local" do |ansible|
         ansible.install_mode = "pip" # Ubuntu is fine without that. Redhat prefers it.
         ansible.verbose = "v" # or "vv", "vvv", "vvvv"
-        ansible.playbook = "/vagant/playbook.yml"
-        ansible.extra_vars = "@/vagant/extra-vars.yml"
+        ansible.playbook = "/vagrant/playbook.yml"
+        ansible.extra_vars = "@/vagrant/extra-vars.yml"
       end
     end
     ```
