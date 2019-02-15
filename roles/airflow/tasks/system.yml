@@ -15,7 +15,7 @@
     path: /mnt/efs
     src: "{{ nfs_mount_id }}"
     fstype: efs
-    opts: rw,auto
+    opts: rw,auto,_netdev
     state: present
   when: nfs_mount_enabled
 

@@ -206,9 +206,6 @@ web_server_ssl_key = {{ airflow_webserver_ssl_key }}
 # Number of seconds the webserver waits before killing gunicorn master that doesn't respond
 web_server_worker_timeout = {{ airflow_webserver_worker_timeout }}
 
-# Number of seconds the gunicorn webserver waits before timing out on a worker
-web_server_worker_timeout = {{ airflow_webserver_worker_timeout }}
-
 # Number of workers to refresh at a time. When set to 0, worker refresh is
 # disabled. When nonzero, airflow periodically refreshes webserver workers by
 # bringing up new ones and killing old ones.
@@ -278,7 +275,7 @@ hide_paused_dags_by_default = {{ airflow_webserver_hide_paused_dags_by_default }
 page_size = {{ airflow_webserver_page_size }}
 
 # Use FAB-based webserver with RBAC feature
-rbac = {{ airflow_webserver_navbar_color }}
+rbac = {{ airflow_webserver_rbac }}
 
 # Define the color of navigation bar
 navbar_color = {{ airflow_webserver_navbar_color }}
