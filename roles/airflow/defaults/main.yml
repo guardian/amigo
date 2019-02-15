@@ -146,7 +146,7 @@ airflow_webserver_hide_paused_dags_by_default: False
 airflow_webserver_dag_default_view: tree
 airflow_webserver_page_size: 100
 airflow_webserver_rbac: False
-airflow_webserver_navbar_color: #007A87
+airflow_webserver_navbar_color: "#007A87"
 airflow_webserver_default_dag_run_display_number: 25
 airflow_webserver_enable_proxy_fix: False
 
