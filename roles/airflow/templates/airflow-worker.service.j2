@@ -17,7 +17,7 @@
 Description=Airflow celery worker daemon
 After=network.target postgresql.service mysql.service redis.service rabbitmq-server.service
 Wants=postgresql.service mysql.service redis.service rabbitmq-server.service
-Wants=airflow-initdb.service
+Requires=airflow-initdb.service
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow
