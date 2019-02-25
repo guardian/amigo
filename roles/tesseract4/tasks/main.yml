@@ -31,3 +31,8 @@
   apt:
     name: tesseract-ocr-rus
     update_cache: yes
+
+- name: Install Tesseract Portuguese
+  apt:
+    name: tesseract-ocr-por
+    update_cache: yes
