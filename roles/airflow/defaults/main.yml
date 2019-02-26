@@ -25,30 +25,36 @@ airflow_user: airflow
 airflow_group: airflow
 
 ## Service options
-
 airflow_scheduler_runs: 5
 
 airflow_services:
   airflow-mutex:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
   airflow-initdb:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
   airflow-webserver:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
   airflow-scheduler:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
   airflow-worker:
+    configure: no
     enabled: no
     state: stopped
   airflow-connections-update:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
   airflow-dags-update:
-    enabled: yes
+    configure: yes
+    enabled: no
     state: stopped
 
 # Files & Paths
