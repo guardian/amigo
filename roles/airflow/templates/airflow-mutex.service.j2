@@ -24,7 +24,7 @@ User=airflow
 Group=airflow
 Type=oneshot
 RemainAfterExit=true
-ExecStart=/usr/local/sbin/airflow-scheduler-mutex.sh $REGION $ASG_NAME
+ExecStart=/usr/local/sbin/airflow-scheduler-mutex.sh $REGION $LOGICAL_ID
 TimeoutSec=600
 
 [Install]
