@@ -20,6 +20,6 @@ COUNT=$(aws ec2 describe-instances --region $REGION \
     Name=tag:Stack,Values=ophan-data-lake \
     Name=tag:Stage,Values=PROD \
     Name=tag:aws:cloudformation:logical-id,Values=$LOGICAL_ID \
-    | jq '.Reservations[].Instances | length')
+    | jq '.Reservations | length')
 
 exit `expr $COUNT - 1`
