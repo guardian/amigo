@@ -7,5 +7,5 @@
     enabled: "{{ item.value.enabled }}"
     daemon_reload: yes
   with_dict: "{{ airflow_services }}"
-  when: item.value.enabled
+  when: item.value.configure
   changed_when: false
