@@ -2,7 +2,12 @@
 
 ## MANAGED BY ANSIBLE ##
 
-S3_PATH="s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/*.py"
+S3_PATH="s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
 
 echo "Downloading DAGs from $S3_PATH"
-aws s3 cp $S3_PATH {{ airflow_dags_folder }}
+aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
+    --recursive \
+    --exclude "*"\
+    --include "*.py"
+
+systemctl try-restart airflow-webserver.service
