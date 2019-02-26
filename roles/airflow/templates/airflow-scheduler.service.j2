@@ -1,6 +1,6 @@
 ## MANAGED BY ANSIBLE
 #
-##
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,9 @@ Description=Airflow scheduler
 Requires=network.target
 After=network.target
 Requires=airflow-mutex.service
+After=airflow-mutex.service
 Requires=airflow-initdb.service
+After=airflow-initdb.service
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow
