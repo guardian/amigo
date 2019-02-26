@@ -9,5 +9,3 @@ aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
     --recursive \
     --exclude "*"\
     --include "*.py"
-
-systemctl try-restart airflow-webserver.service

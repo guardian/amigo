@@ -5,7 +5,7 @@
 S3_PATH="s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
 
 echo "Downloading connections from $S3_PATH"
-aws s3 cp $S3_PATH {{ airflow_connections_folder }}
+aws s3 cp $S3_PATH {{ airflow_connections_folder }} --recursive
 
 for con in `find {{ airflow_connections_folder }} -type f -name "*.json"`; do
     /usr/local/bin/airflow-add-connection.sh $con
