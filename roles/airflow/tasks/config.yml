@@ -10,6 +10,7 @@
     - "{{ airflow_logs_folder }}"
     - "{{ airflow_child_process_log_folder }}"
     - "{{ airflow_dags_folder }}"
+    - "{{ airflow_connections_folder }}"
     - "{{ airflow_plugins_folder }}"
 
 - name: Airflow | Copy gunicorn logrotate config

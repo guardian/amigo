@@ -12,7 +12,7 @@
 
 - name: Support | Mount EFS
   mount:
-    path: /mnt/efs
+    path: "{{ nfs_mount_point }}"
     src: "{{ nfs_mount_id }}"
     fstype: efs
     opts: rw,auto,_netdev
@@ -21,11 +21,15 @@
 
 - name: Support | update templates
   template:
-    src: airflow-add-connection.sh.j2
-    dest: /usr/local/bin/airflow-add-connection.sh
+    src: "{{ item }}"
+    dest: "/usr/local/bin/{{ item | replace('.j2', '') }}"
     mode: 0755
     owner: root
     group: root
+  with_items:
+    - airflow-add-connection.sh.j2
+    - airflow-update-dags.sh.j2
+    - airflow-update-connections.sh.j2
 
 - name: Support | Adding autoscaling group mutex scripts
   template:
