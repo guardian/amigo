@@ -2,6 +2,10 @@
 
 ## MANAGED BY ANSIBLE ##
 
+set -a # causes variables defined to be automatically exported
+. {{ airflow_environment_file_folder }}/airflow
+set +a
+
 FILE=$1
 
 if [ ! -e $FILE ] ; then
@@ -27,7 +31,7 @@ fi
 
 echo "Creating connection $CONNECTION_NAME with type $CONNECTION_TYPE"
 
-JSON_ONE_LINE=`cat $FILE | sed 's/"/\\"/g' | tr '\n' ''`
+JSON_ONE_LINE=`cat $FILE | sed 's/"/\\"/g' | jq -rc '.' | sed 's/"/\\"/g'`
 
 airflow connections -d --conn_id $CONNECTION_NAME 2>/dev/null
 

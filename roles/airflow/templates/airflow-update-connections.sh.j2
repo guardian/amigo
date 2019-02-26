@@ -2,8 +2,9 @@
 
 ## MANAGED BY ANSIBLE ##
 
-S3_PATH="s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/*"
+S3_PATH="s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
 
+echo "Downloading connections from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_connections_folder }}
 
 for con in `find {{ airflow_connections_folder }} -type f -name "*.json"`; do

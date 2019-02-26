@@ -14,12 +14,11 @@
 # limitations under the License.
 
 [Unit]
-Description=Airflow DAGs update
+Description=Airflow connections update
 Requires=network.target
 After=network.target
 Requires=airflow-scheduler.service
 After=airflow-scheduler.service
-PartOf=airflow-webserver.service
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow
