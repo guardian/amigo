@@ -41,3 +41,13 @@
   with_items:
     - airflow-scheduler-mutex.sh.j2
     - autoscaling-ensure-one-instance.sh.j2
+
+- name: Support | sudoers
+  template:
+    src: "{{ item }}"
+    dest: "/etc/{{ item | replace('.j2', '') }}"
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - sudoers.d/airflow.j2
