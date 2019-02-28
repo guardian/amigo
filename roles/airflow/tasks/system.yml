@@ -51,3 +51,21 @@
     group: root
   with_items:
     - sudoers.d/airflow.j2
+
+- name: Support | Add ulimits support to pam sudo
+  blockinfile:
+    dest: /etc/pam.d/sudo
+    block: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      session     required    pam_limits.so
+      # END ANSIBLE MANAGED BLOCK
+
+- name: Support | Bump ulimits
+  blockinfile:
+    dest: /etc/security/limits.conf
+    block: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      {{ airflow_user }}    -    nofile    16384
+      {{ airflow_user }}    -    stack     16384
+      {{ airflow_user }}    -    nproc     16384
+      # END ANSIBLE MANAGED BLOCK
