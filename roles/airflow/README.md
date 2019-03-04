@@ -2,6 +2,8 @@
 
 This installs airflow on the host.
 
+An production recipe from the Data-tech Airflow instance can be found [here](https://amigo.gutools.co.uk/recipes/datatech-airflow).
+
 ## AMI configuration
 
 ### NFS mount
@@ -13,9 +15,10 @@ into a shared NFS directory.
 
 AWS provides such a service called [EFS](https://eu-west-1.console.aws.amazon.com/efs/home?region=eu-west-1). 
 
-To enable an NFS/EFS mount point into your airflw instance, pass in the following:
+To enable an NFS/EFS mount point into your airflow instance, pass in the following:
 
 ```
+# NFS
 nfs_mount_enabled: True
 nfs_mount_id: fs-123456
 nfs_mount_point: /somewhere # optional, defaults to /mnt/nfs
@@ -62,3 +65,28 @@ as in:
       [...]
 
 ```
+
+## Cloudformation
+
+This airflow role is fairly opinionated in the sense it's been designed around [Riff Raff's autoscaling](https://riffraff.gutools.co.uk/docs/magenta-lib/types#autoscaling) deployment method.
+
+As such, the airflow instance needs to be part of some ASG. 
+The data-tech repository holds such an example of a [production stack](https://github.com/guardian/ophan-data-lake/blob/rg/airflow_readme/airflow/cloudformation/airflow.yaml).
+
+Its [readme](https://github.com/guardian/ophan-data-lake/blob/rg/airflow_readme/airflow/README.md) also contains some information about Airflow's scheduler execution control.
+
+## Airflow DAGs and connections
+
+Upon (re-)deployment, systemd will try to get any DAGs and connections from S3. 
+
+This role needs to be told where on S3 to downloads those assets from with:
+
+```
+# S3 assets
+airflow_s3_dags_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
+airflow_s3_connections_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
+```
+
+* [airflow-dags-update.service](templates/airflow-dags-update.service.j2) drops DAGs in `{{ airflow_dags_folder }}` 
+* [airflow-connections-update.service](templates/airflow-connections-update.service.j2) drops connections in `{{ airflow_connections_folder }}`
+    and registers them by calling [airflow-update-connections.sh](templates/airflow-update-connections.sh.j2)

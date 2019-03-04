@@ -65,6 +65,10 @@ airflow_logs_folder: "{{ nfs_mount_point }}/logs"
 airflow_child_process_log_folder: "{{ airflow_logs_folder }}/scheduler"
 airflow_environment_file_folder: /etc/sysconfig
 
+# S3 assets
+airflow_s3_dags_folder:
+airflow_s3_connections_folder:
+
 # Allowing playbooks to provide external config files&templates
 airflow_extra_conf_path: "{{ playbook_dir }}/files/airflow"
 airflow_extra_conf_template_path: "{{ playbook_dir }}/templates/airflow"

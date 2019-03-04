@@ -165,7 +165,7 @@ covering this, but, roughly speaking you need to:
       end
     end
     ```
-1. Create a `playbook.yaml` file:
+1. Create a `playbook.yaml` file (using [airflow](roles/airflow/) role as an example):
     ```
     ---
     - name: Airflow
@@ -184,6 +184,8 @@ covering this, but, roughly speaking you need to:
     nfs_mount_enabled: True
     nfs_mount_id: localhost
     airflow_executor: SequentialExecutor
+    airflow_s3_dags_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
+    airflow_s3_connections_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
     
     # whatever other concrete values you may need. 
     ```
