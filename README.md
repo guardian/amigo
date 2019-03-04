@@ -165,7 +165,7 @@ covering this, but, roughly speaking you need to:
       end
     end
     ```
-1. Create a `playbook.yaml` file (using [airflow](airflow/) role as an example):
+1. Create a `playbook.yaml` file (using [airflow](roles/airflow/) role as an example):
     ```
     ---
     - name: Airflow
