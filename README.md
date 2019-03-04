@@ -184,8 +184,8 @@ covering this, but, roughly speaking you need to:
     nfs_mount_enabled: True
     nfs_mount_id: localhost
     airflow_executor: SequentialExecutor
-    airflow_s3_dags_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
-    airflow_s3_connections_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
+    airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
+    airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
     
     # whatever other concrete values you may need. 
     ```
