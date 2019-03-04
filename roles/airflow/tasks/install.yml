@@ -64,6 +64,14 @@
     owner: "{{ airflow_user }}"
     group: "{{ airflow_group }}"
 
+- name: Support | Airflow Env
+  blockinfile:
+    dest: "{{ airflow_environment_file_folder }}/airflow"
+    block: |
+      # BEGIN ANSIBLE MANAGED BLOCK
+      PYTHONPATH="{{ airflow_python_libs }}"
+      # END ANSIBLE MANAGED BLOCK
+
 - name: Airflow | Copy Daemon scripts
   template:
     src: "{{ item.key }}.service.j2"
