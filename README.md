@@ -207,5 +207,3 @@ covering this, but, roughly speaking you need to:
         - role: airflow
         - role: ...
     ```
-
-nfs_mount_point: /mnt/nfs, airflow_version: 1.10.2, nfs_mount_enabled: True, airflow_webserver_auth_backend: airflow.contrib.auth.backends.google_auth, nfs_mount_id: fs-fceb7334, airflow_extra_packages: ['crypto,postgres,google_auth']
