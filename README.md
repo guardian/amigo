@@ -186,6 +186,7 @@ covering this, but, roughly speaking you need to:
     airflow_executor: SequentialExecutor
     airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
     airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
+    airflow_s3_python_libs_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/python_libs/"
     
     # whatever other concrete values you may need. 
     ```
