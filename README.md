@@ -184,8 +184,8 @@ covering this, but, roughly speaking you need to:
     nfs_mount_enabled: True
     nfs_mount_id: localhost
     airflow_executor: SequentialExecutor
-    airflow_s3_dags_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
-    airflow_s3_connections_folder: "s3://ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
+    airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
+    airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
     
     # whatever other concrete values you may need. 
     ```
@@ -207,3 +207,5 @@ covering this, but, roughly speaking you need to:
         - role: airflow
         - role: ...
     ```
+
+nfs_mount_point: /mnt/nfs, airflow_version: 1.10.2, nfs_mount_enabled: True, airflow_webserver_auth_backend: airflow.contrib.auth.backends.google_auth, nfs_mount_id: fs-fceb7334, airflow_extra_packages: ['crypto,postgres,google_auth']
