@@ -15,7 +15,7 @@
     path: "{{ nfs_mount_point }}"
     src: "{{ nfs_mount_id }}"
     fstype: efs
-    opts: rw,auto,_netdev
+    opts: auto,rw,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=60min,noatime,nodiratime,noac,nocto
     state: present
   when: nfs_mount_enabled
 

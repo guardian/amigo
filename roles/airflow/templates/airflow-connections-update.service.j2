@@ -17,7 +17,7 @@
 Description=Airflow connections update
 Requires=network.target
 After=network.target
-Requires=airflow-scheduler.service
+BindsTo=airflow-scheduler.service
 After=airflow-scheduler.service
 
 [Service]
