@@ -26,7 +26,7 @@ User={{ airflow_user }}
 Group={{ airflow_group }}
 Type=oneshot
 RemainAfterExit=true
-ExecStart=/usr/local/bin/airflow initdb
+ExecStart={{ airflow_virtualenv_folder }}/bin/airflow initdb
 
 [Install]
 WantedBy=multi-user.target

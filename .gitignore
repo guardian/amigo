@@ -9,5 +9,8 @@ target
 amigo.iml
 
 roles/Vagrantfile
-roles/extra-vars.yml
+roles/extra-vars.yaml
+roles/playbook.retry
+roles/*.log
 roles/playbook.yml
+roles/.vagrant

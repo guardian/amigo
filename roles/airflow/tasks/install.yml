@@ -15,10 +15,18 @@
     pkg: "{{ airflow_required_libs }}"
     state: present
 
+- name: Airflow | pip installs
+  pip:
+    name: ['boto3', 'six', 'gunicorn', 'psycopg2', 'numpy']
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: /usr/bin/python3
+
 - name: Airflow | Installing Airflow
   pip:
     name: apache-airflow
     version: "{{ airflow_version }}"
+    virtualenv: "{{ airflow_virtualenv_folder }}"
+    virtualenv_python: /usr/bin/python3
   environment:
     SLUGIFY_USES_TEXT_UNIDECODE: "yes"
   register: airflow_install
@@ -27,10 +35,17 @@
   pip:
     name: apache-airflow[{{ airflow_extra_packages | join(', ') }}]
     version: "{{ airflow_version }}"
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: /usr/bin/python3
 
-- name: pip installs
-  pip:
-    name: ['boto3', 'six', 'gunicorn', 'psycopg2']
+- name: "Airflow | ensuring {{ airflow_virtualenv_folder }}"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+  with_items:
+    - "{{ airflow_virtualenv_folder }}/"
 
 - name: Airflow | Create path for Airflow home
   file:

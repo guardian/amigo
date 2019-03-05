@@ -15,6 +15,8 @@ airflow_default_timezone: "utc"
 airflow_logging_config_class:
 
 airflow_required_libs:
+  - python3-dev
+  - virtualenv
   - python-pip
   - acl
   - gcc
@@ -60,6 +62,7 @@ airflow_services:
 # Files & Paths
 airflow_home: /etc/airflow
 airflow_dags_folder: "{{ airflow_home }}/dags"
+airflow_virtualenv_folder: "{{ airflow_home }}/virtualenv"
 airflow_connections_folder: "{{ airflow_home }}/connections"
 airflow_logs_folder: "{{ nfs_mount_point }}/logs"
 airflow_child_process_log_folder: "{{ airflow_logs_folder }}/scheduler"
