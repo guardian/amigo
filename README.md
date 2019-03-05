@@ -46,7 +46,7 @@ If you want to actually perform a bake, you will need separate credentials for P
 
 If you have created a custom VPC in your AWS account (i.e. your account contains any VPCs other than the default one), then you will also need to tell Packer which VPC and subnet to use when building images:
 
-```
+```shell
 $ cat ~/.configuration-magic/amigo.conf
 
 packer {
@@ -58,7 +58,7 @@ packer {
 
 If you want to use the `packages` role to install packages from an S3 bucket then you'll also need to configure that:
 
-```
+```hocon
 ansible {
   packages {
     s3bucket = "your-bucket"
@@ -71,19 +71,19 @@ Optionally, you may want to set `associate_public_ip_address` to true if your su
 
 Once you have your credentials and config sorted out, just do: 
 
-```
+```shell
 $ sbt run
 ```
 
 ## How to run the tests
 
-```
+```shell
 $ sbt test
 ```
 
 ## Required AWS permissions for Packer
 
-```
+```json
 {
     "Statement": [
         {
@@ -141,7 +141,7 @@ covering this, but, roughly speaking you need to:
 1. `cd` into `roles/`
 1. Create a `Vagrantfile`:
  
-    ```
+    ```yaml
     Vagrant.configure(2) do |config|
     
       config.vm.box = "ubuntu/bionic64"
@@ -166,7 +166,7 @@ covering this, but, roughly speaking you need to:
     end
     ```
 1. Create a `playbook.yaml` file (using [airflow](roles/airflow/) role as an example):
-    ```
+    ```yaml
     ---
     - name: Airflow
       hosts: all
@@ -178,7 +178,7 @@ covering this, but, roughly speaking you need to:
         - role: ...
     ```
 1. Create a `extra-vars.yaml` file:
-    ```
+    ```yaml
     ---
     
     nfs_mount_enabled: True
@@ -194,7 +194,7 @@ covering this, but, roughly speaking you need to:
 1. Run `vagrant provision` to re-run the ansible script
  
 1. If you get an error about python not being set up properly, a hacky workaround is to install it as a pre task:
-    ```
+    ```yaml
     ---
     - name: Airflow
       hosts: all

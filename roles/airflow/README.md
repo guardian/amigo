@@ -17,7 +17,7 @@ AWS provides such a service called [EFS](https://eu-west-1.console.aws.amazon.co
 
 To enable an NFS/EFS mount point into your airflow instance, pass in the following:
 
-```
+```yaml
 # NFS
 nfs_mount_enabled: True
 nfs_mount_id: fs-123456
@@ -43,7 +43,7 @@ Now, Airflow allows for its configuration values to be passed via environment va
 Therefore, in the `UserData` of your cloudformation template, append the `key`/`value` pairs you may need,
 as in:
 
-```
+```yaml
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -81,7 +81,7 @@ Upon (re-)deployment, systemd will try to get any DAGs and connections from S3.
 
 This role needs to be told where on S3 to downloads those assets from with:
 
-```
+```yaml
 # S3 assets
 airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
 airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
