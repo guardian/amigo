@@ -1,0 +1,30 @@
+---
+
+JournaldStorage:
+JournaldCompress: False
+JournaldSeal: False
+JournaldSplitMode:
+JournaldSyncIntervalSec:
+JournaldRateLimitIntervalSec:
+JournaldRateLimitBurst:
+JournaldSystemMaxUse:
+JournaldSystemKeepFree:
+JournaldSystemMaxFileSize:
+JournaldSystemMaxFiles:
+JournaldRuntimeMaxUse:
+JournaldRuntimeKeepFree:
+JournaldRuntimeMaxFileSize:
+JournaldRuntimeMaxFiles:
+JournaldMaxRetentionSec:
+JournaldMaxFileSec:
+JournaldForwardToSyslog: False
+JournaldForwardToKMsg: False
+JournaldForwardToConsole: False
+JournaldForwardToWall: False
+JournaldTTYPath:
+JournaldMaxLevelStore:
+JournaldMaxLevelSyslog:
+JournaldMaxLevelKMsg:
+JournaldMaxLevelConsole:
+JournaldMaxLevelWall:
+JournaldLineMax:

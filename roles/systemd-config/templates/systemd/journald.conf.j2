@@ -1,0 +1,59 @@
+## MANAGED BY ANSIBLE ##
+
+[Journal]
+{% if not(JournaldStorage is none) %}Storage={{ JournaldStorage }}
+{% endif %}
+{% if not(JournaldCompress is none) and JournaldCompress %}Compress=yes
+{% endif %}
+{% if not(JournaldSeal is none) and JournaldSeal %}Seal=yes
+{% endif %}
+{% if not(JournaldSplitMode is none) %}SplitMode={{ JournaldSplitMode }}
+{% endif %}
+{% if not(JournaldSyncIntervalSec is none) %}SyncIntervalSec={{ JournaldSyncIntervalSec }}
+{% endif %}
+{% if not(JournaldRateLimitIntervalSec is none) %}RateLimitIntervalSec={{ JournaldRateLimitIntervalSec }}
+{% endif %}
+{% if not(JournaldRateLimitBurst is none) %}RateLimitBurst={{ JournaldRateLimitBurst }}
+{% endif %}
+{% if not(JournaldSystemMaxUse is none) %}SystemMaxUse={{ JournaldSystemMaxUse }}
+{% endif %}
+{% if not(JournaldSystemKeepFree is none) %}SystemKeepFree={{ JournaldSystemKeepFree }}
+{% endif %}
+{% if not(JournaldSystemMaxFileSize is none) %}SystemMaxFileSize={{ JournaldSystemMaxFileSize }}
+{% endif %}
+{% if not(JournaldSystemMaxFiles is none) %}SystemMaxFiles={{ JournaldSystemMaxFiles }}
+{% endif %}
+{% if not(JournaldRuntimeMaxUse is none) %}RuntimeMaxUse={{ JournaldRuntimeMaxUse }}
+{% endif %}
+{% if not(JournaldRuntimeKeepFree is none) %}RuntimeKeepFree={{ JournaldRuntimeKeepFree }}
+{% endif %}
+{% if not(JournaldRuntimeMaxFileSize is none) %}RuntimeMaxFileSize={{ JournaldRuntimeMaxFileSize }}
+{% endif %}
+{% if not(JournaldRuntimeMaxFiles is none) %}RuntimeMaxFiles={{ JournaldRuntimeMaxFiles }}
+{% endif %}
+{% if not(JournaldMaxRetentionSec is none) %}MaxRetentionSec={{ JournaldMaxRetentionSec }}
+{% endif %}
+{% if not(JournaldMaxFileSec is none) %}MaxFileSec={{ JournaldMaxFileSec }}
+{% endif %}
+{% if not(JournaldForwardToSyslog is none) and JournaldForwardToSyslog %}ForwardToSyslog=yes
+{% endif %}
+{% if not(JournaldForwardToKMsg is none) and JournaldForwardToKMsg %}ForwardToKMsg=yes
+{% endif %}
+{% if not(JournaldForwardToConsole is none) and JournaldForwardToConsole %}ForwardToConsole=yes
+{% endif %}
+{% if not(JournaldForwardToWall is none) and JournaldForwardToWall %}ForwardToWall=yes
+{% endif %}
+{% if not(JournaldTTYPath is none) %}TTYPath={{ JournaldTTYPath }}
+{% endif %}
+{% if not(JournaldMaxLevelStore is none) %}MaxLevelStore={{ JournaldMaxLevelStore }}
+{% endif %}
+{% if not(JournaldMaxLevelSyslog is none) %}MaxLevelSyslog={{ JournaldMaxLevelSyslog }}
+{% endif %}
+{% if not(JournaldMaxLevelKMsg is none) %}MaxLevelKMsg={{ JournaldMaxLevelKMsg }}
+{% endif %}
+{% if not(JournaldMaxLevelConsole is none) %}MaxLevelConsole={{ JournaldMaxLevelConsole }}
+{% endif %}
+{% if not(JournaldMaxLevelWall is none) %}MaxLevelWall={{ JournaldMaxLevelWall }}
+{% endif %}
+{% if not(JournaldLineMax is none) %}LineMax={{ JournaldLineMax }}
+{% endif %}
