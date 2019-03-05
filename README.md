@@ -83,7 +83,7 @@ $ sbt test
 
 ## Required AWS permissions for Packer
 
-```Elixir
+```elixir
 {
     "Statement": [
         {
