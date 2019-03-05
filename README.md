@@ -83,7 +83,7 @@ $ sbt test
 
 ## Required AWS permissions for Packer
 
-```javascript
+```Elixir
 {
     "Statement": [
         {
@@ -141,7 +141,7 @@ covering this, but, roughly speaking you need to:
 1. `cd` into `roles/`
 1. Create a `Vagrantfile`:
  
-    ```
+    ```ruby
     Vagrant.configure(2) do |config|
     
       config.vm.box = "ubuntu/bionic64"
