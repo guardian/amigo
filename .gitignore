@@ -10,7 +10,6 @@ amigo.iml
 
 roles/Vagrantfile
 roles/extra-vars.yaml
-roles/playbook.retry
+roles/playbook.yaml
 roles/*.log
-roles/playbook.yml
 roles/.vagrant
