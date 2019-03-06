@@ -8,7 +8,7 @@ dependencies:
     package_state: forcereinstall
 
   - role: packages
-    packages: 
+    packages:
       - curl
       - software-properties-common
       - zip
