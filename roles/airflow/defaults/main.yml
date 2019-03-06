@@ -8,6 +8,7 @@ nfs_mount_point: /mnt/nfs
 ## General
 airflow_version: 1.10.2
 airflow_extra_packages: ['crypto,postgres,google_auth']
+airflow_python_path: /usr/bin/python3
 
 airflow_logging_level: "INFO"
 airflow_fab_logging_level: "INFO"
