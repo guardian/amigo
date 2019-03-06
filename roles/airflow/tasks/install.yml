@@ -17,7 +17,7 @@
 
 - name: Airflow | pip installs
   pip:
-    name: ['boto3', 'six', 'gunicorn', 'psycopg2', 'numpy']
+    name: ['boto3', 'six', 'gunicorn', 'psycopg2', 'numpy', 'awscli']
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
