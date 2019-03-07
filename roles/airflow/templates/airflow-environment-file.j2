@@ -25,6 +25,6 @@ SCHEDULER_RUNS={{ airflow_scheduler_runs }}
 
 AIRFLOW_HOME={{ airflow_home }}
 
-PATH=$PATH:{{ airflow_virtualenv_folder }}/bin
+PATH=$PATH:/bin:{{ airflow_virtualenv_folder }}/bin
 
 PYTHONPATH="{{ airflow_python_libs }}"

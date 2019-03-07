@@ -17,7 +17,8 @@
 
 - name: Airflow | pip installs
   pip:
-    name: ['boto3', 'six', 'gunicorn', 'psycopg2', 'numpy', 'awscli']
+    name: ['botocore', 'boto3', 'six', 'gunicorn', 'numpy', 'awscli']
+    state: latest
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
@@ -30,6 +31,14 @@
   environment:
     SLUGIFY_USES_TEXT_UNIDECODE: "yes"
   register: airflow_install
+
+- name: Airflow | overriding psycopg2 with psycopg2-binary
+  pip:
+    name: ['psycopg2-binary']
+    state: latest
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: "{{ airflow_python_path }}"
+
 
 - name: Airflow | Installing Airflow Extra Packages
   pip:
