@@ -1,0 +1,5 @@
+---
+- name: Install Tor
+  apt:
+    name: tor
+    update_cache: yes
