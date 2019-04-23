@@ -22,6 +22,7 @@ airflow_required_libs:
   - acl
   - gcc
   - jq
+  - libpq-dev
 
 # Owner
 airflow_user: airflow
