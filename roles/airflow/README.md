@@ -85,7 +85,7 @@ This role needs to be told where on S3 to downloads those assets from with:
 # S3 assets
 airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
 airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
-airflow_s3_python_libs_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/python_libs/"
+airflow_s3_plugins_dir_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/plugins/"
 ```
 
 * [airflow-dags-update.service](templates/airflow-dags-update.service.j2) drops DAGs in `{{ airflow_dags_folder }}` 

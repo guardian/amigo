@@ -74,7 +74,7 @@ airflow_plugins_dir: "{{ airflow_home }}/plugins"
 # S3 assets
 airflow_s3_dags_folder:
 airflow_s3_connections_folder:
-airflow_s3_python_libs_folder:
+airflow_s3_plugins_dir_folder:
 
 # Allowing playbooks to provide external config files&templates
 airflow_extra_conf_path: "{{ playbook_dir }}/files/airflow"
