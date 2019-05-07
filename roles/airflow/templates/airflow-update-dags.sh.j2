@@ -14,7 +14,7 @@ aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
 S3_PATH="s3://{{ airflow_s3_python_libs_folder }}"
 
 echo "Downloading extra python libraries from $S3_PATH"
-aws s3 cp $S3_PATH {{ airflow_python_libs }} \
+aws s3 cp $S3_PATH {{ airflow_plugins_dir }} \
     --recursive \
     --exclude "*"\
     --include "*.py"

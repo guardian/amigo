@@ -69,7 +69,7 @@ airflow_connections_folder: "{{ airflow_home }}/connections"
 airflow_logs_folder: "{{ nfs_mount_point }}/logs"
 airflow_child_process_log_folder: "{{ airflow_logs_folder }}/scheduler"
 airflow_environment_file_folder: /etc/sysconfig
-airflow_python_libs: "{{ airflow_home }}/python_libs"
+airflow_plugins_dir: "{{ airflow_home }}/plugins"
 
 # S3 assets
 airflow_s3_dags_folder:
