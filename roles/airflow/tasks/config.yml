@@ -12,7 +12,7 @@
     - "{{ airflow_dags_folder }}"
     - "{{ airflow_connections_folder }}"
     - "{{ airflow_plugins_folder }}"
-    - "{{ airflow_python_libs }}"
+    - "{{ airflow_plugins_dir }}"
 
 - name: Airflow | Copy gunicorn logrotate config
   template:
