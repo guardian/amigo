@@ -2,7 +2,7 @@
 
 [core]
 # The home folder for airflow, default is ~/airflow
-airflow_home = {{ airflow_home }}
+# airflow_home = {{ airflow_home }} # defined in /etc/sysconfig/airflow. Causes spurious warnings is set twice.
 
 # The folder where your airflow pipelines live, most likely a
 # subfolder in a code repository
