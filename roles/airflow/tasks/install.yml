@@ -32,18 +32,24 @@
     SLUGIFY_USES_TEXT_UNIDECODE: "yes"
   register: airflow_install
 
-- name: Airflow | overriding psycopg2 with psycopg2-binary
-  pip:
-    name: ['psycopg2-binary']
-    state: latest
-    virtualenv: "{{ airflow_virtualenv_folder }}/"
-    virtualenv_python: "{{ airflow_python_path }}"
-
-
 - name: Airflow | Installing Airflow Extra Packages
   pip:
     name: apache-airflow[{{ airflow_extra_packages | join(', ') }}]
     version: "{{ airflow_version }}"
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: "{{ airflow_python_path }}"
+
+- name: Airflow | ensure psycopg2 is absent (deprecated, superseded with psycopg2-binary)
+  pip:
+    name: ['psycopg2']
+    state: absent
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: "{{ airflow_python_path }}"
+
+- name: Airflow | overriding psycopg2 with psycopg2-binary
+  pip:
+    name: ['psycopg2-binary']
+    state: latest
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
