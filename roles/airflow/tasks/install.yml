@@ -22,7 +22,7 @@
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
-- name: Airflow | Installing Airflow
+- name: "Airflow | Installing Airflow {{ airflow_version }}"
   pip:
     name: apache-airflow
     version: "{{ airflow_version }}"
