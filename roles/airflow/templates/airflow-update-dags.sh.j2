@@ -5,7 +5,7 @@
 DAGS_ZIP=dags.zip
 PLUGINS_ZIP=plugins.zip
 
-S3_PATH="s3://{{ airflow_s3_dags_folder }}"
+S3_PATH="s3://{{ airflow_s3_dags_folder }}$DAGS_ZIP"
 
 echo "Downloading DAGs from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
@@ -13,21 +13,23 @@ aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
     --include $DAGS_ZIP
 
 if [ -e {{ airflow_dags_folder }}/$DAGS_ZIP ]; then
-    unzip {{ airflow_dags_folder }}/$DAGS_ZIP -d {{ airflow_home }}
+    unzip -o {{ airflow_dags_folder }}/$DAGS_ZIP -d {{ airflow_home }}
+    rm -f {{ airflow_dags_folder }}/$DAGS_ZIP
 else
     echo "WARNING: NO DAGS FOUND IN  {{ airflow_dags_folder }}/$DAGS_ZIP"
 fi
 
 
-S3_PATH="s3://{{ airflow_s3_plugins_dir_folder }}"
+S3_PATH="s3://{{ airflow_s3_plugins_dir_folder }}$PLUGINS_ZIP"
 
 echo "Downloading extra python libraries from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_plugins_dir }} \
     --exclude "*"\
     --include $PLUGINS_ZIP
 
-if [ -e {{ airflow_dags_folder }}/$PLUGINS_ZIP ]; then
-    unzip {{ airflow_plugins_dir }}/$PLUGINS_ZIP -d {{ airflow_home }}
+if [ -e {{ airflow_s3_plugins_dir_folder }}/$PLUGINS_ZIP ]; then
+    unzip -o {{ airflow_plugins_dir }}/$PLUGINS_ZIP -d {{ airflow_home }}
+    rm -f {{ airflow_plugins_dir }}/$PLUGINS_ZIP
 else
-    echo "WARNING: NO PLUGINS FOUND IN  {{ airflow_dags_folder }}/$PLUGINS_ZIP"
+    echo "WARNING: NO PLUGINS FOUND IN  {{ airflow_s3_plugins_dir_folder }}/$PLUGINS_ZIP"
 fi
