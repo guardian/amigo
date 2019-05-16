@@ -27,9 +27,9 @@ aws s3 cp $S3_PATH {{ airflow_plugins_dir }} \
     --exclude "*"\
     --include $PLUGINS_ZIP
 
-if [ -e {{ airflow_plugins_dir }}$PLUGINS_ZIP ]; then
+if [ -e {{ airflow_plugins_dir }}/$PLUGINS_ZIP ]; then
     unzip -o {{ airflow_plugins_dir }}/$PLUGINS_ZIP -d {{ airflow_home }}
     rm -f {{ airflow_plugins_dir }}/$PLUGINS_ZIP
 else
-    echo "WARNING: NO PLUGINS FOUND IN  {{ airflow_s3_plugins_dir_folder }}/$PLUGINS_ZIP"
+    echo "WARNING: NO PLUGINS FOUND IN  {{ airflow_s3_plugins_dir_folder }}$PLUGINS_ZIP"
 fi
