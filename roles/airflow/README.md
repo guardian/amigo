@@ -83,7 +83,7 @@ This role needs to be told where on S3 to downloads those assets from with:
 
 ## Remote logging
 
-Pass the following values to your AMIgo receipe:
+Pass the following values to your AMIgo recipe:
 
 ```yaml
 airflow_remote_logging: True
@@ -91,6 +91,8 @@ airflow_remote_base_log_folder: "s3://some-bucket/"
 airflow_remote_log_conn_id: dummy #set to a dummy value if not relying on actual airflow connections but rather on ec2 permissions/role. Cannot be empty or null though.
 
 ```
+
+## DAGs remote sources configuration
 
 ```yaml
 # S3 assets
