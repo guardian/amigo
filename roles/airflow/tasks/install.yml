@@ -97,7 +97,7 @@
 - name: Airflow | Copy Daemon scripts
   template:
     src: "lib/systemd/system/{{ item.key }}.service.j2"
-    dest: /{{ item.key }}.service
+    dest: /lib/systemd/system/{{ item.key }}.service
     mode: 0644
   with_dict: "{{ airflow_services }}"
   when: item.value.configure
