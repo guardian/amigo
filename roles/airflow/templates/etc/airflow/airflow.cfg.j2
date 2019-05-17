@@ -9,9 +9,11 @@
 # This path must be absolute
 dags_folder = {{ airflow_dags_folder }}
 
+{% if airflow_remote_logging != True %}
 # The folder where airflow should store its log files
 # This path must be absolute
 base_log_folder = {{ airflow_logs_folder }}
+{% endif %}
 
 # Airflow can store logs remotely in AWS S3, Google Cloud Storage or Elastic Search.
 # Users must supply an Airflow connection id that provides access to the storage

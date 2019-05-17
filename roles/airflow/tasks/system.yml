@@ -8,7 +8,7 @@
     group: root
   with_items:
     - "{{ nfs_mount_point }}"
-  when: "{{ nfs_mount_enabled | bool }}"
+  when: nfs_mount_enabled | bool
 
 - name: Support | Mount EFS
   mount:
@@ -17,7 +17,7 @@
     fstype: efs
     opts: auto,rw,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=60min,noatime,nodiratime,noac,nocto,_netdev
     state: present
-  when: "{{ nfs_mount_enabled | bool }}"
+  when: nfs_mount_enabled | bool
 
 - name: Support | update templates
   template:
