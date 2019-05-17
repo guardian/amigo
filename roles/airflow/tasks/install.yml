@@ -17,7 +17,7 @@
 
 - name: Airflow | pip installs
   pip:
-    name: ['botocore', 'boto3', 'six', 'gunicorn', 'numpy', 'awscli']
+    name: ['botocore', 'boto3', 'six', 'gunicorn', 'numpy']
     state: latest
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
@@ -102,3 +102,20 @@
   with_dict: "{{ airflow_services }}"
   when: item.value.configure
 
+- name: Airflow | Find remote logging template
+  find:
+    paths: "{{ airflow_virtualenv_folder }}"
+    recurse: True
+    patterns: "airflow_local_settings.py"
+    file_type: file
+    use_regex: no
+  register: airflow_logging_template
+
+- name: Airflow | Install remote logging template
+  copy:
+    src: "{{ airflow_logging_template.files[0].path }}"
+    dest: "{{ airflow_plugins_folder }}"
+    mode: 0644
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+  when: airflow_remote_logging|bool
