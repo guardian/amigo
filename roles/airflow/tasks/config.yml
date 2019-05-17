@@ -18,7 +18,7 @@
 
 - name: Airflow | Copy gunicorn logrotate config
   template:
-    src: gunicorn-logrotate.j2
+    src: etc/logrotate.d/gunicorn-logrotate.j2
     dest: /etc/logrotate.d/airflow
     mode: 0644
     owner: root
@@ -26,7 +26,7 @@
 
 - name: Airflow | Copy basic airflow config file
   template:
-    src: "airflow.cfg.j2"
+    src: "etc/airflow/airflow.cfg.j2"
     dest: "{{ airflow_home }}/airflow.cfg"
     owner: "{{ airflow_user }}"
     group: "{{ airflow_group }}"
