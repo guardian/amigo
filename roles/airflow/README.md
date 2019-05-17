@@ -88,6 +88,6 @@ airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/c
 airflow_s3_plugins_dir_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/plugins/"
 ```
 
-* [airflow-dags-update.service](templates/airflow-dags-update.service.j2) drops DAGs in `{{ airflow_dags_folder }}` 
-* [airflow-connections-update.service](templates/airflow-connections-update.service.j2) drops connections in `{{ airflow_connections_folder }}`
-    and registers them by calling [airflow-update-connections.sh](templates/airflow-update-connections.sh.j2)
+* [airflow-dags-update.service](templates/lib/systemd/system/airflow-dags-update.service.j2) drops DAGs in `{{ airflow_dags_folder }}` 
+* [airflow-connections-update.service](templates/lib/systemd/system/airflow-connections-update.service.j2) drops connections in `{{ airflow_connections_folder }}`
+    and registers them by calling [airflow-update-connections.sh](templates/usr/local/bin/airflow-update-connections.sh.j2)
