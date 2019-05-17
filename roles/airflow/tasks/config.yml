@@ -32,3 +32,11 @@
     group: "{{ airflow_group }}"
     mode: 0640
   register: airflow_config
+
+- name: Airflow | Setting python virtualenv
+  template:
+    src: "home/airflow/bash_profile.j2"
+    dest: "/home/airflow/.bash_profile"
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+    mode: 0644

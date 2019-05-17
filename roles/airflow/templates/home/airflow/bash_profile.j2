@@ -1,0 +1,11 @@
+#!/bin/sh
+
+## MANAGED BY ANSIBLE ##
+
+set -a
+
+. {{ airflow_environment_file_folder }}/airflow
+
+set +a
+
+. {{ airflow_virtualenv_folder }}/bin/activate
