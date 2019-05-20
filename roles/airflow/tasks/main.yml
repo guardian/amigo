@@ -1,6 +1,10 @@
 - name: System
   include: system.yml
 
+- name: NFS
+  include: nfs.yml
+  when: nfs_mount_enabled == True
+
 - name: Airflow | Install
   include: install.yml
   tags:
