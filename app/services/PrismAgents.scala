@@ -3,6 +3,7 @@ package services
 import akka.agent.Agent
 import akka.actor.{Cancellable, Scheduler}
 import models.AmiId
+import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
 import play.api.{Environment, Mode}
 import prism.Prism
@@ -12,22 +13,42 @@ import scala.collection.SeqLike
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
+object PrismAgents {
+  val MAX_AGE: Long = 15 * 60 * 1000
+
+  trait Failure
+  case object NotInitialised extends Failure
+
+  type CacheData[T] = Either[Failure, (T, DateTime)]
+  def dataToResult[T](data: CacheData[T], now: DateTime)(implicit exec: ExecutionContext): T = data match {
+    case Left(NotInitialised) =>
+      throw new IllegalStateException(s"AMIgo internal data cache is not yet populated")
+    case Right((_ , staleTimeStamp)) if (now.getMillis - staleTimeStamp.getMillis) > MAX_AGE =>
+      throw new IllegalStateException(s"AMIgo internal data cache is stale - last update at $staleTimeStamp")
+    case Right((t, _)) => t
+  }
+}
+
+
+
 class PrismAgents(prism: Prism,
     lifecycle: ApplicationLifecycle,
     scheduler: Scheduler,
     environment: Environment)(implicit exec: ExecutionContext) extends Loggable {
 
-  private val instancesAgent: Agent[Seq[Instance]] = Agent(Seq.empty)
-  private val launchConfigurationsAgent: Agent[Seq[LaunchConfiguration]] = Agent(Seq.empty)
-  private val copiedImagesAgent: Agent[Map[AmiId, Seq[Image]]] = Agent(Map.empty)
-  private val accountsAgent: Agent[Seq[AWSAccount]] = Agent(Seq.empty)
+  import PrismAgents._
+
+  private val instancesAgent: Agent[CacheData[Seq[Instance]]] = Agent(Left(NotInitialised))
+  private val launchConfigurationsAgent: Agent[CacheData[Seq[LaunchConfiguration]]] = Agent(Left(NotInitialised))
+  private val copiedImagesAgent: Agent[CacheData[Map[AmiId, Seq[Image]]]] = Agent(Left(NotInitialised))
+  private val accountsAgent: Agent[CacheData[Seq[AWSAccount]]] = Agent(Left(NotInitialised))
 
   val baseUrl: String = prism.baseUrl
 
-  def allInstances: Seq[Instance] = instancesAgent.get
-  def allLaunchConfigurations: Seq[LaunchConfiguration] = launchConfigurationsAgent.get
-  def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] = copiedImagesAgent.get.filterKeys(sourceAmiIds.contains)
-  def accounts: Seq[AWSAccount] = accountsAgent.get
+  def allInstances: Seq[Instance] = dataToResult(instancesAgent.get, DateTime.now)
+  def allLaunchConfigurations: Seq[LaunchConfiguration] = dataToResult(launchConfigurationsAgent.get, DateTime.now)
+  def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] = dataToResult(copiedImagesAgent.get, DateTime.now).filterKeys(sourceAmiIds.contains)
+  def accounts: Seq[AWSAccount] = dataToResult(accountsAgent.get, DateTime.now)
 
   if (environment.mode != Mode.Test) {
 
@@ -49,11 +70,11 @@ class PrismAgents(prism: Prism,
     refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
   }
 
-  private def refresh[T <: SeqLike[_, _], R](source: => Future[T], agent: Agent[R], name: String)(transform: T => R): Future[Unit] = {
+  private def refresh[T <: SeqLike[_, _], R](source: => Future[T], agent: Agent[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {
     source
       .map { sourceData =>
         log.debug(s"Prism: Loaded ${sourceData.length} $name")
-        agent.send(transform(sourceData))
+        agent.send(Right(transform(sourceData) -> DateTime.now))
       }
       .recover {
         case t =>

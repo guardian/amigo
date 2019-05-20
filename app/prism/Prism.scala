@@ -24,11 +24,20 @@ class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(i
 
   private def findAll[T](path: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
     val url = s"$baseUrl$path"
-    ws.url(url).get().map { resp =>
-      extractData[Seq[T]](resp.json).fold(error => {
-        log.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")
-        Seq.empty[T]
-      }, t => t)
+    ws.url(url).get().flatMap { resp =>
+      val prismResponse = for {
+        stale <- (resp.json \ "stale").validate[JsBoolean].map(_.value)
+        data <- r.reads(resp.json)
+      } yield (stale, data)
+
+      prismResponse.fold(error => {
+        val message = s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error"
+        log.warn(message)
+        Future.failed(new IllegalStateException(message))
+      }, {
+        case (true, _) => Future.failed(new IllegalStateException(s"Prism response indicated it was stale on $url"))
+        case (false, t) => Future.successful(t)
+      })
     }
   }
 
@@ -70,10 +79,4 @@ object Prism {
   private def dataReads[T](dataPath: String*)(implicit r: Reads[T]): Reads[Seq[T]] =
     dataPath.foldLeft[JsPath](__)((path, subPath) => path \ subPath).read[Seq[T]]
 
-  private[prism] def extractData[T](json: JsValue)(implicit r: Reads[T]): Either[Seq[(JsPath, Seq[ValidationError])], T] = {
-    r.reads(json) match {
-      case JsSuccess(data, _) => Right(data)
-      case JsError(e) => Left(e)
-    }
-  }
 }
