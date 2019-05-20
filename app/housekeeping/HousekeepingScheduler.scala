@@ -4,7 +4,9 @@ import org.quartz.{ JobDataMap, Scheduler }
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 
-class HousekeepingScheduler(scheduler: Scheduler, housekeepingJobs: List[HousekeepingJob]) {
+import scala.concurrent.ExecutionContext
+
+class HousekeepingScheduler(scheduler: Scheduler, housekeepingJobs: List[HousekeepingJob])(implicit ec: ExecutionContext) {
 
   def initialise(): Unit = {
     housekeepingJobs.foreach { housekeepingJob =>
@@ -23,10 +25,12 @@ class HousekeepingScheduler(scheduler: Scheduler, housekeepingJobs: List[Houseke
   private def buildJobDataMap(housekeepingJob: HousekeepingJob): JobDataMap = {
     val map = new JobDataMap()
     map.put(HousekeepingScheduler.HousekeepingJobInstance, housekeepingJob)
+    map.put(HousekeepingScheduler.HousekeepingExecutionContext, ec)
     map
   }
 }
 
 object HousekeepingScheduler {
   val HousekeepingJobInstance = "HousekeepingJobInstance"
+  val HousekeepingExecutionContext = "HousekeepingExecutionContext"
 }

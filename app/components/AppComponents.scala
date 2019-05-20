@@ -116,7 +116,7 @@ class AppComponents(context: Context)
   val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
 
   // do this synchronously at startup so we can set permissions
-  val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
+  val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccounts().asFuture, 30 seconds).right.get.map(_.accountNumber)
 
   val sns: SNS = {
     val snsClient = AmazonSNSClientBuilder.standard

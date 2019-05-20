@@ -1,5 +1,6 @@
 package controllers
 
+import attempt.Attempt
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
@@ -12,6 +13,7 @@ import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 class RecipeController(
@@ -19,31 +21,40 @@ class RecipeController(
     prismAgents: PrismAgents,
     val authConfig: GoogleAuthConfig,
     val messagesApi: MessagesApi,
-    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    debugAvailable: Boolean)(implicit dynamo: Dynamo, ec: ExecutionContext) extends Controller with AuthActions with I18nSupport {
   import RecipeController._
 
-  def listRecipes = AuthAction {
+  def listRecipes = AuthAction.async {
     val recipes: Iterable[Recipe] = Recipes.list()
-    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
-    Ok(views.html.recipes(recipes, usages))
+    val usages: Attempt[Map[Recipe, RecipeUsage]] = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents, ec)
+    usages.fold(failure => InternalServerError(s"Prism error: $failure"), { u =>
+      Ok(views.html.recipes(recipes, u))
+    })
   }
 
-  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+  def showRecipe(id: RecipeId) = AuthAction.async { implicit request =>
+    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recentBakes = bakes.take(20)
-      val recentCopies = prismAgents.copiedImages(recentBakes.flatMap(_.amiId).toSet)
-      Ok(
-        views.html.showRecipe(
-          recipe,
-          recentBakes,
-          recentCopies,
-          prismAgents.accounts,
-          RecipeUsage(bakes)(prismAgents),
-          Roles.list,
-          debugAvailable
+
+      val maybeResult = for {
+        recentCopies <- prismAgents.copiedImages(recentBakes.flatMap(_.amiId).toSet)
+        recipeUsage <- RecipeUsage(bakes)(prismAgents, ec)
+        accounts <- prismAgents.accounts
+      } yield {
+        Ok(
+          views.html.showRecipe(
+            recipe,
+            recentBakes,
+            recentCopies,
+            accounts,
+            recipeUsage,
+            Roles.list,
+            debugAvailable
+          )
         )
-      )
+      }
+      maybeResult.fold(failure => InternalServerError(s"Prism data unavailable: $failure"), identity)
     }
   }
 
@@ -115,47 +126,55 @@ class RecipeController(
     })
   }
 
-  def showUsages(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
+  def showUsages(id: RecipeId) = AuthAction.async { implicit request =>
+    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
       val bakes = Bakes.list(recipe.id)
-      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
-      Ok(
-        views.html.showUsage(
-          recipe,
-          recipeUsage.bakeUsage,
-          prismAgents.accounts,
-          prismAgents.baseUrl
-        )
-      )
-    }
-  }
-
-  def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val bakes = Bakes.list(recipe.id).toSeq
-      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
-      Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
-    }
-  }
-
-  def deleteRecipe(id: RecipeId) = AuthAction { implicit request =>
-    Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      val bakes = Bakes.list(recipe.id)
-      val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
-      if (recipeUsage.bakeUsage.nonEmpty) {
-        Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
-      } else {
-        // stop any scheduled build
-        bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
-
-        // delete the AMIgo data
-        bakes.foreach { bake =>
-          Bakes.markToDelete(bake.bakeId)
-        }
-        Recipes.delete(recipe)
-        // redirect back to the index page
-        Redirect(routes.RecipeController.listRecipes())
+      val result = for {
+        accounts <- prismAgents.accounts
+        recipeUsage <- RecipeUsage(bakes)(prismAgents, ec)
+      } yield {
+        Ok(views.html.showUsage(recipe, recipeUsage.bakeUsage, accounts, prismAgents.baseUrl))
       }
+      result.fold(failure => InternalServerError(s"Prism data unavailable: $failure"), identity)
+    }
+  }
+
+  def deleteConfirm(id: RecipeId) = AuthAction.async { implicit request =>
+    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
+      val bakes = Bakes.list(recipe.id).toSeq
+      val result = for {
+        recipeUsage <- RecipeUsage(bakes)(prismAgents, ec)
+      } yield {
+        Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
+      }
+      result.fold(failure => InternalServerError(s"Prism data unavailable: $failure"), identity)
+    }
+  }
+
+  def deleteRecipe(id: RecipeId) = AuthAction.async { implicit request =>
+    Recipes.findById(id).fold[Future[Result]](Future.successful(NotFound)) { recipe =>
+      val bakes = Bakes.list(recipe.id)
+
+      val result = for {
+        recipeUsage <- RecipeUsage(bakes)(prismAgents, ec)
+      } yield {
+        if (recipeUsage.bakeUsage.nonEmpty) {
+          Conflict(s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources.")
+        } else {
+          // stop any scheduled build
+          bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
+
+          // delete the AMIgo data
+          bakes.foreach { bake =>
+            Bakes.markToDelete(bake.bakeId)
+          }
+          Recipes.delete(recipe)
+          // redirect back to the index page
+          Redirect(routes.RecipeController.listRecipes())
+        }
+      }
+
+      result.fold(failure => InternalServerError(s"Prism data unavailable: $failure"), identity)
     }
   }
 

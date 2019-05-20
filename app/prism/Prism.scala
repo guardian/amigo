@@ -1,34 +1,46 @@
 package prism
 
+import attempt._
 import models.AmiId
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import services.Loggable
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext }
+import scala.util.control.NonFatal
 
 class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(implicit ec: ExecutionContext)
     extends Loggable {
   import Prism._
 
-  def findAllAWSAccounts(): Future[Seq[AWSAccount]] = {
+  def findAllAWSAccounts(): Attempt[Seq[AWSAccount]] = {
     findAll[AWSAccount]("/sources?resource=instance&origin.vendor=aws")
   }
 
-  def findAllInstances(): Future[Seq[Instance]] = findAll[Instance]("/instances")
+  def findAllInstances(): Attempt[Seq[Instance]] = findAll[Instance]("/instances")
 
-  def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("/launch-configurations")
+  def findAllLaunchConfigurations(): Attempt[Seq[LaunchConfiguration]] = findAll[LaunchConfiguration]("/launch-configurations")
 
-  def findCopiedImages(): Future[Seq[Image]] = findAll[Image]("/images?tags.CopiedFromAMI!=")
+  def findCopiedImages(): Attempt[Seq[Image]] = findAll[Image]("/images?tags.CopiedFromAMI!=")
 
-  private def findAll[T](path: String)(implicit r: Reads[Seq[T]]): Future[Seq[T]] = {
+  private def findAll[T](path: String)(implicit r: Reads[Seq[T]]): Attempt[Seq[T]] = {
     val url = s"$baseUrl$path"
-    ws.url(url).get().map { resp =>
-      extractData[Seq[T]](resp.json).fold(error => {
-        log.warn(s"Failed to parse Prism response for GET $url. Status code = ${resp.status}, Error = $error")
-        Seq.empty[T]
-      }, t => t)
+    Attempt.fromFuture(ws.url(url).get()) {
+      case NonFatal(t) => UnknownFailure(t)
+    }.flatMap { resp =>
+      val prismResponse = for {
+        stale <- (resp.json \ "stale").validate[JsBoolean].map(_.value)
+        data <- r.reads(resp.json)
+      } yield (stale, data)
+
+      prismResponse.fold(error => {
+        val message = s"Failed to parse Prism response from GET $url. Status code = ${resp.status}, Error = $error"
+        log.warn(message)
+        Attempt.Left(JsonParseFailure(message))
+      }, {
+        case (true, _) => Attempt.Left(PrismStaleFailure("Response from prism is marked as stale"))
+        case (false, t) => Attempt.Right(t)
+      })
     }
   }
 
@@ -66,14 +78,8 @@ object Prism {
     (JsPath \ "state").read[String]
   )(Image.apply _)
   implicit val imagesReads: Reads[Seq[Image]] = dataReads[Image](dataPath = "data", "images")
+  implicit val staleReads: Reads[Boolean] = (JsPath \ "stale").read[Boolean]
 
   private def dataReads[T](dataPath: String*)(implicit r: Reads[T]): Reads[Seq[T]] =
     dataPath.foldLeft[JsPath](__)((path, subPath) => path \ subPath).read[Seq[T]]
-
-  private[prism] def extractData[T](json: JsValue)(implicit r: Reads[T]): Either[Seq[(JsPath, Seq[ValidationError])], T] = {
-    r.reads(json) match {
-      case JsSuccess(data, _) => Right(data)
-      case JsError(e) => Left(e)
-    }
-  }
 }

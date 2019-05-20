@@ -1,5 +1,6 @@
 package prism
 
+import attempt.Attempt
 import models._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
@@ -8,8 +9,10 @@ import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.mock.MockitoSugar
 import prism.Prism.{ AWSAccount, Image, Instance, LaunchConfiguration }
 import services.PrismAgents
+import test.AttemptValues
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
+class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar with AttemptValues {
 
   def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now)
   def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), None, List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
@@ -52,12 +55,12 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     val lc2 = LaunchConfiguration("lc-2", amiId3, account)
 
     val mockPrismAgents = mock[PrismAgents]
-    when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2, instance5)
-    when(mockPrismAgents.allLaunchConfigurations) thenReturn Seq(lc1, lc2)
-    when(mockPrismAgents.copiedImages(any())) thenReturn Map[AmiId, Seq[Image]]()
-    when(mockPrismAgents.copiedImages(Set(AmiId("3")))) thenReturn Map(AmiId("3") -> Seq(Image(AmiId("5"), "1234", AmiId("3"), None, "available")))
+    when(mockPrismAgents.allInstances) thenReturn Attempt.Right(Seq(instance1, instance2, instance5))
+    when(mockPrismAgents.allLaunchConfigurations) thenReturn Attempt.Right(Seq(lc1, lc2))
+    when(mockPrismAgents.copiedImages(any())) thenReturn Attempt.Right(Map[AmiId, Seq[Image]]())
+    when(mockPrismAgents.copiedImages(Set(AmiId("3")))) thenReturn Attempt.Right(Map(AmiId("3") -> Seq(Image(AmiId("5"), "1234", AmiId("3"), None, "available"))))
 
-    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, bakes)(mockPrismAgents, global).successValue
 
     usages.size shouldBe 3
     usages.keySet shouldBe Set(recipe1, recipe2, recipe3)
