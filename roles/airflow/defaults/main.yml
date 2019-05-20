@@ -109,8 +109,6 @@ airflow_killed_task_cleanup_time: 60
 airflow_dag_run_conf_overrides_params: False
 airflow_worker_precheck: False
 
-airflow_plugins_folder: "{{ airflow_home }}/plugins"
-
 # REMOTE LOGS
 airflow_remote_logging: False
 airflow_remote_base_log_folder:
