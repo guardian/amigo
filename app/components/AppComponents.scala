@@ -187,7 +187,7 @@ class AppComponents(context: Context)
   val markOrphanedBakesForDeletion = new MarkOrphanedBakesForDeletion(prismAgents, dynamo)
 
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, List(bakeDeletionHousekeeping, markOldUnusedBakesForDeletion, markOrphanedBakesForDeletion))
-  //housekeepingScheduler.initialise()
+  housekeepingScheduler.initialise()
 
   val debugAvailable = identity.stage != "PROD"
 
