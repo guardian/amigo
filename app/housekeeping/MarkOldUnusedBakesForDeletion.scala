@@ -39,10 +39,10 @@ class MarkOldUnusedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) ex
     val now = new DateTime()
     val recipeIds = Recipes.list().map(_.id).toSet
     val oldUnusedBakes = MarkOldUnusedBakesForDeletion.getOldUnusedBakes(recipeIds, now, Bakes.list, RecipeUsage.apply)
-    log.info(s"Found ${oldUnusedBakes.size} unused bakes over ${MarkOldUnusedBakesForDeletion.MAX_AGE} days old")
+    if (oldUnusedBakes.nonEmpty) log.info(s"Found ${oldUnusedBakes.size} unused bakes over ${MarkOldUnusedBakesForDeletion.MAX_AGE} days old")
 
     val bakesToMark = oldUnusedBakes.take(MarkOldUnusedBakesForDeletion.BATCH_SIZE)
-    log.info(s"Marking ${bakesToMark.size} unused bakes for deletion")
+    if (bakesToMark.nonEmpty) log.info(s"Marking ${bakesToMark.size} unused bakes for deletion")
 
     bakesToMark.foreach { bake =>
       Bakes.markToDelete(bake.bakeId)

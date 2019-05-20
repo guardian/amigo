@@ -26,7 +26,7 @@ class BakeDeletion(dynamo: Dynamo,
     // get some bakes that have been deleted
     val deletedBakes = Bakes.findDeleted()
 
-    log.info(s"Found ${deletedBakes.size} bakes to delete")
+    if (deletedBakes.nonEmpty) log.info(s"Found ${deletedBakes.size} bakes to delete")
 
     // delete any AMIs
     val amis = deletedBakes.flatMap(_.amiId)

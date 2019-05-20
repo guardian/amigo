@@ -33,7 +33,7 @@ class MarkOrphanedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) ext
       case _ =>
         val bakes = Bakes.scanForAll()
         val orphanedBakeIds = MarkOrphanedBakesForDeletion.findOrphanedBakeIds(recipes.map(_.id).toSet, bakes)
-        log.info(s"Marking ${orphanedBakeIds.size} orphaned bakes for deletion")
+        if (orphanedBakeIds.nonEmpty) log.info(s"Marking ${orphanedBakeIds.size} orphaned bakes for deletion")
         orphanedBakeIds.foreach { bakeId =>
           Bakes.markToDelete(bakeId)
           log.info(s"Marked ${bakeId.toString} for deletion")
