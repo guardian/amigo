@@ -1,0 +1,18 @@
+---
+
+- name: Support | Ensure NFS directories structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  with_items:
+    - "{{ nfs_mount_point }}"
+
+- name: Support | Mount EFS
+  mount:
+    path: "{{ nfs_mount_point }}"
+    src: "{{ nfs_mount_id }}"
+    fstype: efs
+    opts: auto,rw,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=60min,noatime,nodiratime,noac,nocto,_netdev
+    state: present
