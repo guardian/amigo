@@ -20,9 +20,10 @@ After=network.target
 
 Requires=airflow-dags-update.service
 After=airflow-dags-update.service
-
+{% if nfs_mount_enabled %}
 After=mnt-nfs.mount
 BindsTo=mnt-nfs.mount
+{% endif %}
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow

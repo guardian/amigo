@@ -1,5 +1,13 @@
 ---
 
+- set_fact:
+    airflow_logs_folder: "{{ airflow_logs_folder_nfs }}"
+  when: nfs_mount_enabled
+
+- set_fact:
+    airflow_logs_folder: "{{ airflow_logs_folder_local }}"
+  when: not nfs_mount_enabled
+
 - name: Airflow | Ensure Airflow group
   group:
     name: "{{ airflow_group }}"
