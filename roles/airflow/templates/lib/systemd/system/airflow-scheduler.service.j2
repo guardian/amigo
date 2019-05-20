@@ -24,8 +24,10 @@ After=airflow-mutex.service
 BindsTo=airflow-initdb.service
 After=airflow-initdb.service
 
+{% if nfs_mount_enabled %}
 After=mnt-nfs.mount
 BindsTo=mnt-nfs.mount
+{% endif %}
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow
