@@ -1,21 +1,5 @@
 ---
 
-- name: Airflow | Ensure airflow directories structure
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ airflow_user }}"
-    group: "{{ airflow_group }}"
-    recurse: True
-  with_items:
-    - "{{ airflow_logs_folder }}"
-    - "{{ airflow_child_process_log_folder }}"
-    - "{{ airflow_dags_folder }}"
-    - "{{ airflow_connections_folder }}"
-    - "{{ airflow_plugins_folder }}"
-    - "{{ airflow_plugins_dir }}"
-    - "{{ airflow_virtualenv_folder }}"
-
 - name: Airflow | Copy gunicorn logrotate config
   template:
     src: etc/logrotate.d/gunicorn-logrotate.j2
@@ -40,3 +24,26 @@
     owner: "{{ airflow_user }}"
     group: "{{ airflow_group }}"
     mode: 0644
+
+- name: Airflow | Create path for configuration files
+  file:
+    path: "{{ airflow_environment_file_folder }}"
+    state: directory
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+
+- name: Airflow | Copy Environment File
+  template:
+    src: etc/sysconfig/airflow-environment-file.j2
+    dest: "{{ airflow_environment_file_folder }}/airflow"
+    mode: 0644
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+
+- name: Airflow | Copy Daemon scripts
+  template:
+    src: "lib/systemd/system/{{ item.key }}.service.j2"
+    dest: /lib/systemd/system/{{ item.key }}.service
+    mode: 0644
+  with_dict: "{{ airflow_services }}"
+  when: item.value.configure
