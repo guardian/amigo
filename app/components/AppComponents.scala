@@ -9,6 +9,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
@@ -112,6 +113,12 @@ class AppComponents(context: Context)
     amigoAwsAccount
   }
 
+  val ec2Client: AmazonEC2 = AmazonEC2ClientBuilder.standard
+    .withCredentials(awsCreds)
+    .withRegion(region)
+    .withClientConfiguration(clientConfiguration)
+    .build()
+
   val prism = new Prism(wsClient)
   val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
 
@@ -186,7 +193,7 @@ class AppComponents(context: Context)
     new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
-    new DeleteLongRunningJobs
+    new TerminateLongRunningPackerImages(identity.stage, ec2Client)
   )
 
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
