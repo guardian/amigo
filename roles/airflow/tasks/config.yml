@@ -47,3 +47,12 @@
     mode: 0644
   with_dict: "{{ airflow_services }}"
   when: item.value.configure
+
+- name: Airflow | Copy RBAC webserver config
+  template:
+    src: "etc/airflow/webserver_config.py.j2"
+    dest: "{{ airflow_home }}/webserver_config.py"
+    owner: "{{ airflow_user }}"
+    group: "{{ airflow_group }}"
+    mode: 0640
+  when: airflow_webserver_rbac|bool
