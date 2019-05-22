@@ -325,6 +325,24 @@ airflow_kubernetes_in_cluster: True
 airflow_kubernetes_affinity:
 airflow_kubernetes_tolerations:
 
-
 # ELASTICSEARCH
 airflow_elasticsearch_host:
+
+# RBAC
+airflow_rbac_security_manager: AUTH_OAUTH # AUTH_DB | AUTH_LDAP | AUTH_OAUTH | AUTH_OID | AUTH_REMOTE_USER
+airflow_rbac_auth_role_admin: Admin
+airflow_rbac_auth_role_public: Viewer
+airflow_rbac_auth_user_registration: True
+airflow_rbac_auth_user_registration_role: Admin
+
+# RBAC OAUTH
+airflow_rbac_auth_oauth_name: google
+airflow_rbac_auth_oauth_token_key: access_token
+airflow_rbac_auth_oauth_icon: fa-google
+airflow_rbac_auth_oauth_whitelist:
+  - '@guardian.com'
+  - '@theguardian.com'
+  - '@guardian.co.uk'
+
+# RBAC LDAP
+airflow_rbac_auth_ldap_server:

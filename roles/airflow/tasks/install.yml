@@ -2,7 +2,7 @@
 
 - set_fact:
     airflow_logs_folder: "{{ airflow_logs_folder_nfs }}"
-  when: nfs_mount_enabled
+  when: nfs_mount_enabled|bool
 
 - set_fact:
     airflow_logs_folder: "{{ airflow_logs_folder_local }}"
