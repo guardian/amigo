@@ -59,7 +59,7 @@ AUTH_USER_REGISTRATION_ROLE = "{{ airflow_rbac_auth_user_registration_role }}"
 {% if airflow_rbac_security_manager == 'AUTH_OAUTH' %}
 OAUTH_PROVIDERS = [{
 	'name': '{{ airflow_rbac_auth_oauth_name }}',
-    'whitelist': [{% for arg1 in airflow_rbac_auth_oauth_whitelist %} '{{arg1}}' {% if not loop.last %}, {% endif %} {% endfor %}],  # optional
+    'whitelist': conf.get('google', 'domain').split(","),  # optional
     'token_key': '{{ airflow_rbac_auth_oauth_token_key }}',
     'icon':'{{ airflow_rbac_auth_oauth_icon }}',
         'remote_app': {
