@@ -18,7 +18,7 @@ import com.gu.googleauth.GoogleAuthConfig
 import controllers._
 import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
-import housekeeping.{ BakeDeletion, HousekeepingScheduler, MarkOldUnusedBakesForDeletion, MarkOrphanedBakesForDeletion }
+import housekeeping._
 import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
@@ -182,11 +182,14 @@ class AppComponents(context: Context)
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
-  val bakeDeletionHousekeeping = new BakeDeletion(dynamo, awsAccount, prismAgents, sender)
-  val markOldUnusedBakesForDeletion = new MarkOldUnusedBakesForDeletion(prismAgents, dynamo)
-  val markOrphanedBakesForDeletion = new MarkOrphanedBakesForDeletion(prismAgents, dynamo)
+  val houseKeepingJobs = List(
+    new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
+    new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
+    new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
+    new DeleteLongRunningJobs
+  )
 
-  val housekeepingScheduler = new HousekeepingScheduler(scheduler, List(bakeDeletionHousekeeping, markOldUnusedBakesForDeletion, markOrphanedBakesForDeletion))
+  val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
   housekeepingScheduler.initialise()
 
   val debugAvailable = identity.stage != "PROD"

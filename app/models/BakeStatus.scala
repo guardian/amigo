@@ -14,6 +14,7 @@ object BakeStatus extends Enum[BakeStatus] {
   case object Running extends BakeStatus
   case object Complete extends BakeStatus
   case object Failed extends BakeStatus
+  case object TimedOut extends BakeStatus
 
   implicit val dynamoFormat = {
     def fromString(s: String): Either[DynamoReadError, BakeStatus] = Either.fromOption(
