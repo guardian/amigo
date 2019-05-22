@@ -340,9 +340,6 @@ airflow_rbac_auth_oauth_name: google
 airflow_rbac_auth_oauth_token_key: access_token
 airflow_rbac_auth_oauth_icon: fa-google
 airflow_rbac_auth_oauth_whitelist:
-  - '@guardian.com'
-  - '@theguardian.com'
-  - '@guardian.co.uk'
 
 # RBAC LDAP
 airflow_rbac_auth_ldap_server:
