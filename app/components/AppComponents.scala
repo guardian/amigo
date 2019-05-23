@@ -193,7 +193,7 @@ class AppComponents(context: Context)
     new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
-    new TerminateLongRunningPackerImages(identity.stage, ec2Client)
+    new TerminateLongRunningBakes(identity.stage, ec2Client)
   )
 
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)

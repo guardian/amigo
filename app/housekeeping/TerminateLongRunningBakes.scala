@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 // As a result of this, the EC2 instance used for the bake would not be terminated, incurring unnecessary costs.
 // The solution is to terminate all EC2 instances with Stack amigo-packer that were launched over an hour ago,
 // and update the status (in the database) of Running bakes that were launched over an hour ago to status TimedOut.
-class TerminateLongRunningPackerImages(stage: String, ec2Client: AmazonEC2)(implicit dynamo: Dynamo)
+class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dynamo: Dynamo)
   extends HousekeepingJob with Loggable {
 
   // Line in the sand: no bake should take more than an hour.
