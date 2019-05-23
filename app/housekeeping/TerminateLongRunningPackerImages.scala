@@ -11,9 +11,6 @@ import services.Loggable
 import scala.collection.JavaConversions._
 import scala.concurrent.duration._
 
-// TODO: if we didn't care about a different status - TimeOut - (maybe?) we could just terminate the instance
-// and the PackerProcessMonitor would report the task as failed and status update would be handled using current mechanism.
-
 // This house keeping job is to mitigate against Amigo bakes that have failed, but have not reported as such.
 // As a result of this, the EC2 instance used for the bake would not be terminated, incurring unnecessary costs.
 // The solution is to terminate all EC2 instances with Stack amigo-packer that were launched over an hour ago,
@@ -43,29 +40,37 @@ class TerminateLongRunningPackerImages(stage: String, ec2Client: AmazonEC2)(impl
   private def packerInstances(): List[Instance] = {
     val request = new DescribeInstancesRequest()
       .withFilters(
-        new Filter(s"tag:Stage=$stage"),
-        new Filter("tag:Stack=amigo-packer")
+        new Filter("tag:Stage", List("INFRA")), // TODO change to stage
+        new Filter("tag:Stack", List("amigo-packer")),
+        new Filter("instance-state-name", List("running"))
       )
-    val result = ec2Client.describeInstances(request)
-    result.getReservations
-      .flatMap(reservation => reservation.getInstances)
+
+    ec2Client.describeInstances(request)
+      .getReservations
+      .flatMap(_.getInstances)
       .toList
   }
 
   private def shouldTerminatePackerInstance(instance: Instance): Boolean = {
+    // Check tags to be sure we want to delete instance
+    // i.e. don't rely solely on filters set in packerInstances() method.
+    val targetTags = instance.getTags.filter { tag =>
+      (tag.getKey == "Stage" && tag.getValue == "INFRA") || (tag.getKey == "Stack" && tag.getValue == "amigo-packer")
+    }
     val launchTime = new DateTime(instance.getLaunchTime)
-    isExpired(launchTime)
+    isExpired(launchTime) && targetTags.size == 2
   }
 
-  private def terminateEC2Instance(instanceId: String): Unit = {
-    val request = new TerminateInstancesRequest().withInstanceIds(instanceId)
-    // val result = ec2Client.terminateInstances(request)
-    // TODO: await until instances have been terminated?
+  // Terminate instead of stop, since we don't want to restart instance.
+  // Termination also removes associated security groups.
+  private def terminateEC2Instances(instanceIds: List[String]): Unit = {
+    if (instanceIds.nonEmpty) {
+      val request = new TerminateInstancesRequest().withInstanceIds(instanceIds)
+      ec2Client.terminateInstances(request)
+    }
   }
 
   override def housekeep(): Unit = {
-
-    // TODO: does ordering of actions matter here?
 
     log.info("scanning for long running bakes to mark as timed out")
 
@@ -84,10 +89,8 @@ class TerminateLongRunningPackerImages(stage: String, ec2Client: AmazonEC2)(impl
 
     log.info(s"${instances.size} old packer instance(s) found for termination")
 
-    instances.foreach { instance =>
-      val instanceId = instance.getInstanceId
-      log.info(s"deleting packer instance $instanceId")
-      terminateEC2Instance(instanceId)
-    }
+    val instanceIds = instances.map(_.getInstanceId)
+    log.info(s"terminating instances ${instanceIds.mkString(",")}")
+    terminateEC2Instances(instanceIds)
   }
 }
