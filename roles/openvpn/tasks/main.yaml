@@ -1,0 +1,12 @@
+---
+- name: Install OpenVPN
+  apt:
+    name: openvpn
+    force: yes
+    update_cache: yes
+
+- name: EasyRsa
+  apt:
+    name: easy-rsa
+    force: yes
+    update_cache: yes
