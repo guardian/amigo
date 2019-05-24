@@ -1,0 +1,10 @@
+---
+- name: Install Wazuh Manager
+  apt:
+    name: wazuh-manager
+    update_cache: yes
+
+- name: Install Wazuh API
+  apt:
+    name: wazuh-api
+    update_cache: yes
