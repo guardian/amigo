@@ -7,6 +7,6 @@ S3_PATH="s3://{{ airflow_s3_connections_folder }}"
 echo "Downloading connections from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_connections_folder }} --recursive
 
-for con in `find {{ airflow_connections_folder }} -type f -name "*.json"`; do
-    /usr/local/bin/airflow-add-connection.sh $con
-done
+find {{ airflow_connections_folder }} -type f -name "*.json" | sort | while read CONNECTION_FILE; do
+    echo "/usr/local/bin/airflow-add-connection.sh $CONNECTION_FILE;"
+done | parallel -N 3
