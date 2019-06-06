@@ -32,7 +32,7 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   private def isOverruning(dateTime: DateTime): Boolean =
    dateTime.isBefore(DateTime.now.minusSeconds(timeOut.toSeconds.toInt))
 
-  private def shouldDeleteBake(bake: Bake.DbModel): Boolean =
+  private def shouldTimeoutBake(bake: Bake.DbModel): Boolean =
     bake.status == BakeStatus.Running && isOverruning(bake.startedAt)
 
   private def updateStatusToTimedOut(bake: Bake.DbModel): Unit =
@@ -80,11 +80,11 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
 
     log.info("scanning for long running bakes to mark as timed out")
 
-    val bakesToDelete = Bakes.scanForAll().filter(shouldDeleteBake)
+    val bakesToTimeout = Bakes.scanForAll().filter(shouldTimeoutBake)
 
-    log.info(s"${bakesToDelete.size} long running bake(s) found for marking as timed out")
+    log.info(s"${bakesToTimeout.size} long running bake(s) found for marking as timed out")
 
-    bakesToDelete.foreach { bake =>
+    bakesToTimeout.foreach { bake =>
       log.info(s"marking long running bake $bake as timed out")
       updateStatusToTimedOut(bake)
     }
