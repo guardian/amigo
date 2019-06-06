@@ -20,13 +20,13 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   extends HousekeepingJob with Loggable {
 
   // Line in the sand: no bake should take more than an hour.
-  private val timeOut = 10.second // TODO: change after testing on CODE
+  private val timeOut = 1.hour // TODO: change after testing on CODE
 
   // By running every 20 minutes, the maximum lifetime of an EC2 instance used to bake an Amigo image will 1 hour and 20 minutes.
   // Based on current bakes in the PROD bake table (~500) and the provisioned throughput of said table (1),
   // the minimum period for the schedule is ~10 minutes = 500 / 60.
   // Increase min period to 20 minutes to allow for increase of records in bakes table.
-  override val schedule: ScheduleBuilder[_ <: Trigger] = SimpleScheduleBuilder.repeatSecondlyForever(10) // TODO: change after testing on CODE
+  override val schedule: ScheduleBuilder[_ <: Trigger] = SimpleScheduleBuilder.repeatMinutelyForever(20)
 
   private def isOverruning(dateTime: DateTime): Boolean =
    dateTime.isBefore(DateTime.now.minusSeconds(timeOut.toSeconds.toInt))
@@ -46,7 +46,7 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("tag:BakeId", List(bakeId.toString)),
-        new Filter("instance-state-name", List("running"))
+        new Filter("instance-state-name", List("running", "stopped"))
       )
 
     ec2Client.describeInstances(request)
