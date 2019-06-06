@@ -38,19 +38,21 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   private def updateStatusToTimedOut(bake: Bake.DbModel): Unit =
     Bakes.updateStatus(BakeId(bake.recipeId, bake.buildNumber), BakeStatus.TimedOut)
 
-  private def packerInstances(): List[Instance] = {
-    val request = new DescribeInstancesRequest()
-      .withFilters(
-        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
-        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
-        new Filter("instance-state-name", List("running"))
-      )
+  private def packerInstances(): List[Instance] =
+    SNS.listAwsResource { token =>
+      val request = new DescribeInstancesRequest()
+        .withFilters(
+          new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
+          new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
+          new Filter("instance-state-name", List("running"))
+        )
+        .withNextToken(token.orNull)
 
-    ec2Client.describeInstances(request)
-      .getReservations
-      .flatMap(_.getInstances)
-      .toList
-  }
+      val response = ec2Client.describeInstances(request)
+      val instances = response.getReservations.flatMap(_.getInstances).toList
+
+      (instances, Option(response.getNextToken))
+    }
 
   private def hasTag(instance: Instance, key: String, value: String): Boolean =
     instance.getTags.exists(tag => tag.getKey == key && tag.getValue == value)
