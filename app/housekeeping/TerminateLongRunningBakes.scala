@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.{DescribeInstancesRequest, Filter, Instance, TerminateInstancesRequest}
 import data.{Bakes, Dynamo}
 import models.{Bake, BakeId, BakeStatus}
+import notification.SNS
 import org.joda.time.DateTime
 import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
 import packer.PackerBuildConfigGenerator
@@ -28,16 +29,15 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   // Increase min period to 20 minutes to allow for increase of records in bakes table.
   override val schedule: ScheduleBuilder[_ <: Trigger] = SimpleScheduleBuilder.repeatMinutelyForever(20)
 
-  private def isExpired(dateTime: DateTime): Boolean =
+  private def isOverruning(dateTime: DateTime): Boolean =
    dateTime.isBefore(DateTime.now.minusSeconds(timeOut.toSeconds.toInt))
 
   private def shouldDeleteBake(bake: Bake.DbModel): Boolean =
-    bake.status == BakeStatus.Running && isExpired(bake.startedAt)
+    bake.status == BakeStatus.Running && isOverruning(bake.startedAt)
 
   private def updateStatusToTimedOut(bake: Bake.DbModel): Unit =
     Bakes.updateStatus(BakeId(bake.recipeId, bake.buildNumber), BakeStatus.TimedOut)
 
-  // TODO: test this works
   private def packerInstances(): List[Instance] = {
     val request = new DescribeInstancesRequest()
       .withFilters(
@@ -60,7 +60,7 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
 
     // Check tags to be sure we want to delete instance
     // i.e. don't rely solely on filters set in packerInstances() method.
-    isExpired(launchTime) &&
+    isOverruning(launchTime) &&
       hasTag(instance, key = "Stage", value = PackerBuildConfigGenerator.stage) &&
       hasTag(instance, key = "Stack", value = PackerBuildConfigGenerator.stack)
   }

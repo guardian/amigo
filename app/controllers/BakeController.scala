@@ -51,9 +51,3 @@ class BakeController(
   }
 
 }
-
-
-object Tmp {
-
-
-}
