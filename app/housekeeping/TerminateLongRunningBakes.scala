@@ -20,7 +20,7 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   extends HousekeepingJob with Loggable {
 
   // Line in the sand: no bake should take more than an hour.
-  private val timeOut = 1.hour // TODO: change after testing on CODE
+  private val timeOut = 1.hour
 
   // By running every 20 minutes, the maximum lifetime of an EC2 instance used to bake an Amigo image will 1 hour and 20 minutes.
   // Based on current bakes in the PROD bake table (~500) and the provisioned throughput of said table (1),
