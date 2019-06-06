@@ -6,6 +6,7 @@ import data.{Bakes, Dynamo}
 import models.{Bake, BakeId, BakeStatus}
 import org.joda.time.DateTime
 import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
+import packer.PackerBuildConfigGenerator
 import services.Loggable
 
 import scala.collection.JavaConversions._
@@ -40,8 +41,8 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
   private def packerInstances(): List[Instance] = {
     val request = new DescribeInstancesRequest()
       .withFilters(
-        new Filter("tag:Stage", List("INFRA")), // TODO change to stage
-        new Filter("tag:Stack", List("amigo-packer")),
+        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
+        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("instance-state-name", List("running"))
       )
 
@@ -51,14 +52,17 @@ class TerminateLongRunningBakes(stage: String, ec2Client: AmazonEC2)(implicit dy
       .toList
   }
 
+  private def hasTag(instance: Instance, key: String, value: String): Boolean =
+    instance.getTags.exists(tag => tag.getKey == key && tag.getValue == value)
+
   private def shouldTerminatePackerInstance(instance: Instance): Boolean = {
+    val launchTime = new DateTime(instance.getLaunchTime)
+
     // Check tags to be sure we want to delete instance
     // i.e. don't rely solely on filters set in packerInstances() method.
-    val targetTags = instance.getTags.filter { tag =>
-      (tag.getKey == "Stage" && tag.getValue == "INFRA") || (tag.getKey == "Stack" && tag.getValue == "amigo-packer")
-    }
-    val launchTime = new DateTime(instance.getLaunchTime)
-    isExpired(launchTime) && targetTags.size == 2
+    isExpired(launchTime) &&
+      hasTag(instance, key = "Stage", value = PackerBuildConfigGenerator.stage) &&
+      hasTag(instance, key = "Stack", value = PackerBuildConfigGenerator.stack)
   }
 
   // Terminate instead of stop, since we don't want to restart instance.
