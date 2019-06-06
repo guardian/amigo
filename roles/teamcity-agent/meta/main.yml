@@ -8,4 +8,4 @@ dependencies:
       - software-properties-common
       - zip
   - role: pip-packages 
-    packages: [boto3, botocore]
+    packages: [boto3, botocore, aws-sam-cli]
