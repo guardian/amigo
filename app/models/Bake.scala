@@ -15,13 +15,15 @@ case class Bake(recipe: Recipe,
 object Bake {
 
   case class DbModel(
-    recipeId: RecipeId,
-    buildNumber: Int,
-    status: BakeStatus,
-    amiId: Option[AmiId],
-    startedBy: String,
-    startedAt: DateTime,
-    deleted: Option[Boolean])
+      recipeId: RecipeId,
+      buildNumber: Int,
+      status: BakeStatus,
+      amiId: Option[AmiId],
+      startedBy: String,
+      startedAt: DateTime,
+      deleted: Option[Boolean]) {
+    val bakeId = BakeId(recipeId, buildNumber)
+  }
 
   import automagic._
 

@@ -7,6 +7,9 @@ import models.packer._
 
 object PackerBuildConfigGenerator {
 
+  val stage: String = "INFRA"
+  val stack: String = "amigo-packer"
+
   /**
    * Generates a Packer build config that:
    *  - starts an EC2 machine
@@ -28,14 +31,15 @@ object PackerBuildConfigGenerator {
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
-      instance_type = "t2.micro",
+      instance_type = "t3.micro",
 
       ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
 
       run_tags = Map(
-        "Stage" -> "INFRA",
-        "Stack" -> "amigo-packer",
-        "App" -> "{{user `recipe`}}"
+        "Stage" -> stage,
+        "Stack" -> stack,
+        "App" -> "{{user `recipe`}}",
+        "BakeId" -> s"${bake.recipe.id.value}-${bake.buildNumber}"
       ),
       ami_name = imageDetails.name,
       ami_description = imageDetails.description,
