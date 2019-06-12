@@ -2,13 +2,13 @@ package housekeeping
 
 import com.amazonaws.services.ec2.model.Instance
 import data.Dynamo
-import housekeeping.TimeOutLongRunningBakes.{BakesRepo, PackerEC2Client}
-import models.{Bake, BakeId, BakeStatus, RecipeId}
+import housekeeping.TimeOutLongRunningBakes.{ BakesRepo, PackerEC2Client }
+import models.{ Bake, BakeId, BakeStatus, RecipeId }
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 class TimeOutLongRunningBakesSpec extends FlatSpec with Matchers with MockitoSugar {
 
@@ -152,5 +152,51 @@ class TimeOutLongRunningBakesSpec extends FlatSpec with Matchers with MockitoSug
 
     // Check that the status of bakes that aren't overruning aren't updated.
     verifyNoMoreInteractions(bakesRepo)
+  }
+
+  "runHouseKeeping" should "update the status to TimedOut of a bake running over an hour, even if the respective EC2 instance can't be found" in new Mocks {
+
+    val now = DateTime.now()
+
+    when(bakesRepo.getBakes)
+      .thenReturn(
+        List(
+          Bake.DbModel(
+            recipeId = RecipeId("identity"),
+            buildNumber = 1,
+            status = BakeStatus.Running,
+            amiId = None,
+            startedBy = "amigo-test",
+            startedAt = now.minusHours(2),
+            deleted = None
+          )
+        )
+      )
+
+    val overrunningBakeId: BakeId = BakeId(RecipeId("identity"), buildNumber = 1)
+
+    // Simulate EC2 instance not being found.
+    when(packerEC2Client.getInstance(ArgumentMatchers.eq(overrunningBakeId)))
+      .thenReturn(None)
+
+    housekeepingJob.runHouseKeeping(earliestStartedAt = now.minusHours(1))
+
+    // Check that we get overrunning instance and terminate it.
+    verify(packerEC2Client).getInstance(ArgumentMatchers.eq(overrunningBakeId))
+
+    // Check we still set the status of overrunning bakes to timed out.
+    verify(bakesRepo, times(1)).getBakes
+    verify(bakesRepo, times(1))
+      .updateStatusToTimedOut(ArgumentMatchers.eq(
+        Bake.DbModel(
+          recipeId = RecipeId("identity"),
+          buildNumber = 1,
+          status = BakeStatus.Running,
+          amiId = None,
+          startedBy = "amigo-test",
+          startedAt = now.minusHours(2),
+          deleted = None
+        )
+      ))
   }
 }
