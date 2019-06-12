@@ -1,0 +1,6 @@
+---
+- name: Install Tshark
+  apt:
+    name: tshark
+    force: yes
+    update_cache: yes
