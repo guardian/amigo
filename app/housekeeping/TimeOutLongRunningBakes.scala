@@ -42,17 +42,21 @@ class TimeOutLongRunningBakes private[housekeeping](stage: String, bakesRepo: Ba
 
       packerEC2Client.getInstance(bake.bakeId) match {
         case None =>
-          log.warn(s"unable to find instance associated with long running bake ${bake.bakeId}")
+          log.warn(
+            s"unable to find instance associated with long running bake ${bake.bakeId} - " +
+            "assuming instance was deleted manually"
+          )
 
         case Some(instance) =>
           val instanceId = instance.getInstanceId
-
           log.info(s"terminating instance $instanceId associated with long running bake ${bake.bakeId}")
           packerEC2Client.terminateEC2Instance(instanceId)
-
-          log.info(s"marking long running bake $bake as timed out")
-          bakesRepo.updateStatusToTimedOut(bake)
       }
+
+      // Update the status to TimedOut, even if the respective EC2 instance can't be found.
+      // This is to handle cases where e.g. the instance was deleted manually.
+      log.info(s"marking long running bake $bake as timed out")
+      bakesRepo.updateStatusToTimedOut(bake)
     }
   }
 
