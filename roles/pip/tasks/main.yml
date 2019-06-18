@@ -3,3 +3,4 @@
   apt:
     name: ['python-pip']
     update_cache: yes
+    state: latest
