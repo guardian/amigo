@@ -1,4 +1,9 @@
 ---
 dependencies:
-  - apt
+  - role: packages
+    packages:
+      - curl
+      - apt-transport-https
+      - lsb-release
+      - gnupg2
   - role: node
