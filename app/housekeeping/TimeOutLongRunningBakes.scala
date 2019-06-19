@@ -85,6 +85,7 @@ object TimeOutLongRunningBakes {
       instance.getTags.exists(tag => tag.getKey == key && tag.getValue == value)
 
     def getInstance(bakeId: BakeId): Option[Instance] = {
+      // Filters here are base on the instance tags that are set in PackerBuildConfigGenerator.
       val request = new DescribeInstancesRequest()
         .withFilters(
           new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
