@@ -39,7 +39,7 @@ object PackerBuildConfigGenerator {
         "Stage" -> stage,
         "Stack" -> stack,
         "App" -> "{{user `recipe`}}",
-        "BakeId" -> s"${bake.recipe.id.value}-${bake.buildNumber}"
+        "BakeId" -> s"${bake.bakeId.toString}"
       ),
       ami_name = imageDetails.name,
       ami_description = imageDetails.description,
