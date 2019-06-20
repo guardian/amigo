@@ -1,7 +1,7 @@
 ---
 dependencies:
   - role: docker
-    version: 18.03.1~ce-0
+    version: 18.06.3~ce~3-0
   - role: packages
     packages: 
       - curl
