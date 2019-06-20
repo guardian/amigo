@@ -139,7 +139,7 @@ covering this, but, roughly speaking you need to:
 ### Running Ansible roles
 
 1. `cd` into `roles/`
-1. Create a `Vagrantfile`:
+1. Create a `Vagrantfile` in this directory. Note location of .playbook and .extra_vars files (feel free to change):
  
     ```ruby
     Vagrant.configure(2) do |config|
@@ -160,8 +160,8 @@ covering this, but, roughly speaking you need to:
       config.vm.provision "ansible_local" do |ansible|
         ansible.install_mode = "pip" # Ubuntu is fine without that. Redhat prefers it.
         ansible.verbose = "v" # or "vv", "vvv", "vvvv"
-        ansible.playbook = "/vagrant/playbook.yaml"
-        ansible.extra_vars = "@/vagrant/extra-vars.yaml"
+        ansible.playbook = "vagrant/playbook.yaml"
+        ansible.extra_vars = "@vagrant/extra-vars.yaml"
       end
     end
     ```
