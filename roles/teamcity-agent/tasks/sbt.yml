@@ -11,3 +11,5 @@
 - name: Populate SBT
   command: sbt sbtVersion
   become: teamcity
+  environment:
+    SBT_OPTS: -Xms256M -Xmx512M -Xss2M -XX:MaxMetaspaceSize=512M
