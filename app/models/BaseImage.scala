@@ -28,6 +28,7 @@ case object Ubuntu extends LinuxDist {
     // bootstrap Ansible
     PackerProvisionerConfig.executeRemoteCommands(Seq(
       // Wait for cloud-init to finish first: https://github.com/mitchellh/packer/issues/2639
+      "export DEBIAN_FRONTEND=noninteractive",
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "apt-get --yes install software-properties-common",
       "apt-add-repository --yes ppa:ansible/ansible",
