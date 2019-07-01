@@ -2,7 +2,7 @@
 
 ## MANAGED BY ANSIBLE ##
 
-S3_PATH="s3://{{ airflow_s3_connections_folder }}"
+S3_PATH="s3://$airflow_s3_connections_folder"
 
 echo "Downloading connections from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_connections_folder }} --recursive

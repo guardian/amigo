@@ -4,8 +4,7 @@
 
 DAGS_ZIP=dags.zip
 PLUGINS_ZIP=plugins.zip
-
-S3_PATH="s3://{{ airflow_s3_dags_folder }}$DAGS_ZIP"
+S3_PATH="s3://$airflow_s3_dags_folder$DAGS_ZIP"
 
 echo "Downloading DAGs from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_dags_folder }} \
@@ -20,7 +19,7 @@ else
 fi
 
 
-S3_PATH="s3://{{ airflow_s3_plugins_dir_folder }}$PLUGINS_ZIP"
+S3_PATH="s3://$airflow_s3_plugins_dir_folder$PLUGINS_ZIP"
 
 echo "Downloading extra python libraries from $S3_PATH"
 aws s3 cp $S3_PATH {{ airflow_plugins_dir }} \
