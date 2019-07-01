@@ -22,7 +22,7 @@ base_log_folder = {{ airflow_logs_folder }}
 # configuration requirements.
 remote_logging = {{ airflow_remote_logging }}
 remote_log_conn_id = {{ airflow_remote_log_conn_id }}
-remote_base_log_folder = s3://{{ airflow_remote_base_log_folder }}
+remote_base_log_folder = s3://$airflow_remote_base_log_folder
 encrypt_s3_logs = {{ airflow_encrypt_s3_logs }}
 {% endif %}
 
