@@ -29,10 +29,10 @@ case object Ubuntu extends LinuxDist {
     PackerProvisionerConfig.executeRemoteCommands(Seq(
       // Wait for cloud-init to finish first: https://github.com/mitchellh/packer/issues/2639
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "apt-get --yes install software-properties-common",
+      "DEBIAN_FRONTEND=noninteractive  apt-get --yes install software-properties-common",
       "apt-add-repository --yes ppa:ansible/ansible",
       "apt-get --yes update",
-      "apt-get --yes install ansible"
+      "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
     ))
   )
 }
