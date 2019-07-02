@@ -87,18 +87,20 @@ Pass the following values to your AMIgo recipe:
 
 ```yaml
 airflow_remote_logging: True
-airflow_remote_base_log_folder: "s3://some-bucket/"
 airflow_remote_log_conn_id: dummy #set to a dummy value if not relying on actual airflow connections but rather on ec2 permissions/role. Cannot be empty or null though.
 
 ```
-
+And set the following env variable in your `UserData` as previously explained
+```bash
+airflow_remote_base_log_folder=some-bucket-name/some-path
+```
 ## DAGs remote sources configuration
 
-```yaml
-# S3 assets
-airflow_s3_dags_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/dags/"
-airflow_s3_connections_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/connections/"
-airflow_s3_plugins_dir_folder: "ophan-dist/ophan-data-lake/PROD/airflow-assets/plugins/"
+Similarly set connections, plugins and dag locations env variables in `UserData`
+```bash
+airflow_s3_dags_folder=ophan-dist/ophan-data-lake/SOME-STAGE/airflow-assets/dags/
+airflow_s3_connections_folder=ophan-dist/ophan-data-lake/SOME-STAGE/airflow-assets/connections/
+airflow_s3_plugins_dir_folder=ophan-dist/ophan-data-lake/SOME-STAGE/airflow-assets/plugins/
 ```
 
 * [airflow-dags-update.service](templates/lib/systemd/system/airflow-dags-update.service.j2) drops DAGs in `{{ airflow_dags_folder }}` 
