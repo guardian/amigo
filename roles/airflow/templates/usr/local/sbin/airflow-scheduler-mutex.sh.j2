@@ -15,7 +15,7 @@ if [ -z $ASG_NAME ]; then
 	exit 1
 fi
 
-ASG_COUNT="/usr/local/sbin/autoscaling-ensure-one-instance.sh $REGION $ASG_NAME"
+ASG_COUNT="/usr/local/sbin/autoscaling-ensure-one-instance.sh $REGION $ASG_NAME $STAGE"
 
 LOOP=0
 MAX=20

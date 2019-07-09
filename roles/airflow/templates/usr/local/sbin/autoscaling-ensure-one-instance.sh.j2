@@ -15,10 +15,15 @@ if [ -z "$LOGICAL_ID" ]; then
 	exit 1
 fi
 
+if [ -z "$STAGE" ]; then
+	echo  "Please specify the Stage "
+	exit 1
+fi
+
 COUNT=$(aws ec2 describe-instances --region $REGION \
     --filters Name=instance-state-code,Values=16,32 \
     Name=tag:Stack,Values=ophan-data-lake \
-    Name=tag:Stage,Values=PROD \
+    Name=tag:Stage,Values=$STAGE \
     Name=tag:aws:cloudformation:logical-id,Values=$LOGICAL_ID \
     | jq '.Reservations | length')
 
