@@ -4,6 +4,7 @@
 
 REGION=$1
 LOGICAL_ID=$2
+STAGE=$3
 
 if [ -z "$REGION" ]; then
 	echo  "Please specify a region"
@@ -29,4 +30,5 @@ COUNT=$(aws ec2 describe-instances --region $REGION \
     | jq '.Reservations | length')
 
 echo "count for $STAGE was $COUNT"
+
 exit `expr $COUNT - 1`
