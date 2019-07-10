@@ -4,6 +4,7 @@
 
 REGION=$1
 ASG_NAME=$2
+STAGE=$3
 
 if [ -z $REGION ]; then
 	echo  "Please specify a region"
@@ -12,6 +13,11 @@ fi
 
 if [ -z $ASG_NAME ]; then
 	echo  "Please specify the name of the autoscaling group"
+	exit 1
+fi
+
+if [ -z "$STAGE" ]; then
+	echo  "Please specify the Stage "
 	exit 1
 fi
 
