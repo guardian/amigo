@@ -20,6 +20,7 @@ if [ -z "$STAGE" ]; then
 	exit 1
 fi
 
+
 COUNT=$(aws ec2 describe-instances --region $REGION \
     --filters Name=instance-state-code,Values=16,32 \
     Name=tag:Stack,Values=ophan-data-lake \
@@ -27,4 +28,5 @@ COUNT=$(aws ec2 describe-instances --region $REGION \
     Name=tag:aws:cloudformation:logical-id,Values=$LOGICAL_ID \
     | jq '.Reservations | length')
 
+echo "count for $STAGE was $COUNT"
 exit `expr $COUNT - 1`
