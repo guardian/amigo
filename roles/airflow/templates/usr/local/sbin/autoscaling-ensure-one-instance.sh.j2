@@ -1,8 +1,10 @@
 #!/bin/sh
 
 ## MANAGED BY ANSIBLE ##
-echo "RUNNING ENSURE ONE INSTANCE"
-echo -- “$@”
+
+echo  "ensure one instance running..."
+echo  -- "$@"
+
 REGION=$1
 LOGICAL_ID=$2
 STAGE=$3
@@ -30,6 +32,11 @@ COUNT=$(aws ec2 describe-instances --region $REGION \
     Name=tag:aws:cloudformation:logical-id,Values=$LOGICAL_ID \
     | jq '.Reservations | length')
 
-echo "count for $STAGE was $COUNT"
+if [ -z "$COUNT" ]; then
+        echo "could not get instance count!"
+        exit 1
+fi
+
+echo  "count for $STAGE was $COUNT"
 
 exit `expr $COUNT - 1`

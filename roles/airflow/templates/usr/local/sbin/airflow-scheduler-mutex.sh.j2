@@ -1,8 +1,10 @@
 #!/bin/sh
 
 ## MANAGED BY ANSIBLE ##
-echo "RUNNING SCHEDULER MUTEX"
-echo -- “$@”
+
+echo  "SCHEDULER MUTEX running"
+echo  -- "$@"
+
 REGION=$1
 ASG_NAME=$2
 STAGE=$3
@@ -28,7 +30,7 @@ LOOP=0
 MAX=20
 
 while [ $LOOP -le $MAX ]; do
-	$($ASG_COUNT)
+	 sh $ASG_COUNT
 
 	if [ $? -eq 0 ]; then
 		echo "$ASG_NAME has 1 instance."
