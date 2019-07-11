@@ -2,9 +2,6 @@
 
 ## MANAGED BY ANSIBLE ##
 
-echo  "ensure one instance running..."
-echo  -- "$@"
-
 REGION=$1
 LOGICAL_ID=$2
 STAGE=$3
@@ -37,6 +34,6 @@ if [ -z "$COUNT" ]; then
         exit 1
 fi
 
-echo  "count for $STAGE was $COUNT"
+echo  "instance count for $STAGE was $COUNT"
 
 exit `expr $COUNT - 1`
