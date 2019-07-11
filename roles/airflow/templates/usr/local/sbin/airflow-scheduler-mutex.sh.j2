@@ -4,6 +4,7 @@
 
 REGION=$1
 ASG_NAME=$2
+STAGE=$3
 
 if [ -z $REGION ]; then
 	echo  "Please specify a region"
@@ -15,13 +16,18 @@ if [ -z $ASG_NAME ]; then
 	exit 1
 fi
 
-ASG_COUNT="/usr/local/sbin/autoscaling-ensure-one-instance.sh $REGION $ASG_NAME"
+if [ -z "$STAGE" ]; then
+	echo  "Please specify the Stage "
+	exit 1
+fi
+
+ASG_COUNT="/usr/local/sbin/autoscaling-ensure-one-instance.sh $REGION $ASG_NAME $STAGE"
 
 LOOP=0
 MAX=20
 
 while [ $LOOP -le $MAX ]; do
-	$($ASG_COUNT)
+	 sh $ASG_COUNT
 
 	if [ $? -eq 0 ]; then
 		echo "$ASG_NAME has 1 instance."
