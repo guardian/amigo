@@ -1,3 +1,3 @@
 # Docker Compose
 
-Installs Docker Compose. Requires `version` as a parameter. 
+Installs Docker Compose. Optional `version` as a parameter, otherwise it will install the latest. 
