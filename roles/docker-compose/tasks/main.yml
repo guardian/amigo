@@ -1,5 +1,5 @@
 ---
-- name: Install Docker Composer
+- name: Install Docker Compose
   get_url:
     url: |
       https://github.com/docker/compose/releases/{{ ("download/%s" % version) if version else "latest/download" }}/docker-compose-{{ansible_system}}-{{ansible_architecture}}
