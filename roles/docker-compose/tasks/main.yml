@@ -1,6 +1,7 @@
 ---
 - name: Install Docker Composer
   get_url:
-    url: https://github.com/docker/compose/releases/download/{{version}}/docker-compose-{{ansible_system}}-{{ansible_architecture}}"
+    url: |
+      https://github.com/docker/compose/releases/{{ ("download/%s" % version) if version else "latest/download" }}/docker-compose-{{ansible_system}}-{{ansible_architecture}}
     dest: /usr/local/bin/docker-compose
     mode: '0755'
