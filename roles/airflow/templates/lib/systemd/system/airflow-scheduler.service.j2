@@ -24,6 +24,9 @@ After=airflow-mutex.service
 BindsTo=airflow-initdb.service
 After=airflow-initdb.service
 
+BindsTo=airflow-connections-update.service
+After=airflow-connections-update.service
+
 {% if nfs_mount_enabled %}
 After=mnt-nfs.mount
 BindsTo=mnt-nfs.mount
