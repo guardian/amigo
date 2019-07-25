@@ -1,7 +1,16 @@
 ---
-- name: Install Docker Compose
+- name: Install the latest Docker Composer
+  when: version is undefined
   get_url:
     url: |
-      https://github.com/docker/compose/releases/{{ ("download/%s" % version) if version else "latest/download" }}/docker-compose-{{ansible_system}}-{{ansible_architecture}}
+      https://github.com/docker/compose/releases/latest/download/docker-compose-{{ansible_system}}-{{ansible_architecture}}
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Install a given version of Docker Compose
+  when: version is defined
+  get_url:
+    url: |
+      https://github.com/docker/compose/releases/download/{{version}}/docker-compose-{{ansible_system}}-{{ansible_architecture}}
     dest: /usr/local/bin/docker-compose
     mode: '0755'
