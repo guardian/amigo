@@ -133,7 +133,7 @@ airflow_cli_api_client: airflow.api.client.local_client
 airflow_cli_api_endpoint_url: http://localhost:8080
 
 # API
-airflow_auth_backend: airflow.api.auth.backend.default
+airflow_auth_backend: airflow.api.auth.backend.deny_all
 
 # Lineage
 airflow_lineage_backend:
