@@ -36,6 +36,8 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ## How to run locally
 
+Install dependencies with [`./script/setup`](./script/setup)
+
 (For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without runing amigo/packer' below.)
 
 AMIgo requires Packer to be [installed](https://www.packer.io/intro/getting-started/install.html)
