@@ -13,7 +13,9 @@ case class Recipe(
   modifiedBy: String,
   modifiedAt: DateTime,
   bakeSchedule: Option[BakeSchedule],
-  encryptFor: List[AccountNumber])
+  encryptFor: List[AccountNumber],
+  instanceType: InstanceType = InstanceType.DEFAULT
+)
 
 object Recipe {
 
@@ -29,7 +31,9 @@ object Recipe {
     modifiedBy: String,
     modifiedAt: DateTime,
     bakeSchedule: Option[BakeSchedule],
-    encryptFor: Option[List[AccountNumber]])
+    encryptFor: Option[List[AccountNumber]],
+    instanceType: Option[InstanceType]
+)
 
   import automagic._
 

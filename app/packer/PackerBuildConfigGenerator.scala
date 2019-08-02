@@ -31,7 +31,7 @@ object PackerBuildConfigGenerator {
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
-      instance_type = "t3.small",
+      instance_type = bake.recipe.instanceType.name,
 
       ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
 
