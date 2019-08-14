@@ -20,6 +20,7 @@ import controllers._
 import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import housekeeping._
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
@@ -189,11 +190,15 @@ class AppComponents(context: Context)
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
+  val bakesRepo = new BakesRepo
+  val packerEC2Client = new PackerEC2Client(ec2Client)
+
   val houseKeepingJobs = List(
     new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
-    TimeOutLongRunningBakes(identity.stage, ec2Client)
+    new TimeOutLongRunningBakes(bakesRepo, packerEC2Client),
+    new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client)
   )
 
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
