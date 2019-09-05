@@ -86,3 +86,13 @@
     enabled: yes
 - name: SBT
   include: sbt.yml
+- name: ".aws Cleanup Script"
+  copy:
+    src: awsconfig_cleanup.sh
+    dest: /usr/local/bin/awsconfig_cleanup.sh
+    mode: 0555
+- name: ".aws Cleanup Script sudoers"
+  shell: |
+    echo "teamcity  ALL=(root) NOPASSWD: /usr/local/bin/awsconfig_cleanup.sh" > /etc/sudoers.d/awscleanup
+  become: yes
+  become_user: root
