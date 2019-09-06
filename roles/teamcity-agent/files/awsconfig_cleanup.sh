@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/bin/bash -e
 
 if [ -d "/opt/teamcity/.aws" ]; then
     ls -lhd /opt/teamcity/.aws
