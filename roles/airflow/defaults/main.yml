@@ -6,7 +6,7 @@ nfs_mount_id:
 nfs_mount_point: /mnt/nfs
 
 ## General
-airflow_version: 1.10.3
+airflow_version: 1.10.5
 airflow_extra_packages: ['crypto,postgres,google_auth,s3']
 airflow_python_path: /usr/bin/python3
 
