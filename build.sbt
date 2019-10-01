@@ -34,7 +34,7 @@ lazy val root = (project in file("."))
       baseDirectory.value / "cloudformation.yaml" -> "cloudformation/cloudformation.yaml"
     ),
     // Include the roles dir in the tarball for now
-    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
+    mappings in Universal ++= (file("roles") ** RolesFileFilter).get.map { f => f.getAbsoluteFile -> f.toString },
     buildInfoPackage := "amigo",
     buildInfoKeys := {
       lazy val buildInfo = BuildInfo(baseDirectory.value)

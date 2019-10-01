@@ -1,0 +1,7 @@
+---
+- name: TestPlayBook
+  hosts: all
+  connection: local
+  become: true
+  roles:
+    - role: # specify roles defined in roles /directory here
