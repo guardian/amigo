@@ -141,6 +141,6 @@ covering this, but, roughly speaking you need to:
 ### Running Ansible roles
 
 1. `cd` into `roles/`
-2. update files `__test/playbook.yaml` and `__test/extra-vars.yaml` accordingly
+2. update files `playbook.yaml` and `extra-vars.yaml` accordingly
 3. run `vagrant up` to download the image and run your ansible script
 4. run `vagrant provision` to re-run the ansible script
