@@ -15,8 +15,8 @@ object RolesFileFilter extends sbt.FileFilter  {
     else isInDirs(file.getParentFile, dir)
 
   // Want to ignore:
-  // - files: bootstrap.sh, Vagrantfile, log files from vagrant (*.log)
-  // - directories: .vagrant/, __test
+  // - files: bootstrap.sh, Vagrantfile, log files from vagrant (*.log), extra-vars.yaml, playbook.yaml
+  // - directories: .vagrant
   override def accept(file: File): Boolean = {
     val files = Set("bootstrap.sh", "Vagrantfile", "extra-vars.yaml", "playbook.yaml")
     if (file.isFile && file.getParent == "roles" &&
