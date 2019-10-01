@@ -3,4 +3,4 @@ monitor_disk_space_available: false
 monitor_memory_available: false
 monitor_disk_space_utilisation: false
 monitor_memory_utilisation: false
-paths: [/]
+paths: []
