@@ -6,7 +6,7 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
 
   # For some reason when tried, is sometimes needed with redhat images. Ubuntu and centos seem fine
-  #config.vm.synced_folder ".", "/vagrant"
+  # config.vm.synced_folder ".", "/vagrant"
 
   config.vm.provider "virtualbox" do |v|
    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
