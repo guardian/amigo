@@ -6,7 +6,7 @@ nfs_mount_id:
 nfs_mount_point: /mnt/nfs
 
 ## General
-airflow_version: 1.10.3
+airflow_version: 1.10.5
 airflow_extra_packages: ['crypto,postgres,google_auth,s3']
 airflow_python_path: /usr/bin/python3
 
@@ -334,7 +334,7 @@ airflow_rbac_security_manager: AUTH_OAUTH # AUTH_DB | AUTH_LDAP | AUTH_OAUTH | A
 airflow_rbac_auth_role_admin: Admin
 airflow_rbac_auth_role_public: Viewer
 airflow_rbac_auth_user_registration: True
-airflow_rbac_auth_user_registration_role: Admin
+airflow_rbac_auth_user_registration_role: User
 
 # RBAC OAUTH
 airflow_rbac_auth_oauth_name: google

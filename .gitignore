@@ -8,8 +8,5 @@ target
 /RUNNING_PID
 amigo.iml
 
-roles/Vagrantfile
-roles/extra-vars.yaml
-roles/playbook.yaml
 roles/*.log
 roles/.vagrant
