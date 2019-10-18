@@ -1,0 +1,3 @@
+---
+- name: install fastlane ruby gem
+  gem: name=fastlane state=latest user_install=no
