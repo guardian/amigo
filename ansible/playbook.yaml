@@ -4,4 +4,4 @@
   connection: local
   become: true
   roles:
-    - role: # specify roles defined in roles /directory here
+    - role: cloudwatch-hardware-monitoring-cronjob

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Copies roles to Ansible directory so that they can be referenced by ansible/playbook.yaml.
+# Symbolic links not used since behaviour is not consistent.
+# For more details, see here: https://www.vagrantup.com/docs/synced-folders/basic_usage.html#symbolic-links
+
+set -e
+
+echo 'making roles available locally to ansible'
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cp -r ${ROOT_DIR}/roles ${ROOT_DIR}/ansible
