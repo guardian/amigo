@@ -7,4 +7,4 @@ ROOT_DIR=${DIR}/..
 
 brew bundle --file=${ROOT_DIR}/Brewfile
 
-${ROOT_DIR}/script/link_roles
+${ROOT_DIR}/script/cp_roles

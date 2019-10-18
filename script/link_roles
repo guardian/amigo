@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-echo 'making roles available locally to ansible'
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ln -s ${ROOT_DIR}/roles ${ROOT_DIR}/ansible
