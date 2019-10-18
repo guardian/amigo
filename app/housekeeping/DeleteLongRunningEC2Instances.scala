@@ -23,32 +23,34 @@ class DeleteLongRunningEC2Instances(bakesRepo: BakesRepo, packerEC2Client: Packe
 
   override val schedule: ScheduleBuilder[_ <: Trigger] = SimpleScheduleBuilder.repeatMinutelyForever(20)
 
-  def getPackerInstancesToTerminate(earliestStartedAt: DateTime): List[Instance] =
+  def getRunningPackerInstancesLaunchedBefore(dateTime: DateTime): List[Instance] =
     packerEC2Client.getRunningPackerInstances().filter { instance =>
       val launchTime = new DateTime(instance.getLaunchTime)
-      launchTime.isBefore(earliestStartedAt)
+      launchTime.isBefore(dateTime)
     }
 
   def runHouseKeeping(earliestStartedAt: DateTime): Unit = {
 
-    val instancesToTerminate = getPackerInstancesToTerminate(earliestStartedAt)
+    val instancesToTerminate = getRunningPackerInstancesLaunchedBefore(earliestStartedAt)
 
-    if (instancesToTerminate.nonEmpty) {
+    if (instancesToTerminate.isEmpty) {
+      log.info("no instances found to terminate")
+    } else {
       log.warn(
-        s"instances found to terminate that were launched before $earliestStartedAt" +
-          s"${instancesToTerminate.mkString(",")} - terminating these instances"
+        s"instances found to terminate that were launched before $earliestStartedAt: " +
+          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}"
       )
 
       instancesToTerminate.foreach { instance =>
         log.info(s"terminating instance ${instance.getInstanceId}")
-        packerEC2Client.terminateEC2Instance(instance.getInstanceId) // TODO
+        packerEC2Client.terminateEC2Instance(instance.getInstanceId)
 
         getBakeIdFromInstance(instance) match {
           case None =>
             log.warn(s"unable to get bake id for instance ${instance.getInstanceId}")
           case Some(id) =>
             log.info(s"updating status of $id to timed out")
-            // bakesRepo.updateStatusToTimedOutIfRunning(id) // TODO
+            bakesRepo.updateStatusToTimedOutIfRunning(id)
         }
       }
     }

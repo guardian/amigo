@@ -43,8 +43,9 @@ class PackerEC2Client(underlying: AmazonEC2) {
     val request = new DescribeInstancesRequest()
       .withFilters(
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
+        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("tag:Name", List("Packer Builder")),
-        new Filter("instance-state-name", List("running", "stopped"))
+        new Filter("instance-state-name", List("running"))
       )
 
     underlying.describeInstances(request)
