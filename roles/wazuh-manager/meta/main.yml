@@ -6,4 +6,3 @@ dependencies:
       - apt-transport-https
       - lsb-release
       - gnupg2
-  - role: node

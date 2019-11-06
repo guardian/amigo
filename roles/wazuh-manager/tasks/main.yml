@@ -38,8 +38,3 @@
   apt:
     name: filebeat
     update_cache: yes
-
-- name: Download base config file and alert template
-  shell: |
-      curl -so /etc/filebeat/filebeat.yml https://raw.githubusercontent.com/wazuh/wazuh/v3.9.2/extensions/filebeat/7.x/filebeat.yml
-      curl -so /etc/filebeat/wazuh-template.json https://raw.githubusercontent.com/wazuh/wazuh/v3.9.2/extensions/elasticsearch/7.x/wazuh-template.json
