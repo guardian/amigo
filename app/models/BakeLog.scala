@@ -13,6 +13,7 @@ case class MessagePart(text: String, colour: String) {
 }
 
 object MessagePart {
+  val defaultColour = "#ffffff"
 
   val HtmlColours = Map(
     "yellow" -> "#FF9900" // kinda orangey

@@ -53,11 +53,11 @@ object PackerOutputParser {
       if (it.start > previousEndIndex) {
         // Add any non-coloured part between the end of the previous coloured part
         // and the start of this one
-        parts += MessagePart(message.substring(previousEndIndex, it.start), "black")
+        parts += MessagePart(message.substring(previousEndIndex, it.start), MessagePart.defaultColour)
       }
 
       val colourCode = it.group(1)
-      val colour = AnsiColours.getOrElse(colourCode, "black")
+      val colour = AnsiColours.getOrElse(colourCode, MessagePart.defaultColour)
       val text = it.group(2)
       parts += MessagePart(text, colour)
 
@@ -66,7 +66,7 @@ object PackerOutputParser {
 
     if (previousEndIndex < message.length) {
       // Add any non-coloured part after the final coloured part
-      parts += MessagePart(message.substring(previousEndIndex), "black")
+      parts += MessagePart(message.substring(previousEndIndex), MessagePart.defaultColour)
     }
 
     parts

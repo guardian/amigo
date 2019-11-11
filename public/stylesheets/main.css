@@ -16,6 +16,11 @@ body { padding-top: 70px; }
 #packer-output {
     max-height: 400px; /* This gets updated to match the screen size using JS */
     overflow-y: scroll;
+    background-color: #3e3e3e;
+}
+
+.bake-log {
+    color: #ffffff;
 }
 
 .btn--success:after {
