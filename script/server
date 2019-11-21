@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# When authenticating with AWS, one of the credentials packer will try
+# is the default credentials in the shared credentials file.
+# https://www.packer.io/docs/builders/amazon.html#shared-credentials-file
+#
+# The AWS_PROFILE environment variable can be set to override the default credentials used.
+# https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+#
+# Therefore, by setting it to deployTools (profile name of Deploy Tools account)
+# the packer process running locally will be able to successfully authenticate with AWS.
+export AWS_PROFILE=deployTools
+sbt run

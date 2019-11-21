@@ -36,6 +36,12 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ## How to run locally
 
+Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
+Amigo app locally and the assoicated packer process should have the sufficient AWS authorization.
+
+<details>
+<summary>Previous run locally advice</summary>
+
 Install dependencies with [`./script/setup`](./script/setup)
 
 (For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without runing amigo/packer' below.)
@@ -76,6 +82,7 @@ Once you have your credentials and config sorted out, just do:
 ```shell
 $ sbt run
 ```
+</details>
 
 ## How to run the tests
 
