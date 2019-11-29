@@ -61,6 +61,13 @@
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
+- name: Airflow | overriding requests-oauthlib and oauthlib version to fix apache-airflow[gcp] compatibility
+  pip:
+    name: ['requests-oauthlib==0.8.0', 'oauthlib==2.0.6']
+    state: forcereinstall
+    virtualenv: "{{ airflow_virtualenv_folder }}/"
+    virtualenv_python: "{{ airflow_python_path }}"
+
 - name: "Airflow | ensuring {{ airflow_virtualenv_folder }}"
   file:
     path: "{{ item }}"
