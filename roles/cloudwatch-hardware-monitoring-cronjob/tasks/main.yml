@@ -4,10 +4,20 @@
       mem_avail_option: "--mem-avail"
   when: monitor_memory_available
 
+- name: Collects memory used.
+  set_fact:
+    mem_used_option: "--mem-used"
+  when: monitor_memory_used
+
 - name: Create monitor disk space available parameter
   set_fact:
       disk_space_avail_option: "--disk-space-avail"
   when: monitor_disk_space_available
+
+- name: Collects disk space used
+  set_fact:
+    disk_space_used_option: "--disk-space-used"
+  when: monitor_disk_space_used
 
 - name: Create monitor disk space utilisation parameter
   set_fact:
@@ -20,5 +30,5 @@
   when: monitor_memory_utilisation
 
 - name: Add hardware data collection cronjob
-  cron: name="send hardware data information to cloudwatch" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl {{ mem_avail_option | default("") }} {{ disk_space_avail_option | default("") }} {{ disk_space_util_option | default("") }} {{ mem_util_option | default("") }} {{ item }} --auto-scaling --from-cron"
+  cron: name="send hardware data information to cloudwatch" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl {{ mem_avail_option | default("") }} {{ mem_used_option | default("") }} {{ disk_space_avail_option | default("") }} {{ disk_space_util_option | default("") }} {{ disk_space_used_option | default("") }} {{ mem_util_option | default("") }} {{ item }} --auto-scaling --from-cron"
   with_items: "{{ paths | map('regex_replace', '(.*)', '--disk-path \\1') | join(' ') }}"
