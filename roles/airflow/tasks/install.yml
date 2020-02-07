@@ -25,7 +25,7 @@
 
 - name: Airflow | pip installs
   pip:
-    name: ['botocore', 'boto3', 'six', 'gunicorn', 'numpy', 'flask_oauthlib']
+    name: ['botocore', 'boto3', 'six', 'gunicorn', 'numpy', 'Werkzeug==0.16.1', 'flask_oauthlib']
     state: latest
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
