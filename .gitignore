@@ -8,5 +8,7 @@ target
 /RUNNING_PID
 amigo.iml
 
+Brewfile.lock.json
+
 roles/*.log
 roles/.vagrant
