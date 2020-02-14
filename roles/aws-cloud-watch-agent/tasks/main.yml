@@ -16,6 +16,8 @@
     path: /usr/share/collectd
     state: directory
 
+# How to create an empty file with Ansible.
+# https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
 - name: Create types.db file
   copy:
     content: ""
