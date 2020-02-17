@@ -1,0 +1,24 @@
+---
+- name: Download cloudwatch agent for Ubuntu amd64
+  get_url:
+    url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+    dest: /tmp/amazon-cloudwatch-agent.deb
+
+- name: Install cloudwatch agent
+  apt:
+    deb: /tmp/amazon-cloudwatch-agent.deb
+
+# When the agent is started, it'll return an error if the file /usr/share/collectd/types.db doesn't exist
+# https://github.com/awsdocs/amazon-cloudwatch-user-guide/issues/1
+
+- name: Create collectd directory
+  file:
+    path: /usr/share/collectd
+    state: directory
+
+# How to create an empty file with Ansible.
+# https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
+- name: Create types.db file
+  copy:
+    content: ""
+    dest: /usr/share/collectd/types.db
