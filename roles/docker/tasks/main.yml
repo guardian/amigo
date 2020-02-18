@@ -19,7 +19,7 @@
   apt: 
     name: "{{ item }}"
     update_cache: yes
-    state: installed
+    state: present
     force: yes
   with_items:
     - apt-transport-https
@@ -38,7 +38,7 @@
   apt:
     name: docker-ce={{ version }}~ubuntu
     update_cache: yes
-    state: installed
+    state: present
 
 - name: Create docker group
   group:
