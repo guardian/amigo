@@ -1,4 +1,3 @@
 ---
 - name: Add disk available cronjob
-  cron: name="disk space avaible" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --mem-avail --disk-path /dev/xvda1 --auto-scaling --from-cron"
-
+  cron: name="disk space avaible" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --mem-avail --disk-path $(/bin/lsblk -pnl | /usr/bin/awk '{ if (NF==7 && $5==0) print $1}')  --auto-scaling --from-cron"
