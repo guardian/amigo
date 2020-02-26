@@ -1,0 +1,5 @@
+---
+certificate_source: https://s3.amazonaws.com/rds-downloads/
+certificate_name: rds-ca-2019-root
+truststore_dir: /usr/lib/ssl/certs/java/
+truststore_name: aws-rds-cacerts
