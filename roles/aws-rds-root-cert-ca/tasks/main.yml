@@ -1,0 +1,12 @@
+---
+- name: get aws RDS root CA certificate
+  get_url: url=https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem dest=/tmp/rds-ca-2019-root.pem
+
+- name: convert pem to der format
+  command: openssl x509 -outform der -in /tmp/rds-ca-2019-root.pem -out /tmp/rds-ca-2019-root.der
+
+- name: create new truststore
+  command: keytool -import -alias rds-root -keystore /usr/lib/ssl/certs/java/aws-rds-cacerts -file /tmp/rds-ca-2019-root.der -storepass changeit -noprompt
+
+- name: import default truststore into new one
+  command: keytool -importkeystore -srckeystore /usr/lib/ssl/certs/java/cacerts -srcstorepass changeit -destkeystore /usr/lib/ssl/certs/java/aws-rds-cacerts -deststorepass changeit
