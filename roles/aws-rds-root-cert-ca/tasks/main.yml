@@ -6,7 +6,7 @@
   command: openssl x509 -outform der -in /tmp/{{certificate_name}}.pem -out /tmp/{{certificate_name}}.der
 
 - name: create new truststore
-  command: keytool -import -alias rds-root -keystore "{{truststore_dir}}{{truststore_name}}" -file /tmp/{{certificate_name}}.der -storepass changeit -noprompt
+  command: keytool -import -alias rds-root -keystore "{{truststore_dir}}{{truststore_name}}" -file /tmp/{{certificate_name}}.der -storepass "{{truststore_password}}" -noprompt
 
 - name: import default truststore into new one
-  command: keytool -importkeystore -srckeystore "{{truststore_dir}}cacerts" -srcstorepass changeit -destkeystore "{{truststore_dir}}{{truststore_name}}" -deststorepass changeit
+  command: keytool -importkeystore -srckeystore "{{truststore_dir}}cacerts" -srcstorepass "{{castore_password}}" -destkeystore "{{truststore_dir}}{{truststore_name}}" -deststorepass "{{truststore_password}}"
