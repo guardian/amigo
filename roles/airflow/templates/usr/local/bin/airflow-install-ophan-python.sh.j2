@@ -1,0 +1,18 @@
+#!/bin/sh
+GUARDIAN_PYTHON_ZIP=guardian.zip
+PYTHON_FOLDER=python/
+S3_PATH="s3://${airflow_s3_dags_folder}/$PYTHON_FOLDER/$GUARDIAN_PYTHON_ZIP"
+LOCAL_PYTHON_FOLDER=
+
+echo "Downloading extra python libraries from $S3_PATH"
+rm -f {{ airflow_home }}/python
+mkdir {{ airflow_home }}/python
+aws s3 cp $S3_PATH {{ airflow_home }}/
+
+if [ -e {{ airflow_home }}/$GUARDIAN_PYTHON_ZIP ]; then
+    unzip -o {{ airflow_home }}/$GUARDIAN_PYTHON_ZIP -d {{ airflow_home }}
+    rm -f {{ airflow_home }}/$GUARDIAN_PYTHON_ZIP
+    {{ airflow_virtualenv_folder }}/bin/pip install -e {{ airflow_home }}/python/
+else
+    echo "WARNING: NO PYTHON MODULE FOUND IN {{ airflow_s3_dags_folder }}python/$GUARDIAN_PYTHON_ZIP"
+fi
