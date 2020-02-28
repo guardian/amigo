@@ -3,6 +3,11 @@
 ## Description
 Sets up an AWS RDS root CA certificate in a Java truststore if an app wants to use full SSL between an RDS database.
 
+## Mandatory Variables
+| Variable | Description |
+| - | - |
+| aws_rds_truststore_password | password for the new truststore |
+
 ## Variables
 | Variable | Description |
 | - | - |
