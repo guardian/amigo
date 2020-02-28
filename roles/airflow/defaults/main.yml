@@ -36,6 +36,10 @@ airflow_services:
     configure: yes
     enabled: no
     state: stopped
+  airflow-install-ophan-python:
+    configure: yes
+    enabled: no
+    state: stopped
   airflow-initdb:
     configure: yes
     enabled: no
