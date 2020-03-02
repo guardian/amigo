@@ -3,5 +3,5 @@
   cron:
     name: "disk space avaible"
     # Which minutes or how often (*/5)
-    minute: "{{ minute }}"
+    minute: "{{ minute | default(omit) }}"
     job: "/usr/local/aws-scripts-mon/mon-put-instance-data.pl --disk-space-avail --mem-avail $(/bin/lsblk -pnl | /usr/bin/awk '{ if (NF==7 && $5==0) print "--disk-path " $1}' | xargs)  --auto-scaling --from-cron"
