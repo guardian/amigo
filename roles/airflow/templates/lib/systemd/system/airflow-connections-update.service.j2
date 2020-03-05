@@ -18,9 +18,6 @@ Description=Airflow connections update
 Requires=network.target
 After=network.target
 
-Requires=airflow-initdb.service
-After=airflow-initdb.service
-
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow

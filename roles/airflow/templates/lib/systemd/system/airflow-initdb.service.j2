@@ -17,8 +17,7 @@
 Description=Airflow InitDB
 Requires=network.target
 After=network.target
-
-Requires=airflow-install-ophan-python.service
+BindsTo=airflow-install-ophan-python.service
 After=airflow-install-ophan-python.service
 
 
