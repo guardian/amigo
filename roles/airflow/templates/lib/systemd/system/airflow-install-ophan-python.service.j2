@@ -2,8 +2,6 @@
 Description=Airflow connections update
 Requires=network.target
 After=network.target
-BindsTo=airflow-mutex.service
-After=airflow-mutex.service
 
 [Service]
 EnvironmentFile={{ airflow_environment_file_folder }}/airflow

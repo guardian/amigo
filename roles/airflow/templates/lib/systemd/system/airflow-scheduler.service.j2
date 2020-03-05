@@ -18,11 +18,12 @@ Description=Airflow scheduler
 Requires=network.target
 After=network.target
 
-BindsTo=airflow-mutex.service
+
+Requires=airflow-mutex.service
 After=airflow-mutex.service
 
-BindsTo=airflow-initdb.service
-After=airflow-initdb.service
+Requires=airflow-dags-update.service
+After=airflow-dags-update.service
 
 BindsTo=airflow-connections-update.service
 After=airflow-connections-update.service
