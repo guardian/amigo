@@ -11,6 +11,7 @@
     - usr/local/bin/airflow-add-connection.sh.j2
     - usr/local/bin/airflow-update-dags.sh.j2
     - usr/local/bin/airflow-update-connections.sh.j2
+    - usr/local/bin/airflow-install-ophan-python.sh.j2
 
 - name: Support | Adding autoscaling group mutex scripts
   template:
