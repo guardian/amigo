@@ -18,9 +18,6 @@ Description=Airflow webserver
 Requires=network.target
 After=network.target
 
-Requires=airflow-mutex.service
-After=airflow-mutex.service
-
 Requires=airflow-dags-update.service
 After=airflow-dags-update.service
 
