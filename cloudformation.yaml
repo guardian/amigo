@@ -120,6 +120,10 @@ Resources:
           - ssm:ListInstanceAssociations
           - ssm:DescribeInstanceProperties
           - ssm:DescribeDocumentParameters
+          - ssmmessages:CreateControlChannel
+          - ssmmessages:CreateDataChannel
+          - ssmmessages:OpenControlChannel
+          - ssmmessages:OpenDataChannel
       Roles:
       - !Ref RootRole
 
