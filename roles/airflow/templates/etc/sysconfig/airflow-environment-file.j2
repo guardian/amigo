@@ -27,6 +27,6 @@ AIRFLOW_HOME={{ airflow_home }}
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:{{ airflow_virtualenv_folder }}/bin
 
-PYTHONPATH="{{ airflow_plugins_dir }}"
+PYTHONPATH={{ airflow_home }}:{{ airflow_plugins_dir }}
 
 GUNICORN_CMD_ARGS="--log-level WARNING"
