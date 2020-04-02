@@ -8,6 +8,10 @@
   sysctl:
     name: vm.max_map_count
     value: 262144
+- name: set max_user_watchers to 8 times default ubuntu level
+  sysctl:
+    name: fs.inotify.max_user_watches
+    value: 65536
 - name: create docker group
   group:
     name: docker
