@@ -8,7 +8,7 @@ import packer.PackerBuildConfigGenerator
 import scala.collection.JavaConversions._
 
 // EC2 methods, specifically related to Packer instances.
-class PackerEC2Client(underlying: AmazonEC2) {
+class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
 
   private def hasTag(instance: Instance, key: String, value: String): Boolean =
     instance.getTags.exists(tag => tag.getKey == key && tag.getValue == value)
@@ -17,6 +17,7 @@ class PackerEC2Client(underlying: AmazonEC2) {
     // Filters here are base on the instance tags that are set in PackerBuildConfigGenerator.
     val request = new DescribeInstancesRequest()
       .withFilters(
+        new Filter("tag:AmigoStage", List(amigoStage)),
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("tag:BakeId", List(bakeId.toString)),
@@ -42,6 +43,7 @@ class PackerEC2Client(underlying: AmazonEC2) {
   def getRunningPackerInstances(): List[Instance] = {
     val request = new DescribeInstancesRequest()
       .withFilters(
+        new Filter("tag:AmigoStage", List(amigoStage)),
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("tag:Name", List("Packer Builder")),

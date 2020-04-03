@@ -183,7 +183,7 @@ class AppComponents(context: Context)
 
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(enabled, prismAgents, eventBus, ansibleVariables)
+    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
@@ -191,7 +191,7 @@ class AppComponents(context: Context)
   bakeScheduler.initialise(Recipes.list())
 
   val bakesRepo = new BakesRepo
-  val packerEC2Client = new PackerEC2Client(ec2Client)
+  val packerEC2Client = new PackerEC2Client(ec2Client, identity.stage)
 
   val houseKeepingJobs = List(
     new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
@@ -211,7 +211,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

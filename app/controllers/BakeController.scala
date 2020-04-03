@@ -12,6 +12,7 @@ import play.api.mvc._
 import services.{ Loggable, PrismAgents }
 
 class BakeController(
+  stage: String,
   eventsSource: Source[BakeEvent, _],
   prism: PrismAgents,
   val authConfig: GoogleAuthConfig,
@@ -25,7 +26,7 @@ class BakeController(
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>
           val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-          PackerRunner.createImage(theBake, prism, eventBus, ansibleVars, debugAvailable && debug)
+          PackerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, debugAvailable && debug)
           Redirect(routes.BakeController.showBake(recipeId, buildNumber))
         case None =>
           val message = s"Failed to get the next build number for recipe $recipeId"
