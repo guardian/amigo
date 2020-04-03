@@ -45,7 +45,7 @@ class PackerEC2Client(underlying: AmazonEC2) {
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
         new Filter("tag:Name", List("Packer Builder")),
-        new Filter("instance-state-name", List("running"))
+        new Filter("instance-state-name", List("running", "stopped"))
       )
 
     underlying.describeInstances(request)
