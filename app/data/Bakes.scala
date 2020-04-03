@@ -20,7 +20,7 @@ object Bakes {
       .given(attributeExists('recipeId) and attributeExists('buildNumber))
       .update(
         ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('status -> status)(BakeStatus.dynamoFormat)
+        set('status -> status)
       )
       .exec()
   }
