@@ -1,0 +1,17 @@
+diff --git a/airflow/utils/log/s3_task_handler.py b/airflow/utils/log/s3_task_handler.py
+index da0d3bb11..50f7923e8 100644
+--- a/airflow/utils/log/s3_task_handler.py
++++ b/airflow/utils/log/s3_task_handler.py
+@@ -59,6 +59,12 @@ class S3TaskHandler(FileTaskHandler, LoggingMixin):
+         self.log_relative_path = self._render_filename(ti, ti.try_number)
+         self.upload_on_close = not ti.raw
+ 
++        # Clear the file first so that duplicate data is not uploaded
++        # when re-using the same path (e.g. with rescheduled sensors)
++        if self.upload_on_close:
++            with open(self.handler.baseFilename, 'w'):
++                pass
++
+     def close(self):
+         """
+         Close and upload local log file to remote storage S3.
