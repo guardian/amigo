@@ -47,6 +47,12 @@
     virtualenv: "{{ airflow_virtualenv_folder }}/"
     virtualenv_python: "{{ airflow_python_path }}"
 
+- name: Patch Airflow Logging -- Remove in 1.10.8+
+  patch:
+    basedir: "{{ airflow_virtualenv_folder }}/lib/python3.6/site-packages/"
+    src: patches/AIRFLOW-1916-dont-duplicate-logs.diff
+    strip: 1
+
 - name: Airflow | ensure psycopg2 is absent (deprecated, superseded with psycopg2-binary)
   pip:
     name: ['psycopg2']
