@@ -20,7 +20,17 @@ object Bakes {
       .given(attributeExists('recipeId) and attributeExists('buildNumber))
       .update(
         ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('status -> status)
+        set('status -> status)(BakeStatus.dynamoFormat)
+      )
+      .exec()
+  }
+
+  def updateStatusIfRunning(bakeId: BakeId, status: BakeStatus)(implicit dynamo: Dynamo): Unit = {
+    table
+      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .update(
+        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
+        set('status -> status)(BakeStatus.dynamoFormat)
       )
       .exec()
   }

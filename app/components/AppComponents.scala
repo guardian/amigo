@@ -20,6 +20,7 @@ import controllers._
 import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import housekeeping._
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
@@ -182,18 +183,22 @@ class AppComponents(context: Context)
 
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(enabled, prismAgents, eventBus, ansibleVariables)
+    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
+  val bakesRepo = new BakesRepo
+  val packerEC2Client = new PackerEC2Client(ec2Client, identity.stage)
+
   val houseKeepingJobs = List(
     new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
-    TimeOutLongRunningBakes(identity.stage, ec2Client)
+    new TimeOutLongRunningBakes(bakesRepo, packerEC2Client),
+    new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client)
   )
 
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
@@ -206,7 +211,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

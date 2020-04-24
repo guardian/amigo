@@ -18,7 +18,7 @@ object PackerBuildConfigGenerator {
    *  - tags the resulting AMI with the recipe ID and build number
    */
   def generatePackerBuildConfig(
-    bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
+    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
 
@@ -37,6 +37,7 @@ object PackerBuildConfigGenerator {
 
       run_tags = Map(
         "Stage" -> stage,
+        "AmigoStage" -> amigoStage,
         "Stack" -> stack,
         "App" -> "{{user `recipe`}}",
         "BakeId" -> s"${bake.bakeId.toString}"
