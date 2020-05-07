@@ -74,11 +74,11 @@ object PackerOutputParser {
 
   // Only handle the foreground colours
   private val AnsiColours = Map(
-    "31" -> "red",
-    "32" -> "green",
-    "33" -> "yellow",
-    "34" -> "blue",
-    "35" -> "magenta",
-    "36" -> "cyan"
-  )
+    "31" -> "#B43C2A",
+    "32" -> "#00C200",
+    "33" -> "#C7C400",
+    "34" -> "#2744C7",
+    "35" -> "#C040BE",
+    "36" -> "#00C5C7"
+  ) /* iTerm2's default theme */
 }

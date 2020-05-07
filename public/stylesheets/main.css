@@ -16,11 +16,11 @@ body { padding-top: 70px; }
 #packer-output {
     max-height: 400px; /* This gets updated to match the screen size using JS */
     overflow-y: scroll;
-    background-color: #3e3e3e;
+    background-color: #15191F; /* iTerm2's default theme */
 }
 
 .bake-log {
-    color: #ffffff;
+    color: #DCDCDC; /* iTerm2's default theme */
 }
 
 .btn--success:after {
