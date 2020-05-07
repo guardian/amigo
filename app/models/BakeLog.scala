@@ -13,10 +13,10 @@ case class MessagePart(text: String, colour: String) {
 }
 
 object MessagePart {
-  val defaultColour = "#ffffff"
+  val defaultColour = "#DCDCDC" /* iTerm2's default theme */
 
   val HtmlColours = Map(
-    "yellow" -> "#FF9900" // kinda orangey
+    "yellow" -> "#ECE100"  /* iTerm2's default theme */
   )
 
 }
