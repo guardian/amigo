@@ -11,7 +11,7 @@
 - name: Install cloudformation tools
   include: "{{ item }}"
   with_first_found:
-    - "install-cfn-tool-{{ ansible_distribution }}-{{ post_focal }}.yml"
+    - "install-cfn-tools-{{ ansible_distribution }}-{{ post_focal }}.yml"
     - "install-cfn-tools-{{ ansible_os_family }}.yml"
     - "install-cfn-tools.yml"
   
