@@ -1,27 +1,17 @@
 ---
-- name: Install latest AWS CLI
-  include: install-pip-aws-cli-redhat6.yml
-  when: ansible_os_family == "RedHat"
+- name: See what Ubuntu version we're running
+  set_fact: 
+    post_focal: "{{ 'post-focal' if ( ansible_distribution_major_version|int >= 20 ) else 'older' }}"
 
-- name: Install latest AWS CLI
-  include: install-pip-aws-cli-debian.yml
-  when: ansible_os_family == "Debian"
+- name: Install pip and the latest AWS CLI
+  include: "{{ item }}"
+  with_first_found:
+    - "install-pip-aws-cli-{{ ansible_os_family }}.yml"
 
-- name: Download AWS CFN tools
-  get_url: url=https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz dest=/tmp/aws-cfn-bootstrap-latest.tar.gz 
-
-- name: Create directory for AWS CFN tools
-  file: path=/tmp/aws-cfn-bootstrap-latest state=directory
-
-- name: Extract AWS CFN tools
-  command: tar xvfz /tmp/aws-cfn-bootstrap-latest.tar.gz --strip-components=1 -C /tmp/aws-cfn-bootstrap-latest
-
-  # this package has dependencies that are not compatible with Python 3 so we use `pip`
-- name: Install AWS CFN tools
-  command: pip install /tmp/aws-cfn-bootstrap-latest/
-  register: result
-  until: result.rc == 0
-  retries: 5
-
-- name: Cleanup AWS CFN tools
-  file: path=/tmp/aws-cfn-bootstrap-latest state=absent
+- name: Install cloudformation tools
+  include: "{{ item }}"
+  with_first_found:
+    - "install-cfn-tools-{{ ansible_distribution }}-{{ post_focal }}.yml"
+    - "install-cfn-tools-{{ ansible_os_family }}.yml"
+    - "install-cfn-tools.yml"
+  

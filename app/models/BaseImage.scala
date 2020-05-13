@@ -30,7 +30,10 @@ case object Ubuntu extends LinuxDist {
       // Wait for cloud-init to finish first: https://github.com/mitchellh/packer/issues/2639
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "DEBIAN_FRONTEND=noninteractive  apt-get --yes install software-properties-common",
-      "apt-add-repository --yes ppa:ansible/ansible",
+      "version=$(. /etc/os-release; echo $VERSION_ID | cut -d'.' -f1)",
+      "if (($version < 20)); then apt-add-repository --yes ppa:ansible/ansible; fi",
+      // ansible ppa broken in ubuntu: https://github.com/ansible/ansible/issues/69203
+      // and available in https://packages.ubuntu.com/focal/ansible
       "apt-get --yes update",
       "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
     ))
