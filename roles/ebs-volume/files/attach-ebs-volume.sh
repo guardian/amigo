@@ -98,21 +98,13 @@ function find_device() {
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances
   device=$(find_nvme_device)
-  while [[ ${counter} -lt 10 && ${device} == "???" ]]; do
-    sleep 1
-    device=$(find_nvme_device)
-    counter=$((counter + 1))
-
-    echo >&2 "${device} ${counter} $?"
-  done
 
   if [[ ${device} == "???" ]]; then
     # Most of our instance types are Nitro-based,
     # but if we can't find an nvme device, try /xvd*
     echo >&2 "Could not find corresponding nvme device for /dev/sd${DEVICE_LETTER}"
     echo >&2 "Trying non-nvme device /dev/xvd${DEVICE_LETTER}"
-    echo "/dev/xvd${DEVICE_LETTER}"
-    return 1
+    device=/dev/xvd${DEVICE_LETTER}
   fi
 
   echo ${device}
@@ -133,8 +125,9 @@ function wait_for_device() {
 
 UBUNTU_DEVICE=$(find_device)
 echo "Found device ${UBUNTU_DEVICE}"
-wait_for_device ${UBUNTU_DEVICE}
-
+echo "Waiting for device to become available"
+time wait_for_device ${UBUNTU_DEVICE}
+echo "Device available."
 echo "Creating mountpoint ${MOUNTPOINT}"
 mkdir -p ${MOUNTPOINT}
 echo "Creating filesystem at ${UBUNTU_DEVICE}"
