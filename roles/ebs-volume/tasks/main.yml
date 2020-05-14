@@ -1,7 +1,7 @@
 ---
   - name: make directory for script
     file:
-      path: /opt/mount-drive
+      path: /opt/attach-ebs-volume
       state: directory
       mode: 0755
   
