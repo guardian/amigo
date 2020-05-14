@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-function HELP {
->&2 cat << EOF
+function HELP() {
+  cat >&2 <<EOF
 
   Usage: ${0} -d device-letter -m mountpoint [-u user]
 
@@ -26,33 +26,32 @@ function HELP {
                   performed.
 
 EOF
-exit 1
+  exit 1
 }
 
- 
 OPTIONS="defaults"
 
 # Process options
 while getopts d:m:u:s:k:t:i:xo:h FLAG; do
   case $FLAG in
-    d)
-      DEVICE_LETTER=$OPTARG
-      ;;
-    m)
-      MOUNTPOINT=$OPTARG
-      ;;
-    u)
-      MOUNT_USER=$OPTARG
-      ;;
-    o)
-      OPTIONS=$OPTARG
-      ;;
-    h)  #show help
-      HELP
-      ;;
+  d)
+    DEVICE_LETTER=$OPTARG
+    ;;
+  m)
+    MOUNTPOINT=$OPTARG
+    ;;
+  u)
+    MOUNT_USER=$OPTARG
+    ;;
+  o)
+    OPTIONS=$OPTARG
+    ;;
+  h) #show help
+    HELP
+    ;;
   esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 if [ -z "${DEVICE_LETTER}" ]; then
   echo "Must specify a device letter"
@@ -64,12 +63,12 @@ if [ -z "${MOUNTPOINT}" ]; then
   exit 1
 fi
 
-function find_nvme_device {
+function find_nvme_device() {
   local expected_device="sd${DEVICE_LETTER}"
   local nvm_devices=$(ls /dev/nvme?n1)
 
   for nvm_device in ${nvm_devices}; do
-    nvme id-ctrl -v ${nvm_device} | grep -q ${expected_device}
+    nvme id-ctrl ${nvm_device} -v | sed '1,/vs\[\]/d' | grep -q ${expected_device}
     if [ $? -eq 0 ]; then
       echo "${nvm_device}"
       return 0
@@ -80,12 +79,22 @@ function find_nvme_device {
   return 0
 }
 
-function find_uuid {
-  local id=basename ${UBUNTU_DEVICE}
+function find_uuid() {
+  local id=$(basename ${UBUNTU_DEVICE})
   lsblk -o +UUID | grep "^${id}" | awk '{print $8}'
 }
 
-function find_device {
+function find_fstab_id() {
+  local UUID=$(find_uuid)
+  if [[ -z "${UUID// /}" ]]; then
+    # no UUID
+    echo $UBUNTU_DEVICE
+  else
+    echo UUID=$UUID
+  fi
+}
+
+function find_device() {
   # EBS volumes are exposed as NVMe block devices on Nitro-based instances
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances
@@ -95,14 +104,14 @@ function find_device {
     device=$(find_nvme_device)
     counter=$((counter + 1))
 
-    >&2 echo "${device} ${counter} $?"
+    echo >&2 "${device} ${counter} $?"
   done
 
   if [[ ${device} == "???" ]]; then
     # Most of our instance types are Nitro-based,
     # but if we can't find an nvme device, try /xvd*
-    >&2 echo "Could not find corresponding nvme device for /dev/sd${DEVICE_LETTER}"
-    >&2 echo "Trying non-nvme device /dev/xvd${DEVICE_LETTER}"
+    echo >&2 "Could not find corresponding nvme device for /dev/sd${DEVICE_LETTER}"
+    echo >&2 "Trying non-nvme device /dev/xvd${DEVICE_LETTER}"
     echo "/dev/xvd${DEVICE_LETTER}"
     return 1
   fi
@@ -110,7 +119,7 @@ function find_device {
   echo ${device}
 }
 
-function wait_for_device {
+function wait_for_device() {
   local DEVICE=$1
   local counter=0
   while [ ${counter} -lt 60 -a ! -b "${DEVICE}" ]; do
@@ -122,17 +131,25 @@ function wait_for_device {
     return 1
   fi
 }
- 
-UBUNTU_DEVICE=$(find_device)
-wait_for_device ${UBUNTU_DEVICE}
-UUID=$(find_uuid)
 
-if [ -n "${MOUNTPOINT}" ]; then
-  mkdir -p ${MOUNTPOINT}
-  mkfs -t ext4 ${UBUNTU_DEVICE}
-  echo "UUID=${UUID} ${MOUNTPOINT} ext4 ${OPTIONS} 0 0" >> /etc/fstab
-  mount ${MOUNTPOINT}
-  if [ -n "${MOUNT_USER}" ]; then
-    chown ${MOUNT_USER} ${MOUNTPOINT}
-  fi
+UBUNTU_DEVICE=$(find_device)
+echo "Found device ${UBUNTU_DEVICE}"
+wait_for_device ${UBUNTU_DEVICE}
+
+echo "Creating mountpoint ${MOUNTPOINT}"
+mkdir -p ${MOUNTPOINT}
+echo "Creating filesystem at ${UBUNTU_DEVICE}"
+mkfs -t ext4 ${UBUNTU_DEVICE}
+
+FSTAB_ID=$(find_fstab_id)
+FSTAB_LINE="${FSTAB_ID} ${MOUNTPOINT} ext4 ${OPTIONS} 0 0"
+echo "Adding line to /etc/fstab"
+echo $FSTAB_LINE
+echo $FSTAB_LINE >>/etc/fstab
+echo "Mounting."
+mount ${MOUNTPOINT}
+if [ -n "${MOUNT_USER}" ]; then
+  echo "Chowning ${MOUNTPOINT} to ${MOUNT_USER}"
+  chown ${MOUNT_USER} ${MOUNTPOINT}
 fi
+echo "Success."
