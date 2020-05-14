@@ -80,8 +80,7 @@ function find_nvme_device() {
 }
 
 function find_uuid() {
-  local id=$(basename ${UBUNTU_DEVICE})
-  lsblk -o +UUID | grep "^${id}" | awk '{print $8}'
+  blkid -s UUID -o value $UBUNTU_DEVICE
 }
 
 function find_fstab_id() {
