@@ -1,0 +1,20 @@
+---
+  - name: make directory for script
+    file:
+      path: /opt/mount-drive
+      state: directory
+      mode: 0755
+  
+  - name: copy script to mount drive
+    copy: 
+      src: attach-ebs-volume.sh
+      dest: /opt/attach-ebs-volume/attach-ebs-volume.sh 
+      owner: root 
+      group: root
+      mode: u+x
+
+  - name: symlink into /usr/local/sbin
+    file:
+      src: /opt/attach-ebs-volume/attach-ebs-volume.sh 
+      dest: /usr/local/sbin/attach-ebs-volume
+      state: link
