@@ -1,6 +1,8 @@
 # Attach EBS Volume
 
 A script to mount ebs volumes, because it's not safe to assume a device path.
+On aws "nitro" instances, NVM is used, and the mapping between nvm device path
+and EBS path is non-deterministic. 
 
 
 Usage: attach-ebs-volume -d device-letter -m mountpoint [-u user]
