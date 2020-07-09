@@ -1,0 +1,58 @@
+---
+- name: Enable Docker
+  command: amazon-linux-extras install docker
+
+- name: Install Docker
+  yum:
+    name: docker
+    state: present
+
+- name: Add ec2-user to docker group to avoid requiring 'sudo'
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+
+- name: Install Amazon ECR Docker Credential Helper
+  yum:
+    name: amazon-ecr-credential-helper
+    state: present
+
+- name: Create Docker config directory (if doesn't exist)
+  file:
+    path: /home/ec2-user/.docker
+    state: directory
+    mode: ugo+rw
+    owner: ec2-user
+    group: ec2-user
+
+- name: Copy Docker config to register creds store
+  copy:
+    src: config.json
+    dest: /home/ec2-user/.docker/config.json
+    owner: ec2-user
+    group: ec2-user
+    mode: ugo+rw
+
+- name: Create Docker config directory (if doesn't exist) (for root user)
+  file:
+    path: /root/.docker
+    state: directory
+    mode: ugo+rw
+    owner: root
+    group: root
+
+- name: Copy Docker config to register creds store (for root user)
+  copy:
+    src: config.json
+    dest: /root/.docker/config.json
+    owner: root
+    group: root
+    mode: ugo+rw
+
+
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
