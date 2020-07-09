@@ -19,7 +19,7 @@ object LinuxDist {
 
   def create(name: String): Option[LinuxDist] = all.get(name)
 
-  val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat)
+  val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
 }
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"
@@ -49,6 +49,20 @@ case object RedHat extends LinuxDist {
       "yum -y update",
       "yum -y install ansible",
       "yum -y install libselinux-python-2.0.94-7.el6"
+    ))
+  )
+}
+
+case object AmazonLinux2 extends LinuxDist {
+  val name = "amazon linux 2"
+  val loginName = "ec2-user"
+  val provisioners = Seq(
+    PackerProvisionerConfig.executeRemoteCommands(Seq(
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "yum -y update",
+      "yum -y install amazon-linux-extras", // should be a no-op
+      "amazon-linux-extras enable ansible2",
+      "yum -y install ansible"
     ))
   )
 }
