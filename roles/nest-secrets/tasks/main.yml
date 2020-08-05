@@ -1,0 +1,6 @@
+---
+- name: Download nest-secrets
+  get_url:
+    url: "https://github.com/guardian/nest-secrets/releases/download/{{ version }}/nest-secrets-linux-amd64"
+    dest: /usr/local/bin/nest-secrets
+    mode: '0111'
