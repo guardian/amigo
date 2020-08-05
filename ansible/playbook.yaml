@@ -3,5 +3,6 @@
   hosts: all
   connection: local
   become: true
-  roles:
-    - role: cloudwatch-hardware-monitoring-cronjob
+
+  tasks:
+    - name: Your task(s) go here...
