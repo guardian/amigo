@@ -71,44 +71,79 @@
           }
           <th>Status</th>
           <th>AMI</th>
+          @* Column for copy button *@
+          <th></th>
+          @* Column for open in AMIable link *@
+          <th></th>
         </thead>
         <tbody>
         @for(bake <- recentBakes) {
           <tr>
-          <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@fragments.timestamp(bake.startedAt, bake.startedBy)</a></td>
-          <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.buildNumber</a></td>
-          @if(recentCopies.nonEmpty) {
-            <td class="has-block-link"></td>
-          }
-          <td class="has-block-link"><a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">@bake.status</a></td>
-            <td class="absolute-container has-block-link">
-            @if(bake.amiId.isDefined) {
-              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)"><code>@bake.amiId</code></a>
-              <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@bake.amiId">
-                <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
-              </button>
-            }
+            <td class="has-block-link">
+              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
+                @fragments.timestamp(bake.startedAt, bake.startedBy)
+              </a>
             </td>
+            <td class="has-block-link">
+              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
+                @bake.buildNumber
+              </a>
+            </td>
+            @if(recentCopies.nonEmpty) {
+              <td class="has-block-link"></td>
+            }
+            <td class="has-block-link">
+              <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
+                @bake.status
+              </a>
+            </td>
+            @if(bake.amiId.isDefined) {
+              <td class="has-block-link">
+                <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
+                  <code>@bake.amiId</code>
+                </a>
+              </td>
+              <td class="absolute-container has-block-link">
+                <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@bake.amiId">
+                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                </button>
+              </td>
+              <td>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
+              </td>
+              </td>
+            } else {
+              <td></td>
+              <td></td>
+              <td></td>
+            }
           </tr>
           @for(copy <- bake.amiId.flatMap(id => recentCopies.get(id)).getOrElse(Nil)){
             <tr>
-              <td></td>
-              <td>  </td>
-              <td><ul class="list-unstyled">
-                <li>Acc: @defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
-                  @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
-                }</li>
-                @copy.encrypted.map{e =>
-                  <li>Encrypted tag: @e</li>
-                }
-              </ul>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>
+                <ul class="list-unstyled">
+                  <li>Acc: @defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                      @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
+                    }
+                  </li>
+                  @copy.encrypted.map{e => <li>Encrypted tag: @e</li>}
+                </ul>
               </td>
-              <td>@copy.state.capitalize</td>
-              <td class="absolute-container">
+              <td>
+                @copy.state.capitalize
+              </td>
+              <td>
                 <code>@copy.imageId</code>
+              </td>
+              <td class="absolute-container">
                 <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@copy.imageId">
                   <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
                 </button>
+              </td>
+              <td>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
               </td>
             </tr>
           }
