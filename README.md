@@ -1,8 +1,8 @@
 # AMIgo
 
 AMIgo is an application for baking AMIs (Amazon Machine Images).
-For information on how to use Amigo baked AMIs with Riffraff check [here](./docs/riffraff-integration.md)
-This project is built in [teamcity](https://teamcity.gutools.co.uk/buildConfiguration/Tools_Amigo)
+For information on how to use Amigo baked AMIs with Riffraff check [here](./docs/riffraff-integration.md).
+This project is built in [teamcity](https://teamcity.gutools.co.uk/buildConfiguration/Tools_Amigo).
 
 ## Terminology
 
