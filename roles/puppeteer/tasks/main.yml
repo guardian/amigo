@@ -5,7 +5,7 @@
     name: [
       'npm', # we need this to *install* Puppeteer
       'nodejs', # we need this to *run* Puppeteer
-      'chromium-browser' # we used to use this to get all the X11 libraries required by Puppeteer's bundled copy of Chrome, but as of September 2020 need to specify libxss1 (see below)
+      'chromium-browser', # we used to use this to get all the X11 libraries required by Puppeteer's bundled copy of Chrome, but as of September 2020 need to specify libxss1 (see below)
       'libxss1' # required by Puppeteer as detailed https://github.com/guardian/ophan/issues/3932
     ]
 
