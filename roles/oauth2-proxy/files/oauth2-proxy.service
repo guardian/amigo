@@ -1,0 +1,15 @@
+
+[Unit]
+Description=Oauth2 Proxy
+
+[Service]
+Type=simple
+User=oauth2-proxy
+Group=oauth2-proxy
+EnvironmentFile=-/etc/default/oauth2-proxy
+ExecStart=/opt/oauth2-proxy/oauth2-proxy --config @@OAUTH2_CONFIG_PATH
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
