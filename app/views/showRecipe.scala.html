@@ -37,6 +37,11 @@
       } else {
         <p><b>This recipe is not used</b></p>
       }
+      <p>
+        <a href="@(s"https://github.com/search?q=${helper.urlEncode(s"""org:guardian+"${recipe.id}"+filename:riff-raff.yaml""")}&type=code")">
+          Search GitHub for usage
+        </a>
+      </p>
     </div>
   </div>
 
