@@ -3,7 +3,7 @@
   unarchive: src=https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ oauth_version }}/oauth2-proxy-v{{ oauth_version }}.linux-amd64.tar.gz dest=/opt remote_src=True
 
 - name: Rename folder
-  shell: mv /opt/oauth2-proxy-{{ oauth_version }}.linux-amd64 /opt/oauth2-proxy
+  shell: mv /opt/oauth2-proxy-v{{ oauth_version }}.linux-amd64 /opt/oauth2-proxy
 
 - name: Create oauth2-proxy group
   group: name=oauth2-proxy
