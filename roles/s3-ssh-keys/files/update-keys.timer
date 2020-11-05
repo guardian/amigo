@@ -1,9 +1,0 @@
-[Unit]
-Description=Update SSH keys every half hour
-
-[Timer]
-OnStartupSec=1 minute
-OnUnitActiveSec=30 minutes
-
-[Install]
-WantedBy=timers.target
