@@ -1,0 +1,24 @@
+---
+- name: Install required dependencies
+  apt:
+    state: present
+    name: [
+        'curl',
+        'apt-transport-https',
+        'lsb-release',
+        'gnupg2',
+        'jq'
+    ]
+
+- name: Run main script
+  shell: |
+    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
+    echo "deb https://packages.wazuh.com/3.x/apt/ stable main" | tee /etc/apt/sources.list.d/wazuh.list
+    apt-get update
+    apt-get install wazuh-agent=3.13.1-1
+
+    sed -i "s/^deb/#deb/" /etc/apt/sources.list.d/wazuh.list
+    apt-get update
+
+    # ----------------- Store the password and register the agent
+    echo {{ secret_arn }}
