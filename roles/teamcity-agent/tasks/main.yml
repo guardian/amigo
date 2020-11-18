@@ -74,6 +74,18 @@
   become_user: teamcity
   args:
     executable: /bin/bash
+- name: add ssh key
+  shell: |
+    set -e
+    mkdir -p /opt/teamcity/ssh
+    aws s3 cp s3://teamcity-config/github_ssh/ci /opt/teamcity/ssh/ci
+    chmod 400 /opt/teamcity/ssh/ci
+    eval $(ssh-agent -s)
+    ssh-add /opt/teamcity/ssh/ci
+  become: yes
+  become_user: teamcity
+  args:
+    executable: /bin/bash
 - name: add caches
   import_role:
     name: teamcity-ivy-cache
