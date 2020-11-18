@@ -24,3 +24,43 @@
 
     SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
     echo $SECRET_ARN
+
+    REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+
+    aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
+       --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
+       | jq -r .value > /var/ossec/etc/authd.pass
+
+    cat << PARENT_EOF > /var/ossec/etc/connect-to-manager.sh
+    # ----------------- On boot
+    MANAGER_IP="{{ manager_ip }}"
+
+    INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+    FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
+    OPTIONS="--query Tags[].Value --output text --region $REGION"
+
+    APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
+    STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
+    STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS)
+
+    cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
+
+    sed -i "s/MANAGER_IP/$MANAGER_IP/" /var/ossec/etc/ossec.conf
+    sed -i "s/<protocol>udp<\/protocol>/<protocol>tcp<\/protocol>/" /var/ossec/etc/ossec.conf
+    cat >> /var/ossec/etc/ossec.conf << EOF
+    <ossec_config>
+      <labels>
+        <label key="aws.app">$APP</label>
+        <label key="aws.stack">$STACK</label>
+        <label key="aws.stage">$STAGE</label>
+      </labels>
+    </ossec_config>
+    EOF
+
+    systemctl restart wazuh-agent
+    /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
+
+    PARENT_EOF
+
+    chmod +x /var/ossec/etc/connect-to-manager.sh
+    cat /var/ossec/etc/connect-to-manager.sh
