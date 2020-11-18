@@ -31,7 +31,7 @@
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
        | jq -r .value > /var/ossec/etc/authd.pass
 
-    cat << PARENT_EOF > /var/ossec/etc/connect-to-manager.sh
+    cat << 'PARENT_EOF' > /var/ossec/etc/connect-to-manager.sh
     # ----------------- On boot
     MANAGER_IP="{{ manager_ip }}"
 
