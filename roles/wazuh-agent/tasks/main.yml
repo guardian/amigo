@@ -21,4 +21,6 @@
     apt-get update
 
     # ----------------- Store the password and register the agent
-    echo {{ secret_arn }}
+
+    SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
+    echo $SECRET_ARN
