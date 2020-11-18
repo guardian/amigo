@@ -34,10 +34,12 @@
     cat << 'PARENT_EOF' > /var/ossec/etc/connect-to-manager.sh
     # ----------------- On boot
     MANAGER_IP="{{ manager_ip }}"
+    REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
     INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
     FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
     OPTIONS="--query Tags[].Value --output text --region $REGION"
+
 
     APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
     STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
