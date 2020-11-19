@@ -19,17 +19,20 @@
 
     sed -i "s/^deb/#deb/" /etc/apt/sources.list.d/wazuh.list
     apt-get update
-
+    echo installed_agent
     # ----------------- Store the password and register the agent
 
     SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
     echo $SECRET_ARN
 
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+    echo fetched_region
 
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
        | jq -r .value > /var/ossec/etc/authd.pass
+
+    echo fetched_secret
 
     cat << 'PARENT_EOF' > /var/ossec/etc/connect-to-manager.sh
     # ----------------- On boot
@@ -64,5 +67,9 @@
 
     PARENT_EOF
 
+    echo wrote_script
+
     chmod +x /var/ossec/etc/connect-to-manager.sh
+    echo chmoded
     cat /var/ossec/etc/connect-to-manager.sh
+    echo done
