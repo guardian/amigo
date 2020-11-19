@@ -62,8 +62,11 @@
     </ossec_config>
     EOF
 
-    systemctl restart wazuh-agent
+    systemctl enable wazuh-agent
+    systemctl status wazuh-agent
     /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
+    systemctl status wazuh-agent
+    systemctl start wazuh-agent
     PARENT_EOF
 
     echo wrote_script
@@ -91,8 +94,10 @@
     ## Enable the new service unit
     systemctl daemon-reload
     echo daemon_reload
+    systemctl disable wazuh-agent
+    echo disable_agent
     systemctl enable wazuh-manager-connection.service
-    echo service_enable
+    echo enable_connection_manager_service
 
     ## Debug commands
     # status: sudo systemctl status wazuh-manager-connection
