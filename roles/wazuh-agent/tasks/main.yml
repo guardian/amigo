@@ -34,8 +34,8 @@
 
     echo fetched_secret
 
-    cat << 'PARENT_EOF' > /var/ossec/etc/connect-to-manager.sh
-    # ----------------- On boot
+    cat << 'PARENT_EOF' > /usr/local/bin/connect-to-wazuh-manager.sh
+    #!/bin/bash -x
     MANAGER_IP="{{ manager_ip }}"
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
@@ -64,12 +64,36 @@
 
     systemctl restart wazuh-agent
     /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
-
     PARENT_EOF
 
     echo wrote_script
 
-    chmod +x /var/ossec/etc/connect-to-manager.sh
-    echo chmoded
-    cat /var/ossec/etc/connect-to-manager.sh
-    echo done
+    chmod +x /usr/local/bin/connect-to-wazuh-manager.sh
+    chmod 744 /usr/local/bin/connect-to-wazuh-manager.sh
+
+    echo script_permissions
+
+    ## Create Systemd service file
+    cat << EOF > /etc/systemd/system/wazuh-manager-connection.service
+    [Unit]
+    After=network.service
+
+    [Service]
+    ExecStart=/usr/local/bin/connect-to-wazuh-manager.sh
+
+    [Install]
+    WantedBy=default.target
+    EOF
+    echo wrote_systemd
+    chmod 664 /etc/systemd/system/disk-space-check.service
+    echo systemd_permissions
+
+    ## Enable the new service unit
+    systemctl daemon-reload
+    echo daemon_reload
+    systemctl enable wazuh-manager-connection.service
+    echo service_enable
+
+    ## Debug commands
+    # status: sudo systemctl status wazuh-manager-connection
+    # full log: journalctl -u wazuh-manager-connection
