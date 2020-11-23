@@ -62,9 +62,12 @@
     </ossec_config>
     EOF
 
+    # Enroll with manager
+    /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
+
+    # Boot agent
     systemctl enable wazuh-agent
     systemctl status wazuh-agent
-    /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
     systemctl status wazuh-agent
     systemctl start wazuh-agent
     PARENT_EOF
