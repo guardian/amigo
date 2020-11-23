@@ -88,7 +88,7 @@
     WantedBy=default.target
     EOF
     echo wrote_systemd
-    chmod 664 /etc/systemd/system/disk-space-check.service
+    chmod 664 /etc/systemd/system/wazuh-manager-connection.service
     echo systemd_permissions
 
     ## Enable the new service unit
