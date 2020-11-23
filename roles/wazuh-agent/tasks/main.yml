@@ -10,18 +10,22 @@
         'jq'
     ]
 
-- name: Run main script
+- name: Add the Wazuh Manager repository and GPG key
   shell: |
     curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
     echo "deb https://packages.wazuh.com/3.x/apt/ stable main" | tee /etc/apt/sources.list.d/wazuh.list
-    apt-get update
-    apt-get install wazuh-agent=3.13.1-1
 
-    sed -i "s/^deb/#deb/" /etc/apt/sources.list.d/wazuh.list
-    apt-get update
-    
-    # ----------------- Store the password and register the agent
+- name: Install Wazuh Manager
+  apt:
+    name: wazuh-agent=3.13.1-1
+    update_cache: yes
 
+- name: Disable the Wazuh updates
+  shell: |
+    echo "wazuh-agent hold" | sudo dpkg --set-selections
+
+- name: Store the password
+  shell: |
     SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
@@ -29,60 +33,65 @@
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
        | jq -r .value > /var/ossec/etc/authd.pass
 
-    cat << 'PARENT_EOF' > /usr/local/bin/connect-to-wazuh-manager.sh
-    #!/bin/bash -x
-    MANAGER_IP="{{ manager_ip }}"
-    REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+- name: Inject boot script
+  copy:
+    dest: /usr/local/bin/connect-to-wazuh-manager.sh
+    mode: '0744'
+    content: |
+      #!/bin/bash -x
+      MANAGER_IP="{{ manager_ip }}"
+      REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
-    INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
-    FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
-    OPTIONS="--query Tags[].Value --output text --region $REGION"
+      INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+      FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
+      OPTIONS="--query Tags[].Value --output text --region $REGION"
 
-    APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
-    STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
-    STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS)
+      APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
+      STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
+      STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS)
 
-    cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
+      cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
 
-    sed -i "s/MANAGER_IP/$MANAGER_IP/" /var/ossec/etc/ossec.conf
-    sed -i "s/<protocol>udp<\/protocol>/<protocol>tcp<\/protocol>/" /var/ossec/etc/ossec.conf
-    cat >> /var/ossec/etc/ossec.conf << EOF
-    <ossec_config>
-      <labels>
-        <label key="aws.app">$APP</label>
-        <label key="aws.stack">$STACK</label>
-        <label key="aws.stage">$STAGE</label>
-      </labels>
-    </ossec_config>
-    EOF
+      sed -i "s/MANAGER_IP/$MANAGER_IP/" /var/ossec/etc/ossec.conf
+      sed -i "s/<protocol>udp<\/protocol>/<protocol>tcp<\/protocol>/" /var/ossec/etc/ossec.conf
+      cat >> /var/ossec/etc/ossec.conf << EOF
+      <ossec_config>
+        <labels>
+          <label key="aws.app">$APP</label>
+          <label key="aws.stack">$STACK</label>
+          <label key="aws.stage">$STAGE</label>
+        </labels>
+      </ossec_config>
+      EOF
 
-    # Enroll with manager
-    /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
+      # Enroll with manager
+      /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
 
-    # Boot agent
-    systemctl enable wazuh-agent
-    systemctl start wazuh-agent
-    PARENT_EOF
+      # Boot agent
+      systemctl enable wazuh-agent
+      systemctl start wazuh-agent
 
-    chmod +x /usr/local/bin/connect-to-wazuh-manager.sh
-    chmod 744 /usr/local/bin/connect-to-wazuh-manager.sh
+- name: Inject systemd service unit wazuh-manager-connection.service
+  copy:
+    dest: /etc/systemd/system/wazuh-manager-connection.service
+    mode: '0644'
+    content: |
+      [Unit]
+      After=network.service
 
-    ## Create Systemd service file
-    cat << EOF > /etc/systemd/system/wazuh-manager-connection.service
-    [Unit]
-    After=network.service
+      [Service]
+      ExecStart=/usr/local/bin/connect-to-wazuh-manager.sh
 
-    [Service]
-    ExecStart=/usr/local/bin/connect-to-wazuh-manager.sh
+      [Install]
+      WantedBy=default.target
 
-    [Install]
-    WantedBy=default.target
-    EOF
-    chmod 664 /etc/systemd/system/wazuh-manager-connection.service
-
-    ## Disable wazuh agent until registration happens
+- name: Configure system to connect on first boot
+  shell: |
+    # Disable wazuh agent until registration happens
     systemctl disable wazuh-agent
 
-    ## Enable the new service unit so we register on first boot
+    # Load wazuh-manager-connection.service, which we just created
     systemctl daemon-reload
+
+    # Enable it so it runs on first boot
     systemctl enable wazuh-manager-connection.service
