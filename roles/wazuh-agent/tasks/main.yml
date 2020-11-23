@@ -91,11 +91,14 @@
     chmod 664 /etc/systemd/system/wazuh-manager-connection.service
     echo systemd_permissions
 
-    ## Enable the new service unit
-    systemctl daemon-reload
-    echo daemon_reload
+
+    ## Disable wazuh agent until registration happens
     systemctl disable wazuh-agent
     echo disable_agent
+
+    ## Enable the new service unit so we register on first boot
+    systemctl daemon-reload
+    echo daemon_reload
     systemctl enable wazuh-manager-connection.service
     echo enable_connection_manager_service
 
