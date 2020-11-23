@@ -10,19 +10,28 @@
         'jq'
     ]
 
-- name: Add the Wazuh Manager repository and GPG key
-  shell: |
-    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
-    echo "deb https://packages.wazuh.com/3.x/apt/ stable main" | tee /etc/apt/sources.list.d/wazuh.list
+- name: Add wazuh apt-key
+  apt_key: 
+    url: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+    state: present 
 
-- name: Install Wazuh Manager
-  apt:
-    name: wazuh-agent=3.13.1-1
+- name: Add wazuh apt repository
+  apt_repository: 
+    repo: 'deb https://packages.wazuh.com/3.x/apt/ stable main' 
+    state: present 
+    filename: wazuh 
     update_cache: yes
 
-- name: Disable the Wazuh updates
-  shell: |
-    echo "wazuh-agent hold" | sudo dpkg --set-selections
+- name: Install Wazuh Agent
+  apt:
+    name: wazuh-agent={{ agent_version }}
+    state: present
+    update_cache: yes
+
+- name: Prevent wazuh-agent from being upgraded to a different version
+  dpkg_selections:
+    name: wazuh-agent
+    selection: hold
 
 - name: Store the password
   shell: |
