@@ -19,20 +19,15 @@
 
     sed -i "s/^deb/#deb/" /etc/apt/sources.list.d/wazuh.list
     apt-get update
-    echo installed_agent
+    
     # ----------------- Store the password and register the agent
 
     SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
-    echo $SECRET_ARN
-
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
-    echo fetched_region
 
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
        | jq -r .value > /var/ossec/etc/authd.pass
-
-    echo fetched_secret
 
     cat << 'PARENT_EOF' > /usr/local/bin/connect-to-wazuh-manager.sh
     #!/bin/bash -x
@@ -42,7 +37,6 @@
     INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
     FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
     OPTIONS="--query Tags[].Value --output text --region $REGION"
-
 
     APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
     STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
@@ -67,17 +61,11 @@
 
     # Boot agent
     systemctl enable wazuh-agent
-    systemctl status wazuh-agent
-    systemctl status wazuh-agent
     systemctl start wazuh-agent
     PARENT_EOF
 
-    echo wrote_script
-
     chmod +x /usr/local/bin/connect-to-wazuh-manager.sh
     chmod 744 /usr/local/bin/connect-to-wazuh-manager.sh
-
-    echo script_permissions
 
     ## Create Systemd service file
     cat << EOF > /etc/systemd/system/wazuh-manager-connection.service
@@ -90,21 +78,11 @@
     [Install]
     WantedBy=default.target
     EOF
-    echo wrote_systemd
     chmod 664 /etc/systemd/system/wazuh-manager-connection.service
-    echo systemd_permissions
-
 
     ## Disable wazuh agent until registration happens
     systemctl disable wazuh-agent
-    echo disable_agent
 
     ## Enable the new service unit so we register on first boot
     systemctl daemon-reload
-    echo daemon_reload
     systemctl enable wazuh-manager-connection.service
-    echo enable_connection_manager_service
-
-    ## Debug commands
-    # status: sudo systemctl status wazuh-manager-connection
-    # full log: journalctl -u wazuh-manager-connection
