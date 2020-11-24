@@ -35,9 +35,8 @@
 
 - name: Store the password
   shell: |
-    SECRET_ARN="arn:aws:secretsmanager:{{ secret_region }}:{{ account_id }}:secret:{{ secret_id }}"
+    SECRET_ARN="{{ secret_id }}"
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
-    echo {{ secret_id }}
 
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
