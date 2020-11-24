@@ -76,11 +76,6 @@
       # Enroll with manager
       /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
 
-- name: Disable service
-  shell: |
-    # Disable wazuh agent until registration happens
-    systemctl disable wazuh-agent
-
 - name: Inject ExecStartPre
   copy:
     dest: /etc/systemd/system/wazuh-agent.service
@@ -104,11 +99,3 @@
 
       [Install]
       WantedBy=multi-user.target
-
-- name: Configure system to connect on first boot
-  shell: |
-    # Reload  wazuh-agent, which we just patched
-    systemctl daemon-reload
-
-    # Enable it so it runs on first boot
-    systemctl enable wazuh-agent
