@@ -80,4 +80,4 @@
   lineinfile:
     path: /etc/systemd/system/wazuh-agent.service
     insertbefore: '^ExecStart'
-    line: ExecStartPre=/usr/local/bin/connect-to-wazuh-manager.sh
+    line: ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh
