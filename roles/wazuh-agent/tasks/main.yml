@@ -47,7 +47,7 @@
     dest: /usr/local/bin/authenticate-with-wazuh-manager.sh
     mode: '0744'
     content: |
-      #!/bin/bash -xe
+      #!/bin/bash -x
       if [ -f "/var/ossec/etc/authd.pass" ]; then
         MANAGER_IP="{{ manager_ip }}"
         REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
