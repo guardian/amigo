@@ -35,7 +35,7 @@
 
 - name: Store the password
   shell: |
-    SECRET_ARN="{{ secret_id }}"
+    SECRET_ARN="{{ secret_arn }}"
     REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
