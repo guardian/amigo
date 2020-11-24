@@ -76,31 +76,39 @@
       # Enroll with manager
       /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
 
-      # Boot agent
-      systemctl enable wazuh-agent
-      systemctl start wazuh-agent
-
-- name: Inject systemd service unit wazuh-manager-connection.service
-  copy:
-    dest: /etc/systemd/system/wazuh-manager-connection.service
-    mode: '0644'
-    content: |
-      [Unit]
-      After=network.service
-
-      [Service]
-      ExecStart=/usr/local/bin/connect-to-wazuh-manager.sh
-
-      [Install]
-      WantedBy=default.target
-
-- name: Configure system to connect on first boot
+- name: Disable service
   shell: |
     # Disable wazuh agent until registration happens
     systemctl disable wazuh-agent
 
-    # Load wazuh-manager-connection.service, which we just created
+- name: Inject ExecStartPre
+  copy:
+    dest: /etc/systemd/system/wazuh-agent.service
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=Wazuh agent
+      Wants=network-online.target
+      After=network.target network-online.target
+
+      [Service]
+      Type=forking
+      EnvironmentFile=/etc/ossec-init.conf
+
+      ExecStartPre=/usr/local/bin/connect-to-wazuh-manager.sh
+      ExecStart=/usr/bin/env ${DIRECTORY}/bin/ossec-control start
+      ExecStop=/usr/bin/env ${DIRECTORY}/bin/ossec-control stop
+      ExecReload=/usr/bin/env ${DIRECTORY}/bin/ossec-control reload
+      KillMode=none
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Configure system to connect on first boot
+  shell: |
+    # Reload  wazuh-agent, which we just patched
     systemctl daemon-reload
 
     # Enable it so it runs on first boot
-    systemctl enable wazuh-manager-connection.service
+    systemctl enable wazuh-agent
