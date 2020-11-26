@@ -48,7 +48,7 @@
     dest: /usr/local/bin/authenticate-with-wazuh-manager.sh
     mode: '0744'
     content: |
-      #!/bin/bash -x
+      #!/bin/bash -xe
       if [ -f "/var/ossec/etc/authd.pass" ]; then
         MANAGER_IP="{{ manager_ip }}"
         EC2_METADATA="169.254.169.254"
@@ -59,9 +59,9 @@
         FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
         OPTIONS="--query Tags[].Value --output text --region $REGION"
 
-        APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
-        STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS)
-        STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS)
+        APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS || true)
+        STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS || true)
+        STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS || true)
 
         cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
 
