@@ -36,7 +36,8 @@
 - name: Store the password
   shell: |
     SECRET_ARN="{{ secret_arn }}"
-    REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+    EC2_METADATA="169.254.169.254"
+    REGION=`curl -s http://${EC2_METADATA}/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
@@ -50,9 +51,11 @@
       #!/bin/bash -x
       if [ -f "/var/ossec/etc/authd.pass" ]; then
         MANAGER_IP="{{ manager_ip }}"
-        REGION=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+        EC2_METADATA="169.254.169.254"
+        
+        REGION=`curl -s http://${EC2_METADATA}/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 
-        INSTANCE_ID=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+        INSTANCE_ID=`curl -s http://${EC2_METADATA}.254/latest/meta-data/instance-id`
         FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
         OPTIONS="--query Tags[].Value --output text --region $REGION"
 
