@@ -243,6 +243,7 @@ Resources:
       AssociatePublicIpAddress: false
       SecurityGroups:
       - !Ref 'ApplicationSecurityGroup'
+      - !Ref 'WazuhSecurityGroup'
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'InstanceProfile'
       UserData:
@@ -295,3 +296,17 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: 10.249.0.0/16
+  WazuhSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Wazuh agent registration and event logging
+      VpcId: !Ref 'VPC'
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '1514'
+        ToPort: '1514'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '1515'
+        ToPort: '1515'
+        CidrIp: 0.0.0.0/0
