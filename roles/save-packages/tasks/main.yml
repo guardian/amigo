@@ -1,0 +1,17 @@
+---
+- name: get tag string
+  shell: |
+    EC2_METADATA="169.254.169.254"
+    REGION=`curl -s http://${EC2_METADATA}/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+    INSTANCE_ID=$(ec2metadata --instance-id)
+    FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
+    OPTIONS="--query Tags[].Value --output text --region $REGION"
+
+    APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS || true)
+    BAKE_ID=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=BakeId $OPTIONS || true)
+
+    PACKAGE_LIST_PATH="/tmp/${APP}-${BAKE_ID}.txt"
+
+    apt list --installed > $PACKAGE_LIST_PATH
+
+    aws s3 cp $PACKAGE_LIST_PATH s3://amigo-data/packagelists/. --region eu-west-1
