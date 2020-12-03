@@ -7,7 +7,6 @@
     FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
     OPTIONS="--query Tags[].Value --output text --region $REGION"
 
-#    APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
     BAKE_ID=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=BakeId $OPTIONS | sed 's/[# ]//g')
 
     LIST_FILENAME="${BAKE_ID}.txt"
