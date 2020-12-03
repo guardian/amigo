@@ -9,6 +9,7 @@ import com.gu.scanamo.error.TypeCoercionError
 sealed trait LinuxDist {
   val name: String
   val provisioners: Seq[PackerProvisionerConfig]
+  def postProvisioners(bakeId: BakeId, region: String): Seq[PackerProvisionerConfig]
   val loginName: String
 }
 object LinuxDist {
@@ -38,6 +39,10 @@ case object Ubuntu extends LinuxDist {
       "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
     ))
   )
+  def postProvisioners(bakeId: BakeId, region: String) = Seq(PackerProvisionerConfig.executeRemoteCommands(Seq(
+    s"""apt list --installed > /tmp/${bakeId}""",
+    s"""aws s3 cp /tmp/${bakeId} s3://amigo-data/packagelists/${bakeId} --region ${region}""")
+  ))
 }
 case object RedHat extends LinuxDist {
   val name = "redhat"
@@ -51,6 +56,7 @@ case object RedHat extends LinuxDist {
       "yum -y install libselinux-python-2.0.94-7.el6"
     ))
   )
+  def postProvisioners(bakeId: BakeId, region: String) = Seq()
 }
 
 case object AmazonLinux2 extends LinuxDist {
@@ -65,6 +71,7 @@ case object AmazonLinux2 extends LinuxDist {
       "yum -y install ansible"
     ))
   )
+  def postProvisioners(bakeId: BakeId, region: String) = Seq()
 }
 
 case class BaseImage(

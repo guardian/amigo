@@ -22,6 +22,7 @@ object PackerBuildConfigGenerator {
     amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata)(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
+    val region = "eu-west-1"
 
     val disk = bake.recipe.diskSize.map(size => List(BlockDeviceMapping(volume_size = size)))
 
@@ -34,7 +35,7 @@ object PackerBuildConfigGenerator {
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
-      region = "eu-west-1",
+      region = region,
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
@@ -62,7 +63,7 @@ object PackerBuildConfigGenerator {
 
     val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
       PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-    )
+    ) ++ bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).postProvisioners(bake.bakeId, region)
 
     PackerBuildConfig(
       variables,
