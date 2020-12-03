@@ -10,7 +10,7 @@
     APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS)
     BAKE_ID=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=BakeId $OPTIONS | sed 's/#//g')
 
-    LIST_FILENAME="${APP}-${BAKE_ID}.txt"
+    LIST_FILENAME="${APP}${BAKE_ID}.txt"
     PACKAGE_LIST_PATH="/tmp/${LIST_FILENAME}"
     echo $PACKAGE_LIST_PATH
 
