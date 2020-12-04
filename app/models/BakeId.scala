@@ -5,6 +5,7 @@ import com.gu.scanamo.error.{ TypeCoercionError, DynamoReadError }
 
 case class BakeId(recipeId: RecipeId, buildNumber: Int) {
   override def toString: String = s"${recipeId.value} #$buildNumber"
+  def toIdString = s"${recipeId.value}-$buildNumber"
 }
 
 object BakeId {

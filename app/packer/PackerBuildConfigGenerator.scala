@@ -63,7 +63,7 @@ object PackerBuildConfigGenerator {
 
     val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
       PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-    ) ++ bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).postProvisioners(bake.bakeId, region)
+    ) :+ PackerProvisionerConfig.executeRemoteCommands(bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).uploadPackagesCommands(bake.bakeId.toIdString, region))
 
     PackerBuildConfig(
       variables,
