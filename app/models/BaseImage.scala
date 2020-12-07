@@ -5,11 +5,13 @@ import models.packer.PackerProvisionerConfig
 import org.joda.time.DateTime
 import cats.syntax.either._
 import com.gu.scanamo.error.TypeCoercionError
+import BakeId.toMetadata
+import BakeId.toFilename
 
 sealed trait LinuxDist {
   val name: String
   val provisioners: Seq[PackerProvisionerConfig]
-  def uploadPackagesCommands(packagesFilename: String, region: String): Seq[String]
+  def uploadPackagesCommands(bakeId: BakeId, region: String): Seq[String]
   val loginName: String
 }
 object LinuxDist {
@@ -19,6 +21,9 @@ object LinuxDist {
     ))(_.name)
 
   def create(name: String): Option[LinuxDist] = all.get(name)
+
+  def packageListUploadCommand(bakeId: BakeId, region: String) =
+    s"aws s3 cp /tmp/${toFilename(bakeId)} s3://amigo-data/packagelists/${toFilename(bakeId)} --region ${region} --metadata ${toMetadata(bakeId)}"
 
   val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
 }
@@ -39,9 +44,9 @@ case object Ubuntu extends LinuxDist {
       "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
     ))
   )
-  def uploadPackagesCommands(packagesFilename: String, region: String) = Seq(
-    s"""apt list --installed > /tmp/${packagesFilename}""",
-    s"""aws s3 cp /tmp/${packagesFilename} s3://amigo-data/packagelists/${packagesFilename} --region ${region}"""
+  def uploadPackagesCommands(bakeId: BakeId, region: String) = Seq(
+    s"""apt list --installed > /tmp/${toFilename(bakeId)}""",
+    LinuxDist.packageListUploadCommand(bakeId, region)
   )
 }
 case object RedHat extends LinuxDist {
@@ -56,9 +61,9 @@ case object RedHat extends LinuxDist {
       "yum -y install libselinux-python-2.0.94-7.el6"
     ))
   )
-  def uploadPackagesCommands(packagesFilename: String, region: String) = Seq(
-    s"yum list installed > /tmp/$packagesFilename",
-    s"aws s3 cp /tmp/$packagesFilename s3://amigo-data-packagelists/ "
+  def uploadPackagesCommands(bakeId: BakeId, region: String) = Seq(
+    s"yum list installed > /tmp/${toFilename(bakeId)}",
+    LinuxDist.packageListUploadCommand(bakeId, region)
   )
 }
 
@@ -74,9 +79,9 @@ case object AmazonLinux2 extends LinuxDist {
       "yum -y install ansible"
     ))
   )
-  def uploadPackagesCommands(packagesFilename: String, region: String) = Seq(
-    s"yum list installed > /tmp/$packagesFilename",
-    s"aws s3 cp /tmp/$packagesFilename s3://amigo-data-packagelists/ "
+  def uploadPackagesCommands(bakeId: BakeId, region: String) = Seq(
+    s"yum list installed > /tmp/${toFilename(bakeId)}",
+    LinuxDist.packageListUploadCommand(bakeId, region)
   )
 }
 
