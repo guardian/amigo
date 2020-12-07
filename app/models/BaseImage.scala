@@ -74,7 +74,10 @@ case object AmazonLinux2 extends LinuxDist {
       "yum -y install ansible"
     ))
   )
-  def uploadPackagesCommands(packagesFilename: String, region: String) = Seq()
+  def uploadPackagesCommands(packagesFilename: String, region: String) = Seq(
+    s"yum list installed > /tmp/$packagesFilename",
+    s"aws s3 cp /tmp/$packagesFilename s3://amigo-data-packagelists/ "
+  )
 }
 
 case class BaseImage(
