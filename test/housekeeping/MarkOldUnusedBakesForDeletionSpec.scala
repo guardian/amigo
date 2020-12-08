@@ -14,7 +14,7 @@ class MarkOldUnusedBakesForDeletionSpec extends FlatSpec with Matchers {
   val newBake2: Bake = fixtureBake(fixtureRecipe("recipe-4", newDate), Some(AmiId("ami-4")), newDate)
 
   def fixtureBaseImage(baseImageId: String, createdDate: DateTime): BaseImage = {
-    BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", createdDate, "Test", createdDate)
+    BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", createdDate, "Test", createdDate, bakeInstance = Some(BakeInstances.x86))
   }
   def fixtureRecipe(id: String, createdDate: DateTime): Recipe = {
     Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id", createdDate), None, List(), "Test", createdDate, "Test", createdDate, None, Nil)

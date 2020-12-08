@@ -6,6 +6,27 @@ import org.joda.time.DateTime
 import cats.syntax.either._
 import com.gu.scanamo.error.TypeCoercionError
 
+import scala.collection.immutable
+
+case class BakeInstance(architecture: String, instanceType: String) {
+  override def toString: String = s"$instanceType (${architecture})"
+}
+
+object BakeInstance {
+  implicit val dynamoFormat: DynamoFormat[BakeInstance] =
+    DynamoFormat.xmap[BakeInstance, String](value => Either.fromOption(
+      BakeInstances.bakeInstanceForArchitecture(value), TypeCoercionError(new RuntimeException(s"$value is not a known architecture"))
+    ))(_.architecture)
+}
+
+object BakeInstances {
+  val x86: BakeInstance = BakeInstance("x86_64", "t3.small")
+  val arm64: BakeInstance = BakeInstance("arm64", "t4g.small")
+  val all: List[BakeInstance] = List(x86, arm64)
+  def bakeInstanceForArchitecture(architecture: String): Option[BakeInstance] = all.find(bi => bi.architecture == architecture)
+
+}
+
 sealed trait LinuxDist {
   val name: String
   val provisioners: Seq[PackerProvisionerConfig]
@@ -76,5 +97,6 @@ case class BaseImage(
   createdAt: DateTime,
   modifiedBy: String,
   modifiedAt: DateTime,
-  linuxDist: Option[LinuxDist] = None)
+  linuxDist: Option[LinuxDist] = None,
+  bakeInstance: Option[BakeInstance])
 

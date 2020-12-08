@@ -8,6 +8,7 @@
     @b3.static("ID"){@image.id.value}
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
     @b3.select( form("linuxDist"), models.LinuxDist.all.toList.map{ case (k,v) => k -> v.name }, '_label -> "Linux Distribution" )
+    @b3.select( form("bakeInstance"), models.BakeInstances.all.map{ case b: BakeInstance => b.architecture -> b.toString }, '_label -> "Bake Instance Type" )
     @b3.textarea( form("description"), '_label -> "Description" )
 
     <div class="form-group">

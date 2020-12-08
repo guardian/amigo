@@ -6,6 +6,7 @@ import com.gu.scanamo.{ DynamoFormat, Scanamo, Table => ScanamoTable }
 import com.gu.scanamo.ops.ScanamoOps
 import models.{ Bake, BakeLog, BaseImage, Recipe }
 import services.Loggable
+import models.BakeInstance.dynamoFormat
 
 import scala.annotation.tailrec
 import scala.util.Try

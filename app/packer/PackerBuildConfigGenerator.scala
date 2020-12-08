@@ -2,7 +2,7 @@ package packer
 
 import java.nio.file.{ Path, Paths }
 
-import models.{ Bake, Ubuntu }
+import models.{ Bake, BakeInstances, Ubuntu }
 import models.packer._
 
 object PackerBuildConfigGenerator {
@@ -31,7 +31,7 @@ object PackerBuildConfigGenerator {
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
-      instance_type = "t3.small",
+      instance_type = s"${bake.recipe.baseImage.bakeInstance.getOrElse(BakeInstances.x86).instanceType}",
 
       ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
 

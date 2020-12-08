@@ -11,7 +11,7 @@ import services.PrismAgents
 
 class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
-  def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now)
+  def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now, bakeInstance = Some(BakeInstances.x86))
   def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), None, List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
   def fixtureRecipeWithSize(id: String, size: Int): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), Some(100), List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
   def fixtureBake(recipe: Recipe, amiId: Option[AmiId]): Bake = Bake(recipe, 1, amiId.map(_ => BakeStatus.Complete).getOrElse(BakeStatus.Failed), amiId, "Test", DateTime.now, false)

@@ -29,7 +29,8 @@ class BaseImageController(
       val form = Forms.editBaseImage.fill((
         image.description,
         image.amiId,
-        image.linuxDist.getOrElse(Ubuntu)
+        image.linuxDist.getOrElse(Ubuntu),
+        image.bakeInstance.getOrElse(BakeInstances.x86)
       ))
       Ok(views.html.editBaseImage(image, form, Roles.listIds))
     }
@@ -40,12 +41,12 @@ class BaseImageController(
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
       }, {
-        case (description, amiId, linuxDist) =>
+        case (description, amiId, linuxDist, bakeInstance) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
           customisedRoles.fold(
             error => BadRequest(s"Problem parsing roles: $error"),
             roles => {
-              BaseImages.update(image, description, amiId, linuxDist, roles, modifiedBy = request.user.fullName)
+              BaseImages.update(image, description, amiId, linuxDist, roles, modifiedBy = request.user.fullName, bakeInstance)
               Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
             }
           )
@@ -61,17 +62,17 @@ class BaseImageController(
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
-      case (id, description, amiId, linuxDist) =>
+      case (id, description, amiId, linuxDist, bakeInstance) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
-            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist)).withError("id", "This base image ID is already in use")
+            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist, bakeInstance)).withError("id", "This base image ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
             customisedRoles.fold(
               error => BadRequest(s"Problem parsing roles: $error"),
               roles => {
-                BaseImages.create(id, description, amiId, roles, createdBy = request.user.fullName, linuxDist)
+                BaseImages.create(id, description, amiId, roles, createdBy = request.user.fullName, linuxDist, bakeInstance)
                 Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
               }
             )
@@ -92,17 +93,24 @@ object BaseImageController {
         .verifying(s"Must be one of ${LinuxDist.all.keys}", LinuxDist.create(_).nonEmpty)
         .transform(LinuxDist.create(_).get, _.name)
 
+    val bakeInstance: Mapping[BakeInstance] =
+      nonEmptyText(maxLength = 16)
+        .verifying(s"Must be one of ${BakeInstances.all}", a => BakeInstances.bakeInstanceForArchitecture(a).nonEmpty)
+        .transform(BakeInstances.bakeInstanceForArchitecture(_).get, _.architecture)
+
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
-      "linuxDist" -> linuxDist
+      "linuxDist" -> linuxDist,
+      "bakeInstance" -> bakeInstance
     ))
 
     val createBaseImage = Form(tuple(
       "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
-      "linuxDist" -> linuxDist
+      "linuxDist" -> linuxDist,
+      "bakeInstance" -> bakeInstance
     ))
   }
 }

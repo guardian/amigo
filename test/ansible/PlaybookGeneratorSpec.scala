@@ -21,7 +21,8 @@ class PlaybookGeneratorSpec extends FlatSpec with Matchers {
         createdBy = "Testy McTest",
         createdAt = DateTime.now(),
         modifiedBy = "Testy McTest",
-        modifiedAt = DateTime.now()
+        modifiedAt = DateTime.now(),
+        bakeInstance = Some(BakeInstances.x86)
       ),
       diskSize = None,
       roles = List(
