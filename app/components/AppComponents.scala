@@ -181,11 +181,13 @@ class AppComponents(context: Context)
     Map("s3_prefix" -> configuration.getString("ansible.packages.s3prefix").getOrElse("")) ++
       configuration.getString("ansible.packages.s3bucket").map("s3_bucket" ->)
 
+  val amigoDataBucket: Option[String] = configuration.getString("amigo.data.bucket")
+
   val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
-  val scheduledBakeRunner = {
+  val scheduledBakeRunner: ScheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup)
+    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
@@ -213,7 +215,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

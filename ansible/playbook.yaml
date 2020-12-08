@@ -4,5 +4,5 @@
   connection: local
   become: true
 
-  tasks:
-    - name: Your task(s) go here...
+  roles:
+    - role-to-test

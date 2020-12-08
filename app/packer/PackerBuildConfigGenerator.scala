@@ -19,7 +19,7 @@ object PackerBuildConfigGenerator {
    *  - tags the resulting AMI with the recipe ID and build number
    */
   def generatePackerBuildConfig(
-    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata)(implicit packerConfig: PackerConfig): PackerBuildConfig = {
+    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
     val region = "eu-west-1"
@@ -62,10 +62,14 @@ object PackerBuildConfigGenerator {
     )
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
+
+    val uploadPackagesCommand = amigoDataBucket.map { bucket =>
+      PackerProvisionerConfig.executeRemoteCommands(baseImage.uploadPackagesCommands(bake.bakeId, region, bucket))
+    }.toSeq
+
     val provisioners = baseImage.provisioners ++ Seq(
-      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles")),
-      PackerProvisionerConfig.executeRemoteCommands(baseImage.uploadPackagesCommands(bake.bakeId, region))
-    )
+      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
+    ) ++ uploadPackagesCommand
 
     PackerBuildConfig(
       variables,
