@@ -13,6 +13,8 @@ GET     /base-images/:id            controllers.BaseImageController.showBaseImag
 GET     /base-images/:id/edit       controllers.BaseImageController.editBaseImage(id: BaseImageId)
 POST    /base-images/:id/edit       controllers.BaseImageController.updateBaseImage(id: BaseImageId)
 POST    /base-images/:id/clone      controllers.BaseImageController.cloneBaseImage(id: BaseImageId)
+GET     /base-images/:id/delete      controllers.BaseImageController.deleteConfirm(id: BaseImageId)
+POST    /base-images/:id/delete      controllers.BaseImageController.deleteBaseImage(id: BaseImageId)
 
 GET     /housekeeping                      controllers.HousekeepingController.showOrphans
 POST    /housekeeping/deleteOrphans        controllers.HousekeepingController.deleteOrphans

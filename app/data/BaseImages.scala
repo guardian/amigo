@@ -4,6 +4,8 @@ import com.gu.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
 import cats.syntax.either._
+import com.amazonaws.services.dynamodbv2.model.DeleteItemResult
+import data.Recipes.table
 
 object BaseImages {
   import Dynamo._
@@ -39,6 +41,10 @@ object BaseImages {
 
   def findById(id: BaseImageId)(implicit dynamo: Dynamo): Option[BaseImage] =
     table.get('id -> id).exec().flatMap(_.toOption)
+
+  def delete(baseImage: BaseImage)(implicit dynamo: Dynamo): DeleteItemResult = {
+    table.delete('id -> baseImage.id.value).exec()
+  }
 
   private def table(implicit dynamo: Dynamo) = dynamo.Tables.baseImages.table
 

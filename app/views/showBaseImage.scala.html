@@ -10,6 +10,7 @@
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
       <a class="btn btn-default" href="@routes.BaseImageController.editBaseImage(image.id)">Edit</a>
+      <a href="@routes.BaseImageController.deleteConfirm(image.id)" class="btn btn-danger">Delete...</a>
     </div>
     <div class="panel-body">
     @b3.form(routes.BaseImageController.cloneBaseImage(image.id)) {

@@ -159,7 +159,7 @@ class RecipeController(
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id).toSeq
       val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
-      Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
+      Ok(views.html.confirmRecipeDelete(recipe, bakes, recipeUsage.bakeUsage))
     }
   }
 
