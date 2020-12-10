@@ -9,7 +9,7 @@ import models._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
 import play.api.mvc._
-import services.{ Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, Loggable, PrismAgents }
 
 class BakeController(
   stage: String,
@@ -18,7 +18,8 @@ class BakeController(
   val authConfig: GoogleAuthConfig,
   val messagesApi: MessagesApi,
   ansibleVars: Map[String, String],
-  debugAvailable: Boolean)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
+  debugAvailable: Boolean,
+  amiMetadataLookup: AmiMetadataLookup)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean) = AuthAction { request =>
@@ -26,7 +27,7 @@ class BakeController(
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>
           val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-          PackerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, debugAvailable && debug)
+          PackerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, debugAvailable && debug, amiMetadataLookup)
           Redirect(routes.BakeController.showBake(recipeId, buildNumber))
         case None =>
           val message = s"Failed to get the next build number for recipe $recipeId"

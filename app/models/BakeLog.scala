@@ -16,7 +16,7 @@ object MessagePart {
   val defaultColour = "#DCDCDC" /* iTerm2's default theme */
 
   val HtmlColours = Map(
-    "yellow" -> "#ECE100"  /* iTerm2's default theme */
+    "yellow" -> "#ECE100" /* iTerm2's default theme */
   )
 
 }

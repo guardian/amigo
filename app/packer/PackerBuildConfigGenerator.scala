@@ -1,9 +1,10 @@
 package packer
 
-import java.nio.file.{ Path, Paths }
-
-import models.{ Bake, Ubuntu }
 import models.packer._
+import models.{ Bake, Ubuntu }
+import services.AmiMetadata
+
+import java.nio.file.{ Path, Paths }
 
 object PackerBuildConfigGenerator {
 
@@ -18,11 +19,17 @@ object PackerBuildConfigGenerator {
    *  - tags the resulting AMI with the recipe ID and build number
    */
   def generatePackerBuildConfig(
-    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
+    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata)(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
 
     val disk = bake.recipe.diskSize.map(size => List(BlockDeviceMapping(volume_size = size)))
+
+    val instanceType = sourceAmiMetadata.architecture match {
+      case "x86_64" => "t3.small"
+      case "arm64" => "t4g.small"
+      case other => throw new IllegalArgumentException(s"Don't know what instance type to use to bake an AMI for $other")
+    }
 
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
@@ -31,7 +38,7 @@ object PackerBuildConfigGenerator {
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
-      instance_type = "t3.small",
+      instance_type = instanceType,
 
       ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
 
