@@ -25,6 +25,7 @@ POST    /recipes                    controllers.RecipeController.createRecipe
 GET     /recipes/:id                controllers.RecipeController.showRecipe(id: RecipeId)
 GET     /recipes/:id/edit           controllers.RecipeController.editRecipe(id: RecipeId)
 POST    /recipes/:id/edit           controllers.RecipeController.updateRecipe(id: RecipeId)
+POST    /recipes/:id/clone          controllers.RecipeController.cloneRecipe(id: RecipeId)
 GET     /recipes/:id/delete         controllers.RecipeController.deleteConfirm(id: RecipeId)
 POST    /recipes/:id/delete         controllers.RecipeController.deleteRecipe(id: RecipeId)
 
