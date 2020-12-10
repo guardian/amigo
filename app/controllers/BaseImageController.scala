@@ -20,7 +20,7 @@ class BaseImageController(
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
-      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq))
+      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq, Forms.cloneBaseImage))
     }
   }
 
@@ -79,6 +79,31 @@ class BaseImageController(
     })
   }
 
+  def cloneBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+    Forms.cloneBaseImage.bindFromRequest.fold(
+      { form => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> s"Failed to clone base image: ${form.errors.head.message}") },
+      { newId =>
+        BaseImages.findById(newId).fold[Result] {
+          BaseImages.findById(id).fold[Result](NotFound) { baseImage =>
+            baseImage.linuxDist match {
+              case Some(linuxDist) =>
+                BaseImages.create(
+                  id = newId,
+                  description = baseImage.description,
+                  amiId = baseImage.amiId,
+                  builtinRoles = baseImage.builtinRoles,
+                  createdBy = request.user.fullName,
+                  linuxDist = linuxDist
+                )
+                Redirect(routes.BaseImageController.showBaseImage(newId)).flashing("info" -> "Successfully cloned base image")
+              case None => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Failed to clone base image as it has not linux dist set")
+            }
+          }
+        }(_ => Conflict(s"$newId already exists"))
+      }
+    )
+  }
+
 }
 
 object BaseImageController {
@@ -104,6 +129,10 @@ object BaseImageController {
       "amiId" -> amiId,
       "linuxDist" -> linuxDist
     ))
+
+    val cloneBaseImage = Form(
+      "newId" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
+    )
   }
 }
 

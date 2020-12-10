@@ -1,13 +1,27 @@
 @import data.Roles
-@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe])(implicit flash: Flash)
-@simpleLayout("AMIgo"){
+@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe], cloneForm: Form[_])(implicit flash: Flash, messages: play.api.i18n.Messages)
 
+@implicitFieldConstructor = @{ b3.inline.fieldConstructor }
+
+@simpleLayout("AMIgo"){
   <h1>@image.id.value</h1>
 
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
       <a class="btn btn-default" href="@routes.BaseImageController.editBaseImage(image.id)">Edit</a>
+    </div>
+    <div class="panel-body">
+    @b3.form(routes.BaseImageController.cloneBaseImage(image.id)) {
+      @b3.inputWrapped( "newId", cloneForm("newId"), 'placeholder -> s"${image.id.value}-cloned" ) { input =>
+        <div class="input-group">
+          @input
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-default">Clone</button>
+          </span>
+        </div>
+      }
+    }
     </div>
   </div>
 
