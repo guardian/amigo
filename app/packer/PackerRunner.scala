@@ -1,18 +1,17 @@
 package packer
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Path }
-
 import ansible.PlaybookGenerator
 import event.EventBus
 import models.Bake
 import models.packer.PackerVariablesConfig
 import play.api.libs.json.Json
-import services.{ Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, Loggable, PrismAgents }
 
-import scala.concurrent.{ Future, Promise }
+import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.{ Files, Path }
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ Future, Promise }
 import scala.util.Try
 
 object PackerRunner extends Loggable {
@@ -24,15 +23,18 @@ object PackerRunner extends Loggable {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(stage: String, bake: Bake, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean)(implicit packerConfig: PackerConfig): Future[Int] = {
+  def createImage(stage: String, bake: Bake, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean, amiMetadataLookup: AmiMetadataLookup)(implicit packerConfig: PackerConfig): Future[Int] = {
     val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars)
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
     Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
+    val sourceAmi = bake.recipe.baseImage.amiId.value
+    val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).right.getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
+
     val awsAccountNumbers = prism.accounts.map(_.accountNumber)
-    log.info(s"AMI will be shared with the following AWS accounts: $awsAccountNumbers")
+
     val packerVars = PackerVariablesConfig(bake)
-    val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(stage, bake, playbookFile, packerVars, awsAccountNumbers)
+    val packerBuildConfig = PackerBuildConfigGenerator.generatePackerBuildConfig(stage, bake, playbookFile, packerVars, awsAccountNumbers, amiMetadata)
     val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
     val packerConfigFile = Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
     Files.write(packerConfigFile, packerJson.getBytes(StandardCharsets.UTF_8)) // TODO error handling

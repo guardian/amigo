@@ -36,7 +36,7 @@ import play.api.routing.Router
 import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.{ ElkLogging, Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismAgents }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -120,6 +120,8 @@ class AppComponents(context: Context)
     .withClientConfiguration(clientConfiguration)
     .build()
 
+  val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
+
   val prism = new Prism(wsClient)
   val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
 
@@ -183,7 +185,7 @@ class AppComponents(context: Context)
 
   val scheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables)
+    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
@@ -211,7 +213,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
