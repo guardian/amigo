@@ -1,8 +1,9 @@
 ---
 - name: Install wget, unzip, jq and other useful stuff
-  apt: name={{ item }} state=present
-  with_items:
+  apt:
+    name:
     - language-pack-en
     - cloud-guest-utils
     - jq
     - unzip
+    state: present

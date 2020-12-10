@@ -1,5 +1,3 @@
 ---
 - name: Install pngquant
-  apt: name={{ item }} state=present
-  with_items:
-    - pngquant
+  apt: name=pngquant state=present

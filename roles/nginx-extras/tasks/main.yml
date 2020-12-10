@@ -1,9 +1,10 @@
 ---
 - name: Install nginx and nginx-extras
-  apt: name={{ item }} state=present
-  with_items:
+  apt:
+    name:
     - nginx
     - nginx-extras
+    state: present
 
 - name: remove default site from sites-enabled
   file: path=/etc/nginx/sites-enabled/default state=absent

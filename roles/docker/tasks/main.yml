@@ -17,14 +17,13 @@
 
 - name: Install required packages
   apt: 
-    name: "{{ item }}"
-    update_cache: yes
-    state: present
-    force: yes
-  with_items:
+    name:
     - apt-transport-https
     - ca-certificates
     - openssl
+    update_cache: yes
+    state: present
+    force: yes
 
 - name: Add repo key
   apt_key:

@@ -1,7 +1,7 @@
 --- 
   - name: Install an old version of Python
-    apt: name={{item}}
-    with_items:
+    apt:
+      name:
       - python2
       - python-setuptools
 
