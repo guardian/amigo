@@ -8,8 +8,12 @@
         accounts: Seq[AWSAccount],
         usage: prism.RecipeUsage,
         allRoles: Seq[RoleSummary],
-        debugAvailable: Boolean
-)(implicit flash: Flash)
+        debugAvailable: Boolean,
+        cloneForm: Form[_]
+)(implicit flash: Flash, messages: play.api.i18n.Messages)
+
+@implicitFieldConstructor = @{ b3.inline.fieldConstructor }
+
 @simpleLayout("AMIgo"){
 
   <h1>@recipe.id.value</h1>
@@ -21,6 +25,18 @@
       <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
       @if(debugAvailable){<a data-href="@routes.BakeController.startBaking(recipe.id, debug = true)" class="post btn btn-warning">Bake with debug enabled</a>}
       <a href="@routes.RecipeController.deleteConfirm(recipe.id)" class="btn btn-danger">Delete...</a>
+    </div>
+    <div class="panel-body">
+      @b3.form(routes.RecipeController.cloneRecipe(recipe.id)) {
+        @b3.inputWrapped( "newId", cloneForm("newId"), 'placeholder -> s"${recipe.id.value}-cloned" ) { input =>
+          <div class="input-group">
+            @input
+            <span class="input-group-btn">
+         <button type="submit" class="btn btn-default">Clone</button>
+            </span>
+          </div>
+        }
+      }
     </div>
   </div>
 

@@ -42,6 +42,9 @@
       @if(flash.get("info").isDefined) {
         <div class="alert alert-success" role="alert">@flash("info")</div>
       }
+      @if(flash.get("error").isDefined) {
+        <div class="alert alert-error" role="alert">@flash("error")</div>
+      }
 
       @content
     </div>

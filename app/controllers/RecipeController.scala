@@ -14,6 +14,7 @@ import services.PrismAgents
 
 import scala.util.Try
 
+//noinspection TypeAnnotation
 class RecipeController(
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
@@ -41,7 +42,8 @@ class RecipeController(
           prismAgents.accounts,
           RecipeUsage(bakes)(prismAgents),
           Roles.list,
-          debugAvailable
+          debugAvailable,
+          Forms.cloneRecipe
         )
       )
     }
@@ -130,11 +132,34 @@ class RecipeController(
     }
   }
 
+  def cloneRecipe(id: RecipeId) = AuthAction { implicit request =>
+    Forms.cloneRecipe.bindFromRequest.fold(
+      { form => Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> s"Failed to clone recipe: ${form.errors.head.message}") },
+      { newId =>
+        Recipes.findById(newId).fold[Result] {
+          Recipes.findById(id).fold[Result](NotFound) { recipe =>
+            Recipes.create(
+              id = newId,
+              description = recipe.description,
+              baseImage = recipe.baseImage,
+              diskSize = recipe.diskSize,
+              roles = recipe.roles,
+              createdBy = request.user.fullName,
+              bakeSchedule = recipe.bakeSchedule,
+              encryptedCopies = recipe.encryptFor
+            )
+            Redirect(routes.RecipeController.showRecipe(newId)).flashing("info" -> "Successfully cloned recipe")
+          }
+        }(_ => Conflict(s"$newId already exists"))
+      }
+    )
+  }
+
   def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id).toSeq
       val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
-      Ok(views.html.confirmDelete(recipe, bakes, recipeUsage.bakeUsage))
+      Ok(views.html.confirmRecipeDelete(recipe, bakes, recipeUsage.bakeUsage))
     }
   }
 
@@ -195,6 +220,10 @@ object RecipeController {
       "bakeSchedule" -> bakeScheduleMapping,
       "encryptFor" -> accountNumbersMapping
     ))
+
+    val cloneRecipe = Form(
+      "newId" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value)
+    )
 
   }
 

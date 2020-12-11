@@ -1,0 +1,25 @@
+@import prism.BakeUsage
+@(baseImageToDelete: BaseImage, usages: Seq[Recipe])
+@simpleLayout("AMIgo"){
+
+    @if(usages.isEmpty) {
+        <h1>Really delete @baseImageToDelete.id?</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Confirm delete</div>
+            <div class="panel-body">
+                <p><a data-href="@routes.BaseImageController.deleteBaseImage(baseImageToDelete.id)" class="post btn btn-danger">Delete</a></p>
+            </div>
+        </div>
+    } else {
+        <h1>Recipe @baseImageToDelete.id is still used by recipes</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Can't be deleted</div>
+            <div class="panel-body">
+                This base image is used by @usages.length recipes and cannot be deleted. You can review the recipes <a href="@routes.BaseImageController.showBaseImage(baseImageToDelete.id)">here</a>.
+            </div>
+        </div>
+    }
+
+}

@@ -12,6 +12,9 @@ POST    /base-images                controllers.BaseImageController.createBaseIm
 GET     /base-images/:id            controllers.BaseImageController.showBaseImage(id: BaseImageId)
 GET     /base-images/:id/edit       controllers.BaseImageController.editBaseImage(id: BaseImageId)
 POST    /base-images/:id/edit       controllers.BaseImageController.updateBaseImage(id: BaseImageId)
+POST    /base-images/:id/clone      controllers.BaseImageController.cloneBaseImage(id: BaseImageId)
+GET     /base-images/:id/delete      controllers.BaseImageController.deleteConfirm(id: BaseImageId)
+POST    /base-images/:id/delete      controllers.BaseImageController.deleteBaseImage(id: BaseImageId)
 
 GET     /housekeeping                      controllers.HousekeepingController.showOrphans
 POST    /housekeeping/deleteOrphans        controllers.HousekeepingController.deleteOrphans
@@ -25,6 +28,7 @@ POST    /recipes                    controllers.RecipeController.createRecipe
 GET     /recipes/:id                controllers.RecipeController.showRecipe(id: RecipeId)
 GET     /recipes/:id/edit           controllers.RecipeController.editRecipe(id: RecipeId)
 POST    /recipes/:id/edit           controllers.RecipeController.updateRecipe(id: RecipeId)
+POST    /recipes/:id/clone          controllers.RecipeController.cloneRecipe(id: RecipeId)
 GET     /recipes/:id/delete         controllers.RecipeController.deleteConfirm(id: RecipeId)
 POST    /recipes/:id/delete         controllers.RecipeController.deleteRecipe(id: RecipeId)
 

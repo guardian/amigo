@@ -7,6 +7,7 @@ import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
+import prism.RecipeUsage
 
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
@@ -20,7 +21,7 @@ class BaseImageController(
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
-      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq))
+      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq, Forms.cloneBaseImage))
     }
   }
 
@@ -79,6 +80,50 @@ class BaseImageController(
     })
   }
 
+  def cloneBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+    Forms.cloneBaseImage.bindFromRequest.fold(
+      { form => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> s"Failed to clone base image: ${form.errors.head.message}") },
+      { newId =>
+        BaseImages.findById(newId).fold[Result] {
+          BaseImages.findById(id).fold[Result](NotFound) { baseImage =>
+            baseImage.linuxDist match {
+              case Some(linuxDist) =>
+                BaseImages.create(
+                  id = newId,
+                  description = baseImage.description,
+                  amiId = baseImage.amiId,
+                  builtinRoles = baseImage.builtinRoles,
+                  createdBy = request.user.fullName,
+                  linuxDist = linuxDist
+                )
+                Redirect(routes.BaseImageController.showBaseImage(newId)).flashing("info" -> "Successfully cloned base image")
+              case None => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> "Failed to clone base image as it does not have a linux distribution set")
+            }
+          }
+        }(_ => Conflict(s"$newId already exists"))
+      }
+    )
+  }
+
+  def deleteConfirm(id: BaseImageId) = AuthAction { implicit request =>
+    BaseImages.findById(id).fold[Result](NotFound) { recipe =>
+      val usedByRecipes = Recipes.findByBaseImage(id).toSeq
+      Ok(views.html.confirmBaseImageDelete(recipe, usedByRecipes))
+    }
+  }
+
+  def deleteBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+    BaseImages.findById(id).fold[Result](NotFound) { image =>
+      val usedByRecipes = Recipes.findByBaseImage(id)
+      if (usedByRecipes.isEmpty) {
+        BaseImages.delete(image)
+        Redirect(routes.BaseImageController.listBaseImages()).flashing("info" -> s"Successfully deleted base image ${id.value}")
+      } else {
+        Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> s"Failed to delete base image as it is in use")
+      }
+    }
+  }
+
 }
 
 object BaseImageController {
@@ -104,6 +149,10 @@ object BaseImageController {
       "amiId" -> amiId,
       "linuxDist" -> linuxDist
     ))
+
+    val cloneBaseImage = Form(
+      "newId" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
+    )
   }
 }
 
