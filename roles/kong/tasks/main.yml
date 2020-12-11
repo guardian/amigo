@@ -1,13 +1,14 @@
 ---
 - name: Install Kong's dependencies
-  apt: name={{item}} state=latest
-  with_items:
+  apt:
+    name:
     - netcat
     - openssl
     - libpcre3
     - dnsmasq
     - procps
     - postgresql-client-{{postgres_version}}
+    state: latest
 
 - name: Create user for Kong
   user: name={{kong_user}} system=yes
