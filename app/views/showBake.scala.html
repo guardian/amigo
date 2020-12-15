@@ -1,4 +1,4 @@
-@(bake: Bake, bakeLogs: Iterable[BakeLog])
+@(bake: Bake, bakeLogs: Iterable[BakeLog], packageList: List[String])
 @layout("AMIgo"){
 
   <h1><a href="@routes.RecipeController.showRecipe(bake.recipe.id)">@bake.recipe.id</a></h1>
@@ -37,6 +37,15 @@
     @for(log <- bakeLogs) {
       <div class="bake-log">[@log.timestamp.toString("YYYY-MM-dd HH:mm:ss")] @log.messageHtml</div>
     }
+  </div>
+
+  <div class="package-list">
+    <h2>Package List</h2>
+    <div class="well" id="packer-output">
+    @for(p <- packageList) {
+      <div class="bake-log">@p</div>
+    }
+    </div>
   </div>
 
 } {

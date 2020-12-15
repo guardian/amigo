@@ -14,7 +14,7 @@ import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.gu.cm.{ ConfigurationLoader, Identity }
+import com.gu.cm.{ ConfigurationLoader, Identity, LocalApplication }
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
 import data.{ Dynamo, Recipes }
@@ -137,12 +137,13 @@ class AppComponents(context: Context)
     new SNS(snsClient, identity.stage, accountNumbers)
   }
 
+  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
+    .withRegion(region)
+    .withCredentials(awsCreds)
+    .withClientConfiguration(clientConfiguration)
+    .build()
+
   configuration.getString("aws.distributionBucket").foreach { bucketName =>
-    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCreds)
-      .withClientConfiguration(clientConfiguration)
-      .build()
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)
   }
 
@@ -215,7 +216,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket, s3Client)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
