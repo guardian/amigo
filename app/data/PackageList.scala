@@ -8,7 +8,7 @@ import scala.util.control.NonFatal
 
 object PackageList extends Loggable {
 
-  val unavailable: List[String] = List("Package list unavailable")
+  val unavailable: List[String] = List("Package list unavailable - has the bake finished?")
 
   def removeNonPackageLines(packages: List[String]): List[String] = {
     packages.filter { p =>

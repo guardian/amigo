@@ -41,6 +41,9 @@
 
   <div class="package-list">
     <h2>Package List</h2>
+    <p>
+      This list contains the packages installed by the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux)
+    </p>
     <div class="well" id="packer-output">
     @for(p <- packageList) {
       <div class="bake-log">@p</div>
