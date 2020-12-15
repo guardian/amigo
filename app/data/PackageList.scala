@@ -25,7 +25,7 @@ object PackageList extends Loggable {
       } else unavailable
     } catch {
       case NonFatal(e) =>
-        log.error(s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey", e)
+        log.warn(s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey", e)
         unavailable
     }
 
