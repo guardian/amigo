@@ -1,11 +1,14 @@
 package data
 
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3Client }
+import com.amazonaws.services.s3.AmazonS3
 import models.BakeId
+import services.Loggable
 
-object PackageList {
+import scala.util.control.NonFatal
 
-  val unavailableText: String = "Package list unavailable"
+object PackageList extends Loggable {
+
+  val unavailable: List[String] = List("Package list unavailable")
 
   def removeNonPackageLines(packages: List[String]): List[String] = {
     packages.filter { p =>
@@ -15,10 +18,17 @@ object PackageList {
 
   def getPackageList(s3Client: AmazonS3, bakeId: BakeId, bucket: String): List[String] = {
     val packageListKey = s"packagelists/${BakeId.toFilename(bakeId)}"
+    try {
+      if (s3Client.doesObjectExist(bucket, packageListKey)) {
+        val list = s3Client.getObjectAsString(bucket, packageListKey)
+        removeNonPackageLines(list.split("\n").toList)
+      } else unavailable
+    } catch {
+      case NonFatal(e) =>
+        log.error(s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey", e)
+        unavailable
+    }
 
-    if (s3Client.doesObjectExist(bucket, packageListKey)) {
-      val list = s3Client.getObjectAsString(bucket, packageListKey)
-      removeNonPackageLines(list.split("\n").toList)
-    } else List(unavailableText)
+
   }
 }
