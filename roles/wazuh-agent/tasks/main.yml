@@ -42,6 +42,8 @@
     aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
        --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
        | jq -r .value > /var/ossec/etc/authd.pass
+  register: command_result
+  failed_when: "'error' in command_result.stderr"
 
 - name: Inject authentication script
   copy:
