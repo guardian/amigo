@@ -1,0 +1,6 @@
+---
+- name: Install a package with pip
+  pip:
+    name: "{{ packages }}"
+    state: "{{ package_state }}"
+    executable: pip3

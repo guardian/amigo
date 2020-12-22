@@ -1,4 +1,9 @@
 ---
+- name: Check Ubuntu version
+  fail:
+    msg: Ubuntu 20.04 (Focal) and above no longer package Python 2. Use the `pip3` role instead.
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 20
+
 - name: install pip
   apt:
     name: ['python-pip']
