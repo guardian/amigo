@@ -48,7 +48,7 @@ class BakeController(
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
       val packageList = amigoDataBucket
         .map(b => PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), b))
-        .getOrElse(PackageList.unavailable)
+        .getOrElse(List("Amigo data bucket not defined: Package list unavailable"))
       Ok(views.html.showBake(bake, bakeLogs, packageList))
     }
   }
