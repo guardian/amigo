@@ -32,6 +32,14 @@ Parameters:
   KinesisStreamName:
     Type: String
     Description: The name (NOT arn) of the Kinesis stream that logs should be shipped to
+
+Mappings:
+  Config:
+    CODE:
+      LowerCaseName: code
+    PROD:
+      LowerCaseName: prod
+
 Resources:
   RootRole:
     Type: AWS::IAM::Role
@@ -304,7 +312,10 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
-      BucketName: !Sub amigo-data-${Stage}
+      BucketName:
+        Fn::Sub:
+          - amigo-data-${LowerCaseStage}
+          - LowerCaseStage: !FindInMap [ Config, Ref: Stage, LowerCaseName ]
       Tags:
         - Key: Stage
           Value: !Ref 'Stage'
