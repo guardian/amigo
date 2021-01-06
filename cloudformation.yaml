@@ -302,6 +302,7 @@ Resources:
         CidrIp: 10.249.0.0/16
   AmigoDataBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
     Properties:
       BucketName: !Sub amigo-data-${Stage}
       Tags:
