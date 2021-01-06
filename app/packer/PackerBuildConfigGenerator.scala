@@ -65,8 +65,8 @@ object PackerBuildConfigGenerator {
     val uploadPackagesCommand = amigoDataBucket.map { bucket =>
       PackerProvisionerConfig.executeRemoteCommands(
         Seq(
-          baseImage.savePackagesListCommand(bake.bakeId),
-          LinuxDist.packageListUploadCommand(bake.bakeId, region, bucket)))
+          baseImage.savePackageListCommand(bake.bakeId),
+          LinuxDist.uploadPackageListCommand(bake.bakeId, region, bucket)))
     }.toSeq
 
     val provisioners = baseImage.provisioners ++ Seq(
