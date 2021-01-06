@@ -23,7 +23,7 @@ object PackageList extends Loggable {
         removeNonPackageLines(list.split("\n").toList)
     } catch {
       case NonFatal(e) =>
-        val message = s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey"
+        val message = s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey. Has the bake finished?"
         log.warn(message, e)
         List(message)
     }
