@@ -7,6 +7,7 @@ import cats.syntax.either._
 import com.gu.scanamo.error.TypeCoercionError
 import BakeId.toMetadata
 import BakeId.toFilename
+import data.PackageList
 
 sealed trait LinuxDist {
   val name: String
@@ -23,7 +24,7 @@ object LinuxDist {
   def create(name: String): Option[LinuxDist] = all.get(name)
 
   def packageListUploadCommand(bakeId: BakeId, region: String, bucket: String) =
-    s"aws s3 cp /tmp/${toFilename(bakeId)} s3://${bucket}/packagelists/${toFilename(bakeId)} --region ${region} --metadata ${toMetadata(bakeId)}"
+    s"aws s3 cp /tmp/${toFilename(bakeId)} s3://${bucket}/${PackageList.packageListsPath}/${toFilename(bakeId)} --region ${region} --metadata ${toMetadata(bakeId)}"
 
   val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
 }

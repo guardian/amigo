@@ -8,6 +8,8 @@ import scala.util.control.NonFatal
 
 object PackageList extends Loggable {
 
+  val packageListsPath = "packagelists"
+
   def removeNonPackageLines(packages: List[String]): List[String] = {
     packages.filter { p =>
       !(p.contains("Listing") || p.contains("Installed Packages") || p.contains("Loaded plugins"))
@@ -15,7 +17,7 @@ object PackageList extends Loggable {
   }
 
   def getPackageList(s3Client: AmazonS3, bakeId: BakeId, bucket: String): List[String] = {
-    val packageListKey = s"packagelists/${BakeId.toFilename(bakeId)}"
+    val packageListKey = s"$packageListsPath/${BakeId.toFilename(bakeId)}"
     try {
         val list = s3Client.getObjectAsString(bucket, packageListKey)
         removeNonPackageLines(list.split("\n").toList)
