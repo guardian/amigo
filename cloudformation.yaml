@@ -101,7 +101,7 @@ Resources:
           Action:
             - s3:GetObject
           Resource:
-            - arn:aws:s3:::amigo-data/*
+            - !Sub 'arn:aws:s3:::${AmigoDataBucket}/*'
       Roles:
       - !Ref 'RootRole'
 
@@ -300,3 +300,14 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: 10.249.0.0/16
+  AmigoDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub amigo-data-${Stage}
+      Tags:
+        - Key: Stage
+          Value: !Ref 'Stage'
+        - Key: Stack
+          Value: deploy
+        - Key: App
+          Value: amigo
