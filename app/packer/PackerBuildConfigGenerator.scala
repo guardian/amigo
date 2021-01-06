@@ -1,10 +1,9 @@
 package packer
 
 import models.packer._
-import models.{ Bake, Ubuntu }
+import models.{Bake, LinuxDist, Ubuntu}
 import services.AmiMetadata
-
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 object PackerBuildConfigGenerator {
 
@@ -64,7 +63,10 @@ object PackerBuildConfigGenerator {
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
 
     val uploadPackagesCommand = amigoDataBucket.map { bucket =>
-      PackerProvisionerConfig.executeRemoteCommands(baseImage.uploadPackagesCommands(bake.bakeId, region, bucket))
+      PackerProvisionerConfig.executeRemoteCommands(
+        Seq(
+          baseImage.savePackagesListCommand(bake.bakeId),
+          LinuxDist.packageListUploadCommand(bake.bakeId, region, bucket)))
     }.toSeq
 
     val provisioners = baseImage.provisioners ++ Seq(
