@@ -32,6 +32,14 @@ Parameters:
   KinesisStreamName:
     Type: String
     Description: The name (NOT arn) of the Kinesis stream that logs should be shipped to
+
+Mappings:
+  Config:
+    CODE:
+      LowerCaseName: code
+    PROD:
+      LowerCaseName: prod
+
 Resources:
   RootRole:
     Type: AWS::IAM::Role
@@ -97,6 +105,11 @@ Resources:
           - s3:GetBucketPolicy
           - s3:PutBucketPolicy
           Resource: arn:aws:s3::*:deploy-tools-dist
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resource:
+            - !Sub 'arn:aws:s3:::${AmigoDataBucket}/*'
       Roles:
       - !Ref 'RootRole'
 
@@ -295,3 +308,18 @@ Resources:
         FromPort: '22'
         ToPort: '22'
         CidrIp: 10.249.0.0/16
+  AmigoDataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName:
+        Fn::Sub:
+          - amigo-data-${LowerCaseStage}
+          - LowerCaseStage: !FindInMap [ Config, Ref: Stage, LowerCaseName ]
+      Tags:
+        - Key: Stage
+          Value: !Ref 'Stage'
+        - Key: Stack
+          Value: deploy
+        - Key: App
+          Value: amigo

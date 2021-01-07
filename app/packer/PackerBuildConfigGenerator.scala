@@ -1,10 +1,9 @@
 package packer
 
 import models.packer._
-import models.{ Bake, Ubuntu }
+import models.{Bake, LinuxDist, Ubuntu}
 import services.AmiMetadata
-
-import java.nio.file.{ Path, Paths }
+import java.nio.file.{Path, Paths}
 
 object PackerBuildConfigGenerator {
 
@@ -19,9 +18,10 @@ object PackerBuildConfigGenerator {
    *  - tags the resulting AMI with the recipe ID and build number
    */
   def generatePackerBuildConfig(
-    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata)(implicit packerConfig: PackerConfig): PackerBuildConfig = {
+    amigoStage: String, bake: Bake, playbookFile: Path, variables: PackerVariablesConfig, awsAccountNumbers: Seq[String], sourceAmiMetadata: AmiMetadata, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
+    val region = "eu-west-1"
 
     val disk = bake.recipe.diskSize.map(size => List(BlockDeviceMapping(volume_size = size)))
 
@@ -34,7 +34,7 @@ object PackerBuildConfigGenerator {
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
-      region = "eu-west-1",
+      region = region,
       vpc_id = packerConfig.vpcId,
       subnet_id = packerConfig.subnetId,
       source_ami = "{{user `base_image_ami_id`}}",
@@ -60,9 +60,18 @@ object PackerBuildConfigGenerator {
 
     )
 
-    val provisioners = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).provisioners ++ Seq(
+    val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
+
+    val uploadPackagesCommand = amigoDataBucket.map { bucket =>
+      PackerProvisionerConfig.executeRemoteCommands(
+        Seq(
+          baseImage.savePackageListCommand(bake.bakeId),
+          LinuxDist.uploadPackageListCommand(bake.bakeId, region, bucket)))
+    }.toSeq
+
+    val provisioners = baseImage.provisioners ++ Seq(
       PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-    )
+    ) ++ uploadPackagesCommand
 
     PackerBuildConfig(
       variables,

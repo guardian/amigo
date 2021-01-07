@@ -5,10 +5,14 @@ import models.packer.PackerProvisionerConfig
 import org.joda.time.DateTime
 import cats.syntax.either._
 import com.gu.scanamo.error.TypeCoercionError
+import BakeId.toMetadata
+import BakeId.toFilename
+import data.PackageList
 
 sealed trait LinuxDist {
   val name: String
   val provisioners: Seq[PackerProvisionerConfig]
+  def savePackageListCommand(bakeId: BakeId): String
   val loginName: String
 }
 object LinuxDist {
@@ -18,6 +22,11 @@ object LinuxDist {
     ))(_.name)
 
   def create(name: String): Option[LinuxDist] = all.get(name)
+
+  def packageListTempPath(bakeId: BakeId) = s"/tmp/${toFilename(bakeId)}"
+
+  def uploadPackageListCommand(bakeId: BakeId, region: String, bucket: String) =
+    s"aws s3 cp ${packageListTempPath(bakeId)} s3://${bucket}/${PackageList.packageListsPath}/${toFilename(bakeId)} --region ${region} --metadata ${toMetadata(bakeId)}"
 
   val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
 }
@@ -38,6 +47,8 @@ case object Ubuntu extends LinuxDist {
       "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
     ))
   )
+  def savePackageListCommand(bakeId: BakeId) =
+    s"apt list --installed > ${LinuxDist.packageListTempPath(bakeId)}"
 }
 case object RedHat extends LinuxDist {
   val name = "redhat"
@@ -51,6 +62,9 @@ case object RedHat extends LinuxDist {
       "yum -y install libselinux-python-2.0.94-7.el6"
     ))
   )
+  def savePackageListCommand(bakeId: BakeId) =
+    s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
+
 }
 
 case object AmazonLinux2 extends LinuxDist {
@@ -65,6 +79,8 @@ case object AmazonLinux2 extends LinuxDist {
       "yum -y install ansible"
     ))
   )
+  def savePackageListCommand(bakeId: BakeId) =
+    s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
 }
 
 case class BaseImage(

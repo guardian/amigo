@@ -9,6 +9,10 @@ case class BakeId(recipeId: RecipeId, buildNumber: Int) {
 
 object BakeId {
 
+  def toFilename(bakeId: BakeId) = s"${bakeId.recipeId.value}--${bakeId.buildNumber}.txt"
+
+  def toMetadata(bakeId: BakeId) = s"Recipe=${bakeId.recipeId.value},BuildNumber=${bakeId.buildNumber}"
+
   // Bake ID is stored as a single string in Dynamo, e.g. "ubuntu-wily-java8 #123"
   private val DynamoFormatRegex = """(.+) #([0-9]+)""".r
 
