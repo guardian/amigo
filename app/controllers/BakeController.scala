@@ -13,6 +13,7 @@ import play.api.mvc._
 import services.{ AmiMetadataLookup, Loggable, PrismAgents }
 import services.{ Loggable, PrismAgents }
 import play.api.libs.json._
+import prism.{ RecipeUsage, SimpleBakeUsage }
 
 class BakeController(
   stage: String,
@@ -24,8 +25,7 @@ class BakeController(
   debugAvailable: Boolean,
   amiMetadataLookup: AmiMetadataLookup,
   amigoDataBucket: Option[String],
-  s3Client: AmazonS3
-)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
+  s3Client: AmazonS3)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean) = AuthAction { request =>
@@ -68,6 +68,15 @@ class BakeController(
       .filter(_.bakeId == bakeId) // only include events relevant to this bake
       .via(EventSource.flow)
     Ok.chunked(source).as("text/event-stream")
+  }
+
+  def allBakeUsages: Action[AnyContent] = AuthAction {
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(Recipes.list(), findBakes = recipeId => Bakes.list(recipeId))(prism)
+
+    val bakeUsages = usages.toList.map { usage =>
+      usage._2.bakeUsage.map(bu => SimpleBakeUsage.fromBakeUsage(bu, amigoDataBucket))
+    }
+    Ok(Json.toJson(bakeUsages))
   }
 
 }
