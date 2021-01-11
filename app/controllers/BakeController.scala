@@ -74,7 +74,7 @@ class BakeController(
 
     val allUsages = RecipeUsage.getUsages(Recipes.list())(prism, dynamo)
 
-    val bakeUsages = SimpleBakeUsage.fromRecipeUsages(allUsages)
+    val bakeUsages = SimpleBakeUsage.fromRecipeUsages(allUsages, amigoDataBucket)
     Ok(Json.toJson(bakeUsages))
   }
 
