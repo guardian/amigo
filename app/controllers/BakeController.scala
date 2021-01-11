@@ -73,7 +73,7 @@ class BakeController(
   def allBakeUsages: Action[AnyContent] = AuthAction {
     val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(Recipes.list(), findBakes = recipeId => Bakes.list(recipeId))(prism)
 
-    val bakeUsages = usages.toList.map { usage =>
+    val bakeUsages = usages.toList.flatMap { usage =>
       usage._2.bakeUsage.map(bu => SimpleBakeUsage.fromBakeUsage(bu, amigoDataBucket))
     }
     Ok(Json.toJson(bakeUsages))
