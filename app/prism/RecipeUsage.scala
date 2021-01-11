@@ -1,6 +1,6 @@
 package prism
 
-import data.PackageList
+import data.{ Bakes, Dynamo, PackageList, Recipes }
 import models.{ AmiId, Bake, BakeId, Recipe, RecipeId }
 import play.api.libs.json.Json
 import prism.Prism.{ Image, Instance, LaunchConfiguration }
@@ -20,6 +20,12 @@ object SimpleBakeUsage {
       bakeUsage.bake.bakeId,
       PackageList.s3Url(bakeUsage.bake.bakeId, amigoDataBucket.getOrElse("unknown-bucket"))
     )
+
+  def fromRecipeUsages(recipeUsages: Iterable[RecipeUsage], amigoDataBucket: Option[String]): Iterable[SimpleBakeUsage] = {
+    recipeUsages.flatMap { usage =>
+      usage.bakeUsage.map(bu => SimpleBakeUsage.fromBakeUsage(bu, amigoDataBucket))
+    }
+  }
 }
 
 case class RecipeUsage(instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration], bakeUsage: Seq[BakeUsage])
@@ -68,6 +74,10 @@ object RecipeUsage {
 
   def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(implicit prismAgents: PrismAgents): Map[Recipe, RecipeUsage] = {
     recipes.map(r => r -> apply(findBakes(r.id))).toMap
+  }
+
+  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo) = {
+    recipes.map(r => RecipeUsage(Bakes.list(r.id)))
   }
 
 }
