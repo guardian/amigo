@@ -39,7 +39,7 @@ GET     /recipes/:recipeId/bakes/:buildNumber           controllers.BakeControll
 GET     /recipes/:recipeId/bakes/:buildNumber/packages  controllers.BakeController.bakePackages(recipeId: RecipeId, buildNumber: Int)
 GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.BakeController.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
 
-GET     /bakeUsages                 controllers.BakeController.allBakeUsages
+GET     /bake-usages                 controllers.BakeController.allBakeUsages
 
 # Healthcheck
 GET     /healthcheck                controllers.RootController.healthcheck
