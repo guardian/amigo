@@ -214,7 +214,7 @@ object RecipeController {
     ))
 
     val createRecipe = Form(tuple(
-      "id" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
+      "id" -> text(minLength = 3, maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
       "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> baseImageIdMapping,
       "diskSize" -> optional(number),
@@ -223,7 +223,7 @@ object RecipeController {
     ))
 
     val cloneRecipe = Form(
-      "newId" -> text(maxLength = 50).transform[RecipeId](RecipeId.apply, _.value)
+      "newId" -> text(minLength = 3, maxLength = 50).transform[RecipeId](RecipeId.apply, _.value)
     )
 
   }

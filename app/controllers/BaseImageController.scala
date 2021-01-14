@@ -144,14 +144,14 @@ object BaseImageController {
     ))
 
     val createBaseImage = Form(tuple(
-      "id" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
+      "id" -> text(minLength = 3, maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
       "linuxDist" -> linuxDist
     ))
 
     val cloneBaseImage = Form(
-      "newId" -> text(maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
+      "newId" -> text(minLength = 3, maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value)
     )
   }
 }
