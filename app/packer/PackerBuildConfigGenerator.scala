@@ -1,9 +1,9 @@
 package packer
 
 import models.packer._
-import models.{Bake, LinuxDist, Ubuntu}
+import models.{ Bake, LinuxDist, Ubuntu }
 import services.AmiMetadata
-import java.nio.file.{Path, Paths}
+import java.nio.file.{ Path, Paths }
 
 object PackerBuildConfigGenerator {
 

@@ -1,13 +1,22 @@
 package models
 
 import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.{ TypeCoercionError, DynamoReadError }
+import com.gu.scanamo.error.{ DynamoReadError, TypeCoercionError }
+import data.PackageList
+import play.api.libs.json.{ JsObject, Json, OWrites, Writes }
 
 case class BakeId(recipeId: RecipeId, buildNumber: Int) {
   override def toString: String = s"${recipeId.value} #$buildNumber"
 }
 
 object BakeId {
+
+  implicit val writes: Writes[BakeId] = new Writes[BakeId] {
+    def writes(bakeId: BakeId): JsObject = Json.obj(
+      "recipeId" -> bakeId.recipeId.value,
+      "buildNumber" -> bakeId.buildNumber
+    )
+  }
 
   def toFilename(bakeId: BakeId) = s"${bakeId.recipeId.value}--${bakeId.buildNumber}.txt"
 

@@ -7,8 +7,9 @@ import org.quartz.CronExpression
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
+import play.api.libs.json.Json
 import play.api.mvc._
-import prism.RecipeUsage
+import prism.{ BakeUsage, RecipeUsage, SimpleBakeUsage }
 import schedule.BakeScheduler
 import services.PrismAgents
 

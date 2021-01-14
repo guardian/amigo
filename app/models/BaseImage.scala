@@ -26,7 +26,7 @@ object LinuxDist {
   def packageListTempPath(bakeId: BakeId) = s"/tmp/${toFilename(bakeId)}"
 
   def uploadPackageListCommand(bakeId: BakeId, region: String, bucket: String) =
-    s"aws s3 cp ${packageListTempPath(bakeId)} s3://${bucket}/${PackageList.packageListsPath}/${toFilename(bakeId)} --region ${region} --metadata ${toMetadata(bakeId)}"
+    s"aws s3 cp ${packageListTempPath(bakeId)} ${PackageList.s3Url(bakeId, bucket)} --region ${region} --metadata ${toMetadata(bakeId)}"
 
   val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
 }

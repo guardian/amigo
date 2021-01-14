@@ -1,12 +1,32 @@
 package prism
 
-import models.{ AmiId, Bake, Recipe, RecipeId }
+import data.{ Bakes, Dynamo, PackageList, Recipes }
+import models.{ AmiId, Bake, BakeId, Recipe, RecipeId }
+import play.api.libs.json.Json
 import prism.Prism.{ Image, Instance, LaunchConfiguration }
 import services.PrismAgents
 
 case class Ami(account: String, id: AmiId)
 
 case class BakeUsage(amiId: AmiId, bake: Bake, viaCopy: Option[Image], instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration])
+
+case class SimpleBakeUsage(bakeId: BakeId, packageListS3Location: String)
+
+object SimpleBakeUsage {
+  implicit val writes = Json.writes[SimpleBakeUsage]
+
+  def fromBakeUsage(bakeUsage: BakeUsage, amigoDataBucket: Option[String]): SimpleBakeUsage =
+    SimpleBakeUsage(
+      bakeUsage.bake.bakeId,
+      PackageList.s3Url(bakeUsage.bake.bakeId, amigoDataBucket.getOrElse("unknown-bucket"))
+    )
+
+  def fromRecipeUsages(recipeUsages: Iterable[RecipeUsage], amigoDataBucket: Option[String]): Iterable[SimpleBakeUsage] = {
+    recipeUsages.flatMap { usage =>
+      usage.bakeUsage.map(bu => SimpleBakeUsage.fromBakeUsage(bu, amigoDataBucket))
+    }
+  }
+}
 
 case class RecipeUsage(instances: Seq[Instance], launchConfigurations: Seq[LaunchConfiguration], bakeUsage: Seq[BakeUsage])
 
@@ -54,6 +74,10 @@ object RecipeUsage {
 
   def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(implicit prismAgents: PrismAgents): Map[Recipe, RecipeUsage] = {
     recipes.map(r => r -> apply(findBakes(r.id))).toMap
+  }
+
+  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo) = {
+    recipes.map(r => RecipeUsage(Bakes.list(r.id)))
   }
 
 }
