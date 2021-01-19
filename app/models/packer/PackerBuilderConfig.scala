@@ -17,6 +17,7 @@ case class PackerBuilderConfig(
   source_ami: String,
   instance_type: String,
   ssh_username: String,
+  ssh_interface: String,
   run_tags: Map[String, String],
   ami_name: String,
   ami_description: String,
@@ -25,7 +26,8 @@ case class PackerBuilderConfig(
   iam_instance_profile: Option[String],
   tags: Map[String, String],
   ami_block_device_mappings: Option[List[BlockDeviceMapping]],
-  launch_block_device_mappings: Option[List[BlockDeviceMapping]])
+  launch_block_device_mappings: Option[List[BlockDeviceMapping]],
+  security_group_id: Option[String])
 
 object PackerBuilderConfig {
   implicit val jsonDiskWrites: OWrites[BlockDeviceMapping] = Json.writes[BlockDeviceMapping]

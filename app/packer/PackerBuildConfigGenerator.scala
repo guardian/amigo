@@ -41,6 +41,7 @@ object PackerBuildConfigGenerator {
       instance_type = instanceType,
 
       ssh_username = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
+      ssh_interface = "session_manager",
 
       run_tags = Map(
         "Stage" -> stage,
@@ -56,8 +57,8 @@ object PackerBuildConfigGenerator {
       iam_instance_profile = packerConfig.instanceProfile,
       tags = imageDetails.tags,
       ami_block_device_mappings = disk,
-      launch_block_device_mappings = disk
-
+      launch_block_device_mappings = disk,
+      security_group_id = packerConfig.securityGroupId
     )
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)

@@ -25,7 +25,9 @@ Parameters:
   PackerVersion:
     Description: What version of Packer to install
     Type: String
-    Default: 1.1.2
+  PackerInstanceProfile:
+    Description: Instance profile given to instances created by Packer #find this in the PackerUser-PackerRole in IAM
+    Type: String
   TLSCert:
     Type: String
     Description: ARN of a TLS certificate to install on the load balancer
@@ -110,6 +112,10 @@ Resources:
             - s3:GetObject
           Resource:
             - !Sub 'arn:aws:s3:::${AmigoDataBucket}/*'
+        - Effect: Allow
+          Action:
+            - iam:GetInstanceProfile
+          Resource: !Ref PackerInstanceProfile
       Roles:
       - !Ref 'RootRole'
 
@@ -133,6 +139,7 @@ Resources:
           - ssm:ListInstanceAssociations
           - ssm:DescribeInstanceProperties
           - ssm:DescribeDocumentParameters
+          - ssm:StartSession
           - ssmmessages:CreateControlChannel
           - ssmmessages:CreateDataChannel
           - ssmmessages:OpenControlChannel
@@ -267,6 +274,9 @@ Resources:
           unzip -d /opt/packer /tmp/packer_*_linux_amd64.zip
           echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 
+          wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+          dpkg -i /tmp/session-manager-plugin.deb
+
           aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
           dpkg -i /tmp/amigo.deb
 
@@ -323,3 +333,14 @@ Resources:
           Value: deploy
         - Key: App
           Value: amigo
+  PackerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub 'amigo-packer-${Stage}'
+      GroupDescription: Security group for instances created by Packer
+      VpcId: !Ref 'VPC'
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0

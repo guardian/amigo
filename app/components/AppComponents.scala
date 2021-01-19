@@ -175,7 +175,8 @@ class AppComponents(context: Context)
     stage = identity.stage,
     vpcId = configuration.getString("packer.vpcId"),
     subnetId = configuration.getString("packer.subnetId"),
-    instanceProfile = configuration.getString("packer.instanceProfile")
+    instanceProfile = configuration.getString("packer.instanceProfile"),
+    securityGroupId = configuration.getString("packer.securityGroupId")
   )
 
   val ansibleVariables: Map[String, String] =
