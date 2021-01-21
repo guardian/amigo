@@ -1,6 +1,5 @@
 ---
 dependencies:
   - apt
-  - enhanced-networking
   - aws-tools
   - ssh-deny-root
