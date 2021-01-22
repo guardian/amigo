@@ -1,0 +1,24 @@
+---
+- name: Reserve 10MB for ssh config
+  command: "dd if=/dev/zero of=/home/ubuntu/ssh.img bs=1024 count=10k"
+  args:
+    creates: "/home/ubuntu/ssh.img"
+
+- name: Create ext2 filesystem
+  filesystem:
+    fstype: ext2
+    dev: /home/ubuntu/ssh.img
+    
+- name: Mount ssh config in homedir
+  mount:
+    path: /home/ubuntu/.ssh
+    src: /home/ubuntu/ssh.img
+    fstype: ext2
+    state: mounted
+
+- name: Set permissions for ssh config dir
+  file:
+    path: /home/ubuntu/.ssh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0700'
