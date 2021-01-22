@@ -22,3 +22,27 @@
     owner: ubuntu
     group: ubuntu
     mode: '0700'
+
+- name: Reserve 10MB for ssm
+  command: "dd if=/dev/zero of=/root/ssm.img bs=1024 count=10k"
+  args:
+    creates: "/root/ssm.img"
+
+- name: Create ext2 filesystem
+  filesystem:
+    fstype: ext2
+    dev: /root/ssm.img
+
+- name: Mount ssm
+  mount:
+    path: /var/lib/amazon/ssm
+    src: /root/ssm.img
+    fstype: ext2
+    state: mounted
+
+- name: Set permissions for ssm dir
+  file:
+    path: /var/lib/amazon/ssm
+    owner: root
+    group: root
+    mode: '0700'
