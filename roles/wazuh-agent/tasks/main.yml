@@ -22,9 +22,35 @@
     filename: wazuh 
     update_cache: yes
 
+- name: Get region
+  shell: |
+    ec2metadata --availability-zone | sed 's/.$//'
+  register: aws_region
+
+- name: Bring in ssm script
+  copy:
+    src: get-ssm-parameter.sh
+    dest: /usr/local/bin/get-ssm-parameter.sh
+    mode: 0555
+
+- name: Get authentication secret
+  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/authentication-secret"
+  register: authentication_secret
+  failed_when: "'error' in authentication_secret.stderr"
+
+- name: Get manager address
+  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/manager-address"
+  register: manager_address
+  failed_when: "'error' in manager_address.stderr"
+
+- name: Get agent version
+  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/agent-version"
+  register: agent_version
+  failed_when: "'error' in agent_version.stderr"
+
 - name: Install Wazuh Agent
   apt:
-    name: wazuh-agent={{ agent_version }}
+    name: wazuh-agent={{ agent_version.stdout }}
     state: present
     update_cache: yes
 
@@ -33,31 +59,24 @@
     name: wazuh-agent
     selection: hold
 
-- name: Store the password
-  shell: |
-    SECRET_ARN="{{ secret_arn }}"
-    EC2_METADATA="169.254.169.254"
-    REGION=`curl -s http://${EC2_METADATA}/latest/meta-data/placement/availability-zone | sed 's/.$//'`
-
-    aws secretsmanager get-secret-value --secret-id $SECRET_ARN \
-       --query SecretString --output text --version-stage AWSCURRENT --region $REGION \
-       | jq -r .value > /var/ossec/etc/authd.pass
-  register: command_result
-  failed_when: "'error' in command_result.stderr"
+- name: Inject authentication
+  copy:
+    dest: /var/ossec/etc/authd.pass
+    mode: 0444
+    content: "{{ authentication_secret.stdout }}"
 
 - name: Inject authentication script
   copy:
     dest: /usr/local/bin/authenticate-with-wazuh-manager.sh
-    mode: '0744'
+    mode: 0744
     content: |
       #!/bin/bash -xe
       if [ -f "/var/ossec/etc/authd.pass" ]; then
-        MANAGER_IP="{{ manager_ip }}"
-        EC2_METADATA="169.254.169.254"
+        MANAGER_ADDRESS="{{ manager_address.stdout }}"
 
-        REGION=`curl -s http://${EC2_METADATA}/latest/meta-data/placement/availability-zone | sed 's/.$//'`
+        REGION=`ec2metadata --availability-zone | sed 's/.$//'`
+        INSTANCE_ID=`ec2metadata --instance-id`
 
-        INSTANCE_ID=`curl -s http://${EC2_METADATA}/latest/meta-data/instance-id`
         FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
         OPTIONS="--query Tags[].Value --output text --region $REGION"
 
@@ -67,7 +86,7 @@
 
         cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
 
-        sed -i "s/MANAGER_IP/$MANAGER_IP/" /var/ossec/etc/ossec.conf
+        sed -i "s/MANAGER_IP/$MANAGER_ADDRESS/" /var/ossec/etc/ossec.conf
         sed -i "s/<protocol>udp<\/protocol>/<protocol>tcp<\/protocol>/" /var/ossec/etc/ossec.conf
         cat >> /var/ossec/etc/ossec.conf << EOF
         <ossec_config>
@@ -80,7 +99,7 @@
       EOF
 
         # Enroll with manager
-        /var/ossec/bin/agent-auth -m $MANAGER_IP -A $INSTANCE_ID
+        /var/ossec/bin/agent-auth -m $MANAGER_ADDRESS -A $INSTANCE_ID
 
         # Cleanup
         rm /var/ossec/etc/authd.pass
