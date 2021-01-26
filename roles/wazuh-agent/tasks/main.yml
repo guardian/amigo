@@ -33,10 +33,10 @@
     dest: /usr/local/bin/get-ssm-parameter.sh
     mode: 0555
 
-- name: Get authentication secret
-  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/authentication-secret"
-  register: authentication_secret
-  failed_when: "'error' in authentication_secret.stderr"
+- name: Get secret_arn
+  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/secret-arn"
+  register: secret_arn
+  failed_when: "'error' in secret_arn.stderr"
 
 - name: Get manager address
   shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/manager-address"
@@ -59,11 +59,13 @@
     name: wazuh-agent
     selection: hold
 
-- name: Inject authentication
-  copy:
-    dest: /var/ossec/etc/authd.pass
-    mode: 0444
-    content: "{{ authentication_secret.stdout }}"
+- name: Store the password
+  shell: |
+    aws secretsmanager get-secret-value --secret-id "{{ secret_arn.stdout }}" \
+       --query SecretString --output text --version-stage AWSCURRENT --region {{ aws_region.stdout }} \
+       | jq -r .value > /var/ossec/etc/authd.pass
+  register: command_result
+  failed_when: "'error' in command_result.stderr"
 
 - name: Inject authentication script
   copy:
