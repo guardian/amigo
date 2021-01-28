@@ -1,0 +1,7 @@
+@(output: List[String])
+
+<div class="well package-list" id="packer-output">
+    @for(o <- output) {
+        <div class="bake-log">@o</div>
+    }
+</div>
