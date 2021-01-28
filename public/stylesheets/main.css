@@ -23,6 +23,20 @@ body { padding-top: 70px; }
     color: #DCDCDC; /* iTerm2's default theme */
 }
 
+.package-diff-insert {
+    color:rgb(239, 246, 252);
+    background: rgb(10, 108, 54);
+    text-decoration: underline;
+}
+
+.package-diff-delete {
+    color: rgb(239, 246, 252);
+    background: rgb(144, 37, 42);
+    text-decoration: line-through;
+}
+
+
+
 .package-list {
     white-space: nowrap;
 }

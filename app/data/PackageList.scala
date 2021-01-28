@@ -8,10 +8,13 @@ import models.BakeId.toFilename
 import models.{ Bake, BakeId }
 >>>>>>> 7e17422 (Diff bake package list with previous bake.)
 import services.Loggable
+import fun.mike.dmp.{ Diff, DiffMatchPatch }
 
+import scala.collection.JavaConverters._
+import scala.collection.{ immutable, mutable }
 import scala.util.control.NonFatal
 
-case class PackageListDiff(removedPackages: List[String], newPackages: List[String])
+case class PackageListDiff(removedPackages: List[String], newPackages: List[String], diff: List[Diff])
 
 object PackageList extends Loggable {
 
@@ -44,7 +47,15 @@ object PackageList extends Loggable {
   def diffPackageLists(newPackageList: List[String], oldPackageList: List[String]): PackageListDiff = {
     val removedPackages = oldPackageList.filter(op => !newPackageList.contains(op))
     val newPackages = newPackageList.filter(np => !oldPackageList.contains(np))
-    PackageListDiff(removedPackages, newPackages)
+
+    val dmp = new DiffMatchPatch()
+    val diff = dmp.diff_main(removedPackages.mkString("\n"), newPackages.mkString("\n"))
+    dmp.diffCleanupSemantic(diff)
+    dmp.Diff_EditCost = 6
+    dmp.diff_cleanupEfficiency(diff)
+    val scalaDiff: List[Diff] = diff.asScala.toList
+
+    PackageListDiff(removedPackages, newPackages, scalaDiff)
   }
 
   def getPackageListDiff(s3Client: AmazonS3, newPackageList: List[String], previousBakeId: Option[BakeId], bucket: Option[String]): Either[String, PackageListDiff] = {
