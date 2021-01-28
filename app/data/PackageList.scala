@@ -1,11 +1,17 @@
 package data
 
 import com.amazonaws.services.s3.AmazonS3
+<<<<<<< HEAD
 import models.BakeId
 import models.BakeId.toFilename
+=======
+import models.{ Bake, BakeId }
+>>>>>>> 7e17422 (Diff bake package list with previous bake.)
 import services.Loggable
 
 import scala.util.control.NonFatal
+
+case class PackageListDiff(removedPackages: List[String], newPackages: List[String])
 
 object PackageList extends Loggable {
 
@@ -19,17 +25,33 @@ object PackageList extends Loggable {
     }
   }
 
-  def getPackageList(s3Client: AmazonS3, bakeId: BakeId, bucket: String): List[String] = {
-    val packageListKey = s3Path(bakeId)
-    try {
-      val list = s3Client.getObjectAsString(bucket, packageListKey)
-      removeNonPackageLines(list.split("\n").toList)
-    } catch {
-      case NonFatal(e) =>
-        val message = s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey. Has the bake finished?"
-        log.warn(message, e)
-        List(message)
+  def getPackageList(s3Client: AmazonS3, bakeId: BakeId, bucket: Option[String]): Either[String, List[String]] = {
+    val maybePackageList: Option[Either[String, List[String]]] = bucket.map { b =>
+      val packageListKey = s"$packageListsPath/${BakeId.toFilename(bakeId)}"
+      try {
+        val list = s3Client.getObjectAsString(b, packageListKey)
+        Right(removeNonPackageLines(list.split("\n").toList))
+      } catch {
+        case NonFatal(e) =>
+          val message = s"Failed to fetch package list from S3 bucket $bucket, key $packageListKey. Has the bake finished?"
+          log.warn(message, e)
+          Left(message)
+      }
     }
+    maybePackageList.getOrElse(Left("Amigo data bucket not defined: can't fetch package list"))
+  }
+
+  def diffPackageLists(newPackageList: List[String], oldPackageList: List[String]): PackageListDiff = {
+    val removedPackages = oldPackageList.filter(op => !newPackageList.contains(op))
+    val newPackages = newPackageList.filter(np => !oldPackageList.contains(np))
+    PackageListDiff(removedPackages, newPackages)
+  }
+
+  def getPackageListDiff(s3Client: AmazonS3, newPackageList: List[String], previousBakeId: Option[BakeId], bucket: Option[String]): Either[String, PackageListDiff] = {
+    val oldPackageList = previousBakeId.map(id => getPackageList(s3Client, id, bucket)).getOrElse(Left("No previous bake to diff with"))
+    for {
+      oldList <- oldPackageList.right
+    } yield diffPackageLists(newPackageList, oldList)
 
   }
 }

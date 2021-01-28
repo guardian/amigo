@@ -44,21 +44,21 @@ class BakeController(
   }
 
   def showBake(recipeId: RecipeId, buildNumber: Int) = AuthAction {
-    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
+    val previousBakeId = Bakes.findPreviousSuccessfulBake(recipeId, buildNumber - 1).map(_.bakeId)
+    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake: Bake =>
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
-      val packageList = amigoDataBucket
-        .map(b => PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), b))
-        .getOrElse(List("Amigo data bucket not defined: Package list unavailable"))
-      Ok(views.html.showBake(bake, bakeLogs, packageList))
+      val packageList = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
+      val packageListDiff = packageList.right.flatMap(p => PackageList.getPackageListDiff(s3Client, p, previousBakeId, amigoDataBucket))
+      Ok(views.html.showBake(bake, bakeLogs, packageList, packageListDiff))
     }
   }
 
   def bakePackages(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction {
-    val list = amigoDataBucket.map(b => PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), b)).getOrElse(List())
-    if (list.nonEmpty) {
-      Ok(Json.obj("packages" -> Json.toJson(list)))
+    val list = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
+    if (list.isLeft) {
+      NotFound(s"Could not find package list for recipe $recipeId, bake $buildNumber: ${list.left.get}")
     } else {
-      NotFound(s"Could not find package list for recipe $recipeId, bake $buildNumber")
+      Ok(Json.obj("packages" -> Json.toJson(list.right.get)))
     }
   }
 

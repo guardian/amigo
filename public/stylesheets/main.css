@@ -23,6 +23,10 @@ body { padding-top: 70px; }
     color: #DCDCDC; /* iTerm2's default theme */
 }
 
+.package-list {
+    white-space: nowrap;
+}
+
 .btn--success:after {
     content: 'Successful';
     display: inline-block;
