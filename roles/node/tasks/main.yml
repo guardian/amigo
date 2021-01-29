@@ -9,7 +9,7 @@
 
 - name: Download & extract Node.js (from nodejs.org)
   unarchive:
-    src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-x64.tar.gz
+    src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-{{architecture}}.tar.gz
     dest: /usr/local
     remote_src: yes
     list_files: yes
