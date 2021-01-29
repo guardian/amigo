@@ -38,7 +38,7 @@ it possible to SSH onto the instance that is being used to build the AMI.
 ## How to run locally
 
 Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
-Amigo app locally and the assoicated packer process should have the sufficient AWS authorization.
+Amigo app locally and the associated packer process should have the sufficient AWS authorization.
 
 <details>
 <summary>Previous run locally advice</summary>
