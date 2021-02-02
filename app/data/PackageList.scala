@@ -1,12 +1,9 @@
 package data
 
 import com.amazonaws.services.s3.AmazonS3
-<<<<<<< HEAD
 import models.BakeId
 import models.BakeId.toFilename
-=======
 import models.{ Bake, BakeId }
->>>>>>> 7e17422 (Diff bake package list with previous bake.)
 import services.Loggable
 import fun.mike.dmp.{ Diff, DiffMatchPatch }
 
@@ -30,7 +27,7 @@ object PackageList extends Loggable {
 
   def getPackageList(s3Client: AmazonS3, bakeId: BakeId, bucket: Option[String]): Either[String, List[String]] = {
     val maybePackageList: Option[Either[String, List[String]]] = bucket.map { b =>
-      val packageListKey = s"$packageListsPath/${BakeId.toFilename(bakeId)}"
+      val packageListKey = s3Path(bakeId)
       try {
         val list = s3Client.getObjectAsString(b, packageListKey)
         Right(removeNonPackageLines(list.split("\n").toList))
@@ -53,6 +50,7 @@ object PackageList extends Loggable {
     dmp.diffCleanupSemantic(diff)
     dmp.Diff_EditCost = 6
     dmp.diff_cleanupEfficiency(diff)
+    diff.asScala.foreach(d => d.text = d.text.replace("\n", "<br />"))
     val scalaDiff: List[Diff] = diff.asScala.toList
 
     PackageListDiff(removedPackages, newPackages, scalaDiff)

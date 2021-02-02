@@ -43,7 +43,7 @@ class BakeController(
     }
   }
 
-  def showBake(recipeId: RecipeId, buildNumber: Int) = AuthAction {
+  def showBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction {
     val previousBakeId = Bakes.findPreviousSuccessfulBake(recipeId, buildNumber - 1).map(_.bakeId)
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake: Bake =>
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))

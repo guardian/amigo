@@ -43,59 +43,49 @@
   </div>
 
   <div class="package-list">
-    <p>
-      This list contains the packages installed by the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux)
-    </p>
-
-    <h2>Package Diff</h2>
+    <h2>Package Changes</h2>
     <div class="row">
+      <div class="col-md-12">
+        <p>
+          This data comes from the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux). Please give any
+          feedback to the devx team.
+        </p>
+      </div>
       @packageListDiff match {
         case Left(message) => {
           <p>message</p>
         }
-        case Right(diff) => {
-          <div class="col-md-6">
-            <h3>Removed Packages</h3>
-            @views.html.fragments.bakeOutput(diff.removedPackages)
-          </div>
-          <div class="col-md-6">
-            <h3>New Packages</h3>
-            @views.html.fragments.bakeOutput(diff.newPackages)
-          </div>
+        case Right(PackageListDiff(removed, added, diff)) => {
          </div>
          <div class="row">
           <div class="col-md-12">
-            <h3>New Packages</h3>
-              <div class="well package-list" id="packer-output">
-                <div class="bake-log">
-              @for(o <- diff.diff) {
-                @o.operation match {
+              <div class="well package-list">
+              @for(d <- diff) {
+                @d.operation match {
                   case Operation.EQUAL => {
-                    <span>@Html(HtmlFormat.escape(o.text).toString.replace("\n", "<br />"))</span>
+                    <span>@Html(d.text)</span>
                   }
                   case Operation.INSERT => {
-                    <ins class="package-diff-insert">@Html(HtmlFormat.escape(o.text).toString.replace("\n", "<br />"))</ins>
+                    <ins class="package-diff-insert">@Html(d.text)</ins>
                   }
                   case Operation.DELETE => {
-                    <del class="package-diff-delete">@Html(HtmlFormat.escape(o.text).toString.replace("\n", "<br />"))</del>
+                    <del class="package-diff-delete">@Html(d.text)</del>
                   }
                 }
-
               }
-                </div>
               </div>
           </div>
         }
       }
     </div>
 
-    <h2>Package List</h2>
+    <h2>All installed packages</h2>
     @packageList match {
       case Left(message) => {
         <p>@message</p>
       }
      case Right(list) => {
-       @views.html.fragments.bakeOutput(packageList.right.get)
+       @views.html.fragments.bakeOutput(list)
      }
     }
 
