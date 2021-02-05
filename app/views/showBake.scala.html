@@ -51,12 +51,12 @@
           feedback to the devx team.
         </p>
       </div>
+    </div>
       @packageListDiff match {
         case Left(message) => {
           <p>@message</p>
         }
         case Right(PackageListDiff(removed, added, diff)) => {
-         </div>
          <div class="row">
           <div class="col-md-12">
               <div class="well package-list">
@@ -75,6 +75,7 @@
               }
               </div>
           </div>
+         </div>
         }
       }
     </div>
