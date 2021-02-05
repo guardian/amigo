@@ -75,7 +75,7 @@ object Bakes {
   def findPreviousSuccessfulBake(recipeId: RecipeId, buildNumber: Int)(implicit dynamo: Dynamo): Option[Bake] = {
     if (buildNumber > 0) {
       val bake = findById(recipeId, buildNumber)
-      if (bake.isEmpty) findPreviousSuccessfulBake(recipeId, buildNumber - 1)
+      if (bake.isEmpty || bake.exists(_.status != BakeStatus.Complete)) findPreviousSuccessfulBake(recipeId, buildNumber - 1)
       else bake
     } else None
   }
