@@ -1,4 +1,7 @@
-@(bake: Bake, bakeLogs: Iterable[BakeLog], packageList: List[String])
+@import data.PackageListDiff
+@import fun.mike.dmp.Operation
+@import fun.mike.dmp.Diff
+@(bake: Bake, bakeLogs: Iterable[BakeLog], packageList: Either[String, List[String]], packageListDiff: Either[String, PackageListDiff])
 @layout("AMIgo"){
 
   <h1><a href="@routes.RecipeController.showRecipe(bake.recipe.id)">@bake.recipe.id</a></h1>
@@ -40,15 +43,53 @@
   </div>
 
   <div class="package-list">
-    <h2>Package List</h2>
-    <p>
-      This list contains the packages installed by the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux)
-    </p>
-    <div class="well" id="packer-output">
-    @for(p <- packageList) {
-      <div class="bake-log">@p</div>
-    }
+
+      @packageListDiff match {
+        case Right(PackageListDiff(previousBakeId, removed, added, diff)) => {
+          <h2>Package Changes</h2>
+          <div class="row">
+            <div class="col-md-12">
+              Package changes since the <a href="@routes.BakeController.showBake(previousBakeId.recipeId, previousBakeId.buildNumber)">last succesful bake</a>.
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="well package-list">
+
+              @for(d <- diff) {
+                @d.operation match {
+                  case Operation.EQUAL => {
+                    <span>@Html(d.text)</span>
+                  }
+                  case Operation.INSERT => {
+                    <ins class="package-diff-insert">@Html(d.text)</ins>
+                  }
+                  case Operation.DELETE => {
+                    <del class="package-diff-delete">@Html(d.text)</del>
+                  }
+                }
+              }
+              </div>
+          </div>
+         </div>
+        }
+        case Left(message) => {}
+      }
     </div>
+
+    <h2>All installed packages</h2>
+      <p>
+        This data comes from the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux).
+      </p>
+    @packageList match {
+      case Left(message) => {
+        @views.html.fragments.bakeOutput(List(message))
+      }
+     case Right(list) => {
+       @views.html.fragments.bakeOutput(list)
+     }
+    }
+
   </div>
 
 } {

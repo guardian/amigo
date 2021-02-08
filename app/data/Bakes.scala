@@ -71,6 +71,15 @@ object Bakes {
     }
   }
 
+  @scala.annotation.tailrec
+  def findPreviousSuccessfulBake(recipeId: RecipeId, buildNumber: Int)(implicit dynamo: Dynamo): Option[Bake] = {
+    if (buildNumber > 0) {
+      val bake = findById(recipeId, buildNumber)
+      if (bake.isEmpty || bake.exists(_.status != BakeStatus.Complete)) findPreviousSuccessfulBake(recipeId, buildNumber - 1)
+      else bake
+    } else None
+  }
+
   def scanForAll()(implicit dynamo: Dynamo): List[Bake.DbModel] = {
     table
       .scan()
