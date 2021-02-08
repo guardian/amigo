@@ -43,23 +43,18 @@
   </div>
 
   <div class="package-list">
-    <h2>Package Changes</h2>
-    <div class="row">
-      <div class="col-md-12">
-        <p>
-          This data comes from the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux). Please give any
-          feedback to the devx team.
-        </p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="well package-list">
+
       @packageListDiff match {
-        case Left(message) => {
-          <p>@message</p>
-        }
-        case Right(PackageListDiff(removed, added, diff)) => {
+        case Right(PackageListDiff(previousBakeId, removed, added, diff)) => {
+          <h2>Package Changes</h2>
+          <div class="row">
+            <div class="col-md-12">
+              Package changes since the <a href="@routes.BakeController.showBake(previousBakeId.recipeId, previousBakeId.buildNumber)">last succesful bake</a>.
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="well package-list">
 
               @for(d <- diff) {
                 @d.operation match {
@@ -78,10 +73,14 @@
           </div>
          </div>
         }
+        case Left(message) => {Unit}
       }
     </div>
 
     <h2>All installed packages</h2>
+      <p>
+        This data comes from the OS default package manager (e.g. apt on Ubuntu, yum on amazon linux).
+      </p>
     @packageList match {
       case Left(message) => {
         @views.html.fragments.bakeOutput(List(message))

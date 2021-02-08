@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 import scala.collection.{ immutable, mutable }
 import scala.util.control.NonFatal
 
-case class PackageListDiff(removedPackages: List[String], newPackages: List[String], diff: List[Diff])
+case class PackageListDiff(previousBakeId: BakeId, removedPackages: List[String], newPackages: List[String], diff: List[Diff])
 
 object PackageList extends Loggable {
 
@@ -41,7 +41,7 @@ object PackageList extends Loggable {
     maybePackageList.getOrElse(Left("Amigo data bucket not defined: can't fetch package list"))
   }
 
-  def diffPackageLists(newPackageList: List[String], oldPackageList: List[String]): PackageListDiff = {
+  def diffPackageLists(newPackageList: List[String], oldPackageList: List[String], previousBakeId: BakeId): PackageListDiff = {
     val removedPackages = oldPackageList.filter(op => !newPackageList.contains(op))
     val newPackages = newPackageList.filter(np => !oldPackageList.contains(np))
 
@@ -53,14 +53,15 @@ object PackageList extends Loggable {
     diff.asScala.foreach(d => d.text = d.text.replace("\n", "<br />"))
     val scalaDiff: List[Diff] = diff.asScala.toList
 
-    PackageListDiff(removedPackages, newPackages, scalaDiff)
+    PackageListDiff(previousBakeId, removedPackages, newPackages, scalaDiff)
   }
 
   def getPackageListDiff(s3Client: AmazonS3, newPackageList: List[String], previousBakeId: Option[BakeId], bucket: Option[String]): Either[String, PackageListDiff] = {
-    val oldPackageList = previousBakeId.map(id => getPackageList(s3Client, id, bucket)).getOrElse(Left("No previous bake to diff with"))
-    for {
-      oldList <- oldPackageList.right
-    } yield diffPackageLists(newPackageList, oldList)
-
-  }
+    previousBakeId.map { pid =>
+      val oldPackageList = getPackageList(s3Client, pid, bucket)
+      for {
+        oldList <- oldPackageList.right
+      } yield diffPackageLists(newPackageList, oldList, pid)
+    }
+  }.getOrElse(Left("No previous bake to diff with"))
 }
