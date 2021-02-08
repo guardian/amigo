@@ -150,6 +150,7 @@ Resources:
           - ssmmessages:CreateDataChannel
           - ssmmessages:OpenControlChannel
           - ssmmessages:OpenDataChannel
+          - ssm:TerminateSession
       Roles:
       - !Ref RootRole
 
