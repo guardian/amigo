@@ -60,7 +60,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.gu" %% "scanamo" % "0.9.5",
-  "com.github.cb372" %% "automagic" % "0.1",
+  "com.github.cb372" %% "automagic" % "0.2.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
   "com.typesafe.akka" %% "akka-agent" % "2.4.2",
