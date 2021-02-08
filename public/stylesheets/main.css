@@ -21,14 +21,14 @@ body { padding-top: 70px; }
 }
 
 .package-diff-insert {
-    color:rgb(239, 246, 252);
-    background: rgb(10, 108, 54);
+    color: #EFF6FC;
+    background: #0A6C36;
     text-decoration: underline;
 }
 
 .package-diff-delete {
-    color: rgb(239, 246, 252);
-    background: rgb(144, 37, 42);
+    color: #EFF6FC;
+    background: #90252A;
     text-decoration: line-through;
 }
 
