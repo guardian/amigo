@@ -27,8 +27,8 @@ body { padding-top: 70px; }
 }
 
 .package-diff-delete {
-    color: rgb(239, 246, 252);
-    background: rgb(144, 37, 42);
+    color: #EFF6FC;
+    background: #90252A;
     text-decoration: line-through;
 }
 
