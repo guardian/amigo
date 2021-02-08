@@ -53,7 +53,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 val jacksonVersion = "2.7.1"
 val awsVersion = "1.11.263"
-val circeVersion = "0.9.0"
+val circeVersion = "0.11.2"
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
