@@ -63,7 +63,7 @@ libraryDependencies ++= Seq(
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
   "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
-  "com.typesafe.akka" %% "akka-agent" % "2.4.2",
+  "com.typesafe.akka" %% "akka-agent" % "2.5.32",
   "com.gu" %% "configuration-magic-play2-4" % "1.3.0",
   "com.gu" %% "play-googleauth" % "0.4.0",
   "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
