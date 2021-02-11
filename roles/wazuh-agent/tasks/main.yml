@@ -97,12 +97,13 @@
             <label key="aws.app">$APP</label>
             <label key="aws.stack">$STACK</label>
             <label key="aws.stage">$STAGE</label>
+            <label key="aws.instanceId">$INSTANCE_ID</label>
           </labels>
         </ossec_config>
       EOF
 
         # Enroll with manager
-        /var/ossec/bin/agent-auth -m $MANAGER_ADDRESS -A $INSTANCE_ID
+        /var/ossec/bin/agent-auth -m $MANAGER_ADDRESS -A "$APP-$STACK-$STAGE-$INSTANCE_ID"
 
         # Cleanup
         rm /var/ossec/etc/authd.pass
