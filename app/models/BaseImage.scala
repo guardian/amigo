@@ -48,7 +48,7 @@ case object Ubuntu extends LinuxDist {
     ))
   )
   def savePackageListCommand(bakeId: BakeId) =
-    s"apt list --installed > ${LinuxDist.packageListTempPath(bakeId)}"
+    s"dpkg-query -W > ${LinuxDist.packageListTempPath(bakeId)}"
 }
 case object RedHat extends LinuxDist {
   val name = "redhat"

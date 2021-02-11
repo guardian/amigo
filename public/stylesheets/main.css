@@ -13,14 +13,27 @@ body { padding-top: 70px; }
     border-radius: 0 0 0.5em 0.5em;
 }
 
-#packer-output {
-    max-height: 400px; /* This gets updated to match the screen size using JS */
-    overflow-y: scroll;
+.well {
     background-color: #15191F; /* iTerm2's default theme */
+    overflow-y: scroll;
+    max-height: 400px; /* This gets updated to match the screen size using JS */
+    color: #DCDCDC; /* iTerm2's default theme */
 }
 
-.bake-log {
-    color: #DCDCDC; /* iTerm2's default theme */
+.package-diff-insert {
+    color: #EFF6FC;
+    background: #0A6C36;
+    text-decoration: underline;
+}
+
+.package-diff-delete {
+    color: #EFF6FC;
+    background: #90252A;
+    text-decoration: line-through;
+}
+
+.package-list {
+    white-space: nowrap;
 }
 
 .btn--success:after {

@@ -91,6 +91,12 @@ Resources:
           Action: ec2:DescribeTags
           Resource: '*'
         - Effect: Allow
+          Action: autoscaling:DescribeAutoScalingGroups
+          Resource: '*'
+        - Effect: Allow
+          Action: autoscaling:DescribeAutoScalingInstances
+          Resource: '*'
+        - Effect: Allow
           Action:
           - sns:ListTopics
           Resource: '*'
@@ -144,6 +150,7 @@ Resources:
           - ssmmessages:CreateDataChannel
           - ssmmessages:OpenControlChannel
           - ssmmessages:OpenDataChannel
+          - ssm:TerminateSession
       Roles:
       - !Ref RootRole
 
