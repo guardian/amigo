@@ -103,7 +103,7 @@
       EOF
 
         # Enroll with manager
-        /var/ossec/bin/agent-auth -m $MANAGER_ADDRESS -A "$APP-$STACK-$STAGE-$INSTANCE_ID"
+        /var/ossec/bin/agent-auth -m $MANAGER_ADDRESS -A "$STACK-$STAGE-$APP-$INSTANCE_ID"
 
         # Cleanup
         rm /var/ossec/etc/authd.pass
