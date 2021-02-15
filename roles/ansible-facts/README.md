@@ -11,6 +11,8 @@ is dependent on the architecture and operating system e.g. for Ubuntu:
 - ARM64: `https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb`
 
 The Ansible fact `ansible_architecture` can be used to determine the architecture of the image and therefore which
-url link to use. By (temporarily) including this role in the recipes `ubuntu-xenial-capi` and `ubuntu-xenial-capi-ARM`
-(and baking the recipes) we were able to determine that the values of `ansible_architecture` were `x86_64` and `aarch64`
-respectively.
+url link to use. 
+
+We temporarily included this role in the recipes `ubuntu-xenial-capi` and `ubuntu-xenial-capi-ARM` for testing purposes.
+After baking the recipes, we were able to determine that the values of `ansible_architecture` were `x86_64` and 
+`aarch64` respectively. We then removed the role from the recipes.
