@@ -1,0 +1,4 @@
+---
+- name: Print all available Ansible facts
+  ansible.builtin.debug:
+    var: ansible_facts
