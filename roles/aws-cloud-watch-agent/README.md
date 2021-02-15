@@ -4,8 +4,7 @@ Currently the role does not assume anything about how the agent should be config
 Typically both of these actions would be performed in the [User Data](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-launchconfig.html#cfn-as-launchconfig-userdata)
 made available to EC2 instances.
 
-At the moment, the role is only available for Ubuntu Linux running on AMD64 architecture, though this can be expanded
-as and when needed; for example by following the pattern in the `aws-tools` role.
+At the moment, the role is available for Ubuntu Linux running on AMD64 or ARM64 architectures.
 
 The AWS documentation on Cloud Watch agent is fairly comprehensive, but scattered; for convenience, some relevant
 resources are listed below:

@@ -3,6 +3,13 @@
   get_url:
     url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
     dest: /tmp/amazon-cloudwatch-agent.deb
+  when: ansible_architecture == "x86_64"
+
+- name: Download cloudwatch agent for Ubuntu arm64
+  get_url:
+    url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
+    dest: /tmp/amazon-cloudwatch-agent.deb
+  when: ansible_architecture == "aarch64"
 
 - name: Install cloudwatch agent
   apt:
