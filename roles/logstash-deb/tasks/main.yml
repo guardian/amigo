@@ -2,8 +2,13 @@
 - name: Add Elasticsearch repository key
   apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
 
-- name: Ensure Logstash is installed
+- name: Ensure Logstash is installed (version < 7.10.0)
   apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
+  when: version is version('7.10.0', '<')
+
+- name: Ensure Logstash is installed (version >= 7.10.0)
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-{{ansible_architecture}}.deb state=present
+  when: version is version(('7.10.0', '>=')
 
 - name: Install Logstash plugins
   command: "{{ ls_home }}/bin/logstash-plugin install {{ item }}"
