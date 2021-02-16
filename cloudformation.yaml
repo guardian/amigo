@@ -272,6 +272,8 @@ Resources:
       - !Ref 'ApplicationSecurityGroup'
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'InstanceProfile'
+      MetadataOptions:
+        HttpTokens: required
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -ev
