@@ -6,9 +6,13 @@
   apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
   when: version is version('7.10.0', '<')
 
-- name: Ensure Logstash is installed (version >= 7.10.0)
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-{{ansible_architecture}}.deb state=present
-  when: version is version(('7.10.0', '>=')
+- name: Ensure Logstash is installed (version >= 7.10.0) for AMD64
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-amd64.deb state=present
+  when: version is version('7.10.0', '>=') and ansible_architecture == "x86_64"
+
+- name: Ensure Logstash is installed (version >= 7.10.0) for ARM64
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-arm64.deb state=present
+  when: version is version('7.10.0', '>=') and ansible_architecture == "aarch64"
 
 - name: Install Logstash plugins
   command: "{{ ls_home }}/bin/logstash-plugin install {{ item }}"
