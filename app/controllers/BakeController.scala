@@ -25,7 +25,8 @@ class BakeController(
   debugAvailable: Boolean,
   amiMetadataLookup: AmiMetadataLookup,
   amigoDataBucket: Option[String],
-  s3Client: AmazonS3)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
+  s3Client: AmazonS3,
+  packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean) = AuthAction { request =>
@@ -33,7 +34,7 @@ class BakeController(
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>
           val theBake = Bakes.create(recipe, buildNumber, startedBy = request.user.fullName)
-          PackerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, debugAvailable && debug, amiMetadataLookup, amigoDataBucket)
+          packerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, debugAvailable && debug, amiMetadataLookup, amigoDataBucket)
           Redirect(routes.BakeController.showBake(recipeId, buildNumber))
         case None =>
           val message = s"Failed to get the next build number for recipe $recipeId"

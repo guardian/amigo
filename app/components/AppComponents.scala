@@ -25,7 +25,7 @@ import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, Notification
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import packer.PackerConfig
+import packer.{ PackerConfig, PackerRunner }
 import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
@@ -185,11 +185,13 @@ class AppComponents(context: Context)
 
   val amigoDataBucket: Option[String] = configuration.getString("amigo.data.bucket")
 
+  val packerRunner = new PackerRunner(configuration.getInt("packer.maxInstances").getOrElse(5))
+
   val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
     val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket)
+    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket, packerRunner)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
@@ -217,7 +219,7 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket, s3Client)
+  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket, s3Client, packerRunner)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
