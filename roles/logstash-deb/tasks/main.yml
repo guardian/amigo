@@ -2,17 +2,22 @@
 - name: Add Elasticsearch repository key
   apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
 
-- name: Ensure Logstash is installed (version < 7.10.0)
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
-  when: version is version('7.10.0', '<')
+- name: Fail when we attempt to install Logstash (version < 7.10.0) for ARM64
+  fail:
+    msg: Logstash (version < 7.10.0) does not work for ARM64 architecture
+  when: version is version('7.10.0', '<') and ansible_architecture == "aarch64"
 
-- name: Ensure Logstash is installed (version >= 7.10.0) for AMD64
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-amd64.deb state=present
-  when: version is version('7.10.0', '>=') and ansible_architecture == "x86_64"
+- name: Ensure Logstash is installed (version < 7.10.0) for AMD64
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
+  when: version is version('7.10.0', '<') and ansible_architecture == "x86_64"
 
 - name: Ensure Logstash is installed (version >= 7.10.0) for ARM64
   apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-arm64.deb state=present
   when: version is version('7.10.0', '>=') and ansible_architecture == "aarch64"
+
+- name: Ensure Logstash is installed (version >= 7.10.0) for AMD64
+  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-amd64.deb state=present
+  when: version is version('7.10.0', '>=') and ansible_architecture == "x86_64"
 
 - name: Install Logstash plugins
   command: "{{ ls_home }}/bin/logstash-plugin install {{ item }}"
