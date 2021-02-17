@@ -6,7 +6,9 @@ import models.RecipeId
 import packer.{ PackerConfig, PackerRunner }
 import services.{ AmiMetadataLookup, Loggable, PrismAgents }
 
-class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String])(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
+class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismAgents, eventBus: EventBus,
+    ansibleVars: Map[String, String], amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String],
+    packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
 
   def bake(recipeId: RecipeId): Unit = {
     if (!enabled) {
@@ -23,7 +25,7 @@ class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismAgents, e
                 val theBake = Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
                 log.info(s"Starting scheduled bake: ${theBake.bakeId}")
-                PackerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, false, amiMetadataLookup, amigoDataBucket)
+                packerRunner.createImage(stage, theBake, prism, eventBus, ansibleVars, false, amiMetadataLookup, amigoDataBucket)
               case None =>
                 log.warn(s"Failed to get the next build number for recipe $recipeId")
             }

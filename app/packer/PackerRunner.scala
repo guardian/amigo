@@ -10,11 +10,12 @@ import services.{ AmiMetadataLookup, Loggable, PrismAgents }
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{ Files, Path }
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise }
 import scala.util.Try
 
-object PackerRunner extends Loggable {
+class PackerRunner(maxInstances: Int) extends Loggable {
 
   private val packerCmd = sys.props.get("packerHome").map(ph => s"$ph/packer").getOrElse("packer")
 
@@ -24,12 +25,12 @@ object PackerRunner extends Loggable {
    * @return a Future of the process's exit value
    */
   def createImage(stage: String, bake: Bake, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean, amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): Future[Int] = {
-    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars)
-    val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
-    Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
-
     val sourceAmi = bake.recipe.baseImage.amiId.value
     val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).right.getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
+
+    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars + ("arch" -> amiMetadata.architecture))
+    val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
+    Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
     val awsAccountNumbers = prism.accounts.map(_.accountNumber)
 
@@ -56,11 +57,15 @@ object PackerRunner extends Loggable {
     val exitValuePromise = Promise[Int]()
 
     val runnable = new Runnable {
-      def run(): Unit = PackerProcessMonitor.monitorProcess(packerProcess, exitValuePromise, bake.bakeId, eventBus)
+      def run(): Unit = try {
+        PackerProcessMonitor.monitorProcess(packerProcess, exitValuePromise, bake.bakeId, eventBus)
+      } finally {
+        startNextPacker(_ -= this)
+      }
     }
     val listenerThread = new Thread(runnable, s"Packer process monitor for ${bake.recipe.id.value} #${bake.buildNumber}")
     listenerThread.setDaemon(true)
-    listenerThread.start()
+    startNextPacker(_ += runnable -> listenerThread)
 
     val exitValueFuture = exitValuePromise.future
 
@@ -72,6 +77,22 @@ object PackerRunner extends Loggable {
     }
 
     exitValueFuture
+  }
+
+  private val packerProcesses = mutable.LinkedHashMap.empty[Runnable, Thread]
+
+  private def startNextPacker(modify: mutable.LinkedHashMap[Runnable, Thread] => Unit): Unit = {
+    packerProcesses.synchronized {
+      modify(packerProcesses)
+      val running: Int = packerProcesses.count { case (_, thread) => thread.isAlive }
+      val toStart: List[Thread] = packerProcesses
+        .toList
+        .map { case (_, thread) => thread }
+        .filterNot { _.isAlive }
+        .take(maxInstances - running)
+      log.info(s"AMIgo current bake total: ${packerProcesses.size}, running: $running, starting: ${toStart.length}")
+      toStart.foreach { _.start() }
+    }
   }
 
 }
