@@ -13,4 +13,14 @@ rm /opt/features/friendly-hostnames/hostnames.txt
 INSTANCE_ID="`wget -qO- http://instance-data/latest/meta-data/instance-id`"
 REGION="`wget -qO- http://instance-data/latest/meta-data/placement/availability-zone | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
 
-aws ec2 --region $REGION create-tags --resources $INSTANCE_ID --tags Key=Name,Value=$FRIENDLY_HOSTNAME
+for i in {1..12}
+do
+    if aws ec2 --region $REGION create-tags --resources $INSTANCE_ID --tags Key=Name,Value=$FRIENDLY_HOSTNAME ; then
+        echo "Tagged $INSTANCE_ID with name=$FRIENDLY_HOSTNAME"
+        exit 0
+    fi
+    echo "Failed to tag instance with friendly hostname, retrying after 5s"
+    sleep 5
+done
+
+echo "Failed to tag instance with friendly hostname"
