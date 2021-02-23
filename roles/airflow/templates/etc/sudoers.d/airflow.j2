@@ -1,5 +1,0 @@
-# MANAGED BY ANSIBLE
-
-Cmnd_Alias     SYSTEMD_AIRFLOW = {{ airflow_services | map('regex_replace', '^(.*)$', '/bin/systemctl restart \\1')| join(', ')}}
-
-{{ airflow_user }} ALL=NOPASSWD: SYSTEMD_AIRFLOW
