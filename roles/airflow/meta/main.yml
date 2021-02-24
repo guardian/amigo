@@ -1,9 +1,0 @@
----
-dependencies:
-  - role: packages
-    packages:
-      - curl
-      - software-properties-common
-      - zip
-  - role: aws-efs
-  - role: systemd-config
