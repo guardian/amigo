@@ -14,7 +14,7 @@ deployments:
     app: amigo
     parameters:
       amiTags:
-        Recipe: xenial-java8-deploy-infrastructure
+        Recipe: arm64-bionic-java8-deploy-infrastructure
         AmigoStage: PROD
       amiEncrypted: true
       templatePath: cloudformation.yaml
