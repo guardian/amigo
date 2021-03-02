@@ -12,6 +12,8 @@ Using this approach the binary will be unpacked to `/usr/local/node` and a `node
 
 * `packages` - npm packages to install globally. e.g. `packages: [pm2, reqwest]`
 
+* `architecture` - defaults to `x64` (but for example, one can specify `arm64` for graviton instances)
+
 Using this approach, node binaries (node, npm, npx) will be accessible at `/usr/local/node/`. The `node` binary is linked to in `/usr/bin` so should be available via the `PATH` environment variable.
 
 #### DEPRECATED Approach
