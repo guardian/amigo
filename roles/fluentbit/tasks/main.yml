@@ -5,7 +5,7 @@
 
 - name: Add repository
   ansible.builtin.apt_repository:
-    repo: deb https://packages.fluentbit.io/ubuntu/bionic bionic main
+    repo: deb https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
 
 - name: Install
   apt:
