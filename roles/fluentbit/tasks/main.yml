@@ -1,0 +1,13 @@
+---
+- name: Add GPG key
+  apt_key:
+    url: "https://packages.fluentbit.io/fluentbit.key"
+
+- name: Add repository
+  ansible.builtin.apt_repository:
+    repo: deb https://packages.fluentbit.io/ubuntu/bionic bionic main
+
+- name: Install
+  apt:
+    name: td-agent-bit
+    update_cache: yes
