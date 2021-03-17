@@ -2,8 +2,8 @@
 - name: Install nginx and nginx-extras
   apt:
     name:
-    - nginx
-    - nginx-extras
+      - nginx={{version | default('newest') }}
+      - nginx-extras={{version | default('newest') }}
     state: present
 
 - name: remove default site from sites-enabled
