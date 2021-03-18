@@ -7,9 +7,10 @@ manual](https://docs.fluentbit.io/manual/) provides a good overview.
 
 ## Configure role
 
-    ubuntu_version: xenial | bionic | focal
+    version: 1.7.2. # for example, defaults to 'newest'
+    ubuntu_version: xenial | bionic | focal # defaults to bionic
 
-The default is `bionic` but we recommend you set this var explicitly in Amigo.
+We recommend you set both vars explicitly in Amigo.
 
 ## On your instance...
 
