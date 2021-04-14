@@ -20,22 +20,15 @@
       <th>Name</th>
       <th>Description</th>
       <th>Usage</th>
+      <th>Status</th>
     </thead>
     <tbody>
     @for(recipe <- recipes.toList.sortBy(_.id.value.toLowerCase)) {
-      <tr>
+      <tr class="@BaseImage.eolStatusClass(recipe.baseImage)">
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
         <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
-         @defining(usages.getOrElse(recipe, prism.RecipeUsage.noUsage)) { usage =>
-        <td class="recipe-usage" title="Used in @usage.instances.size instance@if(usage.instances.size != 1){s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1){s}">
-            <a href="@routes.RecipeController.showUsages(recipe.id)">
-              <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instances" />
-              <span>@usage.instances.size</span>
-              <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
-              <span>@usage.launchConfigurations.size</span>
-            </a>
-        </td>
-        }
+        @fragments.usagesColumn(recipe, usages)
+        <td>@fragments.eolStatus(recipe.baseImage) </td>
       </tr>
     }
     </tbody>

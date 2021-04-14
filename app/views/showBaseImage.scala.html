@@ -1,5 +1,5 @@
 @import data.Roles
-@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe], cloneForm: Form[_])(implicit flash: Flash, messages: play.api.i18n.Messages)
+@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe], cloneForm: Form[_], usages: Map[Recipe, prism.RecipeUsage])(implicit flash: Flash, messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.inline.fieldConstructor }
 
@@ -31,6 +31,7 @@
     <div class="panel-body">
       <p>Created @fragments.timestamp(image.createdAt, image.createdBy)</p>
       <p>Modified @fragments.timestamp(image.modifiedAt, image.modifiedBy)</p>
+      @image.eolDate.map{eolDate => <p class="@BaseImage.eolStatusClass(image)">End of Life @eolDate.toString("dd/MM/yyyy")</p>}
       <p>@image.description</p>
     </div>
   </div>
@@ -57,11 +58,14 @@
         This base image is not used by any recipe
       } else {
         This base image is used by the following recipes:
-        <ul>
+        <table class="table">
         @usedByRecipes.map { recipe =>
-          <li><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></li>
+          <tr>
+            <td><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></td>
+            @fragments.usagesColumn(recipe, usages)
+          </tr>
         }
-        </ul>
+        </table>
       }
     </div>
   </div>

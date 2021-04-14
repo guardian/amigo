@@ -3,15 +3,18 @@ package controllers
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import models._
+import org.joda.time.DateTime
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
 import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.mvc._
 import prism.RecipeUsage
+import services.PrismAgents
 
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    val messagesApi: MessagesApi,
+    prismAgents: PrismAgents)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
   import BaseImageController._
 
   def listBaseImages = AuthAction {
@@ -21,7 +24,8 @@ class BaseImageController(
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
-      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq, Forms.cloneBaseImage))
+      val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(usedByRecipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
+      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq, Forms.cloneBaseImage, usages))
     }
   }
 
@@ -30,7 +34,8 @@ class BaseImageController(
       val form = Forms.editBaseImage.fill((
         image.description,
         image.amiId,
-        image.linuxDist.getOrElse(Ubuntu)
+        image.linuxDist.getOrElse(Ubuntu),
+        image.eolDate.getOrElse(DateTime.now).toLocalDate.toDate
       ))
       Ok(views.html.editBaseImage(image, form, Roles.listIds))
     }
@@ -41,12 +46,12 @@ class BaseImageController(
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
       }, {
-        case (description, amiId, linuxDist) =>
+        case (description, amiId, linuxDist, eolDate) =>
           val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
           customisedRoles.fold(
             error => BadRequest(s"Problem parsing roles: $error"),
             roles => {
-              BaseImages.update(image, description, amiId, linuxDist, roles, modifiedBy = request.user.fullName)
+              BaseImages.update(image, description, amiId, linuxDist, roles, modifiedBy = request.user.fullName, new DateTime(eolDate))
               Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully updated base image")
             }
           )
@@ -62,17 +67,17 @@ class BaseImageController(
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
-      case (id, description, amiId, linuxDist) =>
+      case (id, description, amiId, linuxDist, eolDate) =>
         BaseImages.findById(id) match {
           case Some(existingImage) =>
-            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist)).withError("id", "This base image ID is already in use")
+            val formWithError = Forms.createBaseImage.fill((id, description, amiId, linuxDist, eolDate)).withError("id", "This base image ID is already in use")
             Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
           case None =>
             val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
             customisedRoles.fold(
               error => BadRequest(s"Problem parsing roles: $error"),
               roles => {
-                BaseImages.create(id, description, amiId, roles, createdBy = request.user.fullName, linuxDist)
+                BaseImages.create(id, description, amiId, roles, createdBy = request.user.fullName, linuxDist, Some(new DateTime(eolDate)))
                 Redirect(routes.BaseImageController.showBaseImage(id)).flashing("info" -> "Successfully created base image")
               }
             )
@@ -94,7 +99,8 @@ class BaseImageController(
                   amiId = baseImage.amiId,
                   builtinRoles = baseImage.builtinRoles,
                   createdBy = request.user.fullName,
-                  linuxDist = linuxDist
+                  linuxDist = linuxDist,
+                  eolDate = baseImage.eolDate
                 )
                 Redirect(routes.BaseImageController.showBaseImage(newId)).flashing("info" -> "Successfully cloned base image")
               case None => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> "Failed to clone base image as it does not have a linux distribution set")
@@ -140,14 +146,16 @@ object BaseImageController {
     val editBaseImage = Form(tuple(
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
-      "linuxDist" -> linuxDist
+      "linuxDist" -> linuxDist,
+      "eolDate" -> date("yyyy-MM-dd")
     ))
 
     val createBaseImage = Form(tuple(
       "id" -> text(minLength = 3, maxLength = 50).transform[BaseImageId](BaseImageId.apply, _.value),
       "description" -> text(maxLength = 10000),
       "amiId" -> amiId,
-      "linuxDist" -> linuxDist
+      "linuxDist" -> linuxDist,
+      "eolDate" -> date("yyyy-MM-dd")
     ))
 
     val cloneBaseImage = Form(
