@@ -15,7 +15,8 @@ object BaseImages {
     amiId: AmiId,
     builtinRoles: List[CustomisedRole],
     createdBy: String,
-    linuxDist: LinuxDist, eolDate: Option[DateTime])(implicit dynamo: Dynamo): BaseImage = {
+    linuxDist: LinuxDist,
+    eolDate: Option[DateTime])(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
     val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, Some(linuxDist), eolDate)
 
