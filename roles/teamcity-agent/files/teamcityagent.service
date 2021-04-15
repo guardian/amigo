@@ -15,5 +15,8 @@ Type=forking
 PIDFile=/opt/teamcity/buildAgent/logs/buildAgent.pid
 RemainAfterExit=yes
 
+# agent will exit with 143 during upgrade process
+SuccessExitStatus=143 0
+
 [Install]
 WantedBy=multi-user.target
