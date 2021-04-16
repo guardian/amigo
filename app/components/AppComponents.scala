@@ -215,7 +215,7 @@ class AppComponents(context: Context)
   val debugAvailable = identity.stage != "PROD"
 
   val rootController = new RootController(googleAuthConfig)
-  val baseImageController = new BaseImageController(googleAuthConfig, messagesApi)
+  val baseImageController = new BaseImageController(googleAuthConfig, messagesApi, prismAgents)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)

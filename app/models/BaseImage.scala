@@ -92,5 +92,36 @@ case class BaseImage(
   createdAt: DateTime,
   modifiedBy: String,
   modifiedAt: DateTime,
-  linuxDist: Option[LinuxDist] = None)
+  linuxDist: Option[LinuxDist] = None,
+  eolDate: Option[DateTime] = None)
 
+sealed trait EolStatus
+case object EndOfLife extends EolStatus
+case object EndOfLifeSoon extends EolStatus
+case object Supported extends EolStatus
+
+object BaseImage {
+
+  def eolStatus(image: BaseImage): EolStatus = {
+    if (image.eolDate.exists(_.isBefore(DateTime.now))) {
+      EndOfLife
+    } else if (image.eolDate.exists(_.isBefore((DateTime.now.plusMonths(3))))) {
+      EndOfLifeSoon
+    } else Supported
+  }
+
+  def eolStatusClass(image: BaseImage): String = eolStatus(image) match {
+    case EndOfLife => "end-of-life"
+    case EndOfLifeSoon => "end-of-life-soon"
+    case Supported => "supported"
+  }
+
+  def eolStatusString(image: BaseImage): String = {
+    val eolDateString = image.eolDate.map(_.toString("dd/MM/yyyy")).getOrElse("unknown")
+    eolStatus(image) match {
+      case EndOfLife => s"WARNING: Base image no longer supported. Support ended on ${eolDateString}"
+      case EndOfLifeSoon => s"WARNING: Base image end of life on ${eolDateString}"
+      case Supported => s"Base image supported until ${eolDateString}"
+    }
+  }
+}

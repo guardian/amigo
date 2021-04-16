@@ -103,3 +103,11 @@ td.recipe-usage {
 .role-usage {
     margin-top: 34px;
 }
+
+.end-of-life {
+    background: repeating-linear-gradient(45deg, #fcd7d7, #fcd7d7 10px, #dddddd 10px, #dddddd 20px)
+}
+
+.end-of-life-soon {
+    background: repeating-linear-gradient(45deg, #ffd9b3,  #ffd9b3 10px, #dddddd 10px, #dddddd 20px)
+}

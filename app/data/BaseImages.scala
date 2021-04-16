@@ -15,22 +15,24 @@ object BaseImages {
     amiId: AmiId,
     builtinRoles: List[CustomisedRole],
     createdBy: String,
-    linuxDist: LinuxDist)(implicit dynamo: Dynamo): BaseImage = {
+    linuxDist: LinuxDist,
+    eolDate: Option[DateTime])(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
-    val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, Some(linuxDist))
+    val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, Some(linuxDist), eolDate)
 
     table.put(baseImage).exec()
     baseImage
   }
 
-  def update(baseImage: BaseImage, description: String, amiId: AmiId, linuxDist: LinuxDist, builtinRoles: List[CustomisedRole], modifiedBy: String)(implicit dynamo: Dynamo): Unit = {
+  def update(baseImage: BaseImage, description: String, amiId: AmiId, linuxDist: LinuxDist, builtinRoles: List[CustomisedRole], modifiedBy: String, eolDate: DateTime)(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
       description = description,
       amiId = amiId,
       linuxDist = Some(linuxDist),
       builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
-      modifiedAt = DateTime.now()
+      modifiedAt = DateTime.now(),
+      eolDate = Some(eolDate)
     )
     table.put(updated).exec()
   }

@@ -9,6 +9,8 @@
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
     @b3.select( form("linuxDist"), models.LinuxDist.all.toList.map{ case (k,v) => k -> v.name }, '_label -> "Linux Distribution" )
     @b3.textarea( form("description"), '_label -> "Description" )
+    @b3.date(form("eolDate"), '_label-> "End of Life Date")
+    <p>(Find Ubuntu support info <a href="https://wiki.ubuntu.com/Releases">here</a></p>
 
     <div class="form-group">
       <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>

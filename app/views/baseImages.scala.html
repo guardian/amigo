@@ -16,12 +16,14 @@
     <thead>
       <th>Name</th>
       <th>Description</th>
+      <th>Status</th>
     </thead>
     <tbody>
     @for(image <- images.toList.sortBy(_.id.value.toLowerCase)) {
       <tr>
         <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.id</a></td>
         <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.description</a></td>
+        <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@fragments.eolStatus(image)</a></td>
       </tr>
     }
     </tbody>
