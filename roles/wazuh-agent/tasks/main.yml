@@ -87,6 +87,17 @@
         STACK=$(aws autoscaling $ARGS --query "AutoScalingGroups[0].Tags[?Key == 'Stack'].Value" || true)
         STAGE=$(aws autoscaling $ARGS --query "AutoScalingGroups[0].Tags[?Key == 'Stage'].Value" || true)
 
+        if [ -z "$APP" ] || [ "$APP" == "None"  ]; then
+              echo "Failed to fetch ASG tags, fetching instance tags instead"
+              FILTERS="Name=resource-id,Values=$INSTANCE_ID Name=resource-type,Values=instance"
+              OPTIONS="--query Tags[].Value --output text --region $REGION"
+              APP=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=App $OPTIONS || true)
+              STACK=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stack $OPTIONS || true)
+              STAGE=$(aws ec2 describe-tags --filters $FILTERS Name=key,Values=Stage $OPTIONS || true)
+        else
+              echo "Successfully fetched ASG tags"
+        fi
+
         cp /var/ossec/etc/ossec.conf /var/ossec/etc/ossec.conf.bak
 
         sed -i "s/MANAGER_IP/$MANAGER_ADDRESS/" /var/ossec/etc/ossec.conf
