@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-FRIENDLY_HOSTNAME=`iconv -f utf8 -t ascii//TRANSLIT /opt/features/friendly-hostnames/hostnames.txt | sed s/[^A-Za-z]*//g | awk 'length>4 && length<30' | shuf -n 1`
+FRIENDLY_HOSTNAME=`iconv -c -f utf8 -t ascii//TRANSLIT /opt/features/friendly-hostnames/hostnames.txt | sed s/[^A-Za-z]*//g | awk 'length>4 && length<30' | shuf -n 1`
 
 echo "Chosen hostname=$FRIENDLY_HOSTNAME"
 
