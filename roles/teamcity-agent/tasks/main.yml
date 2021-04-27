@@ -90,6 +90,11 @@
   systemd:
     name: teamcityagent
     enabled: yes
+
+# this fixes an issue with running docker on ubuntu bionic, see here for details: https://github.com/moby/libnetwork/issues/2187
+- name: disable systemd as default ddns server
+  shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
 - name: SBT
   include: sbt.yml
 - name: ".aws Cleanup Script"
