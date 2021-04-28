@@ -96,7 +96,7 @@
   shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 - name: set default java version # to get available versions run `update-java-alternatives --list`
-  shell: update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
+  shell: update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64 --jre-headless --jre
 
 - name: SBT
   include: sbt.yml
