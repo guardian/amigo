@@ -95,10 +95,9 @@
 - name: disable systemd as default ddns server
   shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-- name: set default java version # to get available versions run update-alternatives --list java
+- name: set default java version # to get available versions run `update-java-alternatives --list`
   shell: |
-    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+    update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
 
 - name: SBT
