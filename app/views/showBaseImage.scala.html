@@ -1,5 +1,5 @@
 @import data.Roles
-@(image: BaseImage, allRoles: Seq[RoleSummary], usedByRecipes: Seq[Recipe], cloneForm: Form[_], usages: Map[Recipe, prism.RecipeUsage])(implicit flash: Flash, messages: play.api.i18n.Messages)
+@(image: BaseImage, allRoles: Seq[RoleSummary], usedRecipes: Seq[Recipe], unusedRecipes: Seq[Recipe], cloneForm: Form[_], usages: Map[Recipe, prism.RecipeUsage])(implicit flash: Flash, messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.inline.fieldConstructor }
 
@@ -54,18 +54,12 @@
     <div class="panel-heading">Used by</div>
     <div class="panel-body">
 
-      @if(usedByRecipes.isEmpty) {
+      @if(usedRecipes.isEmpty && unusedRecipes.isEmpty) {
         This base image is not used by any recipe
       } else {
         This base image is used by the following recipes:
-        <table class="table">
-        @usedByRecipes.map { recipe =>
-          <tr>
-            <td><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></td>
-            @fragments.usagesColumn(recipe, usages)
-          </tr>
-        }
-        </table>
+        @fragments.usedByTable("Recipes with active instances/launch configurations", usedRecipes, usages)
+        @fragments.usedByTable("Unused recipes", unusedRecipes, usages)
       }
     </div>
   </div>

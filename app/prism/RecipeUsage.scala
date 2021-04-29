@@ -76,8 +76,16 @@ object RecipeUsage {
     recipes.map(r => r -> apply(findBakes(r.id))).toMap
   }
 
-  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo) = {
+  def getUsagesMap(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo): Map[Recipe, RecipeUsage] = {
+    forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
+  }
+
+  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo): Iterable[RecipeUsage] = {
     recipes.map(r => RecipeUsage(Bakes.list(r.id)))
+  }
+
+  def hasUsage(recipe: Recipe, usages: Map[Recipe, RecipeUsage]): Boolean = {
+    usages.get(recipe).exists(u => u.launchConfigurations.nonEmpty || u.instances.nonEmpty)
   }
 
 }

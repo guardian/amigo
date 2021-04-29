@@ -1,5 +1,6 @@
 @(
-        recipes: Iterable[Recipe],
+        usedRecipes: Iterable[Recipe],
+        unusedRecipes: Iterable[Recipe],
         usages: Map[Recipe, prism.RecipeUsage]
 )
 @simpleLayout("AMIgo"){
@@ -15,23 +16,7 @@
 
   <p>Click on a row for more details.</p>
 
-  <table class="table table-striped">
-    <thead>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Usage</th>
-      <th>Status</th>
-    </thead>
-    <tbody>
-    @for(recipe <- recipes.toList.sortBy(_.id.value.toLowerCase)) {
-      <tr class="@BaseImage.eolStatusClass(recipe.baseImage)">
-        <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.id</a></td>
-        <td class="has-block-link"><a href="@routes.RecipeController.showRecipe(recipe.id)" class="block-link">@recipe.description</a></td>
-        @fragments.usagesColumn(recipe, usages)
-        <td>@fragments.eolStatus(recipe.baseImage) </td>
-      </tr>
-    }
-    </tbody>
-  </table>
+  @fragments.recipeTable("Recipes in use", usedRecipes, usages)
+  @fragments.recipeTable("Unused recipes", unusedRecipes, usages)
 
 }

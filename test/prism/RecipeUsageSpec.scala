@@ -16,6 +16,9 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
   def fixtureRecipeWithSize(id: String, size: Int): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), Some(100), List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)
   def fixtureBake(recipe: Recipe, amiId: Option[AmiId]): Bake = Bake(recipe, 1, amiId.map(_ => BakeStatus.Complete).getOrElse(BakeStatus.Failed), amiId, "Test", DateTime.now, false)
 
+  val emptyUsage: RecipeUsage = RecipeUsage(Seq(), Seq(), Seq())
+  val nonEmptyusage: RecipeUsage = RecipeUsage(Seq(Instance("weatherwax", AmiId("a-tuin"), AWSAccount("Gaspode", "carrot"))), Seq(), Seq())
+
   "RecipeUsage" should "find for each recipes where they are being used" in {
     val amiId1 = AmiId("1")
     val amiId2 = AmiId("2")
@@ -82,6 +85,19 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     recipe3Usages.instances shouldBe Seq.empty
     recipe3Usages.launchConfigurations shouldBe Seq.empty
     recipe3Usages.bakeUsage shouldBe Seq.empty
+  }
+
+  "hasUsage" should "return true if a recipe is used" in {
+    val recipe1 = fixtureRecipe("recipe1")
+    val recipe2 = fixtureRecipe("recipe2")
+    val usages = Map(
+      recipe1 -> emptyUsage,
+      recipe2 -> nonEmptyusage
+    )
+
+    RecipeUsage.hasUsage(recipe1, usages) shouldBe false
+    RecipeUsage.hasUsage(recipe2, usages) shouldBe true
+
   }
 
 }
