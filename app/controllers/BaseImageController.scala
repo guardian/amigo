@@ -24,8 +24,9 @@ class BaseImageController(
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
-      val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(usedByRecipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
-      Ok(views.html.showBaseImage(image, Roles.list, usedByRecipes.toSeq, Forms.cloneBaseImage, usages))
+      val usages: Map[Recipe, RecipeUsage] = RecipeUsage.getUsagesMap(usedByRecipes)(prismAgents, dynamo)
+      val (usedRecipes, unusedRecipes) = usedByRecipes.partition(r => RecipeUsage.hasUsage(r, usages))
+      Ok(views.html.showBaseImage(image, Roles.list, usedRecipes.toSeq, unusedRecipes.toSeq, Forms.cloneBaseImage, usages))
     }
   }
 

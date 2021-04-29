@@ -26,8 +26,9 @@ class RecipeController(
 
   def listRecipes = AuthAction {
     val recipes: Iterable[Recipe] = Recipes.list()
-    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
-    Ok(views.html.recipes(recipes, usages))
+    val usages: Map[Recipe, RecipeUsage] = RecipeUsage.getUsagesMap(recipes)(prismAgents, dynamo)
+    val (usedRecipes, unusedRecipes) = recipes.partition(r => RecipeUsage.hasUsage(r, usages))
+    Ok(views.html.recipes(usedRecipes, unusedRecipes, usages))
   }
 
   def showRecipe(id: RecipeId) = AuthAction { implicit request =>
