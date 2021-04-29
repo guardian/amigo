@@ -1,0 +1,15 @@
+@(title: String, recipes: Seq[Recipe], usages: Map[Recipe, prism.RecipeUsage])
+
+<h3>@title</h3>
+@if(recipes.isEmpty) {
+    <p>No @title.toLowerCase() for this image</p>
+} else {
+    <table class="table">
+    @recipes.map { recipe =>
+        <tr>
+            <td><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></td>
+            @fragments.usagesColumn(recipe, usages)
+        </tr>
+    }
+    </table>
+}
