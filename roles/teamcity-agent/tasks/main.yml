@@ -91,8 +91,7 @@
     name: teamcityagent
     enabled: yes
 
-# this fixes an issue with running docker on ubuntu bionic, see here for details: https://github.com/moby/libnetwork/issues/2187
-- name: disable systemd as default ddns server
+- name: disable systemd as default dns server
   shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 - name: set default java version # to get available versions run `update-java-alternatives --list`
