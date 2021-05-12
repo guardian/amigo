@@ -88,4 +88,11 @@ object RecipeUsage {
     usages.get(recipe).exists(u => u.launchConfigurations.nonEmpty || u.instances.nonEmpty)
   }
 
+  def amiIsUsed(recipeUsage: RecipeUsage, bake: Bake): Boolean = {
+    bake.amiId.exists { amiId =>
+      val usages: Seq[BakeUsage] = recipeUsage.bakeUsage.filter(bu => bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId))
+      usages.nonEmpty
+    }
+  }
+
 }

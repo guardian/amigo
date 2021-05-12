@@ -38,6 +38,8 @@ POST    /recipes/:id/bake                               controllers.BakeControll
 GET     /recipes/:recipeId/bakes/:buildNumber           controllers.BakeController.showBake(recipeId: RecipeId, buildNumber: Int)
 GET     /recipes/:recipeId/bakes/:buildNumber/packages  controllers.BakeController.bakePackages(recipeId: RecipeId, buildNumber: Int)
 GET     /recipes/:recipeId/bakes/:buildNumber/events    controllers.BakeController.bakeEvents(recipeId: models.RecipeId, buildNumber: Int)
+GET     /recipes/:recipeId/bakes/:buildNumber/delete    controllers.BakeController.deleteConfirm(recipeId: models.RecipeId, buildNumber: Int)
+POST     /recipes/:recipeId/bakes/:buildNumber/delete   controllers.BakeController.deleteBake(recipeId: models.RecipeId, buildNumber: Int)
 
 GET     /bake-usages                 controllers.BakeController.allBakeUsages
 

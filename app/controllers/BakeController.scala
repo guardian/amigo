@@ -79,4 +79,25 @@ class BakeController(
     Ok(Json.toJson(bakeUsages))
   }
 
+  def deleteConfirm(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
+    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+      Ok(views.html.confirmBakeDelete(bake.bakeId, recipeUsage.bakeUsage))
+    }
+  }
+
+  def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
+    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+
+      if (recipeUsage.bakeUsage.nonEmpty) {
+        Conflict(s"Can't delete bake ${bake.bakeId.buildNumber} from recipe ${bake.bakeId.recipeId} as it is still used by ${recipeUsage.bakeUsage.size} resources.")
+      } else {
+        Bakes.markToDelete(bake.bakeId)
+        Redirect(routes.RecipeController.showRecipe(recipeId))
+      }
+
+    }
+  }
+
 }

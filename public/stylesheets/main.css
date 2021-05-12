@@ -111,3 +111,13 @@ td.recipe-usage {
 .end-of-life-soon {
     background: repeating-linear-gradient(45deg, #ffd9b3,  #ffd9b3 10px, #dddddd 10px, #dddddd 20px)
 }
+
+.ami-in-use {
+    padding-left: 25px;
+    color: green;
+}
+
+.ami-not-in-use{
+    padding-left: 25px;
+    color: red;
+}
