@@ -1,19 +1,20 @@
 package controllers
 
 import akka.stream.scaladsl.Source
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3Client }
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import event._
+import models.BakeStatus.DeletionScheduled
 import packer._
 import models._
-import play.api.i18n.{ I18nSupport, MessagesApi }
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.EventSource
 import play.api.mvc._
-import services.{ AmiMetadataLookup, Loggable, PrismAgents }
-import services.{ Loggable, PrismAgents }
+import services.{AmiMetadataLookup, Loggable, PrismAgents}
+import services.{Loggable, PrismAgents}
 import play.api.libs.json._
-import prism.{ RecipeUsage, SimpleBakeUsage }
+import prism.{RecipeUsage, SimpleBakeUsage}
 
 class BakeController(
   stage: String,
@@ -94,6 +95,7 @@ class BakeController(
       if (recipeUsage.bakeUsage.nonEmpty) {
         Conflict(s"Can't delete bake ${bake.bakeId.buildNumber} from recipe ${bake.bakeId.recipeId} as it is still used by ${recipeUsage.bakeUsage.size} resources.")
       } else {
+        Bakes.updateStatus(bake.bakeId, DeletionScheduled)
         Bakes.markToDelete(bake.bakeId)
         Redirect(routes.RecipeController.showRecipe(recipeId))
       }
