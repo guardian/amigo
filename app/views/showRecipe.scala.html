@@ -96,9 +96,9 @@
           }
           <th>Status</th>
           <th>AMI</th>
-          <th>AMI In Use</th>
           @* Column for copy button *@
           <th></th>
+          <th>AMI In Use</th>
           @* Column for open in AMIable link *@
           <th></th>
           @* Column for delete bake link *@
@@ -131,28 +131,20 @@
                   <code>@bake.amiId</code>
                 </a>
               </td>
-              <td>
-              @if(RecipeUsage.amiIsUsed(usage, bake )) {
-                <div class="ami-in-use">
-                  @fragments.icons.check()
-                </div>
-              } else {
-                <div class="ami-not-in-use">
-                  @fragments.icons.x()
-                </div>
-                }
-              </td>
               <td class="absolute-container has-block-link">
                 <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@bake.amiId">
                   <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
                 </button>
               </td>
               <td>
+              @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, bake.amiId ))
+              </td>
+              <td>
                 <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
               </td>
 
               <td>
-              @if(!RecipeUsage.amiIsUsed(usage, bake )) {
+              @if(!RecipeUsage.bakeIsUsed(usage, bake.amiId, recentCopies)) {
                 <a href="@routes.BakeController.deleteConfirm(bake.bakeId.recipeId, bake.bakeId.buildNumber)" class="btn btn-danger btn-xs">
                   <img src="@routes.Assets.versioned("images/trash.svg")" width="13" alt="Delete bake AMIs">
                 </a>
@@ -192,10 +184,12 @@
                 </button>
               </td>
               <td>
+                @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, Some(copy.imageId) ))
+              </td>
+              <td>
                 <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
               </td>
-              <td>usages</td>
-              <td>delete</td>
+              <td>@* Delete button column *@</td>
             </tr>
           }
         }

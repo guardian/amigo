@@ -1,0 +1,11 @@
+@(value: Boolean)
+
+@if(value) {
+    <div class="ami-in-use">
+    @fragments.icons.check()
+    </div>
+} else {
+    <div class="ami-not-in-use">
+    @fragments.icons.x()
+    </div>
+}
