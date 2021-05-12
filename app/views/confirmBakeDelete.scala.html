@@ -1,5 +1,5 @@
 @import prism.BakeUsage
-@(bakeId: BakeId, usages: Seq[BakeUsage])
+@(bakeId: BakeId, usages: Seq[BakeUsage], bakeDeletionFrequencyMinutes: Int)
 @simpleLayout("AMIgo"){
 
     @if(usages.isEmpty) {
@@ -8,7 +8,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Confirm delete</div>
             <div class="panel-body">
-                <p>Note that this will schedule the deletion of all encrypted copies of this bake.</p>
+                <p>Note that this will schedule the deletion of all encrypted copies of this bake within the next @bakeDeletionFrequencyMinutes minutes.</p>
                 <p><a data-href="@routes.BakeController.deleteBake(bakeId.recipeId, bakeId.buildNumber)" class="post btn btn-danger">Delete</a></p>
             </div>
         </div>

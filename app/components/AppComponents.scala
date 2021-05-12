@@ -214,8 +214,9 @@ class AppComponents(context: Context)
   val bakesRepo = new BakesRepo(notificationConfig)
   val packerEC2Client = new PackerEC2Client(ec2Client, identity.stage)
 
+  val bakeDeletionFrequencyMinutes = 1
   val houseKeepingJobs = List(
-    new BakeDeletion(dynamo, awsAccount, prismAgents, sender),
+    new BakeDeletion(dynamo, awsAccount, prismAgents, sender, bakeDeletionFrequencyMinutes),
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
     new TimeOutLongRunningBakes(bakesRepo, packerEC2Client),
@@ -243,7 +244,8 @@ class AppComponents(context: Context)
     amiMetadataLookup,
     amigoDataBucket,
     s3Client,
-    packerRunner)
+    packerRunner,
+    bakeDeletionFrequencyMinutes)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(

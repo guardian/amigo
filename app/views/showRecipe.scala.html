@@ -125,7 +125,7 @@
                 @bake.status
               </a>
             </td>
-            @if(bake.amiId.isDefined || true) {
+            @if(bake.amiId.isDefined) {
               <td class="has-block-link">
                 <a class="block-link" href="@routes.BakeController.showBake(bake.recipe.id, bake.buildNumber)">
                   <code>@bake.amiId</code>

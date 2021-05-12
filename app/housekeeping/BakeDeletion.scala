@@ -13,12 +13,13 @@ import services.{ Loggable, PrismAgents }
 class BakeDeletion(dynamo: Dynamo,
     amigoAwsAccount: String,
     prismAgents: PrismAgents,
-    notificationSender: NotificationSender) extends HousekeepingJob with Loggable {
+    notificationSender: NotificationSender,
+    frequencyMinutes: Int) extends HousekeepingJob with Loggable {
 
   implicit private val implDynamo: Dynamo = dynamo
   implicit private val implPrismAgents: PrismAgents = prismAgents
 
-  override val schedule = SimpleScheduleBuilder.repeatMinutelyForever(1)
+  override val schedule = SimpleScheduleBuilder.repeatMinutelyForever(frequencyMinutes)
 
   def housekeep(): Unit = {
     log.info(s"Started bake deletion housekeeping")

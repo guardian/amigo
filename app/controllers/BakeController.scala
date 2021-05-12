@@ -26,7 +26,8 @@ class BakeController(
   amiMetadataLookup: AmiMetadataLookup,
   amigoDataBucket: Option[String],
   s3Client: AmazonS3,
-  packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
+  packerRunner: PackerRunner,
+  bakeDeletionFrequencyMinutes: Int)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = AuthAction { request =>
@@ -82,7 +83,7 @@ class BakeController(
   def deleteConfirm(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
       val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
-      Ok(views.html.confirmBakeDelete(bake.bakeId, recipeUsage.bakeUsage))
+      Ok(views.html.confirmBakeDelete(bake.bakeId, recipeUsage.bakeUsage, bakeDeletionFrequencyMinutes))
     }
   }
 
