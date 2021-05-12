@@ -98,9 +98,8 @@
           <th>AMI</th>
           @* Column for copy button *@
           <th></th>
-          <th>AMI In Use</th>
-          @* Column for open in AMIable link *@
-          <th></th>
+          <th>In Use</th>
+          <th>AMIable</th>
           @* Column for delete bake link *@
           <th></th>
         </thead>
@@ -140,7 +139,9 @@
               @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, bake.amiId ))
               </td>
               <td>
-                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">
+                  <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable">
+                </a>
               </td>
 
               <td>
@@ -165,7 +166,7 @@
               <td>&nbsp;</td>
               <td>
                 <ul class="list-unstyled">
-                  <li>Acc: @defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                  <li>@defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
                       @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
                     }
                   </li>
@@ -187,7 +188,9 @@
                 @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, Some(copy.imageId) ))
               </td>
               <td>
-                <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">
+                  <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable">
+                </a>
               </td>
               <td>@* Delete button column *@</td>
             </tr>

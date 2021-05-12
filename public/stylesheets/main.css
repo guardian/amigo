@@ -112,12 +112,12 @@ td.recipe-usage {
     background: repeating-linear-gradient(45deg, #ffd9b3,  #ffd9b3 10px, #dddddd 10px, #dddddd 20px)
 }
 
-.ami-in-use {
-    padding-left: 25px;
+.check-icon {
+    padding: 5px;
     color: green;
 }
 
-.ami-not-in-use{
-    padding-left: 25px;
+.cross-icon{
+    padding: 5px;
     color: red;
 }
