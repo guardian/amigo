@@ -100,8 +100,6 @@
           <th></th>
           <th>In Use</th>
           <th>AMIable</th>
-          @* Column for delete bake link *@
-          <th></th>
         </thead>
         <tbody>
         @for(bake <- recentBakes) {
@@ -144,16 +142,8 @@
                 </a>
               </td>
 
-              <td>
-              @if(!RecipeUsage.bakeIsUsed(usage, bake.amiId, recentCopies)) {
-                <a href="@routes.BakeController.deleteConfirm(bake.bakeId.recipeId, bake.bakeId.buildNumber)" class="btn btn-danger btn-xs">
-                  <img src="@routes.Assets.versioned("images/trash.svg")" width="13" alt="Delete bake AMIs">
-                </a>
-              }
-              </td>
               </td>
             } else {
-              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -192,7 +182,6 @@
                   <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable" title="View in AMIable">
                 </a>
               </td>
-              <td>@* Delete button column *@</td>
             </tr>
           }
         }

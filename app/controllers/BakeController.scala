@@ -52,7 +52,11 @@ class BakeController(
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
       val packageList = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
       val packageListDiff = packageList.right.flatMap(p => PackageList.getPackageListDiff(s3Client, p, previousBakeId, amigoDataBucket))
-      Ok(views.html.showBake(bake, bakeLogs, packageList, packageListDiff))
+
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+      val recentCopies = prism.copiedImages(Set(bake.amiId).flatten)
+      val bakeInUse = RecipeUsage.bakeIsUsed(recipeUsage, bake.amiId, recentCopies)
+      Ok(views.html.showBake(bake, bakeLogs, packageList, packageListDiff, bakeInUse))
     }
   }
 
