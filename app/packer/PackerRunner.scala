@@ -28,7 +28,12 @@ class PackerRunner(maxInstances: Int) extends Loggable {
     val sourceAmi = bake.recipe.baseImage.amiId.value
     val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).right.getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
 
-    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe, ansibleVars + ("arch" -> amiMetadata.architecture))
+    val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe,
+      ansibleVars ++ Map(
+        "arch" -> amiMetadata.architecture,
+        "deb_arch" -> amiMetadata.debArchitecture
+      )
+    )
     val playbookFile = Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
     Files.write(playbookFile, playbookYaml.getBytes(StandardCharsets.UTF_8)) // TODO error handling
 
