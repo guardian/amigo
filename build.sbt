@@ -77,7 +77,8 @@ libraryDependencies ++= Seq(
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test,
-  "fun.mike" % "diff-match-patch" % "0.0.2"
+  "fun.mike" % "diff-match-patch" % "0.0.2",
+  "com.gu" % "anghammarad-client_2.11" % "1.1.3"
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"

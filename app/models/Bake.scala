@@ -1,6 +1,10 @@
 package models
 
+import data.{ Bakes, Dynamo }
+import notification.BakeFailedNotifier
 import org.joda.time.DateTime
+
+import scala.concurrent.ExecutionContext
 
 case class Bake(recipe: Recipe,
     buildNumber: Int,
@@ -33,4 +37,10 @@ object Bake {
   def db2domain(dbModel: DbModel, recipe: Recipe): Bake =
     transform[Bake.DbModel, Bake](dbModel, "recipe" -> recipe, "deleted" -> dbModel.deleted.getOrElse(false))
 
+  def updateStatus(bakeId: BakeId, status: BakeStatus, notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext): Unit = {
+    if (status == BakeStatus.Failed || status == BakeStatus.TimedOut) {
+      BakeFailedNotifier.notifyBakeFailed(bakeId, status, notificationConfig)
+    }
+    Bakes.updateStatus(bakeId, status)
+  }
 }

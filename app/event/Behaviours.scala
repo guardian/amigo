@@ -4,9 +4,11 @@ import akka.typed._
 import akka.typed.ScalaDSL._
 import data.{ BakeLogs, Bakes, Dynamo }
 import event.BakeEvent._
-import models.BakeStatus
+import models.{ Bake, BakeStatus, NotificationConfig }
 import play.api.libs.iteratee.Concurrent.Channel
 import services.Loggable
+
+import scala.concurrent.ExecutionContext
 
 object Behaviours extends Loggable {
 
@@ -50,12 +52,14 @@ object Behaviours extends Loggable {
   }
 
   /**
-   * Writes updates to the appropriate Dynamo records
+   * Writes updates to the appropriate Dynamo records and triggers bake failed notifications
    */
-  def writeToDynamo(implicit dynamo: Dynamo): Behavior[BakeEvent] = Static {
+  def persistBakeEvent(notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext): Behavior[BakeEvent] = Static {
     case Log(bakeId, bakeLog) => BakeLogs.save(bakeLog)
     case AmiCreated(bakeId, amiId) => Bakes.updateAmiId(bakeId, amiId)
-    case PackerProcessExited(bakeId, exitCode) => Bakes.updateStatus(bakeId, if (exitCode == 0) BakeStatus.Complete else BakeStatus.Failed)
+    case PackerProcessExited(bakeId, exitCode) =>
+      val status = if (exitCode == 0) BakeStatus.Complete else BakeStatus.Failed
+      Bake.updateStatus(bakeId, status, notificationConfig)
   }
 
 }

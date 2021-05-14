@@ -1,11 +1,13 @@
 package housekeeping.utils
 
 import data.{ Bakes, Dynamo }
-import models.{ Bake, BakeId, BakeStatus }
+import models.{ Bake, BakeId, BakeStatus, NotificationConfig }
+
+import scala.concurrent.ExecutionContext
 
 // Wrapper around dynamo access.
 // Injecting this functionality as a class facilitates unit testing.
-class BakesRepo(implicit dynamo: Dynamo) {
+class BakesRepo(notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext) {
 
   def getBakes: List[Bake.DbModel] = Bakes.scanForAll()
 
@@ -14,7 +16,7 @@ class BakesRepo(implicit dynamo: Dynamo) {
     // Therefore, look up the bake first and check its status.
     Bakes.findById(bakeId.recipeId, bakeId.buildNumber).foreach { bake =>
       if (bake.status == BakeStatus.Running) {
-        Bakes.updateStatus(bakeId, BakeStatus.TimedOut)
+        Bake.updateStatus(bakeId, BakeStatus.TimedOut, notificationConfig)
       }
     }
   }
