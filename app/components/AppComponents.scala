@@ -152,7 +152,9 @@ class AppComponents(context: Context)
 
   val amigoUrl: String = configuration.getString("amigo.url").getOrElse(s"https://${identity.app}.gutools.co.uk")
   val anghammaradNotificationTopic: Option[String] = configuration.getString("anghammarad.sns.topicArn")
-  val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map(t => NotificationConfig(amigoUrl, t, anghammaradSNSClient))
+  val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map{ t =>
+    NotificationConfig(amigoUrl, t, anghammaradSNSClient, identity.stage)
+  }
 
   configuration.getString("aws.distributionBucket").foreach { bucketName =>
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)

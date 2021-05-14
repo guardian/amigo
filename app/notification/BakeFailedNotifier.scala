@@ -16,20 +16,23 @@ object BakeFailedNotifier extends Loggable {
    * Generates an anghammarad notification. The targets of the notification are generated based off the accounts to which
    * an encrypted copy has been requested. If no encrypted copies have been requested return None
    */
-  def makeNotification(bake: Bake, bakeStatus: BakeStatus, baseUrl: String): Option[Notification] = {
+  def makeNotification(bake: Bake, bakeStatus: BakeStatus, config: NotificationConfig): Option[Notification] = {
     val targets = bake.recipe.encryptFor.map(m => AwsAccount(m.accountNumber))
     val statusString = bakeStatus.toString.toLowerCase()
     val actions = List(
-      Action("View recipe", s"$baseUrl/recipes/${bake.recipe.id}"),
-      Action("Check bake log", s"$baseUrl/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}")
+      Action(s"View recipe ${bake.recipe} in AMIgo", s"$config.baseUrl/recipes/${bake.recipe.id}"),
+      Action(s"Check bake log for ${bake.bakeId}", s"$config.baseUrl/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}")
     )
+    val stageString = if (config.amigoStage != "PROD") s"(stage ${config.amigoStage})" else ""
     if (targets.nonEmpty) {
       Some(
         Notification(
-          s"AMIgo bake ${bake.bakeId} $statusString",
+          s"AMIgo bake ${bake.bakeId} $statusString $stageString",
           s"""
-             |Unfortunately a bake on ${bake.recipe.id} has $statusString. Sometimes failures happen due to AMIgo memory errors
-             |and can be fixed simply by re-running the bake and changing the schedule to a less busy time.
+             |Unfortunately a bake on ${bake.recipe.id} has $statusString. Sometimes failures happen due to AMIgo out of
+             | memory errors and can be fixed simply by re-running the bake and changing the schedule to a less busy time.
+             | See below for links to the AMIgo dashboard (VPN required) where you can debug this issue or kick off another bake.
+             | For help, don't hesitate to contact the developer experience team: devx@theguardian.com.
              |""".stripMargin,
           actions,
           targets,
@@ -56,7 +59,7 @@ object BakeFailedNotifier extends Loggable {
     val notificationResult = for {
       config <- notificationConfig
       bake <- Bakes.findById(bakeId.recipeId, bakeId.buildNumber)
-      notification <- makeNotification(bake, bakeStatus, config.baseUrl)
+      notification <- makeNotification(bake, bakeStatus, config)
     } yield {
       Anghammarad.notify(notification, config.snsTopicArn, config.snsClient).onComplete {
         case Success(value) =>
