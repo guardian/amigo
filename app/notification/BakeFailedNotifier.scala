@@ -20,10 +20,10 @@ object BakeFailedNotifier extends Loggable {
     val targets = bake.recipe.encryptFor.map(m => AwsAccount(m.accountNumber))
     val statusString = bakeStatus.toString.toLowerCase()
     val actions = List(
-      Action(s"View recipe ${bake.recipe} in AMIgo", s"$config.baseUrl/recipes/${bake.recipe.id}"),
-      Action(s"Check bake log for ${bake.bakeId}", s"$config.baseUrl/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}")
+      Action(s"View recipe ${bake.recipe.id} in AMIgo", s"${config.baseUrl}/recipes/${bake.recipe.id}"),
+      Action(s"Check bake log for ${bake.bakeId}", s"${config.baseUrl}/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}")
     )
-    val stageString = if (config.amigoStage != "PROD") s"(stage ${config.amigoStage})" else ""
+    val stageString = if (config.amigoStage != "PROD") s"(AMIgo ${config.amigoStage})" else ""
     if (targets.nonEmpty) {
       Some(
         Notification(
