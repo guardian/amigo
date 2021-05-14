@@ -33,6 +33,9 @@ Parameters:
   KinesisStreamName:
     Type: String
     Description: The name (NOT arn) of the Kinesis stream that logs should be shipped to
+  AnghammaradTopicArn:
+    Type: String
+    Description: Anghammarad sns notifications topic arn
 
 Mappings:
   Config:
@@ -107,6 +110,10 @@ Resources:
           Action:
           - sns:*
           Resource: !Sub 'arn:aws:sns:*:*:amigo-${Stage}-housekeeping-notify'
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource: !Ref AnghammaradTopicArn
         - Effect: Allow
           Action:
           - s3:GetBucketPolicy
