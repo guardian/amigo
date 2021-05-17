@@ -73,7 +73,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
+  "net.logstash.logback" % "logstash-logback-encoder" % "6.6",
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test,
