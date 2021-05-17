@@ -29,7 +29,7 @@ class BakeController(
   packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
-  def startBaking(recipeId: RecipeId, debug: Boolean) = AuthAction { request =>
+  def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = AuthAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>

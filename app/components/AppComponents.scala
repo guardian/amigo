@@ -13,7 +13,7 @@ import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.sns.AmazonSNSClientBuilder
+import com.amazonaws.services.sns.{ AmazonSNS, AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
 import com.gu.cm.{ ConfigurationLoader, Identity, LocalApplication }
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
@@ -21,6 +21,7 @@ import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import housekeeping._
 import housekeeping.utils.{ BakesRepo, PackerEC2Client }
+import models.NotificationConfig
 import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
@@ -143,6 +144,18 @@ class AppComponents(context: Context)
     .withClientConfiguration(clientConfiguration)
     .build()
 
+  val anghammaradSNSClient: AmazonSNSAsync = AmazonSNSAsyncClientBuilder.standard
+    .withRegion(region)
+    .withCredentials(awsCreds)
+    .withClientConfiguration(clientConfiguration)
+    .build()
+
+  val amigoUrl: String = configuration.getString("amigo.url").getOrElse(s"https://${identity.app}.gutools.co.uk")
+  val anghammaradNotificationTopic: Option[String] = configuration.getString("anghammarad.sns.topicArn")
+  val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map { t =>
+    NotificationConfig(amigoUrl, t, anghammaradSNSClient, identity.stage)
+  }
+
   configuration.getString("aws.distributionBucket").foreach { bucketName =>
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)
   }
@@ -153,7 +166,7 @@ class AppComponents(context: Context)
     val eventListeners = Map(
       "channelSender" -> Props(Behaviours.sendToChannel(eventsChannel)),
       "logWriter" -> Props(Behaviours.writeToLog),
-      "dynamoWriter" -> Props(Behaviours.writeToDynamo)
+      "dynamoWriter" -> Props(Behaviours.persistBakeEvent(notificationConfig))
     )
     ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
   }
@@ -198,7 +211,7 @@ class AppComponents(context: Context)
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
 
-  val bakesRepo = new BakesRepo
+  val bakesRepo = new BakesRepo(notificationConfig)
   val packerEC2Client = new PackerEC2Client(ec2Client, identity.stage)
 
   val houseKeepingJobs = List(
@@ -219,7 +232,18 @@ class AppComponents(context: Context)
   val housekeepingController = new HousekeepingController(googleAuthConfig)
   val roleController = new RoleController(googleAuthConfig)
   val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, messagesApi, debugAvailable)
-  val bakeController = new BakeController(identity.stage, eventsSource, prismAgents, googleAuthConfig, messagesApi, ansibleVariables, debugAvailable, amiMetadataLookup, amigoDataBucket, s3Client, packerRunner)
+  val bakeController = new BakeController(
+    identity.stage,
+    eventsSource,
+    prismAgents,
+    googleAuthConfig,
+    messagesApi,
+    ansibleVariables,
+    debugAvailable,
+    amiMetadataLookup,
+    amigoDataBucket,
+    s3Client,
+    packerRunner)
   val authController = new Auth(googleAuthConfig)(wsClient)
   val assets = new controllers.Assets(httpErrorHandler)
   lazy val router: Router = new Routes(
