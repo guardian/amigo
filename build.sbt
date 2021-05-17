@@ -75,7 +75,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test,
+  "org.scalatest" %% "scalatest" % "3.2.9" % Test,
   "org.mockito" % "mockito-core" % "2.7.19" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" % "anghammarad-client_2.11" % "1.1.3"
