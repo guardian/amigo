@@ -88,16 +88,21 @@ object RecipeUsage {
     usages.get(recipe).exists(u => u.launchConfigurations.nonEmpty || u.instances.nonEmpty)
   }
 
-  def amiIsUsed(recipeUsage: RecipeUsage, amiId: Option[AmiId]): Boolean = {
-    amiId.exists { amiId =>
-      val usages: Seq[BakeUsage] = recipeUsage.bakeUsage.filter(bu => bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId))
-      usages.nonEmpty
-    }
+  def amiUsages(recipeUsage: RecipeUsage, amiId: AmiId): RecipeUsage = {
+    recipeUsage.copy(
+      launchConfigurations = recipeUsage.launchConfigurations.filter(_.imageId == amiId),
+      instances = recipeUsage.instances.filter(_.imageId == amiId),
+      bakeUsage = recipeUsage.bakeUsage.filter(bu => bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId))
+    )
+  }
+
+  def amiIsUsed(recipeUsage: RecipeUsage, amiId: AmiId): Boolean = {
+      amiUsages(recipeUsage, amiId).bakeUsage.nonEmpty
   }
 
   def bakeIsUsed(recipeUsage: RecipeUsage, amiId: Option[AmiId], recentCopies: Map[AmiId, Seq[Image]]): Boolean = {
     val copies = amiId.flatMap(id => recentCopies.get(id)).getOrElse(Nil)
-    amiIsUsed(recipeUsage, amiId) || copies.exists(c => amiIsUsed(recipeUsage, Some(c.imageId)))
+    amiId.exists(id => amiIsUsed(recipeUsage, id)) || copies.exists(c => amiIsUsed(recipeUsage, c.imageId))
   }
 
 }

@@ -98,7 +98,7 @@
           <th>AMI</th>
           @* Column for copy button *@
           <th></th>
-          <th>In Use</th>
+          <th>Usages</th>
           <th>AMIable</th>
         </thead>
         <tbody>
@@ -133,9 +133,7 @@
                   <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard"  title="Copy to clipboard">
                 </button>
               </td>
-              <td>
-              @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, bake.amiId ))
-              </td>
+                @fragments.usagesColumn(recipe, RecipeUsage.amiUsages(usage, bake.amiId.get))
               <td>
                 <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">
                   <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable" title="View in AMIable">
@@ -174,9 +172,7 @@
                   <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard" title="copy to clipboard">
                 </button>
               </td>
-              <td>
-                @fragments.booleanIcon(RecipeUsage.amiIsUsed(usage, Some(copy.imageId) ))
-              </td>
+              @fragments.usagesColumn(recipe, RecipeUsage.amiUsages(usage, copy.imageId))
               <td>
                 <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">
                   <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable" title="View in AMIable">
