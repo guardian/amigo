@@ -16,7 +16,7 @@ class BakesRepo(notificationConfig: Option[NotificationConfig])(implicit dynamo:
     // Therefore, look up the bake first and check its status.
     Bakes.findById(bakeId.recipeId, bakeId.buildNumber).foreach { bake =>
       if (bake.status == BakeStatus.Running) {
-        Bake.updateStatus(bakeId, BakeStatus.TimedOut, notificationConfig)
+        Bake.updateStatusAndNotifyFailure(bakeId, BakeStatus.TimedOut, notificationConfig)
       }
     }
   }

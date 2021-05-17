@@ -152,7 +152,7 @@ class AppComponents(context: Context)
 
   val amigoUrl: String = configuration.getString("amigo.url").getOrElse(s"https://${identity.app}.gutools.co.uk")
   val anghammaradNotificationTopic: Option[String] = configuration.getString("anghammarad.sns.topicArn")
-  val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map{ t =>
+  val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map { t =>
     NotificationConfig(amigoUrl, t, anghammaradSNSClient, identity.stage)
   }
 

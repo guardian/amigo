@@ -59,7 +59,7 @@ object Behaviours extends Loggable {
     case AmiCreated(bakeId, amiId) => Bakes.updateAmiId(bakeId, amiId)
     case PackerProcessExited(bakeId, exitCode) =>
       val status = if (exitCode == 0) BakeStatus.Complete else BakeStatus.Failed
-      Bake.updateStatus(bakeId, status, notificationConfig)
+      Bake.updateStatusAndNotifyFailure(bakeId, status, notificationConfig)
   }
 
 }

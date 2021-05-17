@@ -37,7 +37,7 @@ object Bake {
   def db2domain(dbModel: DbModel, recipe: Recipe): Bake =
     transform[Bake.DbModel, Bake](dbModel, "recipe" -> recipe, "deleted" -> dbModel.deleted.getOrElse(false))
 
-  def updateStatus(bakeId: BakeId, status: BakeStatus, notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext): Unit = {
+  def updateStatusAndNotifyFailure(bakeId: BakeId, status: BakeStatus, notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext): Unit = {
     if (status == BakeStatus.Failed || status == BakeStatus.TimedOut) {
       BakeFailedNotifier.notifyBakeFailed(bakeId, status, notificationConfig)
     }

@@ -46,11 +46,11 @@ object BakeFailedNotifier extends Loggable {
   }
 
   def logFailure(configAvailable: Boolean, bakeId: BakeId): Unit = {
-      if (configAvailable) {
-        log.info(s"Failed to fetch bake ${bakeId} from DB. Bake failed notification not sent.")
-      } else {
-        log.info(s"Missing notification config - notification for bake failure ${bakeId} not sent")
-      }
+    if (configAvailable) {
+      log.info(s"Failed to fetch bake ${bakeId} from DB. Bake failed notification not sent.")
+    } else {
+      log.info(s"Missing notification config - notification for bake failure ${bakeId} not sent")
+    }
   }
 
   def notifyBakeFailed(bakeId: BakeId, bakeStatus: BakeStatus, notificationConfig: Option[NotificationConfig])(implicit exec: ExecutionContext, dynamo: Dynamo): Unit = {
