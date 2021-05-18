@@ -31,19 +31,17 @@
       </li>
       <li class="list-group-item bake--info">
         <span class="bake--info--title">Usage: </span>
-        <span>@if(inUse){Bake in use}else{Bake is not currently used}</span>
+        <span>@if(inUse){Bake in use and cannot be deleted}else{Bake is not currently used}</span>
       </li>
     </ul>
   </div>
 
-  @if(!inUse) {
     <div class="panel panel-default">
       <div class="panel-heading">Actions</div>
       <div class="panel-body">
-        <a href="@routes.BakeController.deleteConfirm(bake.bakeId.recipeId, bake.bakeId.buildNumber)" class="btn btn-danger">Delete bake and all associated AMIs...</a>
+        <a href="@routes.BakeController.deleteConfirm(bake.bakeId.recipeId, bake.bakeId.buildNumber)" class="btn btn-danger" @if(inUse){disabled}>Delete bake and all associated AMIs...</a>
       </div>
     </div>
-  }
 
   <div>
     <label>

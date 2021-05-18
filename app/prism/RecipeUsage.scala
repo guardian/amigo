@@ -97,7 +97,7 @@ object RecipeUsage {
   }
 
   def amiIsUsed(recipeUsage: RecipeUsage, amiId: AmiId): Boolean = {
-      amiUsages(recipeUsage, amiId).bakeUsage.nonEmpty
+    amiUsages(recipeUsage, amiId).bakeUsage.nonEmpty
   }
 
   def bakeIsUsed(recipeUsage: RecipeUsage, amiId: Option[AmiId], recentCopies: Map[AmiId, Seq[Image]]): Boolean = {
