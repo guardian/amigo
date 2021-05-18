@@ -51,7 +51,7 @@ lazy val root = (project in file("."))
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-val jacksonVersion = "2.7.1"
+val jacksonVersion = "2.12.3"
 val awsVersion = "1.11.1017"
 val circeVersion = "0.9.0"
 libraryDependencies ++= Seq(
@@ -76,7 +76,7 @@ libraryDependencies ++= Seq(
   "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
-  "org.mockito" % "mockito-core" % "2.7.19" % Test,
+  "org.mockito" % "mockito-core" % "2.12.39" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" % "anghammarad-client_2.11" % "1.1.3"
 )
