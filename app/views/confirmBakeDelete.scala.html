@@ -1,0 +1,26 @@
+@import prism.BakeUsage
+@(bakeId: BakeId, usages: Seq[BakeUsage], bakeDeletionFrequencyMinutes: Int)
+@simpleLayout("AMIgo"){
+
+    @if(usages.isEmpty) {
+        <h1>Really delete @bakeId.recipeId bake @bakeId.buildNumber? </h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Confirm delete</div>
+            <div class="panel-body">
+                <p>Note that this will schedule the deletion of all encrypted copies of this bake within the next @bakeDeletionFrequencyMinutes minutes.</p>
+                <p><a data-href="@routes.BakeController.deleteBake(bakeId.recipeId, bakeId.buildNumber)" class="post btn btn-danger">Delete</a></p>
+            </div>
+        </div>
+    } else {
+        <h1>Bake @bakeId.buildNumber of recipe @bakeId.recipeId still has usages</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Can't be deleted</div>
+            <div class="panel-body">
+                This bake still has usages and cannot be deleted. You can review the usages <a href="@routes.RecipeController.showUsages(bakeId.recipeId)">here</a>.
+            </div>
+        </div>
+    }
+
+}

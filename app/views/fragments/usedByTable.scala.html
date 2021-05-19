@@ -8,7 +8,9 @@
     @recipes.map { recipe =>
         <tr>
             <td><a href="@routes.RecipeController.showRecipe(recipe.id)">@recipe.id</a></td>
-            @fragments.usagesColumn(recipe, usages)
+            @defining(usages.getOrElse(recipe, prism.RecipeUsage.noUsage)) { usage =>
+                @fragments.usagesColumn(recipe, usage)
+            }
         </tr>
     }
     </table>

@@ -1,10 +1,13 @@
 @import data.PackageListDiff
 @import fun.mike.dmp.Operation
-@import fun.mike.dmp.Diff
-@(bake: Bake, bakeLogs: Iterable[BakeLog], packageList: Either[String, List[String]], packageListDiff: Either[String, PackageListDiff])
+@(bake: Bake,
+  bakeLogs: Iterable[BakeLog],
+  packageList: Either[String, List[String]],
+  packageListDiff: Either[String, PackageListDiff],
+  inUse: Boolean)
 @layout("AMIgo"){
 
-  <h1><a href="@routes.RecipeController.showRecipe(bake.recipe.id)">@bake.recipe.id</a></h1>
+  <h1><a href="@routes.RecipeController.showRecipe(bake.recipe.id)">@bake.recipe.id</a> bake number @bake.bakeId.buildNumber</h1>
 
   <div class="panel panel-default">
     <div class="panel-heading">Info</div>
@@ -26,8 +29,19 @@
           </button>
         </span>
       </li>
+      <li class="list-group-item bake--info">
+        <span class="bake--info--title">Usage: </span>
+        <span>@if(inUse){Bake in use and cannot be deleted}else{Bake is not currently used}</span>
+      </li>
     </ul>
   </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">Actions</div>
+      <div class="panel-body">
+        <a href="@routes.BakeController.deleteConfirm(bake.bakeId.recipeId, bake.bakeId.buildNumber)" class="btn btn-danger" @if(inUse){disabled}>Delete bake and all associated AMIs...</a>
+      </div>
+    </div>
 
   <div>
     <label>

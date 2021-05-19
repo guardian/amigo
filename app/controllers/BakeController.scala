@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.{ AmazonS3, AmazonS3Client }
 import com.gu.googleauth.GoogleAuthConfig
 import data._
 import event._
+import models.BakeStatus.DeletionScheduled
 import packer._
 import models._
 import play.api.i18n.{ I18nSupport, MessagesApi }
@@ -26,7 +27,8 @@ class BakeController(
   amiMetadataLookup: AmiMetadataLookup,
   amigoDataBucket: Option[String],
   s3Client: AmazonS3,
-  packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
+  packerRunner: PackerRunner,
+  bakeDeletionFrequencyMinutes: Int)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
     extends Controller with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = AuthAction { request =>
@@ -50,7 +52,11 @@ class BakeController(
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
       val packageList = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
       val packageListDiff = packageList.right.flatMap(p => PackageList.getPackageListDiff(s3Client, p, previousBakeId, amigoDataBucket))
-      Ok(views.html.showBake(bake, bakeLogs, packageList, packageListDiff))
+
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+      val recentCopies = prism.copiedImages(Set(bake.amiId).flatten)
+      val bakeInUse = RecipeUsage.bakeIsUsed(recipeUsage, bake.amiId, recentCopies)
+      Ok(views.html.showBake(bake, bakeLogs, packageList, packageListDiff, bakeInUse))
     }
   }
 
@@ -77,6 +83,28 @@ class BakeController(
 
     val bakeUsages = SimpleBakeUsage.fromRecipeUsages(allUsages, amigoDataBucket)
     Ok(Json.toJson(bakeUsages))
+  }
+
+  def deleteConfirm(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
+    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+      Ok(views.html.confirmBakeDelete(bake.bakeId, recipeUsage.bakeUsage, bakeDeletionFrequencyMinutes))
+    }
+  }
+
+  def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
+    Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
+      val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
+
+      if (recipeUsage.bakeUsage.nonEmpty) {
+        Conflict(s"Can't delete bake ${bake.bakeId.buildNumber} from recipe ${bake.bakeId.recipeId} as it is still used by ${recipeUsage.bakeUsage.size} resources.")
+      } else {
+        Bakes.updateStatus(bake.bakeId, DeletionScheduled)
+        Bakes.markToDelete(bake.bakeId)
+        Redirect(routes.RecipeController.showRecipe(recipeId))
+      }
+
+    }
   }
 
 }

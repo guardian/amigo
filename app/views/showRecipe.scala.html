@@ -1,6 +1,7 @@
 @import data.Roles
 @import prism.Prism.Image
 @import prism.Prism.AWSAccount
+@import prism.RecipeUsage
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
@@ -95,8 +96,8 @@
           <th>AMI</th>
           @* Column for copy button *@
           <th></th>
-          @* Column for open in AMIable link *@
-          <th></th>
+          <th>Usages</th>
+          <th>AMIable</th>
         </thead>
         <tbody>
         @for(bake <- recentBakes) {
@@ -127,14 +128,19 @@
               </td>
               <td class="absolute-container has-block-link">
                 <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@bake.amiId">
-                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard"  title="Copy to clipboard">
                 </button>
               </td>
+                @fragments.usagesColumn(recipe, RecipeUsage.amiUsages(usage, bake.amiId.get))
               <td>
-                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@bake.amiId" target="_blank" rel="noopener noreferrer">
+                  <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable" title="View in AMIable">
+                </a>
               </td>
+
               </td>
             } else {
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -146,7 +152,7 @@
               <td>&nbsp;</td>
               <td>
                 <ul class="list-unstyled">
-                  <li>Acc: @defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
+                  <li>@defining(accounts.find(_.accountNumber == copy.ownerId)){ maybeOwnerAcc =>
                       @maybeOwnerAcc.map{ ownerAcc => @ownerAcc.accountName (@ownerAcc.accountNumber) }.getOrElse(copy.ownerId)
                     }
                   </li>
@@ -161,11 +167,14 @@
               </td>
               <td class="absolute-container">
                 <button class="btn btn-primary btn-xs absolute-right copy-button" title="Copy to clipboard" data-clipboard-text="@copy.imageId">
-                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard">
+                  <img src="@routes.Assets.versioned("images/clippy.svg")" width="13" alt="Copy to clipboard" title="copy to clipboard">
                 </button>
               </td>
+              @fragments.usagesColumn(recipe, RecipeUsage.amiUsages(usage, copy.imageId))
               <td>
-                <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">View in AMIable</a>
+                <a href="https://amiable.gutools.co.uk/ami?imageId=@copy.imageId" target="_blank" rel="noopener noreferrer">
+                  <img src="@routes.Assets.versioned("images/amiable.png")" width="13" alt="View in AMIable" title="View in AMIable">
+                </a>
               </td>
             </tr>
           }
