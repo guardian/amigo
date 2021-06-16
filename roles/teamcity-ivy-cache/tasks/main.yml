@@ -17,7 +17,7 @@
   shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/.ivy2/cache/ --recursive --quiet
 - name:  download ivy
   shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/buildAgent/system/sbt_ivy/cache/ --recursive --quiet
-- name: add chron job
+- name: set up upload to S3 cron
   copy:
     src: sync-ivy-cache
     dest: /etc/cron.d/sync-ivy-cache
