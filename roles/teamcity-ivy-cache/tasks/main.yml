@@ -15,8 +15,8 @@
   shell: aws s3 cp s3://teamcity-sbt-cache/ /opt/teamcity/.sbt/ --recursive --quiet
 - name: initial download ivy
   shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/.ivy2/cache/ --recursive --quiet
-- name:  download ivy
-  shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/buildAgent/system/sbt_ivy/cache/ --recursive --quiet
+- name: setup ivy cache for agents
+  shell: cp -r /opt/teamcity/.ivy2/cache/ /opt/teamcity/buildAgent/system/sbt_ivy/cache/
 - name: add chron job
   copy:
     src: sync-ivy-cache
