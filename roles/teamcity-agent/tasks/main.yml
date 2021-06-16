@@ -74,9 +74,6 @@
   become_user: teamcity
   args:
     executable: /bin/bash
-- name: add caches
-  import_role:
-    name: teamcity-ivy-cache
 - name: chown teamcity to teamcity
   file:
     path: /opt/teamcity
