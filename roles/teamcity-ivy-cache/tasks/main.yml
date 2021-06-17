@@ -1,0 +1,28 @@
+---
+- name: teamcity-sbt-cache dir
+  file:
+    path: /opt/teamcity/.sbt
+    state: directory
+- name: teamcity ivy cache
+  file:
+    path: /opt/teamcity/.ivy2/cache
+    state: directory
+- name: teamcity ivy cache
+  file:
+    path: /opt/teamcity/buildAgent/system/sbt_ivy/cache/
+    state: directory
+- name: initial download sbt
+  shell: aws s3 cp s3://teamcity-sbt-cache/ /opt/teamcity/.sbt/ --recursive --quiet
+- name: initial download ivy
+  shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/.ivy2/cache/ --recursive --quiet
+- name:  download ivy
+  shell: aws s3 cp s3://teamcity-ivy-cache/ /opt/teamcity/buildAgent/system/sbt_ivy/cache/ --recursive --quiet
+- name: set up upload to S3 cron
+  copy:
+    src: sync-ivy-cache
+    dest: /etc/cron.d/sync-ivy-cache
+- name: chown teamcity to teamcity
+  file:
+    path: /opt/teamcity
+    recurse: true
+    owner: teamcity
