@@ -36,6 +36,10 @@ Parameters:
   AnghammaradTopicArn:
     Type: String
     Description: Anghammarad sns notifications topic arn
+  DistributionBucketName:
+    Description: SSM parameter containing the S3 bucket name holding distribution artifacts
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /account/services/artifact.bucket
 
 Mappings:
   Config:
@@ -67,7 +71,7 @@ Resources:
           Action:
           - s3:GetObject
           Resource:
-          - arn:aws:s3::*:deploy-tools-dist/*
+          - !Join [ "", [ "arn:aws:s3::*:", !Ref DistributionBucketName, "/*" ] ]
       Roles:
       - !Ref 'RootRole'
   AmigoAppPolicy:
@@ -114,11 +118,14 @@ Resources:
           Action:
             - sns:Publish
           Resource: !Ref AnghammaradTopicArn
+
+        # Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
         - Effect: Allow
           Action:
           - s3:GetBucketPolicy
           - s3:PutBucketPolicy
-          Resource: arn:aws:s3::*:deploy-tools-dist
+          Resource: !Join [ "", [ "arn:aws:s3::*:", !Ref DistributionBucketName ] ]
+
         - Effect: Allow
           Action:
             - s3:GetObject
@@ -290,7 +297,7 @@ Resources:
           wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
           dpkg -i /tmp/session-manager-plugin.deb
 
-          aws --region eu-west-1 s3 cp s3://deploy-tools-dist/deploy/${Stage}/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
+          aws --region eu-west-1 s3 cp s3://${DistributionBucketName}/deploy/${Stage}/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
           dpkg -i /tmp/amigo.deb
 
   LoadBalancerSecurityGroup:
