@@ -2,4 +2,10 @@
 
 set -e
 
+# must be done first as sbt uses the CFN template that is generated
+(
+ cd cdk
+ ./script/ci
+)
+
 sbt clean compile test riffRaffNotifyTeamcity

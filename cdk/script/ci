@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -e
+
+nvm_available() {
+  type -t nvm > /dev/null
+}
+
+source_nvm() {
+  if ! nvm_available; then
+    [ -e "/usr/local/opt/nvm/nvm.sh" ] && source /usr/local/opt/nvm/nvm.sh
+  fi
+  if ! nvm_available; then
+    [ -e "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh"
+  fi
+}
+
+source_nvm
+nvm install
+nvm use
+
+npm install -g yarn
+
+yarn install --frozen-lockfile
+
+yarn test
+yarn build
+yarn synth
