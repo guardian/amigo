@@ -1,0 +1,791 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The Amigo stack matches the snapshot 1`] = `
+Object {
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AMIgo, an AMI bakery",
+  "Mappings": Object {
+    "Config": Object {
+      "CODE": Object {
+        "LowerCaseName": "code",
+      },
+      "PROD": Object {
+        "LowerCaseName": "prod",
+      },
+    },
+  },
+  "Parameters": Object {
+    "AMI": Object {
+      "Default": "ami-6b50e218",
+      "Description": "AMI ID",
+      "Type": "String",
+    },
+    "AnghammaradTopicArn": Object {
+      "Description": "Anghammarad sns notifications topic arn",
+      "Type": "String",
+    },
+    "DistributionBucketName": Object {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "InstanceType": Object {
+      "Description": "EC2 instance type",
+      "Type": "String",
+    },
+    "KinesisStreamName": Object {
+      "Description": "The name (NOT arn) of the Kinesis stream that logs should be shipped to",
+      "Type": "String",
+    },
+    "PackerInstanceProfile": Object {
+      "Description": "Instance profile given to instances created by Packer",
+      "Type": "String",
+    },
+    "PackerVersion": Object {
+      "Description": "What version of Packer to install",
+      "Type": "String",
+    },
+    "PrivateSubnets": Object {
+      "Description": "Subnets to run the ASG and instances within",
+      "Type": "List<AWS::EC2::Subnet::Id>",
+    },
+    "PublicSubnets": Object {
+      "Description": "Subnets to run load balancer within",
+      "Type": "List<AWS::EC2::Subnet::Id>",
+    },
+    "Stage": Object {
+      "AllowedValues": Array [
+        "CODE",
+        "PROD",
+      ],
+      "Default": "CODE",
+      "Description": "Stage name",
+      "Type": "String",
+    },
+    "TLSCert": Object {
+      "Description": "ARN of a TLS certificate to install on the load balancer",
+      "Type": "String",
+    },
+    "VPC": Object {
+      "Description": "Virtual Private Cloud to run EC2 instances within",
+      "Type": "AWS::EC2::VPC::Id",
+    },
+  },
+  "Resources": Object {
+    "AmigoAppPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "dynamodb:ListTables",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "dynamodb:*",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Sub": Array [
+                  "arn:aws:dynamodb:*:*:table/amigo-\${Stage}-*",
+                  Object {
+                    "Stage": Object {
+                      "Ref": "Stage",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
+            },
+            Object {
+              "Action": "ec2:DescribeTags",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "autoscaling:DescribeAutoScalingGroups",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "autoscaling:DescribeAutoScalingInstances",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "sns:ListTopics",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "sns:*",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Sub": Array [
+                  "arn:aws:sns:*:*:amigo-\${Stage}-notify",
+                  Object {
+                    "Stage": Object {
+                      "Ref": "Stage",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "sns:*",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Sub": Array [
+                  "arn:aws:sns:*:*:amigo-\${Stage}-housekeeping-notify",
+                  Object {
+                    "Stage": Object {
+                      "Ref": "Stage",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "sns:Publish",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "AnghammaradTopicArn",
+              },
+            },
+            Object {
+              "Action": Array [
+                "s3:GetBucketPolicy",
+                "s3:PutBucketPolicy",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:aws:s3::*:",
+                    Object {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": Array [
+                "s3:GetObject",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Sub": "arn:aws:s3:::\${AmigoDataBucket}/*",
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "iam:GetInstanceProfile",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "PackerInstanceProfile",
+              },
+            },
+          ],
+        },
+        "PolicyName": "amigo-app",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AmigoDataBucket": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "BucketName": Object {
+          "Fn::Sub": Array [
+            "amigo-data-\${LowerCaseStage}",
+            Object {
+              "LowerCaseStage": Object {
+                "Fn::FindInMap": Array [
+                  "Config",
+                  Object {
+                    "Ref": "Stage",
+                  },
+                  "LowerCaseName",
+                ],
+              },
+            },
+          ],
+        },
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+    },
+    "ApplicationSecurityGroup": Object {
+      "Properties": Object {
+        "GroupDescription": "SSH and HTTP",
+        "SecurityGroupIngress": Array [
+          Object {
+            "CidrIp": "10.249.0.0/16",
+            "FromPort": 9000,
+            "IpProtocol": "tcp",
+            "ToPort": 9000,
+          },
+          Object {
+            "FromPort": 9000,
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": Object {
+              "Ref": "LoadBalancerSecurityGroup",
+            },
+            "ToPort": 9000,
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPC",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "AutoscalingGroup": Object {
+      "Properties": Object {
+        "AvailabilityZones": Object {
+          "Fn::GetAZs": "",
+        },
+        "HealthCheckGracePeriod": 300,
+        "HealthCheckType": "ELB",
+        "LaunchConfigurationName": Object {
+          "Ref": "LaunchConfig",
+        },
+        "LoadBalancerNames": Array [
+          Object {
+            "Ref": "LoadBalancer",
+          },
+        ],
+        "MaxSize": "2",
+        "MinSize": "1",
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "PropagateAtLaunch": true,
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "PropagateAtLaunch": true,
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "PropagateAtLaunch": true,
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "PropagateAtLaunch": true,
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "PropagateAtLaunch": true,
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+        "VPCZoneIdentifier": Object {
+          "Ref": "PrivateSubnets",
+        },
+      },
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+    },
+    "InstanceProfile": Object {
+      "Properties": Object {
+        "Path": "/",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "LaunchConfig": Object {
+      "Properties": Object {
+        "AssociatePublicIpAddress": false,
+        "IamInstanceProfile": Object {
+          "Ref": "InstanceProfile",
+        },
+        "ImageId": Object {
+          "Ref": "AMI",
+        },
+        "InstanceType": Object {
+          "Ref": "InstanceType",
+        },
+        "SecurityGroups": Array [
+          Object {
+            "Ref": "ApplicationSecurityGroup",
+          },
+        ],
+        "UserData": Object {
+          "Fn::Base64": Object {
+            "Fn::Sub": Array [
+              "#!/bin/bash -ev
+
+wget -P /tmp https://releases.hashicorp.com/packer/\${PackerVersion}/packer_\${PackerVersion}_linux_arm64.zip
+mkdir /opt/packer
+unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
+echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
+
+wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
+dpkg -i /tmp/session-manager-plugin.deb
+
+aws --region eu-west-1 s3 cp s3://\${DistributionBucketName}/deploy/\${Stage}/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
+dpkg -i /tmp/amigo.deb
+",
+              Object {
+                "Stage": Object {
+                  "Ref": "Stage",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+    },
+    "LoadBalancer": Object {
+      "Properties": Object {
+        "CrossZone": true,
+        "HealthCheck": Object {
+          "HealthyThreshold": "2",
+          "Interval": "10",
+          "Target": "HTTP:9000/healthcheck",
+          "Timeout": "5",
+          "UnhealthyThreshold": "2",
+        },
+        "Listeners": Array [
+          Object {
+            "InstancePort": "9000",
+            "LoadBalancerPort": "80",
+            "Protocol": "HTTP",
+          },
+          Object {
+            "InstancePort": "9000",
+            "LoadBalancerPort": "443",
+            "Protocol": "HTTPS",
+            "SSLCertificateId": Object {
+              "Ref": "TLSCert",
+            },
+          },
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": Array [
+          Object {
+            "Ref": "LoadBalancerSecurityGroup",
+          },
+        ],
+        "Subnets": Object {
+          "Ref": "PublicSubnets",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+    },
+    "LoadBalancerSecurityGroup": Object {
+      "Properties": Object {
+        "GroupDescription": "Guardian IP range has access to the load balancer on port 80",
+        "SecurityGroupEgress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 9000,
+            "IpProtocol": "tcp",
+            "ToPort": 9000,
+          },
+        ],
+        "SecurityGroupIngress": Array [
+          Object {
+            "CidrIp": "77.91.248.0/21",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80,
+          },
+          Object {
+            "CidrIp": "77.91.248.0/21",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPC",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "LogShippingPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "kinesis:Describe*",
+                "kinesis:Put*",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Sub": "arn:aws:kinesis:\${AWS::Region}:\${AWS::AccountId}:stream/\${KinesisStreamName}",
+                },
+              ],
+            },
+          ],
+        },
+        "PolicyName": "log-shipping-policy",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PackerPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ec2:AttachVolume",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:CopyImage",
+                "ec2:CreateImage",
+                "ec2:CreateKeypair",
+                "ec2:CreateSecurityGroup",
+                "ec2:CreateSnapshot",
+                "ec2:CreateTags",
+                "ec2:CreateVolume",
+                "ec2:DeleteKeypair",
+                "ec2:DeleteSecurityGroup",
+                "ec2:DeleteSnapshot",
+                "ec2:DeleteVolume",
+                "ec2:DeregisterImage",
+                "ec2:DescribeImageAttribute",
+                "ec2:DescribeImages",
+                "ec2:DescribeInstances",
+                "ec2:DescribeRegions",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume",
+                "ec2:GetPasswordData",
+                "ec2:ModifyImageAttribute",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:ModifySnapshotAttribute",
+                "ec2:RegisterImage",
+                "ec2:RunInstances",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances",
+                "iam:PassRole",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+        },
+        "PolicyName": "packer-required-permissions",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PackerSecurityGroup": Object {
+      "Properties": Object {
+        "GroupDescription": "Security group for instances created by Packer",
+        "GroupName": Object {
+          "Fn::Sub": Array [
+            "amigo-packer-\${Stage}",
+            Object {
+              "Stage": Object {
+                "Ref": "Stage",
+              },
+            },
+          ],
+        },
+        "SecurityGroupEgress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 0,
+            "IpProtocol": "tcp",
+            "ToPort": 65535,
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VPC",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "RootRole": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "sts:AssumeRole",
+              ],
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": Array [
+                  "ec2.amazonaws.com",
+                ],
+              },
+            },
+          ],
+        },
+        "Path": "/",
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": Object {
+              "Ref": "Stage",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SSMRunCommandPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "ec2messages:AcknowledgeMessage",
+                "ec2messages:DeleteMessage",
+                "ec2messages:FailMessage",
+                "ec2messages:GetEndpoint",
+                "ec2messages:GetMessages",
+                "ec2messages:SendReply",
+                "ssm:UpdateInstanceInformation",
+                "ssm:ListInstanceAssociations",
+                "ssm:DescribeInstanceProperties",
+                "ssm:DescribeDocumentParameters",
+                "ssm:StartSession",
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel",
+                "ssm:TerminateSession",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+        },
+        "PolicyName": "ssm-run-command-policy",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "UserDataPolicy": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "s3:GetObject",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:s3::*:",
+                      Object {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        "PolicyName": "download-artifacts-from-s3",
+        "Roles": Array [
+          Object {
+            "Ref": "RootRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+}
+`;
