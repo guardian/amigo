@@ -17,7 +17,7 @@ deployments:
         Recipe: arm64-bionic-java8-deploy-infrastructure
         AmigoStage: PROD
       amiEncrypted: true
-      templatePath: cloudformation.yaml
+      templatePath: AMIgo.template.json
   # upload lambda
   imagecopier:
     type: aws-s3
