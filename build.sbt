@@ -4,7 +4,7 @@ import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.11.8"
+scalaVersion := "2.13.6"
 
 javaOptions in Universal ++= Seq(
   s"-Dpidfile.path=/dev/null",
