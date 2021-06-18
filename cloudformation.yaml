@@ -61,6 +61,13 @@ Resources:
             - ec2.amazonaws.com
           Action:
           - sts:AssumeRole
+      Tags:
+        - Key: App
+          Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
   UserDataPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -254,6 +261,13 @@ Resources:
         Interval: '10'
         UnhealthyThreshold: '2'
         HealthyThreshold: '2'
+      Tags:
+        - Key: App
+          Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
   AutoscalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -267,15 +281,15 @@ Resources:
       LoadBalancerNames:
       - !Ref 'LoadBalancer'
       Tags:
-      - Key: Stage
-        PropagateAtLaunch: 'true'
-        Value: !Ref 'Stage'
-      - Key: Stack
-        PropagateAtLaunch: 'true'
-        Value: deploy
       - Key: App
         PropagateAtLaunch: 'true'
         Value: amigo
+      - Key: Stack
+        PropagateAtLaunch: 'true'
+        Value: deploy
+      - Key: Stage
+        PropagateAtLaunch: 'true'
+        Value: !Ref 'Stage'
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -320,6 +334,13 @@ Resources:
         FromPort: '9000'
         ToPort: '9000'
         CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: App
+          Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
   ApplicationSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -334,6 +355,13 @@ Resources:
         FromPort: '9000'
         ToPort: '9000'
         SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
+      Tags:
+        - Key: App
+          Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
   AmigoDataBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -343,12 +371,12 @@ Resources:
           - amigo-data-${LowerCaseStage}
           - LowerCaseStage: !FindInMap [ Config, Ref: Stage, LowerCaseName ]
       Tags:
-        - Key: Stage
-          Value: !Ref 'Stage'
-        - Key: Stack
-          Value: deploy
         - Key: App
           Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
   PackerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -360,3 +388,10 @@ Resources:
           FromPort: 0
           ToPort: 65535
           CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: App
+          Value: amigo
+        - Key: Stack
+          Value: deploy
+        - Key: Stage
+          Value: !Ref 'Stage'
