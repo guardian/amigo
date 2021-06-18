@@ -15,11 +15,11 @@
     "synth": "cdk synth --path-metadata false --version-reporting false"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.107.0",
+    "@aws-cdk/assert": "1.109.0",
     "@guardian/eslint-config-typescript": "^0.6.0",
     "@types/jest": "^26.0.20",
     "@types/node": "15.12.2",
-    "aws-cdk": "1.107.0",
+    "aws-cdk": "1.109.0",
     "eslint": "^7.18.0",
     "jest": "^27.0.4",
     "prettier": "^2.2.0",
@@ -28,13 +28,13 @@
     "typescript": "~4.3.3"
   },
   "dependencies": {
-    "@aws-cdk/aws-ec2": "1.107.0",
-    "@aws-cdk/aws-events-targets": "1.107.0",
-    "@aws-cdk/aws-iam": "1.107.0",
-    "@aws-cdk/aws-lambda": "1.107.0",
-    "@aws-cdk/aws-s3": "1.107.0",
-    "@aws-cdk/cloudformation-include": "1.107.0",
-    "@aws-cdk/core": "1.107.0",
+    "@aws-cdk/aws-ec2": "1.109.0",
+    "@aws-cdk/aws-events-targets": "1.109.0",
+    "@aws-cdk/aws-iam": "1.109.0",
+    "@aws-cdk/aws-lambda": "1.109.0",
+    "@aws-cdk/aws-s3": "1.109.0",
+    "@aws-cdk/cloudformation-include": "1.109.0",
+    "@aws-cdk/core": "1.109.0",
     "@guardian/cdk": "19.1.0",
     "source-map-support": "^0.5.16"
   }
