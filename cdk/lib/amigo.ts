@@ -4,12 +4,17 @@ import { Effect, PolicyStatement, Role } from "@aws-cdk/aws-iam";
 import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
-import { GuStack } from "@guardian/cdk/lib/constructs/core";
-import { GuLogShippingPolicy, GuSSMRunCommandPolicy } from "@guardian/cdk/lib/constructs/iam";
+import { GuDistributionBucketParameter, GuStack } from "@guardian/cdk/lib/constructs/core";
+import type { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
+import { GuGetDistributablePolicy, GuLogShippingPolicy, GuSSMRunCommandPolicy } from "@guardian/cdk/lib/constructs/iam";
 
 const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
 
 export class AmigoStack extends GuStack {
+  private static app: AppIdentity = {
+    app: "amigo",
+  };
+
   constructor(scope: App, id: string, props: GuStackProps) {
     super(scope, id, props);
 
@@ -17,6 +22,7 @@ export class AmigoStack extends GuStack {
       templateFile: yamlTemplateFilePath,
       parameters: {
         Stage: this.getParam<GuStageParameter>("Stage"), // TODO `GuStageParameter` could be a singleton to simplify this
+        DistributionBucketName: GuDistributionBucketParameter.getInstance(this).valueAsString,
       },
     });
 
@@ -40,5 +46,7 @@ export class AmigoStack extends GuStack {
     ssmPolicy.attachToRole(rootRole);
 
     GuLogShippingPolicy.getInstance(this).attachToRole(rootRole);
+
+    new GuGetDistributablePolicy(this, AmigoStack.app).attachToRole(rootRole);
   }
 }
