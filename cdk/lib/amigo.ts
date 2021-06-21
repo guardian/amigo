@@ -20,6 +20,9 @@ export class AmigoStack extends GuStack {
 
     const yamlDefinedStack = new CfnInclude(this, "YamlTemplate", {
       templateFile: yamlTemplateFilePath,
+
+      // These override like-named parameters in the YAML template.
+      // TODO remove the parameter from the YAML template once each resource that uses it has been CDK-ified.
       parameters: {
         Stage: this.getParam<GuStageParameter>("Stage"), // TODO `GuStageParameter` could be a singleton to simplify this
         DistributionBucketName: GuDistributionBucketParameter.getInstance(this).valueAsString,
