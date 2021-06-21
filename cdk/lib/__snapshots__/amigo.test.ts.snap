@@ -33,9 +33,10 @@ Object {
       "Description": "EC2 instance type",
       "Type": "String",
     },
-    "KinesisStreamName": Object {
-      "Description": "The name (NOT arn) of the Kinesis stream that logs should be shipped to",
-      "Type": "String",
+    "LoggingStreamName": Object {
+      "Default": "/account/services/logging.stream.name",
+      "Description": "SSM parameter containing the Name (not ARN) on the kinesis stream",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "PackerInstanceProfile": Object {
       "Description": "Instance profile given to instances created by Packer",
@@ -366,6 +367,71 @@ Object {
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
     },
+    "GuLogShippingPolicy981BFE5A": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "kinesis:Describe*",
+                "kinesis:Put*",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:aws:kinesis:",
+                    Object {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    Object {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":stream/",
+                    Object {
+                      "Ref": "LoggingStreamName",
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuLogShippingPolicy981BFE5A",
+        "Roles": Array [
+          Object {
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "InstanceProfile": Object {
       "Properties": Object {
         "Path": "/",
@@ -536,33 +602,6 @@ dpkg -i /tmp/amigo.deb
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
-    },
-    "LogShippingPolicy": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "kinesis:Describe*",
-                "kinesis:Put*",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
-                Object {
-                  "Fn::Sub": "arn:aws:kinesis:\${AWS::Region}:\${AWS::AccountId}:stream/\${KinesisStreamName}",
-                },
-              ],
-            },
-          ],
-        },
-        "PolicyName": "log-shipping-policy",
-        "Roles": Array [
-          Object {
-            "Ref": "RootRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "PackerPolicy": Object {
       "Properties": Object {
