@@ -714,7 +714,7 @@ dpkg -i /tmp/amigo.deb
       },
       "Type": "AWS::IAM::Role",
     },
-    "SSMRunCommandPolicy": Object {
+    "SSMRunCommandPolicy244E1613": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
@@ -730,22 +730,52 @@ dpkg -i /tmp/amigo.deb
                 "ssm:ListInstanceAssociations",
                 "ssm:DescribeInstanceProperties",
                 "ssm:DescribeDocumentParameters",
-                "ssm:StartSession",
                 "ssmmessages:CreateControlChannel",
                 "ssmmessages:CreateDataChannel",
                 "ssmmessages:OpenControlChannel",
                 "ssmmessages:OpenDataChannel",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": Array [
+                "ssm:StartSession",
                 "ssm:TerminateSession",
               ],
               "Effect": "Allow",
               "Resource": "*",
             },
           ],
+          "Version": "2012-10-17",
         },
         "PolicyName": "ssm-run-command-policy",
         "Roles": Array [
           Object {
-            "Ref": "RootRole",
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

@@ -145,35 +145,6 @@ Resources:
       Roles:
       - !Ref 'RootRole'
 
-  SSMRunCommandPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ssm-run-command-policy
-      PolicyDocument:
-        Statement:
-        # minimal policy to allow running commands via ssm
-        - Effect: Allow
-          Resource: "*"
-          Action:
-          - ec2messages:AcknowledgeMessage
-          - ec2messages:DeleteMessage
-          - ec2messages:FailMessage
-          - ec2messages:GetEndpoint
-          - ec2messages:GetMessages
-          - ec2messages:SendReply
-          - ssm:UpdateInstanceInformation
-          - ssm:ListInstanceAssociations
-          - ssm:DescribeInstanceProperties
-          - ssm:DescribeDocumentParameters
-          - ssm:StartSession
-          - ssmmessages:CreateControlChannel
-          - ssmmessages:CreateDataChannel
-          - ssmmessages:OpenControlChannel
-          - ssmmessages:OpenDataChannel
-          - ssm:TerminateSession
-      Roles:
-      - !Ref RootRole
-
   LogShippingPolicy:
     Type: AWS::IAM::Policy
     Properties:
