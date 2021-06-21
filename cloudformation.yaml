@@ -30,9 +30,6 @@ Parameters:
   TLSCert:
     Type: String
     Description: ARN of a TLS certificate to install on the load balancer
-  KinesisStreamName:
-    Type: String
-    Description: The name (NOT arn) of the Kinesis stream that logs should be shipped to
   AnghammaradTopicArn:
     Type: String
     Description: Anghammarad sns notifications topic arn
@@ -144,21 +141,6 @@ Resources:
           Resource: !Ref PackerInstanceProfile
       Roles:
       - !Ref 'RootRole'
-
-  LogShippingPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: log-shipping-policy
-      PolicyDocument:
-        Statement:
-        - Effect: Allow
-          Action:
-          - kinesis:Describe*
-          - kinesis:Put*
-          Resource:
-          - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisStreamName}
-      Roles:
-      - !Ref RootRole
 
   PackerPolicy:
     Type: AWS::IAM::Policy

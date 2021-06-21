@@ -5,7 +5,7 @@ import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
 import { GuStack } from "@guardian/cdk/lib/constructs/core";
-import { GuSSMRunCommandPolicy } from "@guardian/cdk/lib/constructs/iam";
+import { GuLogShippingPolicy, GuSSMRunCommandPolicy } from "@guardian/cdk/lib/constructs/iam";
 
 const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
 
@@ -38,5 +38,7 @@ export class AmigoStack extends GuStack {
       })
     );
     ssmPolicy.attachToRole(rootRole);
+
+    GuLogShippingPolicy.getInstance(this).attachToRole(rootRole);
   }
 }
