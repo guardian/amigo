@@ -65,19 +65,6 @@ Resources:
           Value: deploy
         - Key: Stage
           Value: !Ref 'Stage'
-  UserDataPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: download-artifacts-from-s3
-      PolicyDocument:
-        Statement:
-        - Effect: Allow
-          Action:
-          - s3:GetObject
-          Resource:
-          - !Join [ "", [ "arn:aws:s3::*:", !Ref DistributionBucketName, "/*" ] ]
-      Roles:
-      - !Ref 'RootRole'
   AmigoAppPolicy:
     Type: AWS::IAM::Policy
     Properties:
