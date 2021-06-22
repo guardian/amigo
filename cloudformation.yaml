@@ -85,15 +85,6 @@ Resources:
           - dynamodb:GetItem
           Resource: arn:aws:dynamodb:*:*:table/config-deploy
         - Effect: Allow
-          Action: ec2:DescribeTags
-          Resource: '*'
-        - Effect: Allow
-          Action: autoscaling:DescribeAutoScalingGroups
-          Resource: '*'
-        - Effect: Allow
-          Action: autoscaling:DescribeAutoScalingInstances
-          Resource: '*'
-        - Effect: Allow
           Action:
           - sns:ListTopics
           Resource: '*'

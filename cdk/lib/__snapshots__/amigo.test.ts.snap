@@ -109,21 +109,6 @@ Object {
               "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
             },
             Object {
-              "Action": "ec2:DescribeTags",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": "autoscaling:DescribeAutoScalingGroups",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": "autoscaling:DescribeAutoScalingInstances",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
               "Action": Array [
                 "sns:ListTopics",
               ],
@@ -366,6 +351,55 @@ Object {
         },
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
+    },
+    "DescribeEC2PolicyFF5F9295": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "autoscaling:DescribeAutoScalingInstances",
+                "autoscaling:DescribeAutoScalingGroups",
+                "ec2:DescribeTags",
+                "ec2:DescribeInstances",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "describe-ec2-policy",
+        "Roles": Array [
+          Object {
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "GetDistributablePolicyAmigoB25A5D2B": Object {
       "Properties": Object {

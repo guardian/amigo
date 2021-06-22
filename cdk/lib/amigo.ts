@@ -8,6 +8,7 @@ import { GuDistributionBucketParameter, GuStack } from "@guardian/cdk/lib/constr
 import type { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import {
   GuAllowPolicy,
+  GuDescribeEC2Policy,
   GuGetDistributablePolicy,
   GuLogShippingPolicy,
   GuSSMRunCommandPolicy,
@@ -96,5 +97,7 @@ export class AmigoStack extends GuStack {
         "iam:PassRole",
       ],
     }).attachToRole(rootRole);
+
+    GuDescribeEC2Policy.getInstance(this).attachToRole(rootRole);
   }
 }
