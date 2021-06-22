@@ -6,7 +6,12 @@ import type { App } from "@aws-cdk/core";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack } from "@guardian/cdk/lib/constructs/core";
 import type { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
-import { GuGetDistributablePolicy, GuLogShippingPolicy, GuSSMRunCommandPolicy } from "@guardian/cdk/lib/constructs/iam";
+import {
+  GuAllowPolicy,
+  GuGetDistributablePolicy,
+  GuLogShippingPolicy,
+  GuSSMRunCommandPolicy,
+} from "@guardian/cdk/lib/constructs/iam";
 
 const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
 
@@ -51,5 +56,45 @@ export class AmigoStack extends GuStack {
     GuLogShippingPolicy.getInstance(this).attachToRole(rootRole);
 
     new GuGetDistributablePolicy(this, AmigoStack.app).attachToRole(rootRole);
+
+    new GuAllowPolicy(this, "PackerPolicy", {
+      policyName: "packer-required-permissions",
+      resources: ["*"],
+      actions: [
+        "ec2:AttachVolume",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:CopyImage",
+        "ec2:CreateImage",
+        "ec2:CreateKeypair",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:DeleteKeypair",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteVolume",
+        "ec2:DeregisterImage",
+        "ec2:DescribeImageAttribute",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeRegions",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume",
+        "ec2:GetPasswordData",
+        "ec2:ModifyImageAttribute",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:ModifySnapshotAttribute",
+        "ec2:RegisterImage",
+        "ec2:RunInstances",
+        "ec2:StopInstances",
+        "ec2:TerminateInstances",
+        "iam:PassRole",
+      ],
+    }).attachToRole(rootRole);
   }
 }

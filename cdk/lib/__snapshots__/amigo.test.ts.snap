@@ -665,7 +665,7 @@ dpkg -i /tmp/amigo.deb
       },
       "Type": "AWS::EC2::SecurityGroup",
     },
-    "PackerPolicy": Object {
+    "PackerPolicyE6040EA8": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
@@ -709,11 +709,35 @@ dpkg -i /tmp/amigo.deb
               "Resource": "*",
             },
           ],
+          "Version": "2012-10-17",
         },
         "PolicyName": "packer-required-permissions",
         "Roles": Array [
           Object {
-            "Ref": "RootRole",
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
