@@ -20,9 +20,10 @@ Object {
       "Description": "AMI ID",
       "Type": "String",
     },
-    "AnghammaradTopicArn": Object {
-      "Description": "Anghammarad sns notifications topic arn",
-      "Type": "String",
+    "AnghammaradSnsArn": Object {
+      "Default": "/account/services/anghammarad.topic.arn",
+      "Description": "SSM parameter containing the ARN of the Anghammarad SNS topic",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "DistributionBucketName": Object {
       "Default": "/account/services/artifact.bucket",
@@ -145,15 +146,6 @@ Object {
                     },
                   },
                 ],
-              },
-            },
-            Object {
-              "Action": Array [
-                "sns:Publish",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Ref": "AnghammaradTopicArn",
               },
             },
             Object {
@@ -429,6 +421,52 @@ Object {
           "Version": "2012-10-17",
         },
         "PolicyName": "GetDistributablePolicyAmigoB25A5D2B",
+        "Roles": Array [
+          Object {
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "GuAnghammaradSenderPolicy674A3874": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "AnghammaradSnsArn",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuAnghammaradSenderPolicy674A3874",
         "Roles": Array [
           Object {
             "Fn::Select": Array [
