@@ -634,11 +634,6 @@ dpkg -i /tmp/amigo.deb
         "Listeners": Array [
           Object {
             "InstancePort": "9000",
-            "LoadBalancerPort": "80",
-            "Protocol": "HTTP",
-          },
-          Object {
-            "InstancePort": "9000",
             "LoadBalancerPort": "443",
             "Protocol": "HTTPS",
             "SSLCertificateId": Object {
@@ -694,12 +689,6 @@ dpkg -i /tmp/amigo.deb
           },
         ],
         "SecurityGroupIngress": Array [
-          Object {
-            "CidrIp": "77.91.248.0/21",
-            "FromPort": 80,
-            "IpProtocol": "tcp",
-            "ToPort": 80,
-          },
           Object {
             "CidrIp": "77.91.248.0/21",
             "FromPort": 443,
