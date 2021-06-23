@@ -127,9 +127,6 @@ Resources:
       Subnets: !Ref 'PublicSubnets'
       CrossZone: true
       Listeners:
-      - Protocol: HTTP
-        LoadBalancerPort: '80'
-        InstancePort: '9000'
       - Protocol: HTTPS
         LoadBalancerPort: '443'
         InstancePort: '9000'
@@ -200,10 +197,6 @@ Resources:
         80
       VpcId: !Ref 'VPC'
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: '80'
-        ToPort: '80'
-        CidrIp: 77.91.248.0/21
       - IpProtocol: tcp
         FromPort: '443'
         ToPort: '443'
