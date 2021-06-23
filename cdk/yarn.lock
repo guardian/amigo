@@ -2299,10 +2299,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@guardian/cdk@19.1.0":
-  version "19.1.0"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-19.1.0.tgz#f2f182cffe070676df4df2fc0d09e8d5f646756c"
-  integrity sha512-8Pvuo8tBe38LzsnRAmWTewxdVTibsuDkz3zzwRd/sovmdwbF9pOxq4Yeow99vEMEnHGJzuEsg9XhPCUbWsYMaw==
+"@guardian/cdk@19.2.1":
+  version "19.2.1"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-19.2.1.tgz#c89265fb61c47ec2f70f375740e2899f51758497"
+  integrity sha512-c+5w/wxvx8+1+9DorUWqqh+8VY2iIGgjqnZ9FCTrFbFN/l77W6eyv8tA9Qx1C7uWpPGWG+x3/hwfL8tCK/6gtA==
   dependencies:
     "@aws-cdk/assert" "1.107.0"
     "@aws-cdk/aws-apigateway" "1.107.0"
@@ -2319,7 +2319,7 @@
     "@aws-cdk/aws-rds" "1.107.0"
     "@aws-cdk/aws-s3" "1.107.0"
     "@aws-cdk/core" "1.107.0"
-    aws-sdk "^2.919.0"
+    aws-sdk "^2.929.0"
     execa "^5.1.1"
     git-url-parse "^11.4.4"
     read-pkg-up "7.0.1"
@@ -3016,10 +3016,25 @@ aws-cdk@1.107.0:
     yaml "1.10.2"
     yargs "^16.2.0"
 
-aws-sdk@^2.848.0, aws-sdk@^2.919.0:
+aws-sdk@^2.848.0:
   version "2.930.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.930.0.tgz#f98871a790ffdbfae5439e50db99f6d4635afe19"
   integrity sha512-g8fPOy7Skh2Pqpz2SaDI+M9re2rjTWBQUirAMgtUD/6I/Lf6CR1Q0amsjtQU8WqRQH06kNGwuLtc8Tt6wAux3Q==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.15.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    uuid "3.3.2"
+    xml2js "0.4.19"
+
+aws-sdk@^2.929.0:
+  version "2.932.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.932.0.tgz#43da32ab6de58a0eac6c7976feb6c9879fe09e7c"
+  integrity sha512-U6MWUtFD0npWa+ReVEgm0fCIM0fMOYahFp14GLv8fC+BWOTvh5Iwt/gF8NrLomx42bBjA1Abaw6yhmiaSJDQHQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"

@@ -30,9 +30,6 @@ Parameters:
   TLSCert:
     Type: String
     Description: ARN of a TLS certificate to install on the load balancer
-  AnghammaradTopicArn:
-    Type: String
-    Description: Anghammarad sns notifications topic arn
   DistributionBucketName:
     Description: SSM parameter containing the S3 bucket name holding distribution artifacts
     Type: AWS::SSM::Parameter::Value<String>
@@ -96,10 +93,6 @@ Resources:
           Action:
           - sns:*
           Resource: !Sub 'arn:aws:sns:*:*:amigo-${Stage}-housekeeping-notify'
-        - Effect: Allow
-          Action:
-            - sns:Publish
-          Resource: !Ref AnghammaradTopicArn
 
         # Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
         - Effect: Allow
