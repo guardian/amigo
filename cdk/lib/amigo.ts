@@ -1,11 +1,13 @@
 import path from "path";
-import type { CfnRole, Policy } from "@aws-cdk/aws-iam";
-import { Effect, PolicyStatement, Role } from "@aws-cdk/aws-iam";
+import type { CfnRole } from "@aws-cdk/aws-iam";
+import { Effect, Policy, PolicyStatement, Role } from "@aws-cdk/aws-iam";
+import type { Bucket } from "@aws-cdk/aws-s3";
 import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
+import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack } from "@guardian/cdk/lib/constructs/core";
-import type { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
+import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
@@ -14,6 +16,7 @@ import {
   GuLogShippingPolicy,
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
+import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
 const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
 
@@ -22,8 +25,43 @@ export class AmigoStack extends GuStack {
     app: "amigo",
   };
 
+  private readonly dataBucket: Bucket;
+
+  private get appPolicy(): Policy {
+    return new Policy(this, "AppPolicy", {
+      policyName: "app-policy",
+      statements: [
+        /*
+        Permissions to enable listing of installed packages created during a bake
+        See https://github.com/guardian/amigo/pull/395
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["s3:GetObject"],
+          resources: [`${this.dataBucket.bucketArn}/*`],
+        }),
+      ],
+    });
+  }
+
   constructor(scope: App, id: string, props: GuStackProps) {
     super(scope, id, props);
+
+    const importBucketName = this.withStageDependentValue({
+      variableName: "DataBucketName",
+      stageValues: {
+        [Stage.CODE]: "amigo-data-code",
+        [Stage.PROD]: "amigo-data-prod",
+      },
+    });
+
+    this.dataBucket = new GuS3Bucket(this, "AmigoDataBucket", {
+      bucketName: importBucketName,
+      existingLogicalId: {
+        logicalId: "AmigoDataBucket",
+        reason: "To prevent orphaning of the YAML defined bucket",
+      },
+    });
 
     const yamlDefinedStack = new CfnInclude(this, "YamlTemplate", {
       templateFile: yamlTemplateFilePath,
@@ -99,8 +137,17 @@ export class AmigoStack extends GuStack {
       }),
       GuDescribeEC2Policy.getInstance(this),
       GuAnghammaradSenderPolicy.getInstance(this),
+      this.appPolicy,
     ];
 
     policiesToAttachToRootRole.forEach((policy) => policy.attachToRole(rootRole));
+
+    /*
+    Looks like some @guardian/cdk constructs are not applying the App tag.
+    I suspect since https://github.com/guardian/cdk/pull/326.
+    Until that is fixed, we can safely, manually apply it to all constructs in tree from `this` as it's a single app stack.
+    TODO: remove this once @guardian/cdk has been fixed.
+    */
+    AppIdentity.taggedConstruct(AmigoStack.app, this);
   }
 }

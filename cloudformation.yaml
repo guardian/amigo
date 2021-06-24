@@ -35,13 +35,6 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /account/services/artifact.bucket
 
-Mappings:
-  Config:
-    CODE:
-      LowerCaseName: code
-    PROD:
-      LowerCaseName: prod
-
 Resources:
   RootRole:
     Type: AWS::IAM::Role
@@ -101,11 +94,6 @@ Resources:
           - s3:PutBucketPolicy
           Resource: !Join [ "", [ "arn:aws:s3::*:", !Ref DistributionBucketName ] ]
 
-        - Effect: Allow
-          Action:
-            - s3:GetObject
-          Resource:
-            - !Sub 'arn:aws:s3:::${AmigoDataBucket}/*'
         - Effect: Allow
           Action:
             - iam:GetInstanceProfile
@@ -227,21 +215,6 @@ Resources:
         FromPort: '9000'
         ToPort: '9000'
         SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
-      Tags:
-        - Key: App
-          Value: amigo
-        - Key: Stack
-          Value: deploy
-        - Key: Stage
-          Value: !Ref 'Stage'
-  AmigoDataBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName:
-        Fn::Sub:
-          - amigo-data-${LowerCaseStage}
-          - LowerCaseStage: !FindInMap [ Config, Ref: Stage, LowerCaseName ]
       Tags:
         - Key: App
           Value: amigo

@@ -5,12 +5,12 @@ Object {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AMIgo, an AMI bakery",
   "Mappings": Object {
-    "Config": Object {
+    "stagemapping": Object {
       "CODE": Object {
-        "LowerCaseName": "code",
+        "DataBucketName": "amigo-data-code",
       },
       "PROD": Object {
-        "LowerCaseName": "prod",
+        "DataBucketName": "amigo-data-prod",
       },
     },
   },
@@ -168,17 +168,6 @@ Object {
             },
             Object {
               "Action": Array [
-                "s3:GetObject",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
-                Object {
-                  "Fn::Sub": "arn:aws:s3:::\${AmigoDataBucket}/*",
-                },
-              ],
-            },
-            Object {
-              "Action": Array [
                 "iam:GetInstanceProfile",
               ],
               "Effect": "Allow",
@@ -201,19 +190,12 @@ Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
         "BucketName": Object {
-          "Fn::Sub": Array [
-            "amigo-data-\${LowerCaseStage}",
+          "Fn::FindInMap": Array [
+            "stagemapping",
             Object {
-              "LowerCaseStage": Object {
-                "Fn::FindInMap": Array [
-                  "Config",
-                  Object {
-                    "Ref": "Stage",
-                  },
-                  "LowerCaseName",
-                ],
-              },
+              "Ref": "Stage",
             },
+            "DataBucketName",
           ],
         },
         "Tags": Array [
@@ -242,6 +224,64 @@ Object {
         ],
       },
       "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "AppPolicyF941AEC5": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    Object {
+                      "Fn::GetAtt": Array [
+                        "AmigoDataBucket",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "app-policy",
+        "Roles": Array [
+          Object {
+            "Fn::Select": Array [
+              1,
+              Object {
+                "Fn::Split": Array [
+                  "/",
+                  Object {
+                    "Fn::Select": Array [
+                      5,
+                      Object {
+                        "Fn::Split": Array [
+                          ":",
+                          Object {
+                            "Fn::GetAtt": Array [
+                              "RootRole",
+                              "Arn",
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "ApplicationSecurityGroup": Object {
       "Properties": Object {
