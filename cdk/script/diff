@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e
+
+STACK_NAME=amigo-CODE
+PROFILE=deployTools
+
+for arg in "$@"; do
+  if [ "$arg" == "--prod" ]; then
+    STACK_NAME=amigo-PROD
+    shift
+  fi
+done
+
+checkCredentials() {
+  STATUS=$(aws sts get-caller-identity --profile ${PROFILE} 2>&1 || true)
+
+  if [[ ${STATUS} =~ (ExpiredToken) ]]; then
+    echo "Credentials for profile '${PROFILE}' have expired. Fetch new credentials."
+    exit 1
+  elif [[ ${STATUS} =~ ("could not be found") ]]; then
+    echo "Credentials for profile '${PROFILE}' are missing. Fetch credentials."
+    exit 1
+  fi
+}
+
+checkCredentials
+
+export GU_CDK_STACK_NAME=${STACK_NAME}
+export AWS_PROFILE=${PROFILE}
+
+yarn diff
