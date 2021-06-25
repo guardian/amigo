@@ -40,7 +40,7 @@ Object {
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "PackerInstanceProfile": Object {
-      "Description": "Instance profile given to instances created by Packer",
+      "Description": "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
       "Type": "String",
     },
     "PackerVersion": Object {
@@ -74,30 +74,6 @@ Object {
     },
   },
   "Resources": Object {
-    "AmigoAppPolicy": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "iam:GetInstanceProfile",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Ref": "PackerInstanceProfile",
-              },
-            },
-          ],
-        },
-        "PolicyName": "amigo-app",
-        "Roles": Array [
-          Object {
-            "Ref": "RootRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "AmigoDataBucket": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
@@ -240,6 +216,13 @@ Object {
                     },
                   ],
                 ],
+              },
+            },
+            Object {
+              "Action": "iam:GetInstanceProfile",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Ref": "PackerInstanceProfile",
               },
             },
           ],
