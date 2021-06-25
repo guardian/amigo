@@ -80,14 +80,6 @@ Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "dynamodb:DescribeTable",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
-            },
-            Object {
-              "Action": Array [
                 "sns:ListTopics",
               ],
               "Effect": "Allow",
@@ -245,6 +237,14 @@ Object {
                   ],
                 ],
               },
+            },
+            Object {
+              "Action": Array [
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
             },
           ],
           "Version": "2012-10-17",
