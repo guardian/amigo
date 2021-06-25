@@ -66,6 +66,16 @@ export class AmigoStack extends GuStack {
           actions: ["dynamodb:DescribeTable", "dynamodb:GetItem"],
           resources: ["arn:aws:dynamodb:*:*:table/config-deploy"],
         }),
+
+        /*
+        Permissions to support encrypted bakes
+        See https://github.com/guardian/amigo/pull/164
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["sns:ListTopics"],
+          resources: ["*"],
+        }),
       ],
     });
   }
