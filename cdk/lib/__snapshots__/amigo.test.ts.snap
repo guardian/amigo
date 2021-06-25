@@ -80,13 +80,6 @@ Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "sns:ListTopics",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
                 "sns:*",
               ],
               "Effect": "Allow",
@@ -245,6 +238,11 @@ Object {
               ],
               "Effect": "Allow",
               "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
+            },
+            Object {
+              "Action": "sns:ListTopics",
+              "Effect": "Allow",
+              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
