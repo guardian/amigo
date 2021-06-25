@@ -80,38 +80,6 @@ Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "sns:*",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::Sub": Array [
-                  "arn:aws:sns:*:*:amigo-\${Stage}-notify",
-                  Object {
-                    "Stage": Object {
-                      "Ref": "Stage",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "Action": Array [
-                "sns:*",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::Sub": Array [
-                  "arn:aws:sns:*:*:amigo-\${Stage}-housekeeping-notify",
-                  Object {
-                    "Stage": Object {
-                      "Ref": "Stage",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "Action": Array [
                 "s3:GetBucketPolicy",
                 "s3:PutBucketPolicy",
               ],
@@ -243,6 +211,36 @@ Object {
               "Action": "sns:ListTopics",
               "Effect": "Allow",
               "Resource": "*",
+            },
+            Object {
+              "Action": "sns:*",
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:sns:*:*:amigo-",
+                      Object {
+                        "Ref": "Stage",
+                      },
+                      "-notify",
+                    ],
+                  ],
+                },
+                Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:sns:*:*:amigo-",
+                      Object {
+                        "Ref": "Stage",
+                      },
+                      "-housekeeping-notify",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",

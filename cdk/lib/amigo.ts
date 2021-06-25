@@ -76,6 +76,19 @@ export class AmigoStack extends GuStack {
           actions: ["sns:ListTopics"],
           resources: ["*"],
         }),
+
+        /*
+        Permissions to trigger AMI deletion
+        See https://github.com/guardian/amigo/pull/193
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["sns:*"],
+          resources: [
+            `arn:aws:sns:*:*:amigo-${this.stage}-notify`,
+            `arn:aws:sns:*:*:amigo-${this.stage}-housekeeping-notify`,
+          ],
+        }),
       ],
     });
   }
