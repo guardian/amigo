@@ -89,6 +89,15 @@ export class AmigoStack extends GuStack {
             `arn:aws:sns:*:*:amigo-${this.stage}-housekeeping-notify`,
           ],
         }),
+
+        /*
+        Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["s3:GetBucketPolicy", "s3:PutBucketPolicy"],
+          resources: [`arn:aws:s3::*:${GuDistributionBucketParameter.getInstance(this).valueAsString}`],
+        }),
       ],
     });
   }

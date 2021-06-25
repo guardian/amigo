@@ -80,24 +80,6 @@ Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "s3:GetBucketPolicy",
-                "s3:PutBucketPolicy",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::Join": Array [
-                  "",
-                  Array [
-                    "arn:aws:s3::*:",
-                    Object {
-                      "Ref": "DistributionBucketName",
-                    },
-                  ],
-                ],
-              },
-            },
-            Object {
-              "Action": Array [
                 "iam:GetInstanceProfile",
               ],
               "Effect": "Allow",
@@ -241,6 +223,24 @@ Object {
                   ],
                 },
               ],
+            },
+            Object {
+              "Action": Array [
+                "s3:GetBucketPolicy",
+                "s3:PutBucketPolicy",
+              ],
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:aws:s3::*:",
+                    Object {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",

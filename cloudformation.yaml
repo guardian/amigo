@@ -61,13 +61,6 @@ Resources:
       PolicyName: amigo-app
       PolicyDocument:
         Statement:
-        # Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
-        - Effect: Allow
-          Action:
-          - s3:GetBucketPolicy
-          - s3:PutBucketPolicy
-          Resource: !Join [ "", [ "arn:aws:s3::*:", !Ref DistributionBucketName ] ]
-
         - Effect: Allow
           Action:
             - iam:GetInstanceProfile
