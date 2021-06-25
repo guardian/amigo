@@ -80,29 +80,6 @@ Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "dynamodb:ListTables",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            Object {
-              "Action": Array [
-                "dynamodb:*",
-              ],
-              "Effect": "Allow",
-              "Resource": Object {
-                "Fn::Sub": Array [
-                  "arn:aws:dynamodb:*:*:table/amigo-\${Stage}-*",
-                  Object {
-                    "Stage": Object {
-                      "Ref": "Stage",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "Action": Array [
                 "dynamodb:DescribeTable",
                 "dynamodb:GetItem",
               ],
@@ -244,6 +221,27 @@ Object {
                       ],
                     },
                     "/*",
+                  ],
+                ],
+              },
+            },
+            Object {
+              "Action": "dynamodb:ListTables",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            Object {
+              "Action": "dynamodb:*",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::Join": Array [
+                  "",
+                  Array [
+                    "arn:aws:dynamodb:*:*:table/amigo-",
+                    Object {
+                      "Ref": "Stage",
+                    },
+                    "-*",
                   ],
                 ],
               },
