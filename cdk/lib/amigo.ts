@@ -40,6 +40,22 @@ export class AmigoStack extends GuStack {
           actions: ["s3:GetObject"],
           resources: [`${this.dataBucket.bucketArn}/*`],
         }),
+
+        /*
+        AMIgo uses DynamoDb as a data store.
+        The permissions are quite wide, mainly because AMIgo creates tables as well as reading/writing data.
+        See `app/data/Dynamo.scala`
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["dynamodb:ListTables"],
+          resources: ["*"],
+        }),
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["dynamodb:*"],
+          resources: [`arn:aws:dynamodb:*:*:table/amigo-${this.stage}-*`],
+        }),
       ],
     });
   }
