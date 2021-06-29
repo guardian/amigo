@@ -24,9 +24,6 @@ Parameters:
   PackerVersion:
     Description: What version of Packer to install
     Type: String
-  PackerInstanceProfile:
-    Description: Instance profile given to instances created by Packer #find this in the PackerUser-PackerRole in IAM
-    Type: String
   TLSCert:
     Type: String
     Description: ARN of a TLS certificate to install on the load balancer
@@ -55,18 +52,6 @@ Resources:
           Value: deploy
         - Key: Stage
           Value: !Ref 'Stage'
-  AmigoAppPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: amigo-app
-      PolicyDocument:
-        Statement:
-        - Effect: Allow
-          Action:
-            - iam:GetInstanceProfile
-          Resource: !Ref PackerInstanceProfile
-      Roles:
-      - !Ref 'RootRole'
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

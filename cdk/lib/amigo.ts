@@ -6,7 +6,7 @@ import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
 import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
-import { GuDistributionBucketParameter, GuStack } from "@guardian/cdk/lib/constructs/core";
+import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import {
   GuAllowPolicy,
@@ -26,6 +26,7 @@ export class AmigoStack extends GuStack {
   };
 
   private readonly dataBucket: Bucket;
+  private readonly packerInstanceProfile: GuStringParameter;
 
   private get appPolicy(): Policy {
     return new Policy(this, "AppPolicy", {
@@ -98,12 +99,26 @@ export class AmigoStack extends GuStack {
           actions: ["s3:GetBucketPolicy", "s3:PutBucketPolicy"],
           resources: [`arn:aws:s3::*:${GuDistributionBucketParameter.getInstance(this).valueAsString}`],
         }),
+
+        /*
+        See https://github.com/guardian/amigo/pull/526
+         */
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ["iam:GetInstanceProfile"],
+          resources: [this.packerInstanceProfile.valueAsString],
+        }),
       ],
     });
   }
 
   constructor(scope: App, id: string, props: GuStackProps) {
     super(scope, id, props);
+
+    this.packerInstanceProfile = new GuStringParameter(this, "PackerInstanceProfile", {
+      description:
+        "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
+    });
 
     const importBucketName = this.withStageDependentValue({
       variableName: "DataBucketName",
