@@ -826,18 +826,20 @@ dpkg -i /tmp/amigo.deb
       "Properties": Object {
         "GroupDescription": "Security group for instances created by Packer",
         "GroupName": Object {
-          "Fn::Sub": Array [
-            "amigo-packer-\${Stage}",
-            Object {
-              "Stage": Object {
+          "Fn::Join": Array [
+            "",
+            Array [
+              "amigo-packer-",
+              Object {
                 "Ref": "Stage",
               },
-            },
+            ],
           ],
         },
         "SecurityGroupEgress": Array [
           Object {
             "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound TCP",
             "FromPort": 0,
             "IpProtocol": "tcp",
             "ToPort": 65535,
