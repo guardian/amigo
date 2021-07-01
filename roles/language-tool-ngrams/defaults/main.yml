@@ -1,3 +1,3 @@
 ---
-source_tarball: s3://amigo-data/data/language-tool/ngrams.tar.gz
+source_tarball: s3://amigo-data-prod/data/language-tool/ngrams.tar.gz
 target_dir: /opt/ngram-data
