@@ -68,9 +68,10 @@ Object {
       "Description": "ARN of a TLS certificate to install on the load balancer",
       "Type": "String",
     },
-    "VPC": Object {
+    "VpcId": Object {
+      "Default": "/account/vpc/primary/id",
       "Description": "Virtual Private Cloud to run EC2 instances within",
-      "Type": "AWS::EC2::VPC::Id",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>",
     },
   },
   "Resources": Object {
@@ -304,7 +305,7 @@ Object {
           },
         ],
         "VpcId": Object {
-          "Ref": "VPC",
+          "Ref": "VpcId",
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
@@ -738,7 +739,7 @@ dpkg -i /tmp/amigo.deb
           },
         ],
         "VpcId": Object {
-          "Ref": "VPC",
+          "Ref": "VpcId",
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
@@ -867,7 +868,7 @@ dpkg -i /tmp/amigo.deb
           },
         ],
         "VpcId": Object {
-          "Ref": "VPC",
+          "Ref": "VpcId",
         },
       },
       "Type": "AWS::EC2::SecurityGroup",

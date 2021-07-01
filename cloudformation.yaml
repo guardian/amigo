@@ -5,9 +5,10 @@ Parameters:
     Description: Stage name
     Type: String
     Default: PROD
-  VPC:
+  VpcId:
     Description: Virtual Private Cloud to run EC2 instances within
-    Type: AWS::EC2::VPC::Id
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>
+    Default: /account/vpc/primary/id
   PublicSubnets:
     Description: Subnets to run load balancer within
     Type: List<AWS::EC2::Subnet::Id>
@@ -135,7 +136,7 @@ Resources:
     Properties:
       GroupDescription: Guardian IP range has access to the load balancer on port
         80
-      VpcId: !Ref 'VPC'
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: '443'
@@ -157,7 +158,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: SSH and HTTP
-      VpcId: !Ref 'VPC'
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: '9000'
@@ -179,7 +180,7 @@ Resources:
     Properties:
       GroupName: !Sub 'amigo-packer-${Stage}'
       GroupDescription: Security group for instances created by Packer
-      VpcId: !Ref 'VPC'
+      VpcId: !Ref VpcId
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0

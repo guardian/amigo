@@ -6,7 +6,12 @@ import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
 import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
-import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
+import {
+  GuDistributionBucketParameter,
+  GuStack,
+  GuStringParameter,
+  GuVpcParameter,
+} from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import {
   GuAllowPolicy,
@@ -144,6 +149,7 @@ export class AmigoStack extends GuStack {
       parameters: {
         Stage: this.getParam<GuStageParameter>("Stage"), // TODO `GuStageParameter` could be a singleton to simplify this
         DistributionBucketName: GuDistributionBucketParameter.getInstance(this).valueAsString,
+        VpcId: GuVpcParameter.getInstance(this).valueAsString,
       },
     });
 

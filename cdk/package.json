@@ -36,7 +36,7 @@
     "@aws-cdk/aws-s3": "1.110.1",
     "@aws-cdk/cloudformation-include": "1.110.1",
     "@aws-cdk/core": "1.110.1",
-    "@guardian/cdk": "20.0.1",
+    "@guardian/cdk": "21.0.0",
     "source-map-support": "^0.5.16"
   }
 }
