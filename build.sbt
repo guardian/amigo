@@ -46,7 +46,11 @@ lazy val root = (project in file("."))
         BuildInfoKey.constant("buildTime", System.currentTimeMillis),
         BuildInfoKey.constant("gitCommitId", buildInfo.revision)
       )
-    }
+    },
+    buildInfoOptions:= Seq(
+      BuildInfoOption.Traits("management.BuildInfo"),
+      BuildInfoOption.ToJson
+    )
   )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
