@@ -396,11 +396,6 @@ Object {
             "Value": "guardian/amigo",
           },
           Object {
-            "Key": "gu:riffraff:new-asg",
-            "PropagateAtLaunch": true,
-            "Value": "true",
-          },
-          Object {
             "Key": "Name",
             "PropagateAtLaunch": true,
             "Value": "AMIgo/AutoScalingGroupAmigo",

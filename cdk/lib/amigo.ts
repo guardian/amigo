@@ -5,7 +5,6 @@ import { Effect, Policy, PolicyStatement, Role } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
 import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
-import { Tags } from "@aws-cdk/core";
 import { AccessScope, GuPlayApp } from "@guardian/cdk";
 import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
@@ -259,7 +258,7 @@ export class AmigoStack extends GuStack {
       "amigo_1.0-latest_all.deb",
     ].join("/");
 
-    const playApp = new GuPlayApp(this, {
+    new GuPlayApp(this, {
       ...AmigoStack.app,
       userData: [
         "#!/bin/bash -ev",
@@ -299,13 +298,6 @@ export class AmigoStack extends GuStack {
         additionalPolicies: policiesToAttachToRootRole,
       },
     });
-
-    /*
-    Tag the new ASG to allow RiffRaff to deploy to both this and the current one at the same time.
-    See https://github.com/guardian/riff-raff/pull/632
-     */
-    const playAppAsg = playApp.autoScalingGroup;
-    Tags.of(playAppAsg).add("gu:riffraff:new-asg", "true");
 
     /*
     `GuPlayApp` creates an instance of `GuGetDistributablePolicy` with the ID "GetDistributablePolicyAmigo".
