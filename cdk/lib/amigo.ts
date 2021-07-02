@@ -5,6 +5,8 @@ import { Effect, Policy, PolicyStatement, Role } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
 import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
+import { Tags } from "@aws-cdk/core";
+import { AccessScope, GuPlayApp } from "@guardian/cdk";
 import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
 import {
@@ -15,17 +17,18 @@ import {
 } from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
+import type { GuGetDistributablePolicy } from "@guardian/cdk/lib/constructs/iam";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
   GuDescribeEC2Policy,
-  GuGetDistributablePolicy,
   GuLogShippingPolicy,
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
 const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
+const packerVersion = "1.6.6";
 
 export class AmigoStack extends GuStack {
   private static app: AppIdentity = {
@@ -176,7 +179,6 @@ export class AmigoStack extends GuStack {
     const policiesToAttachToRootRole: Policy[] = [
       ssmPolicy,
       GuLogShippingPolicy.getInstance(this),
-      new GuGetDistributablePolicy(this, AmigoStack.app),
       new GuAllowPolicy(this, "PackerPolicy", {
         policyName: "packer-required-permissions",
         resources: ["*"],
@@ -248,6 +250,71 @@ export class AmigoStack extends GuStack {
           "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
       },
     });
+
+    const artifactPath = [
+      GuDistributionBucketParameter.getInstance(this).valueAsString,
+      this.stack,
+      this.stage,
+      AmigoStack.app.app,
+      "amigo_1.0-latest_all.deb",
+    ].join("/");
+
+    const playApp = new GuPlayApp(this, {
+      ...AmigoStack.app,
+      userData: [
+        "#!/bin/bash -ev",
+        `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_1.6.6_linux_arm64.zip`,
+        "mkdir /opt/packer",
+        "unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip",
+        "echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
+        "wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb",
+        "dpkg -i /tmp/session-manager-plugin.deb",
+        `aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
+        "dpkg -i /tmp/amigo.deb",
+      ].join("\n"),
+      access: {
+        scope: AccessScope.RESTRICTED,
+        cidrRanges: [Peer.ipv4("77.91.248.0/21")],
+      },
+      certificateProps: {
+        [Stage.CODE]: {
+          domainName: "amigo.code.dev-gutools.co.uk",
+        },
+        [Stage.PROD]: {
+          domainName: "amigo.gutools.co.uk",
+        },
+      },
+      scaling: {
+        [Stage.CODE]: {
+          minimumInstances: 1,
+        },
+        [Stage.PROD]: {
+          minimumInstances: 1,
+        },
+      },
+      monitoringConfiguration: {
+        noMonitoring: true,
+      },
+      roleConfiguration: {
+        additionalPolicies: policiesToAttachToRootRole,
+      },
+    });
+
+    /*
+    Tag the new ASG to allow RiffRaff to deploy to both this and the current one at the same time.
+    See https://github.com/guardian/riff-raff/pull/632
+     */
+    const playAppAsg = playApp.autoScalingGroup;
+    Tags.of(playAppAsg).add("gu:riffraff:new-asg", "true");
+
+    /*
+    `GuPlayApp` creates an instance of `GuGetDistributablePolicy` with the ID "GetDistributablePolicyAmigo".
+    We want to attach a `GuGetDistributablePolicy` to the role used by the YAML template resources,
+    however we cannot create a new `GuGetDistributablePolicy` as the ID will be the same, which is illegal in CDK.
+    To fix, we find the resource that `GuPlayApp` added and add it to the role used by the YAML template resources.
+     */
+    const getDistributablePolicy = this.node.tryFindChild("GetDistributablePolicyAmigo") as GuGetDistributablePolicy;
+    getDistributablePolicy.attachToRole(rootRole);
 
     /*
     Looks like some @guardian/cdk constructs are not applying the App tag.
