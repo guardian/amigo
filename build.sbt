@@ -2,6 +2,9 @@ import akka.actor.FSM.->
 import com.gu.riffraff.artifact.BuildInfo
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 
+import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZonedDateTime}
+
 name := "amigo"
 version := "1.0-latest"
 scalaVersion := "2.11.8"
@@ -38,15 +41,22 @@ lazy val root = (project in file("."))
     buildInfoPackage := "amigo",
     buildInfoKeys := {
       lazy val buildInfo = BuildInfo(baseDirectory.value)
+
+      // so this next one is constant to avoid it always recompiling on dev machines.
+      // we only really care about build time on teamcity, when a constant based on when
+      // it was loaded is just fine
+      lazy val buildTime: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("UTC")))
+
       Seq[BuildInfoKey](
         BuildInfoKey.constant("buildNumber", buildInfo.buildIdentifier),
-        // so this next one is constant to avoid it always recompiling on dev machines.
-        // we only really care about build time on teamcity, when a constant based on when
-        // it was loaded is just fine
-        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+        BuildInfoKey.constant("buildTime", buildTime),
         BuildInfoKey.constant("gitCommitId", buildInfo.revision)
       )
-    }
+    },
+    buildInfoOptions:= Seq(
+      BuildInfoOption.Traits("management.BuildInfo"),
+      BuildInfoOption.ToJson
+    )
   )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
