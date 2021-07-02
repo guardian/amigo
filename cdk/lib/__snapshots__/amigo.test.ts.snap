@@ -2,8 +2,6 @@
 
 exports[`The Amigo stack matches the snapshot 1`] = `
 Object {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "AMIgo, an AMI bakery",
   "Mappings": Object {
     "stagemapping": Object {
       "CODE": Object {
@@ -32,11 +30,6 @@ Object {
     },
   },
   "Parameters": Object {
-    "AMI": Object {
-      "Default": "ami-6b50e218",
-      "Description": "AMI ID",
-      "Type": "String",
-    },
     "AMIAmigo": Object {
       "Description": "Amazon Machine Image ID for the app amigo. Use this in conjunction with AMIgo to keep AMIs up to date.",
       "Type": "AWS::EC2::Image::Id",
@@ -50,10 +43,6 @@ Object {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "InstanceType": Object {
-      "Description": "EC2 instance type",
-      "Type": "String",
     },
     "InstanceTypeAmigo": Object {
       "Default": "t3.small",
@@ -69,18 +58,6 @@ Object {
       "Description": "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
       "Type": "String",
     },
-    "PackerVersion": Object {
-      "Description": "What version of Packer to install",
-      "Type": "String",
-    },
-    "PrivateSubnets": Object {
-      "Description": "Subnets to run the ASG and instances within",
-      "Type": "List<AWS::EC2::Subnet::Id>",
-    },
-    "PublicSubnets": Object {
-      "Description": "Subnets to run load balancer within",
-      "Type": "List<AWS::EC2::Subnet::Id>",
-    },
     "Stage": Object {
       "AllowedValues": Array [
         "CODE",
@@ -88,10 +65,6 @@ Object {
       ],
       "Default": "CODE",
       "Description": "Stage name",
-      "Type": "String",
-    },
-    "TLSCert": Object {
-      "Description": "ARN of a TLS certificate to install on the load balancer",
       "Type": "String",
     },
     "VpcId": Object {
@@ -268,86 +241,11 @@ Object {
         "PolicyName": "app-policy",
         "Roles": Array [
           Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "ApplicationSecurityGroup": Object {
-      "Properties": Object {
-        "GroupDescription": "SSH and HTTP",
-        "SecurityGroupIngress": Array [
-          Object {
-            "CidrIp": "10.249.0.0/16",
-            "FromPort": 9000,
-            "IpProtocol": "tcp",
-            "ToPort": 9000,
-          },
-          Object {
-            "FromPort": 9000,
-            "IpProtocol": "tcp",
-            "SourceSecurityGroupId": Object {
-              "Ref": "LoadBalancerSecurityGroup",
-            },
-            "ToPort": 9000,
-          },
-        ],
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VpcId",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
     },
     "AutoScalingGroupAmigoASG5BE72894": Object {
       "Properties": Object {
@@ -394,11 +292,6 @@ Object {
             "Key": "gu:repo",
             "PropagateAtLaunch": true,
             "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "gu:riffraff:new-asg",
-            "PropagateAtLaunch": true,
-            "Value": "true",
           },
           Object {
             "Key": "Name",
@@ -496,58 +389,6 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::AutoScaling::LaunchConfiguration",
     },
-    "AutoscalingGroup": Object {
-      "Properties": Object {
-        "AvailabilityZones": Object {
-          "Fn::GetAZs": "",
-        },
-        "HealthCheckGracePeriod": 300,
-        "HealthCheckType": "ELB",
-        "LaunchConfigurationName": Object {
-          "Ref": "LaunchConfig",
-        },
-        "LoadBalancerNames": Array [
-          Object {
-            "Ref": "LoadBalancer",
-          },
-        ],
-        "MaxSize": "2",
-        "MinSize": "1",
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "PropagateAtLaunch": true,
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "PropagateAtLaunch": true,
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "PropagateAtLaunch": true,
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "PropagateAtLaunch": true,
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "PropagateAtLaunch": true,
-            "Value": Object {
-              "Ref": "Stage",
-            },
-          },
-        ],
-        "VPCZoneIdentifier": Object {
-          "Ref": "PrivateSubnets",
-        },
-      },
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-    },
     "CertificateAmigoE1AF5E0C": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
@@ -609,32 +450,6 @@ dpkg -i /tmp/amigo.deb",
         "PolicyName": "describe-ec2-policy",
         "Roles": Array [
           Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
         ],
@@ -673,32 +488,6 @@ dpkg -i /tmp/amigo.deb",
           Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
-          Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -719,32 +508,6 @@ dpkg -i /tmp/amigo.deb",
         },
         "PolicyName": "GuAnghammaradSenderPolicy674A3874",
         "Roles": Array [
-          Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
           Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
@@ -872,48 +635,11 @@ dpkg -i /tmp/amigo.deb",
         "PolicyName": "GuLogShippingPolicy981BFE5A",
         "Roles": Array [
           Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "InstanceProfile": Object {
-      "Properties": Object {
-        "Path": "/",
-        "Roles": Array [
-          Object {
-            "Ref": "RootRole",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::InstanceProfile",
     },
     "InstanceRoleAmigo75944747": Object {
       "Properties": Object {
@@ -967,53 +693,6 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::IAM::Role",
     },
-    "LaunchConfig": Object {
-      "Properties": Object {
-        "AssociatePublicIpAddress": false,
-        "IamInstanceProfile": Object {
-          "Ref": "InstanceProfile",
-        },
-        "ImageId": Object {
-          "Ref": "AMI",
-        },
-        "InstanceType": Object {
-          "Ref": "InstanceType",
-        },
-        "SecurityGroups": Array [
-          Object {
-            "Ref": "ApplicationSecurityGroup",
-          },
-        ],
-        "UserData": Object {
-          "Fn::Base64": Object {
-            "Fn::Sub": Array [
-              "#!/bin/bash -ev
-
-wget -P /tmp https://releases.hashicorp.com/packer/\${PackerVersion}/packer_\${PackerVersion}_linux_arm64.zip
-mkdir /opt/packer
-unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
-echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
-
-wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
-dpkg -i /tmp/session-manager-plugin.deb
-
-aws --region eu-west-1 s3 cp s3://\${DistributionBucketName}/deploy/\${Stage}/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
-dpkg -i /tmp/amigo.deb
-",
-              Object {
-                "DistributionBucketName": Object {
-                  "Ref": "DistributionBucketName",
-                },
-                "Stage": Object {
-                  "Ref": "Stage",
-                },
-              },
-            ],
-          },
-        },
-      },
-      "Type": "AWS::AutoScaling::LaunchConfiguration",
-    },
     "ListenerAmigo0180B42C": Object {
       "Properties": Object {
         "Certificates": Array [
@@ -1038,62 +717,6 @@ dpkg -i /tmp/amigo.deb
         "Protocol": "HTTPS",
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
-    },
-    "LoadBalancer": Object {
-      "Properties": Object {
-        "CrossZone": true,
-        "HealthCheck": Object {
-          "HealthyThreshold": "2",
-          "Interval": "10",
-          "Target": "HTTP:9000/healthcheck",
-          "Timeout": "5",
-          "UnhealthyThreshold": "2",
-        },
-        "Listeners": Array [
-          Object {
-            "InstancePort": "9000",
-            "LoadBalancerPort": "443",
-            "Protocol": "HTTPS",
-            "SSLCertificateId": Object {
-              "Ref": "TLSCert",
-            },
-          },
-        ],
-        "Scheme": "internet-facing",
-        "SecurityGroups": Array [
-          Object {
-            "Ref": "LoadBalancerSecurityGroup",
-          },
-        ],
-        "Subnets": Object {
-          "Ref": "PublicSubnets",
-        },
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
-          },
-        ],
-      },
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
     },
     "LoadBalancerAmigoC3017FAF": Object {
       "Properties": Object {
@@ -1203,55 +826,6 @@ dpkg -i /tmp/amigo.deb
       },
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
-    "LoadBalancerSecurityGroup": Object {
-      "Properties": Object {
-        "GroupDescription": "Guardian IP range has access to the load balancer on port 80",
-        "SecurityGroupEgress": Array [
-          Object {
-            "CidrIp": "0.0.0.0/0",
-            "FromPort": 9000,
-            "IpProtocol": "tcp",
-            "ToPort": 9000,
-          },
-        ],
-        "SecurityGroupIngress": Array [
-          Object {
-            "CidrIp": "77.91.248.0/21",
-            "FromPort": 443,
-            "IpProtocol": "tcp",
-            "ToPort": 443,
-          },
-        ],
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VpcId",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
-    },
     "PackerPolicyE6040EA8": Object {
       "Properties": Object {
         "PolicyDocument": Object {
@@ -1300,32 +874,6 @@ dpkg -i /tmp/amigo.deb
         },
         "PolicyName": "packer-required-permissions",
         "Roles": Array [
-          Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
           Object {
             "Ref": "InstanceRoleAmigo75944747",
           },
@@ -1489,51 +1037,6 @@ dpkg -i /tmp/amigo.deb
       },
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
-    "RootRole": Object {
-      "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "sts:AssumeRole",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "Service": Array [
-                  "ec2.amazonaws.com",
-                ],
-              },
-            },
-          ],
-        },
-        "Path": "/",
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
     "SSMRunCommandPolicy244E1613": Object {
       "Properties": Object {
         "PolicyDocument": Object {
@@ -1571,32 +1074,6 @@ dpkg -i /tmp/amigo.deb
         },
         "PolicyName": "ssm-run-command-policy",
         "Roles": Array [
-          Object {
-            "Fn::Select": Array [
-              1,
-              Object {
-                "Fn::Split": Array [
-                  "/",
-                  Object {
-                    "Fn::Select": Array [
-                      5,
-                      Object {
-                        "Fn::Split": Array [
-                          ":",
-                          Object {
-                            "Fn::GetAtt": Array [
-                              "RootRole",
-                              "Arn",
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
           Object {
             "Ref": "InstanceRoleAmigo75944747",
           },

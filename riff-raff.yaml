@@ -7,7 +7,6 @@ deployments:
     type: autoscaling
     parameters:
       bucket: deploy-tools-dist
-      asgMigrationInProgress: true
     dependencies:
       - cloudformation
   cloudformation:
@@ -19,6 +18,7 @@ deployments:
         AmigoStage: PROD
       amiEncrypted: true
       templatePath: AMIgo.template.json
+      amiParameter: AMIAmigo
   # upload lambda
   imagecopier:
     type: aws-s3
