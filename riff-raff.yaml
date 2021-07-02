@@ -7,6 +7,7 @@ deployments:
     type: autoscaling
     parameters:
       bucket: deploy-tools-dist
+      asgMigrationInProgress: true
     dependencies:
       - cloudformation
   cloudformation:
