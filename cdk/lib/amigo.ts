@@ -1,22 +1,14 @@
 import path from "path";
 import { Peer, Port } from "@aws-cdk/aws-ec2";
-import type { CfnRole } from "@aws-cdk/aws-iam";
-import { Effect, Policy, PolicyStatement, Role } from "@aws-cdk/aws-iam";
+import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
-import { CfnInclude } from "@aws-cdk/cloudformation-include";
 import type { App } from "@aws-cdk/core";
 import { AccessScope, GuPlayApp } from "@guardian/cdk";
 import { Stage } from "@guardian/cdk/lib/constants";
-import type { GuStackProps, GuStageParameter } from "@guardian/cdk/lib/constructs/core";
-import {
-  GuDistributionBucketParameter,
-  GuStack,
-  GuStringParameter,
-  GuVpcParameter,
-} from "@guardian/cdk/lib/constructs/core";
+import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
+import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
-import type { GuGetDistributablePolicy } from "@guardian/cdk/lib/constructs/iam";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
@@ -26,7 +18,6 @@ import {
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
-const yamlTemplateFilePath = path.join(__dirname, "../../cloudformation.yaml");
 const packerVersion = "1.6.6";
 
 export class AmigoStack extends GuStack {
@@ -145,22 +136,6 @@ export class AmigoStack extends GuStack {
       },
     });
 
-    const yamlDefinedStack = new CfnInclude(this, "YamlTemplate", {
-      templateFile: yamlTemplateFilePath,
-
-      // These override like-named parameters in the YAML template.
-      // TODO remove the parameter from the YAML template once each resource that uses it has been CDK-ified.
-      parameters: {
-        Stage: this.getParam<GuStageParameter>("Stage"), // TODO `GuStageParameter` could be a singleton to simplify this
-        DistributionBucketName: GuDistributionBucketParameter.getInstance(this).valueAsString,
-        VpcId: GuVpcParameter.getInstance(this).valueAsString,
-      },
-    });
-
-    // See https://docs.aws.amazon.com/cdk/latest/guide/use_cfn_template.html#use_cfn_template_cfninclude_access
-    const cfnRootRole = yamlDefinedStack.getResource("RootRole") as CfnRole;
-    const rootRole = Role.fromRoleArn(this, "RootRole", cfnRootRole.attrArn);
-
     const ssmPolicy = GuSSMRunCommandPolicy.getInstance(this);
 
     // TODO Can GuSSMRunCommandPolicy expose its default `PolicyStatement` to easily add actions to it?
@@ -221,8 +196,6 @@ export class AmigoStack extends GuStack {
       GuAnghammaradSenderPolicy.getInstance(this),
       this.appPolicy,
     ];
-
-    policiesToAttachToRootRole.forEach((policy) => policy.attachToRole(rootRole));
 
     new GuSecurityGroup(this, "PackerSecurityGroup", {
       ...AmigoStack.app,
@@ -298,15 +271,6 @@ export class AmigoStack extends GuStack {
         additionalPolicies: policiesToAttachToRootRole,
       },
     });
-
-    /*
-    `GuPlayApp` creates an instance of `GuGetDistributablePolicy` with the ID "GetDistributablePolicyAmigo".
-    We want to attach a `GuGetDistributablePolicy` to the role used by the YAML template resources,
-    however we cannot create a new `GuGetDistributablePolicy` as the ID will be the same, which is illegal in CDK.
-    To fix, we find the resource that `GuPlayApp` added and add it to the role used by the YAML template resources.
-     */
-    const getDistributablePolicy = this.node.tryFindChild("GetDistributablePolicyAmigo") as GuGetDistributablePolicy;
-    getDistributablePolicy.attachToRole(rootRole);
 
     /*
     Looks like some @guardian/cdk constructs are not applying the App tag.
