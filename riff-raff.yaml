@@ -18,6 +18,7 @@ deployments:
         AmigoStage: PROD
       amiEncrypted: true
       templatePath: AMIgo.template.json
+      amiParameter: AMIAmigo
   # upload lambda
   imagecopier:
     type: aws-s3
