@@ -2,32 +2,32 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
+import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
+import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
-import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
-import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
+import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.sns.{ AmazonSNS, AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
-import com.gu.cm.{ ConfigurationLoader, Identity, LocalApplication }
+import com.amazonaws.services.sns.{AmazonSNS, AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder}
+import com.gu.cm.{AwsInstance, AwsInstanceImpl, ConfigurationLoader, Identity, InstanceDescriber, LocalApplication, SysOutLogger}
 import com.gu.googleauth.GoogleAuthConfig
 import controllers._
-import data.{ Dynamo, Recipes }
-import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import data.{Dynamo, Recipes}
+import event.{ActorSystemWrapper, BakeEvent, Behaviours}
 import housekeeping._
-import housekeeping.utils.{ BakesRepo, PackerEC2Client }
+import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.NotificationConfig
-import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
+import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import packer.{ PackerConfig, PackerRunner }
-import play.api.{ BuiltInComponentsFromContext, Configuration, Logger }
+import packer.{PackerConfig, PackerRunner}
+import play.api.{BuiltInComponentsFromContext, Configuration, Logger}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -36,8 +36,8 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.routing.Router
 import prism.Prism
 import router.Routes
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismAgents }
+import schedule.{BakeScheduler, ScheduledBakeRunner}
+import services.{AmiMetadataLookup, ElkLogging, Loggable, PrismAgents}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -66,10 +66,13 @@ class AppComponents(context: Context)
     with I18nComponents
     with Loggable {
 
+  val awsInstance = new AwsInstanceImpl(SysOutLogger)
+
   val identity = {
     import com.gu.cm.PlayImplicits._
-    Identity.whoAmI("amigo", context.environment.mode)
+    new InstanceDescriber("amigo", context.environment.mode, awsInstance, SysOutLogger).whoAmI
   }
+
   override lazy val configuration: Configuration = context.initialConfiguration ++ ConfigurationLoader.playConfig(identity, context.environment.mode)
 
   def mandatoryConfig(key: String): String = configuration.getString(key).getOrElse(sys.error(s"Missing config key: $key"))
@@ -92,7 +95,7 @@ class AppComponents(context: Context)
 
   // initialise logging
   val elkLoggingStream = configuration.getString("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCreds, applicationLifecycle)
+  val elkLogging = new ElkLogging(identity, awsInstance, elkLoggingStream, awsCreds, applicationLifecycle)
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
