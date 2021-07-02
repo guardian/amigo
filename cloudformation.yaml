@@ -175,21 +175,3 @@ Resources:
           Value: deploy
         - Key: Stage
           Value: !Ref 'Stage'
-  PackerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub 'amigo-packer-${Stage}'
-      GroupDescription: Security group for instances created by Packer
-      VpcId: !Ref VpcId
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 65535
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: App
-          Value: amigo
-        - Key: Stack
-          Value: deploy
-        - Key: Stage
-          Value: !Ref 'Stage'

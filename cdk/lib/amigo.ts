@@ -1,4 +1,5 @@
 import path from "path";
+import { Peer, Port } from "@aws-cdk/aws-ec2";
 import type { CfnRole } from "@aws-cdk/aws-iam";
 import { Effect, Policy, PolicyStatement, Role } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
@@ -13,6 +14,7 @@ import {
   GuVpcParameter,
 } from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
+import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
@@ -220,6 +222,32 @@ export class AmigoStack extends GuStack {
     ];
 
     policiesToAttachToRootRole.forEach((policy) => policy.attachToRole(rootRole));
+
+    new GuSecurityGroup(this, "PackerSecurityGroup", {
+      ...AmigoStack.app,
+      vpc: GuVpc.fromIdParameter(this, "vpc"),
+
+      // The security group name is added to config.
+      // See `app/packer/PackerConfig.scala`.
+      securityGroupName: `amigo-packer-${this.stage}`,
+
+      description: "Security group for instances created by Packer",
+
+      // When true, `allowAllOutbound` will also allow all outbound UDP traffic
+      allowAllOutbound: false,
+      egresses: [
+        {
+          port: Port.tcpRange(0, 65535),
+          range: Peer.anyIpv4(),
+          description: "Allow all outbound TCP",
+        },
+      ],
+      existingLogicalId: {
+        logicalId: "PackerSecurityGroup",
+        reason:
+          "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
+      },
+    });
 
     /*
     Looks like some @guardian/cdk constructs are not applying the App tag.
