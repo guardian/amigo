@@ -12,12 +12,12 @@
 - name: Create ext2 filesystem
   filesystem:
     fstype: ext2
-    dev: /home/ubuntu/ssh.img
+    dev: /var/lib/reserved-disk/ubuntu-ssh.img
     
 - name: Mount ssh config in homedir
   mount:
     path: /home/ubuntu/.ssh
-    src: /home/ubuntu/ssh.img
+    src: /var/lib/reserved-disk/ubuntu-ssh.img
     fstype: ext2
     state: mounted
 
@@ -36,12 +36,12 @@
 - name: Create ext2 filesystem
   filesystem:
     fstype: ext2
-    dev: /root/ssm.img
+    dev: /var/lib/reserved-disk/ssm.img
 
 - name: Mount ssm
   mount:
     path: /var/lib/amazon/ssm
-    src: /root/ssm.img
+    src: /var/lib/reserved-disk/ssm.img
     fstype: ext2
     state: mounted
 
