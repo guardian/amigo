@@ -1,18 +1,23 @@
 ---
-- name: Reserve 10MB for ssh config
-  command: "dd if=/dev/zero of=/home/ubuntu/ssh.img bs=1024 count=10k"
+- name: Creates directory
+  file:
+    path: /var/lib/reserved-disk
+    state: directory
+
+- name: Reserve 50MB for ssh config
+  command: "dd if=/dev/zero of=/var/lib/reserved-disk/ubuntu-ssh.img bs=1024 count=50k"
   args:
-    creates: "/home/ubuntu/ssh.img"
+    creates: "/var/lib/reserved-disk/ubuntu-ssh.img"
 
 - name: Create ext2 filesystem
   filesystem:
     fstype: ext2
-    dev: /home/ubuntu/ssh.img
+    dev: /var/lib/reserved-disk/ubuntu-ssh.img
     
 - name: Mount ssh config in homedir
   mount:
     path: /home/ubuntu/.ssh
-    src: /home/ubuntu/ssh.img
+    src: /var/lib/reserved-disk/ubuntu-ssh.img
     fstype: ext2
     state: mounted
 
@@ -23,20 +28,20 @@
     group: ubuntu
     mode: '0700'
 
-- name: Reserve 10MB for ssm
-  command: "dd if=/dev/zero of=/root/ssm.img bs=1024 count=10k"
+- name: Reserve 50MB for ssm
+  command: "dd if=/dev/zero of=/var/lib/reserved-disk/ssm.img bs=1024 count=50k"
   args:
-    creates: "/root/ssm.img"
+    creates: "/var/lib/reserved-disk/ssm.img"
 
 - name: Create ext2 filesystem
   filesystem:
     fstype: ext2
-    dev: /root/ssm.img
+    dev: /var/lib/reserved-disk/ssm.img
 
 - name: Mount ssm
   mount:
     path: /var/lib/amazon/ssm
-    src: /root/ssm.img
+    src: /var/lib/reserved-disk/ssm.img
     fstype: ext2
     state: mounted
 
@@ -45,4 +50,4 @@
     path: /var/lib/amazon/ssm
     owner: root
     group: root
-    mode: '0700'
+    mode: '0750'
