@@ -4,7 +4,7 @@
     path: /var/lib/reserved-disk
     state: directory
 
-- name: Reserve 10MB for ssh config
+- name: Reserve 50MB for ssh config
   command: "dd if=/dev/zero of=/var/lib/reserved-disk/ubuntu-ssh.img bs=1024 count=50k"
   args:
     creates: "/var/lib/reserved-disk/ubuntu-ssh.img"
@@ -28,7 +28,7 @@
     group: ubuntu
     mode: '0700'
 
-- name: Reserve 10MB for ssm
+- name: Reserve 50MB for ssm
   command: "dd if=/dev/zero of=/var/lib/reserved-disk/ssm.img bs=1024 count=50k"
   args:
     creates: "/var/lib/reserved-disk/ssm.img"
