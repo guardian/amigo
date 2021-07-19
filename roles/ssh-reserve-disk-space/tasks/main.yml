@@ -50,4 +50,4 @@
     path: /var/lib/amazon/ssm
     owner: root
     group: root
-    mode: '0700'
+    mode: '0750'
