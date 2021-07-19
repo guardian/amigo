@@ -1,8 +1,13 @@
 ---
+- name: Creates directory
+  file:
+    path: /var/lib/reserved-disk
+    state: directory
+
 - name: Reserve 10MB for ssh config
-  command: "dd if=/dev/zero of=/home/ubuntu/ssh.img bs=1024 count=10k"
+  command: "dd if=/dev/zero of=/var/lib/reserved-disk/ubuntu-ssh.img bs=1024 count=10k"
   args:
-    creates: "/home/ubuntu/ssh.img"
+    creates: "/var/lib/reserved-disk/ubuntu-ssh.img"
 
 - name: Create ext2 filesystem
   filesystem:
@@ -24,9 +29,9 @@
     mode: '0700'
 
 - name: Reserve 10MB for ssm
-  command: "dd if=/dev/zero of=/root/ssm.img bs=1024 count=10k"
+  command: "dd if=/dev/zero of=/var/lib/reserved-disk/ssm.img bs=1024 count=10k"
   args:
-    creates: "/root/ssm.img"
+    creates: "/var/lib/reserved-disk/ssm.img"
 
 - name: Create ext2 filesystem
   filesystem:
