@@ -100,8 +100,25 @@
     update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
     update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
 
-- name: SBT
-  include: sbt.yml
+# download sbt
+- name: Add SBT repo
+  become: true
+  apt_repository: repo='deb https://repo.scala-sbt.org/scalasbt/debian all main' filename=sbt state=present update_cache=no
+- name: Add (old) SBT repo
+  become: true
+  apt_repository: repo='deb https://repo.scala-sbt.org/scalasbt/debian /' filename=sbt_old state=present update_cache=no
+- name: Add SBT repo key
+  become: true
+  apt_key: keyserver='https://keyserver.ubuntu.com:443' id='2EE0EA64E40A89B84B2DF73499E82A75642AC823'
+- name: Install SBT
+  become: true
+  apt: name=sbt state=present update_cache=yes
+- name: Populate SBT
+  command: sbt sbtVersion
+  become: teamcity
+  environment:
+    SBT_OPTS: -Xms256M -Xmx512M -Xss2M -XX:MaxMetaspaceSize=512M
+
 - name: ".aws Cleanup Script"
   copy:
     src: awsconfig_cleanup.sh
