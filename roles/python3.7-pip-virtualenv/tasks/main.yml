@@ -1,16 +1,6 @@
 ---
-- name: install pip
+- name: install pip, python 3.7 and virtualenv
   apt:
-    name: ['python3-pip']
-    update_cache: yes
-    state: latest
-- name: install python3.7
-  apt:
-    name: ['python3.7']
-    update_cache: yes
-    state: latest
-- name: install virtualenv
-  apt:
-    name: ['virtualenv']
+    name: ['python3-pip', 'python3.7', 'virtualenv']
     update_cache: yes
     state: latest
