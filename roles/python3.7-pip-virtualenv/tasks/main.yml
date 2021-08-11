@@ -1,6 +1,0 @@
----
-- name: install pip, python 3.7 and virtualenv
-  apt:
-    name: ['python3-pip', 'python3.7', 'virtualenv']
-    update_cache: yes
-    state: latest
