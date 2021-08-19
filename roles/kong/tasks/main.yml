@@ -14,7 +14,7 @@
   user: name={{kong_user}} system=yes
 
 - name: Download Kong package
-  get_url: url=https://bintray.com/kong/kong-community-edition-deb/download_file?file_path=dists/kong-community-edition-{{kong_version}}.bionic.all.deb dest=/tmp/kong-{{kong_version}}.deb
+  get_url: url=https://content-api-dist.s3.eu-west-1.amazonaws.com/kong/mirrored/kong-community-edition-{{kong_version}}.bionic.all.deb dest=/tmp/kong-{{kong_version}}.deb
 
 - name: Install Kong package
   command: dpkg -i /tmp/kong-{{kong_version}}.deb
