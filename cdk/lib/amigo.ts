@@ -1,4 +1,3 @@
-import path from "path";
 import { Peer, Port } from "@aws-cdk/aws-ec2";
 import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
@@ -13,9 +12,9 @@ import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
   GuDescribeEC2Policy,
+  GuGetS3ObjectsPolicy,
   GuLogShippingPolicy,
   GuSSMRunCommandPolicy,
-  GuGetS3ObjectsPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
