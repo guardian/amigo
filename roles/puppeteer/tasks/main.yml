@@ -6,11 +6,12 @@
       'npm', # we need this to *install* Puppeteer
       'nodejs', # we need this to *run* Puppeteer
       'chromium-browser', # we used to use this to get all the X11 libraries required by Puppeteer's bundled copy of Chrome, but as of September 2020 need to specify libxss1 (see below)
-      'libxss1' # required by Puppeteer as detailed https://github.com/guardian/ophan/issues/3932
+      'libxss1', # required by Puppeteer as detailed https://github.com/guardian/ophan/issues/3932
+      'libgtk-3-0' # also required by Puppeteer
     ]
 
 - name: Install "puppeteer" node.js package so that it is available to any program on the system
   npm:
     name: puppeteer
-    version: '1.9.0'
+    version: '10.2.0'
     path: / # Hack based on https://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders - blame Alex
