@@ -13,8 +13,11 @@
 - name: Create user for Kong
   user: name={{kong_user}} system=yes
 
+- name: Check aws credentials
+  command: /usr/local/bin/aws sts get-caller-identity
+
 - name: Download Kong package
-  get_url: url=https://content-api-dist.s3.eu-west-1.amazonaws.com/kong/mirrored/kong-community-edition-{{kong_version}}.bionic.all.deb dest=/tmp/kong-{{kong_version}}.deb
+  command: /usr/local/bin/aws s3 cp s3://content-api-dist/kong/mirrored/kong-community-edition-0.14.0.bionic.all.deb /tmp/kong-{{kong_version}}.deb
 
 - name: Install Kong package
   command: dpkg -i /tmp/kong-{{kong_version}}.deb
