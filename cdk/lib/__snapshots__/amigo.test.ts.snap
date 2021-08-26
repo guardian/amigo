@@ -693,27 +693,6 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::IAM::Role",
     },
-    "KongS3Policy256BF474": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::content-api-dist/kong/mirrored/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KongS3Policy256BF474",
-        "Roles": Array [
-          Object {
-            "Ref": "InstanceRoleAmigo75944747",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "ListenerAmigo0180B42C": Object {
       "Properties": Object {
         "Certificates": Array [

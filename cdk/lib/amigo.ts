@@ -12,7 +12,6 @@ import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
   GuDescribeEC2Policy,
-  GuGetS3ObjectsPolicy,
   GuLogShippingPolicy,
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
@@ -150,11 +149,7 @@ export class AmigoStack extends GuStack {
       })
     );
 
-    const s3Props = { bucketName: "content-api-dist", paths: ["kong/mirrored/*"] };
-    const s3Policy = new GuGetS3ObjectsPolicy(this, "KongS3Policy", s3Props);
-
     const policiesToAttachToRootRole: Policy[] = [
-      s3Policy,
       ssmPolicy,
       GuLogShippingPolicy.getInstance(this),
       new GuAllowPolicy(this, "PackerPolicy", {
