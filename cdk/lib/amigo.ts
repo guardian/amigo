@@ -1,4 +1,3 @@
-import path from "path";
 import { Peer, Port } from "@aws-cdk/aws-ec2";
 import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";

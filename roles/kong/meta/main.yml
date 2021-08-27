@@ -1,3 +1,4 @@
 ---
 dependencies:
   - apt
+  - { role: packages, s3_packages: [kong-community-edition-0.14.0.bionic.all.deb] }
