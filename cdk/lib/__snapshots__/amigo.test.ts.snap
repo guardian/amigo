@@ -44,11 +44,6 @@ Object {
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "InstanceTypeAmigo": Object {
-      "Default": "t3.small",
-      "Description": "EC2 Instance Type for the app amigo",
-      "Type": "String",
-    },
     "LoggingStreamName": Object {
       "Default": "/account/services/logging.stream.name",
       "Description": "SSM parameter containing the Name (not ARN) on the kinesis stream",
@@ -343,9 +338,7 @@ Object {
         "ImageId": Object {
           "Ref": "AMIAmigo",
         },
-        "InstanceType": Object {
-          "Ref": "InstanceTypeAmigo",
-        },
+        "InstanceType": "t4g.small",
         "SecurityGroups": Array [
           Object {
             "Fn::GetAtt": Array [
@@ -1083,11 +1076,11 @@ dpkg -i /tmp/amigo.deb",
     },
     "TargetGroupAmigoB9501F07": Object {
       "Properties": Object {
-        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckIntervalSeconds": 10,
         "HealthCheckPath": "/healthcheck",
         "HealthCheckProtocol": "HTTP",
-        "HealthCheckTimeoutSeconds": 10,
-        "HealthyThresholdCount": 2,
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthyThresholdCount": 5,
         "Port": 9000,
         "Protocol": "HTTP",
         "Tags": Array [
@@ -1114,8 +1107,14 @@ dpkg -i /tmp/amigo.deb",
             },
           },
         ],
+        "TargetGroupAttributes": Array [
+          Object {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30",
+          },
+        ],
         "TargetType": "instance",
-        "UnhealthyThresholdCount": 5,
+        "UnhealthyThresholdCount": 2,
         "VpcId": Object {
           "Ref": "VpcId",
         },

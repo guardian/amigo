@@ -1,4 +1,4 @@
-import { Peer, Port } from "@aws-cdk/aws-ec2";
+import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "@aws-cdk/aws-ec2";
 import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
 import type { App } from "@aws-cdk/core";
@@ -232,6 +232,7 @@ export class AmigoStack extends GuStack {
 
     new GuPlayApp(this, {
       ...AmigoStack.app,
+      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
       userData: [
         "#!/bin/bash -ev",
         `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_1.6.6_linux_arm64.zip`,
