@@ -7,6 +7,7 @@ import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
 import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
+import { GuCname } from "@guardian/cdk/lib/constructs/dns";
 import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
 import {
   GuAllowPolicy,
@@ -18,6 +19,8 @@ import {
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
 const packerVersion = "1.6.6";
+const codeDomainName = "amigo.code.dev-gutools.co.uk";
+const prodDomainName = "amigo.gutools.co.uk";
 
 export class AmigoStack extends GuStack {
   private static app: AppIdentity = {
@@ -230,7 +233,7 @@ export class AmigoStack extends GuStack {
       "amigo_1.0-latest_all.deb",
     ].join("/");
 
-    new GuPlayApp(this, {
+    const guPlayApp = new GuPlayApp(this, {
       ...AmigoStack.app,
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
       userData: [
@@ -250,10 +253,10 @@ export class AmigoStack extends GuStack {
       },
       certificateProps: {
         [Stage.CODE]: {
-          domainName: "amigo.code.dev-gutools.co.uk",
+          domainName: codeDomainName,
         },
         [Stage.PROD]: {
-          domainName: "amigo.gutools.co.uk",
+          domainName: prodDomainName,
         },
       },
       scaling: {
@@ -272,6 +275,18 @@ export class AmigoStack extends GuStack {
       },
     });
 
+    const domainName = this.withStageDependentValue({
+      variableName: "domainName",
+      stageValues: {
+        [Stage.CODE]: codeDomainName,
+        [Stage.PROD]: prodDomainName,
+      },
+    });
+
+    new GuCname(this, "AmigoCname", {
+      name: domainName,
+      resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
+    });
     /*
     Looks like some @guardian/cdk constructs are not applying the App tag.
     I suspect since https://github.com/guardian/cdk/pull/326.

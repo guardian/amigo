@@ -79,6 +79,33 @@ Object {
     },
   },
   "Resources": Object {
+    "AmigoCname": Object {
+      "Properties": Object {
+        "Name": Object {
+          "Fn::FindInMap": Array [
+            "stagemapping",
+            Object {
+              "Ref": "Stage",
+            },
+            "domainName",
+          ],
+        },
+        "RecordType": "CNAME",
+        "ResourceRecords": Array [
+          Object {
+            "Fn::GetAtt": Array [
+              "LoadBalancerAmigoC3017FAF",
+              "DNSName",
+            ],
+          },
+        ],
+        "Stage": Object {
+          "Ref": "Stage",
+        },
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
     "AmigoDataBucket": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
