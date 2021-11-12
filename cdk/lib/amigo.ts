@@ -2,6 +2,7 @@ import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "@aws-cdk/
 import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
 import type { Bucket } from "@aws-cdk/aws-s3";
 import type { App } from "@aws-cdk/core";
+import { Duration } from "@aws-cdk/core";
 import { AccessScope, GuPlayApp } from "@guardian/cdk";
 import { Stage } from "@guardian/cdk/lib/constants";
 import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
@@ -19,8 +20,10 @@ import {
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 
 const packerVersion = "1.6.6";
-const codeDomainName = "amigo.code.dev-gutools.co.uk";
-const prodDomainName = "amigo.gutools.co.uk";
+const domainNames = {
+  [Stage.CODE]: { domainName: "amigo.code.dev-gutools.co.uk" },
+  [Stage.PROD]: { domainName: "amigo.gutools.co.uk" },
+};
 
 export class AmigoStack extends GuStack {
   private static app: AppIdentity = {
@@ -252,14 +255,7 @@ export class AmigoStack extends GuStack {
         scope: AccessScope.RESTRICTED,
         cidrRanges: [Peer.ipv4("77.91.248.0/21")],
       },
-      certificateProps: {
-        [Stage.CODE]: {
-          domainName: codeDomainName,
-        },
-        [Stage.PROD]: {
-          domainName: prodDomainName,
-        },
-      },
+      certificateProps: domainNames,
       scaling: {
         [Stage.CODE]: {
           minimumInstances: 1,
@@ -276,17 +272,10 @@ export class AmigoStack extends GuStack {
       },
     });
 
-    const domainName = this.withStageDependentValue({
-      app: AmigoStack.app.app,
-      variableName: "domainName",
-      stageValues: {
-        [Stage.CODE]: codeDomainName,
-        [Stage.PROD]: prodDomainName,
-      },
-    });
-
     new GuCname(this, "AmigoCname", {
-      name: domainName,
+      app: AmigoStack.app.app,
+      domainNameProps: domainNames,
+      ttl: Duration.hours(1),
       resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
     /*
