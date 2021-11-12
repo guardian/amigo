@@ -3,7 +3,7 @@
 exports[`The Amigo stack matches the snapshot 1`] = `
 Object {
   "Mappings": Object {
-    "stagemapping": Object {
+    "amigo": Object {
       "CODE": Object {
         "DataBucketName": "amigo-data-code",
         "domainName": "amigo.code.dev-gutools.co.uk",
@@ -83,7 +83,7 @@ Object {
       "Properties": Object {
         "Name": Object {
           "Fn::FindInMap": Array [
-            "stagemapping",
+            "amigo",
             Object {
               "Ref": "Stage",
             },
@@ -111,7 +111,7 @@ Object {
       "Properties": Object {
         "BucketName": Object {
           "Fn::FindInMap": Array [
-            "stagemapping",
+            "amigo",
             Object {
               "Ref": "Stage",
             },
@@ -278,7 +278,7 @@ Object {
         },
         "MaxSize": Object {
           "Fn::FindInMap": Array [
-            "stagemapping",
+            "amigo",
             Object {
               "Ref": "Stage",
             },
@@ -287,7 +287,7 @@ Object {
         },
         "MinSize": Object {
           "Fn::FindInMap": Array [
-            "stagemapping",
+            "amigo",
             Object {
               "Ref": "Stage",
             },
@@ -414,7 +414,7 @@ dpkg -i /tmp/amigo.deb",
       "Properties": Object {
         "DomainName": Object {
           "Fn::FindInMap": Array [
-            "stagemapping",
+            "amigo",
             Object {
               "Ref": "Stage",
             },
@@ -1138,6 +1138,10 @@ dpkg -i /tmp/amigo.deb",
           Object {
             "Key": "deregistration_delay.timeout_seconds",
             "Value": "30",
+          },
+          Object {
+            "Key": "stickiness.enabled",
+            "Value": "false",
           },
         ],
         "TargetType": "instance",

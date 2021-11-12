@@ -123,6 +123,7 @@ export class AmigoStack extends GuStack {
     });
 
     const importBucketName = this.withStageDependentValue({
+      app: AmigoStack.app.app,
       variableName: "DataBucketName",
       stageValues: {
         [Stage.CODE]: "amigo-data-code",
@@ -276,6 +277,7 @@ export class AmigoStack extends GuStack {
     });
 
     const domainName = this.withStageDependentValue({
+      app: AmigoStack.app.app,
       variableName: "domainName",
       stageValues: {
         [Stage.CODE]: codeDomainName,
