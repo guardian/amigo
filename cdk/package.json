@@ -35,7 +35,7 @@
     "@aws-cdk/aws-lambda": "1.132.0",
     "@aws-cdk/aws-s3": "1.132.0",
     "@aws-cdk/core": "1.132.0",
-    "@guardian/cdk": "29.0.0",
+    "@guardian/cdk": "30.0.0",
     "source-map-support": "^0.5.16"
   }
 }

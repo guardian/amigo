@@ -1177,10 +1177,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@guardian/cdk@29.0.0":
-  version "29.0.0"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-29.0.0.tgz#341efba289ba750f385a56913b1e78577397bc5c"
-  integrity sha512-vrnP7erejOCUXiN7DMB4gPozKI8s/J/1E/lz++5/azAPUc5jDnsN0al8n1t6/vZVxinclBHUcQOqJcjHe2CeyA==
+"@guardian/cdk@30.0.0":
+  version "30.0.0"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-30.0.0.tgz#6bade73415949a5510f4017cfc1bb6b58478b195"
+  integrity sha512-BUZNZScvpLvK5RzClk8AgVJoA8k7nnCu5n8mtXjk8RhnMaL5vJ/zSB9y9OAJNQj19e16/SoPoVUT2rKfNIPnWQ==
   dependencies:
     "@aws-cdk/assert" "1.132.0"
     "@aws-cdk/aws-apigateway" "1.132.0"
@@ -1201,7 +1201,7 @@
     "@aws-cdk/aws-stepfunctions" "1.132.0"
     "@aws-cdk/aws-stepfunctions-tasks" "1.132.0"
     "@aws-cdk/core" "1.132.0"
-    aws-sdk "^2.1020.0"
+    aws-sdk "^2.1025.0"
     chalk "^4.1.2"
     execa "^5.1.1"
     git-url-parse "^11.6.0"
@@ -1926,10 +1926,10 @@ aws-cdk@1.132.0:
     yaml "1.10.2"
     yargs "^16.2.0"
 
-aws-sdk@^2.1020.0:
-  version "2.1026.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1026.0.tgz#193c95f5a93ceea5d0d50498470a552e187e5fab"
-  integrity sha512-MWLzZvsbS6NngiY1H9EcjFiH6UUiFFtE5k0TB6Sg5neCLVhzTzClwX6I0m9CgcFLDy4PrqMSlJBeVfk2OSWq3A==
+aws-sdk@^2.1025.0:
+  version "2.1027.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1027.0.tgz#64688b27607aade2df8de380f5852d67855f1f9b"
+  integrity sha512-j3UjPV9hzyCvkmfcbhRscMggdmrPqlhvo8QzkXCGFfPXjZMh1OJd4HkCEH2NaunzLOyF2Y3QzxKrGOLMT7sNzg==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
