@@ -10,7 +10,7 @@ import java.time.LocalDate
 class RootController(val authConfig: GoogleAuthConfig) extends Controller with AuthActions with Loggable {
 
   def healthcheck = Action {
-    log.info(LocalDate.now)
+    log.info(LocalDate.now.toString)
     Ok(Json.parse(BuildInfo.toJson))
   }
 
