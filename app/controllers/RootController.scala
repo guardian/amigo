@@ -8,6 +8,7 @@ import play.api.mvc._
 class RootController(val authConfig: GoogleAuthConfig) extends Controller with AuthActions {
 
   def healthcheck = Action {
+    println("hi")
     Ok(Json.parse(BuildInfo.toJson))
   }
 
