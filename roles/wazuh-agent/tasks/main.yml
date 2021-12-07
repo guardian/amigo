@@ -45,7 +45,7 @@
 
 - name: Install Wazuh Agent
   apt:
-    name: wazuh-agent={{ stage }}
+    name: wazuh-agent={{ agent_version }}
     state: present
     update_cache: yes
 
