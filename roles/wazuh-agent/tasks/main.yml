@@ -43,14 +43,9 @@
   register: manager_address
   failed_when: "'error' in manager_address.stderr"
 
-- name: Get agent version
-  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/agent-version"
-  register: agent_version
-  failed_when: "'error' in agent_version.stderr"
-
 - name: Install Wazuh Agent
   apt:
-    name: wazuh-agent={{ agent_version.stdout }}
+    name: wazuh-agent=4.1.5-1
     state: present
     update_cache: yes
 
