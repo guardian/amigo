@@ -125,3 +125,8 @@
     path: /etc/systemd/system/wazuh-agent.service
     insertbefore: '^ExecStart'
     line: ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh
+
+- name: Enable wazuh-agent service
+  service:
+    name: wazuh-agent
+    state: enabled
