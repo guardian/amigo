@@ -3,4 +3,4 @@
   apt: name=python3-pip state=present
 
 - name: Install latest AWS CLI
-  command: pip3 install -I awscli==1.19.12
+  command: pip3 install -I awscli==1.22.22
