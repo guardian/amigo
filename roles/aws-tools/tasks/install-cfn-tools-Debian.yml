@@ -13,7 +13,7 @@
   
     # this package has dependencies that are not compatible with Python 3 so we use `pip`
   - name: Install AWS CFN tools
-    command: pip install /tmp/aws-cfn-bootstrap-latest/
+    command: pip3 install /tmp/aws-cfn-bootstrap-latest/
     register: result
     until: result.rc == 0
     retries: 5
