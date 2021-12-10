@@ -11,7 +11,6 @@
   - name: Extract AWS CFN tools
     command: tar xvfz /tmp/aws-cfn-bootstrap-latest.tar.gz --strip-components=1 -C /tmp/aws-cfn-bootstrap-latest
   
-    # this package has dependencies that are not compatible with Python 3 so we use `pip`
   - name: Install AWS CFN tools
     command: pip3 install /tmp/aws-cfn-bootstrap-latest/
     register: result
