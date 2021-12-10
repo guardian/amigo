@@ -1,4 +1,7 @@
 --- 
+  - name: Install pip3
+    apt: name=python3-pip state=present
+
   - name: Download AWS CFN tools
     get_url: url=https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz dest=/tmp/aws-cfn-bootstrap-latest.tar.gz
   
