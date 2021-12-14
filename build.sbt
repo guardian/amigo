@@ -105,6 +105,7 @@ lazy val imageCopier = (project in file("imageCopier"))
       "com.amazonaws" % "aws-java-sdk-ec2" % awsVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
       "com.amazonaws" % "aws-lambda-java-events" % "2.0.2",
+      "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )
