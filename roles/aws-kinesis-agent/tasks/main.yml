@@ -9,15 +9,15 @@
   file: path=/opt/aws-kinesis-agent/ state=directory mode=0755
 
 - name: Download Amazon Kinesis Agent
-  get_url: url="https://github.com/awslabs/amazon-kinesis-agent/archive/2.0.1.tar.gz" dest=/opt/aws-kinesis-agent/2.0.1.tar.gz mode=0754
+  get_url: url="https://github.com/awslabs/amazon-kinesis-agent/archive/2.0.4.tar.gz" dest=/opt/aws-kinesis-agent/2.0.4.tar.gz mode=0754
 
 - name: Extract Amazon Kinesis Agent
-  shell: cd /opt/aws-kinesis-agent/ && tar xf 2.0.1.tar.gz
+  shell: cd /opt/aws-kinesis-agent/ && tar xf 2.0.4.tar.gz
   args:
     executable: /bin/bash
 
 - name: Setup Amazon Kinesis Agent
-  shell: cd /opt/aws-kinesis-agent/amazon-kinesis-agent-2.0.1 && sudo ./setup --install
+  shell: cd /opt/aws-kinesis-agent/amazon-kinesis-agent-2.0.4 && sudo ./setup --install
   args:
     executable: /bin/bash
 
