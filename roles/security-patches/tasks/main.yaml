@@ -1,0 +1,5 @@
+## Automatically disable Log4J2 vulnerability CVE-2021-44228
+- name: Disable Log4J vulnerable features
+  copy:
+    src: 99-log4j.conf
+    dest: /etc/environment.d/99-log4j.conf
