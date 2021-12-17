@@ -1,0 +1,11 @@
+- name: Create /usr/local/log4j-hotpatch directory
+  file: path=/usr/local/log4j-hotpatch state=directory
+
+- name: Copy log4j-hotpatch jar
+  copy: src=Log4jHotPatch.jar dest=/usr/local/log4j-hotpatch/Log4jHotPatch.jar mode=u+x
+
+## Automatically disable Log4J2 vulnerability CVE-2021-44228 and CVE-2021-45046
+- name: Disable Log4J vulnerable features
+  copy:
+      src: 99-log4j.conf
+      dest: /etc/environment.d/99-log4j.conf
