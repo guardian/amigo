@@ -129,4 +129,4 @@
 - name: Enable wazuh-agent service
   service:
     name: wazuh-agent
-    state: enabled
+    enabled: yes
