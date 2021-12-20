@@ -1,14 +1,30 @@
+## Automatically disable Log4J2 vulnerability CVE-2021-44228 and CVE-2021-45046
+
 - name: Create /usr/local/log4j-hotpatch directory
   file: path=/usr/local/log4j-hotpatch state=directory
 
 - name: Copy log4j-hotpatch jar
   copy: src=Log4jHotPatch.jar dest=/usr/local/log4j-hotpatch/Log4jHotPatch.jar mode=u+x
 
-- name: Create /etc/environment.d directory
-  file: path=/etc/environment.d state=directory
+- name: Create systemd conf directory for log4j hotpatch environment
+  file: path=/etc/systemd/system.conf.d state=directory
 
-## Automatically disable Log4J2 vulnerability CVE-2021-44228 and CVE-2021-45046
-- name: Disable Log4J vulnerable features
+- name: Set systemd environment for log4j hotpatch
   copy:
-      src: 99-log4j.conf
-      dest: /etc/environment.d/99-log4j.conf
+      src: log4j-systemd.conf
+      dest: /etc/systemd/system.conf.d/99-log4j-hotpatch.conf
+
+#- name: Create /etc/environment.d directory
+#  file: path=/etc/environment.d state=directory
+#
+#- name: Disable Log4J vulnerable features
+#  copy:
+#      src: 99-log4j.conf
+#      dest: /etc/environment.d/99-log4j.conf
+
+- name: Set log4j hotpatch environment outside systemd
+  ansible.builtin.lineinfile:
+      path: /etc/environment
+      create: yes
+      insertafter: EOF
+      line: JAVA_TOOL_OPTIONS="-javaagent:/usr/local/log4j-hotpatch/Log4jHotPatch.jar"
