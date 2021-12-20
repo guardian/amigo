@@ -14,14 +14,6 @@
       src: log4j-systemd.conf
       dest: /etc/systemd/system.conf.d/99-log4j-hotpatch.conf
 
-#- name: Create /etc/environment.d directory
-#  file: path=/etc/environment.d state=directory
-#
-#- name: Disable Log4J vulnerable features
-#  copy:
-#      src: 99-log4j.conf
-#      dest: /etc/environment.d/99-log4j.conf
-
 - name: Set log4j hotpatch environment outside systemd
   ansible.builtin.lineinfile:
       path: /etc/environment
