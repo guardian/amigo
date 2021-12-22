@@ -26,4 +26,4 @@
     path: /etc/environment
     create: yes
     insertafter: EOF
-    line: JAVA_TOOL_OPTIONS=-javaagent:/usr/local/log4j-hotpatch/Log4jHotPatch.jar
+    line: JAVA_TOOL_OPTIONS=-javaagent:/usr/local/log4j-hotpatch/Log4jHotPatch.jar=log4jFixerVerbose=false
