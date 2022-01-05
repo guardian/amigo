@@ -1,4 +1,4 @@
-@(images: Iterable[BaseImage])
+@(imageUsages: Map[BaseImage, Iterable[Recipe]])
 @simpleLayout("AMIgo"){
 
   <h1>Base images</h1>
@@ -16,13 +16,15 @@
     <thead>
       <th>Name</th>
       <th>Description</th>
+      <th>Usages</th>
       <th>Status</th>
     </thead>
     <tbody>
-    @for(image <- images.toList.sortBy(_.id.value.toLowerCase)) {
+    @for((image, usages) <- imageUsages.toList.sortBy(_._1.id.value.toLowerCase)) {
       <tr>
         <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.id</a></td>
         <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@image.description</a></td>
+        <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@usages.size</a></td>
         <td class="has-block-link"><a href="@routes.BaseImageController.showBaseImage(image.id)" class="block-link">@fragments.eolStatus(image)</a></td>
       </tr>
     }

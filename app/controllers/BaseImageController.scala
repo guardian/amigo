@@ -18,7 +18,9 @@ class BaseImageController(
   import BaseImageController._
 
   def listBaseImages = AuthAction {
-    Ok(views.html.baseImages(BaseImages.list()))
+    val baseImages = BaseImages.list()
+    val usageMap = baseImages.map(base => (base, Recipes.findByBaseImage(base.id))).toMap
+    Ok(views.html.baseImages(usageMap))
   }
 
   def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
