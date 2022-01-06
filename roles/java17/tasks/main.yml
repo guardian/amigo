@@ -1,0 +1,18 @@
+---
+- name: Install Java 17 JRE and JDK
+  apt:
+    name:
+    - openjdk-17-jdk
+    state: latest
+  when: ansible_os_family == "Debian"
+
+## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
+## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
+- name: Change JVM DNS cache TTL
+  replace:
+    path: /etc/java-17-openjdk/security/java.security
+    regexp: '#networkaddress.cache.ttl=.*'
+    replace: 'networkaddress.cache.ttl=60'
+    backup: yes
+  when: ansible_os_family == "Debian"
+
