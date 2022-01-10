@@ -1,4 +1,4 @@
-Java 11 Corretto
+Java 17 Corretto
 ================
 
 This is the AWS flavour of the JVM for which support is provided via AWS enterprise agreements.
