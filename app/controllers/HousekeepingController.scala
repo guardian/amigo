@@ -7,8 +7,8 @@ import models.BakeId
 import play.api.mvc._
 import services.Loggable
 
-class HousekeepingController(val authConfig: GoogleAuthConfig)(implicit dynamo: Dynamo)
-    extends Controller with AuthActions with Loggable {
+class HousekeepingController(val authConfig: GoogleAuthConfig, components: ControllerComponents)(implicit dynamo: Dynamo)
+    extends AbstractController(components) with AuthActions with Loggable {
 
   def showOrphans = AuthAction {
     val (errors, recipes) = Recipes.recipesWithErrors

@@ -6,22 +6,20 @@ import models._
 import org.quartz.CronExpression
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
-import play.api.i18n.{ I18nSupport, MessagesApi }
-import play.api.libs.json.Json
+import play.api.i18n.I18nSupport
 import play.api.mvc._
-import prism.{ BakeUsage, RecipeUsage, SimpleBakeUsage }
+import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 
 import scala.util.Try
 
-//noinspection TypeAnnotation
 class RecipeController(
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi,
-    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    components: ControllerComponents,
+    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends AbstractController(components) with AuthActions with I18nSupport {
   import RecipeController._
 
   def listRecipes = AuthAction {
@@ -51,14 +49,14 @@ class RecipeController(
     }
   }
 
-  def editRecipe(id: RecipeId) = AuthAction {
+  def editRecipe(id: RecipeId) = AuthAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.diskSize, recipe.bakeSchedule, recipe.encryptFor))
       Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.listIds))
     }
   }
 
-  def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def updateRecipe(id: RecipeId) = AuthAction(parse.formUrlEncoded) { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
@@ -86,11 +84,11 @@ class RecipeController(
     }
   }
 
-  def newRecipe = AuthAction {
+  def newRecipe = AuthAction { implicit request =>
     Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.listIds))
   }
 
-  def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def createRecipe = AuthAction(parse.formUrlEncoded) { implicit request =>
     Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.listIds))
     }, {

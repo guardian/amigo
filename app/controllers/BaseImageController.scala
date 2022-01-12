@@ -6,15 +6,15 @@ import models._
 import org.joda.time.DateTime
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
-import play.api.i18n.{ I18nSupport, MessagesApi }
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import prism.RecipeUsage
 import services.PrismAgents
 
 class BaseImageController(
     val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi,
-    prismAgents: PrismAgents)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    prismAgents: PrismAgents,
+    components: ControllerComponents)(implicit dynamo: Dynamo) extends AbstractController(components) with AuthActions with I18nSupport {
   import BaseImageController._
 
   def listBaseImages = AuthAction {
@@ -32,7 +32,7 @@ class BaseImageController(
     }
   }
 
-  def editBaseImage(id: BaseImageId) = AuthAction {
+  def editBaseImage(id: BaseImageId) = AuthAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val form = Forms.editBaseImage.fill((
         image.description,
@@ -44,7 +44,7 @@ class BaseImageController(
     }
   }
 
-  def updateBaseImage(id: BaseImageId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def updateBaseImage(id: BaseImageId) = AuthAction(parse.formUrlEncoded) { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
@@ -62,11 +62,11 @@ class BaseImageController(
     }
   }
 
-  def newBaseImage = AuthAction {
+  def newBaseImage = AuthAction { implicit request =>
     Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.listIds))
   }
 
-  def createBaseImage = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def createBaseImage = AuthAction(parse.formUrlEncoded) { implicit request =>
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {

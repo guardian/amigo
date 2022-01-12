@@ -21,7 +21,7 @@ class BakeController(
   eventsSource: Source[BakeEvent, _],
   prism: PrismAgents,
   val authConfig: GoogleAuthConfig,
-  val messagesApi: MessagesApi,
+  components: ControllerComponents,
   ansibleVars: Map[String, String],
   debugAvailable: Boolean,
   amiMetadataLookup: AmiMetadataLookup,
@@ -29,7 +29,7 @@ class BakeController(
   s3Client: AmazonS3,
   packerRunner: PackerRunner,
   bakeDeletionFrequencyMinutes: Int)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
-    extends Controller with AuthActions with I18nSupport with Loggable {
+    extends AbstractController(components) with AuthActions with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = AuthAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>

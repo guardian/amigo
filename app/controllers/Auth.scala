@@ -8,7 +8,7 @@ import play.api.mvc._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Auth(val authConfig: GoogleAuthConfig)(implicit ws: WSClient) extends Controller with AuthActions {
+class Auth(val authConfig: GoogleAuthConfig, components: ControllerComponents)(implicit ws: WSClient) extends AbstractController(components) with AuthActions {
   import Auth._
 
   def login = Action.async { implicit request =>
