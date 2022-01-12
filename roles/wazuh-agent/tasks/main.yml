@@ -17,7 +17,7 @@
 
 - name: Add wazuh apt repository
   apt_repository: 
-    repo: 'deb https://packages.wazuh.com/3.x/apt/ stable main' 
+    repo: 'deb https://packages.wazuh.com/4.x/apt/ stable main' 
     state: present 
     filename: wazuh 
     update_cache: yes
@@ -43,14 +43,9 @@
   register: manager_address
   failed_when: "'error' in manager_address.stderr"
 
-- name: Get agent version
-  shell: "/usr/local/bin/get-ssm-parameter.sh {{ aws_region.stdout }} /{{ stage }}/deploy/amigo-role/wazuh-agent/agent-version"
-  register: agent_version
-  failed_when: "'error' in agent_version.stderr"
-
 - name: Install Wazuh Agent
   apt:
-    name: wazuh-agent={{ agent_version.stdout }}
+    name: wazuh-agent={{ agent_version }}
     state: present
     update_cache: yes
 
@@ -130,3 +125,8 @@
     path: /etc/systemd/system/wazuh-agent.service
     insertbefore: '^ExecStart'
     line: ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh
+
+- name: Enable wazuh-agent service
+  service:
+    name: wazuh-agent
+    enabled: yes
