@@ -1,6 +1,6 @@
 package controllers
 
-import com.gu.googleauth.GoogleAuthConfig
+import com.gu.googleauth.AuthAction
 import data._
 import models._
 import org.joda.time.DateTime
@@ -12,18 +12,18 @@ import prism.RecipeUsage
 import services.PrismAgents
 
 class BaseImageController(
-    val authConfig: GoogleAuthConfig,
+    val authAction: AuthAction[AnyContent],
     prismAgents: PrismAgents,
-    components: ControllerComponents)(implicit dynamo: Dynamo) extends AbstractController(components) with AuthActions with I18nSupport {
+    components: ControllerComponents)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
   import BaseImageController._
 
-  def listBaseImages = AuthAction {
+  def listBaseImages = authAction {
     val baseImages = BaseImages.list()
     val usageMap = baseImages.map(base => (base, Recipes.findByBaseImage(base.id))).toMap
     Ok(views.html.baseImages(usageMap))
   }
 
-  def showBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+  def showBaseImage(id: BaseImageId) = authAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
       val usages: Map[Recipe, RecipeUsage] = RecipeUsage.getUsagesMap(usedByRecipes)(prismAgents, dynamo)
@@ -32,7 +32,7 @@ class BaseImageController(
     }
   }
 
-  def editBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+  def editBaseImage(id: BaseImageId) = authAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val form = Forms.editBaseImage.fill((
         image.description,
@@ -44,7 +44,7 @@ class BaseImageController(
     }
   }
 
-  def updateBaseImage(id: BaseImageId) = AuthAction(parse.formUrlEncoded) { implicit request =>
+  def updateBaseImage(id: BaseImageId) = authAction(parse.formUrlEncoded) { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       Forms.editBaseImage.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editBaseImage(image, formWithErrors, Roles.listIds))
@@ -62,11 +62,11 @@ class BaseImageController(
     }
   }
 
-  def newBaseImage = AuthAction { implicit request =>
+  def newBaseImage = authAction { implicit request =>
     Ok(views.html.newBaseImage(Forms.createBaseImage, Roles.listIds))
   }
 
-  def createBaseImage = AuthAction(parse.formUrlEncoded) { implicit request =>
+  def createBaseImage = authAction(parse.formUrlEncoded) { implicit request =>
     Forms.createBaseImage.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
     }, {
@@ -88,7 +88,7 @@ class BaseImageController(
     })
   }
 
-  def cloneBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+  def cloneBaseImage(id: BaseImageId) = authAction { implicit request =>
     Forms.cloneBaseImage.bindFromRequest.fold(
       { form => Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> s"Failed to clone base image: ${form.errors.head.message}") },
       { newId =>
@@ -114,14 +114,14 @@ class BaseImageController(
     )
   }
 
-  def deleteConfirm(id: BaseImageId) = AuthAction { implicit request =>
+  def deleteConfirm(id: BaseImageId) = authAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { recipe =>
       val usedByRecipes = Recipes.findByBaseImage(id).toSeq
       Ok(views.html.confirmBaseImageDelete(recipe, usedByRecipes))
     }
   }
 
-  def deleteBaseImage(id: BaseImageId) = AuthAction { implicit request =>
+  def deleteBaseImage(id: BaseImageId) = authAction { implicit request =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
       if (usedByRecipes.isEmpty) {

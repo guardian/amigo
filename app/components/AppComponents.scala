@@ -15,7 +15,7 @@ import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecuri
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.{ AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
 import com.gu.cm.{ AwsInstanceImpl, InstanceDescriber, SysOutLogger, Configuration => CmConfiguration, Mode => CmMode }
-import com.gu.googleauth.GoogleAuthConfig
+import com.gu.googleauth.{ AntiForgeryChecker, AuthAction, GoogleAuthConfig }
 import controllers._
 import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
@@ -34,6 +34,7 @@ import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.iteratee.streams.IterateeStreams
 import play.api.libs.ws.ahc.AhcWSComponents
+import play.api.mvc.AnyContent
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
 import prism.Prism
@@ -185,11 +186,11 @@ class AppComponents(context: Context)
   val eventsSource = Source.fromPublisher(IterateeStreams.enumeratorToPublisher(eventsEnumerator))
   val eventBusActorSystem = {
     val eventListeners = Map(
-      "channelSender" -> Props(Behaviours.sendToChannel(eventsChannel)),
-      "logWriter" -> Props(Behaviours.writeToLog),
-      "dynamoWriter" -> Props(Behaviours.persistBakeEvent(notificationConfig))
+      "channelSender" -> Behaviours.sendToChannel(eventsChannel),
+      "logWriter" -> Behaviours.writeToLog,
+      "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig)
     )
-    ActorSystem[BakeEvent]("EventBus", Props(Behaviours.guardian(eventListeners)))
+    ActorSystem[BakeEvent]("EventBus", Behaviours.guardian(eventListeners))
   }
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
@@ -200,9 +201,10 @@ class AppComponents(context: Context)
     clientId = mandatoryConfig("google.clientId"),
     clientSecret = mandatoryConfig("google.clientSecret"),
     redirectUrl = mandatoryConfig("google.redirectUrl"),
-    domain = Some("guardian.co.uk"),
+    domain = "guardian.co.uk",
     maxAuthAge = Some(Duration.standardDays(90)),
-    enforceValidity = true
+    enforceValidity = true,
+    antiForgeryChecker = AntiForgeryChecker.borrowSettingsFromPlay(httpConfiguration)
   )
 
   implicit val packerConfig = PackerConfig(
@@ -214,12 +216,12 @@ class AppComponents(context: Context)
   )
 
   val ansibleVariables: Map[String, String] =
-    Map("s3_prefix" -> configuration.get[Option[String]]("ansible.packages.s3prefix").getOrElse("")) ++
+    Map("s3_prefix" -> configuration.get[String]("ansible.packages.s3prefix")) ++
       configuration.get[Option[String]]("ansible.packages.s3bucket").map("s3_bucket" ->)
 
   val amigoDataBucket: Option[String] = configuration.get[Option[String]]("amigo.data.bucket")
 
-  val packerRunner = new PackerRunner(configuration.get[Option[Int]]("packer.maxInstances").getOrElse(5))
+  val packerRunner = new PackerRunner(configuration.get[Int]("packer.maxInstances"))
 
   val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
@@ -249,16 +251,18 @@ class AppComponents(context: Context)
 
   val debugAvailable = identity.stage != "PROD"
 
-  val rootController = new RootController(googleAuthConfig, controllerComponents)
-  val baseImageController = new BaseImageController(googleAuthConfig, prismAgents, controllerComponents)
-  val housekeepingController = new HousekeepingController(googleAuthConfig, controllerComponents)
-  val roleController = new RoleController(googleAuthConfig, controllerComponents)
-  val recipeController = new RecipeController(bakeScheduler, prismAgents, googleAuthConfig, controllerComponents, debugAvailable)
+  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction(), controllerComponents.parsers.default)(executionContext)
+
+  val rootController = new RootController(authAction, controllerComponents)
+  val baseImageController = new BaseImageController(authAction, prismAgents, controllerComponents)
+  val housekeepingController = new HousekeepingController(authAction, controllerComponents)
+  val roleController = new RoleController(authAction, controllerComponents)
+  val recipeController = new RecipeController(authAction, bakeScheduler, prismAgents, controllerComponents, debugAvailable)
   val bakeController = new BakeController(
+    authAction,
     identity.stage,
     eventsSource,
     prismAgents,
-    googleAuthConfig,
     controllerComponents,
     ansibleVariables,
     debugAvailable,
@@ -267,7 +271,7 @@ class AppComponents(context: Context)
     s3Client,
     packerRunner,
     bakeDeletionFrequencyMinutes)
-  val authController = new Auth(googleAuthConfig, controllerComponents)(wsClient)
+  val loginController = new Login(googleAuthConfig, wsClient, controllerComponents)
   lazy val router: Router = new Routes(
     httpErrorHandler,
     rootController,
@@ -276,6 +280,6 @@ class AppComponents(context: Context)
     roleController,
     recipeController,
     bakeController,
-    authController,
+    loginController,
     assets)
 }

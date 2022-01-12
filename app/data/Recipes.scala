@@ -1,9 +1,5 @@
 package data
 
-import cats.implicits.catsSyntaxMonadCombineSeparate
-import cats.instances.either._
-import cats.instances.list._
-import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
@@ -20,7 +16,7 @@ object Recipes {
   def list()(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_ => true)
 
   def filteredList(p: DbModel => Boolean)(implicit dynamo: Dynamo): Iterable[Recipe] = {
-    val dbModels = table.scan().exec().flatMap(_.toOption)
+    val dbModels = table.scan().exec().collect { case Right(dbModel) => dbModel }
     for {
       dbModel <- dbModels
       if p(dbModel)
@@ -31,8 +27,9 @@ object Recipes {
   }
 
   def recipesWithErrors()(implicit dynamo: Dynamo): (List[DynamoReadError], List[Recipe]) = {
-    val dbResponse: Traversable[Either[DynamoReadError, DbModel]] = table.scan().exec()
-    val (errors, models) = dbResponse.toList.separate
+    val dbResponse = table.scan().exec()
+    val errors = dbResponse.collect { case Left(error) => error }
+    val models = dbResponse.collect { case Right(recipe) => recipe }
 
     val recipes = for {
       dbModel <- models
@@ -83,7 +80,7 @@ object Recipes {
     }
 
     val update = table.update('id -> recipe.id, updateExpr)
-    update.exec().map(Recipe.db2domain(_, baseImage))
+    update.exec().right.map(Recipe.db2domain(_, baseImage))
   }
 
   def delete(recipe: Recipe)(implicit dynamo: Dynamo): DeleteItemResult = {
@@ -91,8 +88,14 @@ object Recipes {
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
+    val dbModel: Option[DbModel] = table.get('id -> id).exec().flatMap { attempt =>
+      attempt match {
+        case Right(dbModel) => Some(dbModel)
+        case Left(_) => None
+      }
+    }
     for {
-      dbModel <- table.get('id -> id).exec().flatMap(_.toOption)
+      dbModel <- dbModel
       baseImage <- BaseImages.findById(dbModel.baseImageId)
     } yield {
       Recipe.db2domain(dbModel, baseImage)

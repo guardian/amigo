@@ -16,25 +16,21 @@ object Behaviours extends Loggable {
    * Initialises the child actors for each event listener
    * and then switches behaviour to `broadcastEvents`
    */
-  def guardian(eventListenerProps: Map[String, Props[BakeEvent]]): Behavior[BakeEvent] = Full {
+  def guardian(behaviours: Map[String, Behavior[BakeEvent]]): Behavior[BakeEvent] = Full {
     case Sig(ctx, PreStart) =>
-      val eventListeners = eventListenerProps.map {
-        case (name, props) => ctx.spawn(props, name)
+      val eventListeners = behaviours.map {
+        case (name, behavior) => ctx.spawn(behavior, name)
       }
       broadcastEvents(eventListeners)
   }
 
   /**
    * Broadcasts all incoming events to all event listeners
-   * and handles child failures by restarting the child
    */
   def broadcastEvents(eventListeners: Iterable[ActorRef[BakeEvent]]): Behavior[BakeEvent] = Full {
     case Msg(_, bakeEvent) =>
       for (listener <- eventListeners)
         listener ! bakeEvent
-      Same
-    case Sig(_, f @ Failed(cause, child)) =>
-      f.decide(Failed.Restart)
       Same
   }
 
