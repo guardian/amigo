@@ -2,45 +2,45 @@ package components
 
 import akka.stream.scaladsl.Source
 import akka.typed._
-import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
+import com.amazonaws.auth.{AWSCredentialsProviderChain, InstanceProfileCredentialsProvider}
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
+import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
-import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
-import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
-import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
+import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.sns.{ AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
-import com.gu.cm.{ AwsInstanceImpl, InstanceDescriber, SysOutLogger, Configuration => CmConfiguration, Mode => CmMode }
-import com.gu.googleauth.{ AntiForgeryChecker, AuthAction, GoogleAuthConfig }
+import com.amazonaws.services.sns.{AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder}
+import com.gu.cm.{AwsInstanceImpl, InstanceDescriber, SysOutLogger, Configuration => CmConfiguration, Mode => CmMode}
+import com.gu.googleauth.{AntiForgeryChecker, AuthAction, GoogleAuthConfig}
 import controllers._
-import data.{ Dynamo, Recipes }
-import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
+import data.{Dynamo, Recipes}
+import event.{ActorSystemWrapper, BakeEvent, Behaviours}
 import housekeeping._
-import housekeeping.utils.{ BakesRepo, PackerEC2Client }
+import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.NotificationConfig
-import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
+import notification.{AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS}
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import packer.{ PackerConfig, PackerRunner }
-import play.api.{ BuiltInComponentsFromContext, Configuration }
+import packer.{PackerConfig, PackerRunner}
+import play.api.{BuiltInComponentsFromContext, Configuration}
 import play.api.ApplicationLoader.Context
-import play.api.Mode.{ Dev, Prod, Test }
+import play.api.Mode.{Dev, Prod, Test}
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.iteratee.streams.IterateeStreams
 import play.api.libs.ws.ahc.AhcWSComponents
-import play.api.mvc.AnyContent
+import play.api.mvc.{AnyContent, EssentialFilter}
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
 import prism.Prism
 import router.Routes
-import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismAgents }
+import schedule.{BakeScheduler, ScheduledBakeRunner}
+import services.{AmiMetadataLookup, ElkLogging, Loggable, PrismAgents}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -250,6 +250,11 @@ class AppComponents(context: Context)
   housekeepingScheduler.initialise()
 
   val debugAvailable = identity.stage != "PROD"
+
+  // Play 2.6's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
+  // The allowedHostsFilter is removed here as it causes healthchecks to fail
+  // This service is not accessible on the public internet
+  override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
   val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction(), controllerComponents.parsers.default)(executionContext)
 
