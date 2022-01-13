@@ -22,7 +22,7 @@ javaOptions in Universal ++= Seq(
 )
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin, SystemdPlugin)
   .settings(
     packageName in Universal := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
