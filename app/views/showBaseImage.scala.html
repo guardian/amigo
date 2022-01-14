@@ -1,7 +1,7 @@
 @import data.Roles
 @(image: BaseImage, allRoles: Seq[RoleSummary], usedRecipes: Seq[Recipe], unusedRecipes: Seq[Recipe], cloneForm: Form[_], usages: Map[Recipe, prism.RecipeUsage])(implicit flash: Flash, messages: play.api.i18n.Messages)
 
-@implicitFieldConstructor = @{ b3.inline.fieldConstructor }
+@implicitFieldConstructor = @{ b3.inline.fieldConstructor() }
 
 @simpleLayout("AMIgo"){
   <h1>@image.id.value</h1>

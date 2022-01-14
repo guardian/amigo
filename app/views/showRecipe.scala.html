@@ -13,7 +13,7 @@
         cloneForm: Form[_]
 )(implicit flash: Flash, messages: play.api.i18n.Messages)
 
-@implicitFieldConstructor = @{ b3.inline.fieldConstructor }
+@implicitFieldConstructor = @{ b3.inline.fieldConstructor() }
 
 @simpleLayout("AMIgo"){
 

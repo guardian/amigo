@@ -77,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
   "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
   "com.gu" %% "play-googleauth" % "0.7.6",
-  "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
+  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P26-B3",
   "org.quartz-scheduler" % "quartz" % "2.2.3",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
