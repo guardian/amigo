@@ -1,5 +1,5 @@
-@import prism.BakeUsage
-@(baseImageToDelete: BaseImage, usages: Seq[Recipe])
+@import views.html.helper.CSRF
+@(baseImageToDelete: BaseImage, usages: Seq[Recipe])(implicit request: RequestHeader)
 @simpleLayout("AMIgo"){
 
     @if(usages.isEmpty) {
@@ -8,7 +8,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">Confirm delete</div>
             <div class="panel-body">
-                <p><a data-href="@routes.BaseImageController.deleteBaseImage(baseImageToDelete.id)" class="post btn btn-danger">Delete</a></p>
+                @helper.form(routes.BaseImageController.deleteBaseImage(baseImageToDelete.id)) {
+                    @CSRF.formField
+                    <button class="post btn btn-danger">Delete</button>
+                }
             </div>
         </div>
     } else {

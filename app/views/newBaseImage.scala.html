@@ -1,10 +1,12 @@
-@(form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+@import helper.CSRF
+@(form: Form[_], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @simpleLayout("AMIgo"){
 
   @b3.form(routes.BaseImageController.createBaseImage) {
+    @CSRF.formField
     @b3.text(form("id"), '_label -> "ID", 'placeholder -> "my-lovely-image" )
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
     @b3.select( form("linuxDist"), models.LinuxDist.all.toList.map{ case (k,v) => k -> v.name }, '_label -> "Linux Distribution" )
