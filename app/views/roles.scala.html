@@ -23,7 +23,7 @@
         </div>
 
         @for(role <- roles) {
-          <div id="detail-@role.roleId">
+          <div id="detail-@role.roleId" class="hidden">
 
             <ul class="nav nav-tabs" role="tablist">
               @for(readme <- role.readme) {
