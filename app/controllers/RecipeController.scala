@@ -1,37 +1,35 @@
 package controllers
 
-import com.gu.googleauth.GoogleAuthConfig
+import com.gu.googleauth.AuthAction
 import data._
 import models._
 import org.quartz.CronExpression
 import play.api.data.{ Form, Mapping }
 import play.api.data.Forms._
-import play.api.i18n.{ I18nSupport, MessagesApi }
-import play.api.libs.json.Json
+import play.api.i18n.I18nSupport
 import play.api.mvc._
-import prism.{ BakeUsage, RecipeUsage, SimpleBakeUsage }
+import prism.RecipeUsage
 import schedule.BakeScheduler
 import services.PrismAgents
 
 import scala.util.Try
 
-//noinspection TypeAnnotation
 class RecipeController(
+    val authAction: AuthAction[AnyContent],
     bakeScheduler: BakeScheduler,
     prismAgents: PrismAgents,
-    val authConfig: GoogleAuthConfig,
-    val messagesApi: MessagesApi,
-    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends Controller with AuthActions with I18nSupport {
+    components: ControllerComponents,
+    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
   import RecipeController._
 
-  def listRecipes = AuthAction {
+  def listRecipes = authAction {
     val recipes: Iterable[Recipe] = Recipes.list()
     val usages: Map[Recipe, RecipeUsage] = RecipeUsage.getUsagesMap(recipes)(prismAgents, dynamo)
     val (usedRecipes, unusedRecipes) = recipes.partition(r => RecipeUsage.hasUsage(r, usages))
     Ok(views.html.recipes(usedRecipes, unusedRecipes, usages))
   }
 
-  def showRecipe(id: RecipeId) = AuthAction { implicit request =>
+  def showRecipe(id: RecipeId) = authAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recentBakes = bakes.take(20)
@@ -51,14 +49,14 @@ class RecipeController(
     }
   }
 
-  def editRecipe(id: RecipeId) = AuthAction {
+  def editRecipe(id: RecipeId) = authAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val form = Forms.editRecipe.fill((recipe.description, recipe.baseImage.id, recipe.diskSize, recipe.bakeSchedule, recipe.encryptFor))
       Ok(views.html.editRecipe(recipe, form, BaseImages.list().toSeq, Roles.listIds))
     }
   }
 
-  def updateRecipe(id: RecipeId) = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def updateRecipe(id: RecipeId) = authAction(parse.formUrlEncoded) { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
@@ -86,11 +84,11 @@ class RecipeController(
     }
   }
 
-  def newRecipe = AuthAction {
+  def newRecipe = authAction { implicit request =>
     Ok(views.html.newRecipe(Forms.createRecipe, BaseImages.list().toSeq, Roles.listIds))
   }
 
-  def createRecipe = AuthAction(BodyParsers.parse.urlFormEncoded) { implicit request =>
+  def createRecipe = authAction(parse.formUrlEncoded) { implicit request =>
     Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
       BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.listIds))
     }, {
@@ -119,7 +117,7 @@ class RecipeController(
     })
   }
 
-  def showUsages(id: RecipeId) = AuthAction { implicit request =>
+  def showUsages(id: RecipeId) = authAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
@@ -134,7 +132,7 @@ class RecipeController(
     }
   }
 
-  def cloneRecipe(id: RecipeId) = AuthAction { implicit request =>
+  def cloneRecipe(id: RecipeId) = authAction { implicit request =>
     Forms.cloneRecipe.bindFromRequest.fold(
       { form => Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> s"Failed to clone recipe: ${form.errors.head.message}") },
       { newId =>
@@ -157,7 +155,7 @@ class RecipeController(
     )
   }
 
-  def deleteConfirm(id: RecipeId) = AuthAction { implicit request =>
+  def deleteConfirm(id: RecipeId) = authAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id).toSeq
       val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)
@@ -165,7 +163,7 @@ class RecipeController(
     }
   }
 
-  def deleteRecipe(id: RecipeId) = AuthAction { implicit request =>
+  def deleteRecipe(id: RecipeId) = authAction { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
       val bakes = Bakes.list(recipe.id)
       val recipeUsage: RecipeUsage = RecipeUsage(bakes)(prismAgents)

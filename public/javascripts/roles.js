@@ -9,11 +9,11 @@ function updateActiveRole() {
     var roleId = $this.data('role-id');
     if (roleId === activeRole) {
       $this.addClass('active');
-      $('#explanation').hide();
-      $('#detail-'+roleId).show();
+      $('#explanation').addClass('hidden');
+      $('#detail-'+roleId).removeClass('hidden');
     } else {
       $this.removeClass('active');
-      $('#detail-'+roleId).hide();
+      $('#detail-'+roleId).addClass('hidden');
     }
   });
 }
