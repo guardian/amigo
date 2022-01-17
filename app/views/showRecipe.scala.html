@@ -24,13 +24,13 @@
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
       <div class="btn-toolbar">
-        @helper.form(routes.BakeController.startBaking(recipe.id)) {
+        @b3.form(routes.BakeController.startBaking(recipe.id)) {
           @CSRF.formField
           <button class="post btn btn-primary">Bake!</button>
         }
         <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
         @if(debugAvailable){
-          @helper.form(routes.BakeController.startBaking(recipe.id, debug = true)) {
+          @b3.form(routes.BakeController.startBaking(recipe.id, debug = true)) {
             @CSRF.formField
             <button class="post btn btn-warning mr-1">Bake with debug enabled</button>
           }
