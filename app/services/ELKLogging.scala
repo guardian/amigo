@@ -6,30 +6,41 @@ import ch.qos.logback.core.Appender
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.gu.cm.{ AwsInstanceImpl, Identity }
+import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
 import com.gu.logback.appender.kinesis.KinesisAppender
 import net.logstash.logback.layout.LogstashLayout
 import org.slf4j.{ LoggerFactory, Logger => SLFLogger }
-import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.Json
+import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils
 import amigo.BuildInfo
 
+import scala.util.{ Success, Try }
 import scala.util.control.NonFatal
 
-class ElkLogging(
-    identity: Identity,
-    awsInstance: AwsInstanceImpl,
-    loggingStreamName: Option[String],
-    awsCredentialsProvider: AWSCredentialsProvider,
-    applicationLifecycle: ApplicationLifecycle) extends Loggable {
+class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], awsCredentialsProvider: AWSCredentialsProvider) extends Loggable {
+
+  val identity = appIdentity match {
+    case DevIdentity(_) => None
+    case awsIdentity @ AwsIdentity(_, _, _, _) => Some(awsIdentity)
+  }
+
+  val instanceId = identity.flatMap { _ =>
+    Try(Option(EC2MetadataUtils.getInstanceId)) match {
+      case Success(Some(instanceId)) => Some(instanceId)
+      case _ => None
+    }
+  }
+
+  val region = identity.map(_.region).getOrElse("eu-west-1")
+
   def getContextTags: Map[String, String] = {
     val effective = Map(
-      "app" -> identity.app,
-      "stage" -> identity.stage,
-      "stack" -> identity.stack,
-      "region" -> identity.region,
+      "app" -> identity.map(_.app).getOrElse(""),
+      "stage" -> identity.map(_.stage).getOrElse("DEV"),
+      "stack" -> identity.map(_.stack).getOrElse("dev-stack"),
+      "region" -> region,
       "buildNumber" -> BuildInfo.buildNumber,
-      "instanceId" -> awsInstance.instanceId.getOrElse("unknown")
+      "instanceId" -> instanceId.getOrElse("unknown")
     )
     log.info(s"Logging with context map: $effective")
     effective
@@ -55,7 +66,7 @@ class ElkLogging(
   private def makeKinesisAppender(layout: LogstashLayout, context: LoggerContext, streamName: String, bufferSize: Int): KinesisAppender[ILoggingEvent] = {
     val a = new KinesisAppender[ILoggingEvent]()
     a.setStreamName(streamName)
-    a.setRegion(identity.region)
+    a.setRegion(region)
     a.setCredentialsProvider(awsCredentialsProvider)
     a.setBufferSize(bufferSize)
 

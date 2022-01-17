@@ -14,7 +14,7 @@ import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.{ AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
-import com.gu.cm.{ AwsInstanceImpl, InstanceDescriber, SysOutLogger, Configuration => CmConfiguration, Mode => CmMode }
+import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
 import com.gu.googleauth.{ AntiForgeryChecker, AuthAction, GoogleAuthConfig }
 import controllers._
 import data.{ Dynamo, Recipes }
@@ -29,7 +29,6 @@ import org.quartz.impl.StdSchedulerFactory
 import packer.{ PackerConfig, PackerRunner }
 import play.api.{ BuiltInComponentsFromContext, Configuration }
 import play.api.ApplicationLoader.Context
-import play.api.Mode.{ Dev, Prod, Test }
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.iteratee.streams.IterateeStreams
@@ -63,7 +62,7 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   }
 }
 
-class AppComponents(context: Context)
+class AppComponents(context: Context, identity: AppIdentity)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with I18nComponents
@@ -71,28 +70,12 @@ class AppComponents(context: Context)
     with AssetsComponents
     with HttpFiltersComponents {
 
-  val awsInstance = new AwsInstanceImpl(SysOutLogger)
-
-  val configurationMagicMode = context.environment.mode match {
-    case Dev => CmMode.Dev
-    case Test => CmMode.Test
-    case Prod => CmMode.Prod
+  val stage = identity match {
+    case DevIdentity(_) => "DEV"
+    case AwsIdentity(_, _, stage, _) => stage
   }
 
-  val identity = {
-    new InstanceDescriber("amigo", configurationMagicMode, awsInstance, SysOutLogger).whoAmI
-  }
-
-  val configurationMagic: Configuration = {
-    val config = CmConfiguration.fromIdentity(
-      identity = identity,
-      mode = configurationMagicMode
-    ).load.resolve()
-    log.info(s"Configuration loaded from ${config.origin().description()}")
-    Configuration(config)
-  }
-
-  override lazy val configuration: Configuration = context.initialConfiguration ++ configurationMagic
+  override lazy val configuration: Configuration = context.initialConfiguration
 
   def mandatoryConfig(key: String): String = configuration.get[Option[String]](key).getOrElse(sys.error(s"Missing config key: $key"))
 
@@ -114,7 +97,7 @@ class AppComponents(context: Context)
 
   // initialise logging
   val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, awsInstance, elkLoggingStream, awsCreds, applicationLifecycle)
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCreds)
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
@@ -122,7 +105,7 @@ class AppComponents(context: Context)
       .withRegion(region)
       .withClientConfiguration(clientConfiguration)
       .build()
-    new Dynamo(dynamoClient, identity.stage)
+    new Dynamo(dynamoClient, stage)
   }
   dynamo.initTables()
 
@@ -157,7 +140,7 @@ class AppComponents(context: Context)
       .withCredentials(awsCreds)
       .withClientConfiguration(clientConfiguration)
       .build()
-    new SNS(snsClient, identity.stage, accountNumbers)
+    new SNS(snsClient, stage, accountNumbers)
   }
 
   val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
@@ -172,14 +155,14 @@ class AppComponents(context: Context)
     .withClientConfiguration(clientConfiguration)
     .build()
 
-  val amigoUrl: String = configuration.get[Option[String]]("amigo.url").getOrElse(s"https://${identity.app}.gutools.co.uk")
+  val amigoUrl: String = configuration.get[Option[String]]("amigo.url").getOrElse(s"https://amigo.gutools.co.uk")
   val anghammaradNotificationTopic: Option[String] = configuration.get[Option[String]]("anghammarad.sns.topicArn")
   val notificationConfig: Option[NotificationConfig] = anghammaradNotificationTopic.map { t =>
-    NotificationConfig(amigoUrl, t, anghammaradSNSClient, identity.stage)
+    NotificationConfig(amigoUrl, t, anghammaradSNSClient, stage)
   }
 
   configuration.get[Option[String]]("aws.distributionBucket").foreach { bucketName =>
-    LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, identity.stage, accountNumbers)
+    LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, stage, accountNumbers)
   }
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
@@ -194,7 +177,7 @@ class AppComponents(context: Context)
   }
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
-  val sender: NotificationSender = new NotificationSender(sns, identity.region, identity.stage)
+  val sender: NotificationSender = new NotificationSender(sns, region.getName, stage)
   val completedBakeNotifier: AmiCreatedNotifier = new AmiCreatedNotifier(eventsSource, sender.sendTopicMessage)
 
   val googleAuthConfig = GoogleAuthConfig(
@@ -208,7 +191,7 @@ class AppComponents(context: Context)
   )
 
   implicit val packerConfig = PackerConfig(
-    stage = identity.stage,
+    stage = stage,
     vpcId = configuration.get[Option[String]]("packer.vpcId"),
     subnetId = configuration.get[Option[String]]("packer.subnetId"),
     instanceProfile = configuration.get[Option[String]]("packer.instanceProfile"),
@@ -226,8 +209,8 @@ class AppComponents(context: Context)
   val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
-    val enabled = identity.stage == "PROD" // don't run scheduled bakes on dev machines
-    new ScheduledBakeRunner(identity.stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket, packerRunner)
+    val enabled = stage == "PROD" // don't run scheduled bakes on dev machines
+    new ScheduledBakeRunner(stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket, packerRunner)
   }
   val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
 
@@ -235,7 +218,7 @@ class AppComponents(context: Context)
   bakeScheduler.initialise(Recipes.list())
 
   val bakesRepo = new BakesRepo(notificationConfig)
-  val packerEC2Client = new PackerEC2Client(ec2Client, identity.stage)
+  val packerEC2Client = new PackerEC2Client(ec2Client, stage)
 
   val bakeDeletionFrequencyMinutes = 1
   val houseKeepingJobs = List(
@@ -249,7 +232,7 @@ class AppComponents(context: Context)
   val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
   housekeepingScheduler.initialise()
 
-  val debugAvailable = identity.stage != "PROD"
+  val debugAvailable = stage != "PROD"
 
   // Play 2.6's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
   // The allowedHostsFilter is removed here as it causes healthchecks to fail
@@ -265,7 +248,7 @@ class AppComponents(context: Context)
   val recipeController = new RecipeController(authAction, bakeScheduler, prismAgents, controllerComponents, debugAvailable)
   val bakeController = new BakeController(
     authAction,
-    identity.stage,
+    stage,
     eventsSource,
     prismAgents,
     controllerComponents,
