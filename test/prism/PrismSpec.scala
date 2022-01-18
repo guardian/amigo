@@ -2,14 +2,10 @@ package prism
 
 import models.AmiId
 import org.scalatest.{ FlatSpec, Matchers }
-import play.api.{ Configuration, Environment }
-import play.api.http.DefaultFileMimeTypesProvider
-import play.api.http.HttpConfiguration.HttpConfigurationProvider
 import play.api.mvc.{ Action, Results }
 import play.api.test.WsTestClient
 import play.core.server.Server
 import play.api.routing.sird._
-import play.api.test.Helpers.stubControllerComponents
 import prism.Prism.{ AWSAccount, Instance, LaunchConfiguration }
 
 import scala.concurrent.Await
@@ -18,21 +14,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PrismSpec extends FlatSpec with Matchers {
 
-  val environment = Environment.simple()
-  val httpConfiguration = new HttpConfigurationProvider(Configuration.load(environment), environment).get
-  implicit val fileMimeTypes = new DefaultFileMimeTypesProvider(httpConfiguration.fileMimeTypes).get
-
-  val controllerComponents = stubControllerComponents()
-
   def withPrismClient[T](block: Prism => T): T = {
     Server.withRouter() {
-      case GET(p"/sources") => controllerComponents.actionBuilder {
+      case GET(p"/sources") => Action {
         Results.Ok.sendResource("prism/sources.json")
       }
-      case GET(p"/instances") => controllerComponents.actionBuilder {
+      case GET(p"/instances") => Action {
         Results.Ok.sendResource("prism/instances.json")
       }
-      case GET(p"/launch-configurations") => controllerComponents.actionBuilder {
+      case GET(p"/launch-configurations") => Action {
         Results.Ok.sendResource("prism/launch-configurations.json")
       }
     } { implicit port =>

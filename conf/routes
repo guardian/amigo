@@ -47,8 +47,8 @@ GET     /bake-usages                 controllers.BakeController.allBakeUsages
 GET     /healthcheck                controllers.RootController.healthcheck
 
 # Auth
-GET         /login                                                       controllers.Login.loginAction
-GET         /oauth2callback                                              controllers.Login.oauth2Callback
+GET         /login                                                       controllers.Auth.login
+GET         /oauth2callback                                              controllers.Auth.oauth2Callback
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

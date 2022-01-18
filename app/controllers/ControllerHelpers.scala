@@ -1,6 +1,10 @@
 package controllers
 
 import models.{ RoleId, CustomisedRole }
+import cats.syntax.either._
+import cats.syntax.traverse._
+import cats.instances.either._
+import cats.instances.list._
 
 object ControllerHelpers {
 
@@ -9,17 +13,10 @@ object ControllerHelpers {
    */
   def parseEnabledRoles(form: Map[String, Seq[String]]): Either[String, List[CustomisedRole]] = {
     val enabledRoles = form.getOrElse("roles", Nil).toList
-    val rolesOrErrors = enabledRoles.map { roleName =>
+    enabledRoles.traverseU { roleName =>
       val variablesString = form.get(s"role-$roleName-variables").flatMap(_.headOption).getOrElse("")
       val variables = CustomisedRole.formInputTextToVariables(variablesString)
-      variables.right.map(CustomisedRole(RoleId(roleName), _))
-    }
-    val roles = rolesOrErrors.collect { case Right(role) => role }
-    val errors = rolesOrErrors.collect { case Left(error) => error }
-    if (errors.nonEmpty) {
-      Left(errors.head)
-    } else {
-      Right(roles)
+      variables.map(CustomisedRole(RoleId(roleName), _))
     }
   }
 

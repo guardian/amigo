@@ -1,5 +1,6 @@
+import akka.actor.FSM.->
 import com.gu.riffraff.artifact.BuildInfo
-import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
@@ -22,12 +23,12 @@ javaOptions in Universal ++= Seq(
 )
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin, SystemdPlugin)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin)
   .settings(
     packageName in Universal := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
 
-    serverLoading in Debian := Some(Systemd),
+    serverLoading in Debian := Systemd,
     riffRaffPackageType := (packageBin in Debian).value,
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
@@ -68,16 +69,14 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
-  "com.gu" %% "scanamo" % "1.0.0-M4",
+  "com.gu" %% "scanamo" % "0.9.5",
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
-  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.11",
+  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.2",
   "com.typesafe.akka" %% "akka-agent" % "2.4.2",
   "com.gu" %% "configuration-magic-play2-4" % "1.3.0",
-  "com.typesafe.play" %% "play-iteratees" % "2.6.1",
-  "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
-  "com.gu" %% "play-googleauth" % "0.7.6",
-  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P26-B3",
+  "com.gu" %% "play-googleauth" % "0.4.0",
+  "com.adrianhurt" %% "play-bootstrap3" % "0.4.5-P24",
   "org.quartz-scheduler" % "quartz" % "2.2.3",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
   "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
