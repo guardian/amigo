@@ -2,7 +2,6 @@
 @import prism.Prism.Image
 @import prism.Prism.AWSAccount
 @import prism.RecipeUsage
-@import views.html.helper.CSRF
 @(
         recipe: Recipe,
         recentBakes: Iterable[Bake],
@@ -12,9 +11,9 @@
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean,
         cloneForm: Form[_]
-)(implicit request: RequestHeader, flash: Flash, messages: play.api.i18n.Messages)
+)(implicit flash: Flash, messages: play.api.i18n.Messages)
 
-@implicitFieldConstructor = @{ b3.inline.fieldConstructor() }
+@implicitFieldConstructor = @{ b3.inline.fieldConstructor }
 
 @simpleLayout("AMIgo"){
 
@@ -23,24 +22,13 @@
   <div class="panel panel-default">
     <div class="panel-heading">Actions</div>
     <div class="panel-body">
-      <div class="btn-toolbar">
-        @b3.form(routes.BakeController.startBaking(recipe.id)) {
-          @CSRF.formField
-          <button class="post btn btn-primary">Bake!</button>
-        }
-        <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
-        @if(debugAvailable){
-          @b3.form(routes.BakeController.startBaking(recipe.id, debug = true)) {
-            @CSRF.formField
-            <button class="post btn btn-warning mr-1">Bake with debug enabled</button>
-          }
-        }
-        <a href="@routes.RecipeController.deleteConfirm(recipe.id)" class="btn btn-danger">Delete...</a>
-      </div>
+      <a data-href="@routes.BakeController.startBaking(recipe.id)" class="post btn btn-primary">Bake!</a>
+      <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
+      @if(debugAvailable){<a data-href="@routes.BakeController.startBaking(recipe.id, debug = true)" class="post btn btn-warning">Bake with debug enabled</a>}
+      <a href="@routes.RecipeController.deleteConfirm(recipe.id)" class="btn btn-danger">Delete...</a>
     </div>
     <div class="panel-body">
       @b3.form(routes.RecipeController.cloneRecipe(recipe.id)) {
-        @CSRF.formField
         @b3.inputWrapped( "newId", cloneForm("newId"), 'placeholder -> s"${recipe.id.value}-cloned" ) { input =>
           <div class="input-group">
             @input

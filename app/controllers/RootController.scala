@@ -1,17 +1,17 @@
 package controllers
 
 import amigo.BuildInfo
-import com.gu.googleauth.AuthAction
+import com.gu.googleauth.GoogleAuthConfig
 import play.api.libs.json.Json
 import play.api.mvc._
 
-class RootController(val authAction: AuthAction[AnyContent], components: ControllerComponents) extends AbstractController(components) {
+class RootController(val authConfig: GoogleAuthConfig) extends Controller with AuthActions {
 
   def healthcheck = Action {
     Ok(Json.parse(BuildInfo.toJson))
   }
 
-  def index = authAction {
+  def index = AuthAction {
     Ok(views.html.index())
   }
 

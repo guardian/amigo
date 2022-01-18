@@ -2,13 +2,13 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3Client }
-import com.gu.googleauth.{ AuthAction, GoogleAuthConfig }
+import com.gu.googleauth.GoogleAuthConfig
 import data._
 import event._
 import models.BakeStatus.DeletionScheduled
 import packer._
 import models._
-import play.api.i18n.I18nSupport
+import play.api.i18n.{ I18nSupport, MessagesApi }
 import play.api.libs.EventSource
 import play.api.mvc._
 import services.{ AmiMetadataLookup, Loggable, PrismAgents }
@@ -17,11 +17,11 @@ import play.api.libs.json._
 import prism.{ RecipeUsage, SimpleBakeUsage }
 
 class BakeController(
-  val authAction: AuthAction[AnyContent],
   stage: String,
   eventsSource: Source[BakeEvent, _],
   prism: PrismAgents,
-  components: ControllerComponents,
+  val authConfig: GoogleAuthConfig,
+  val messagesApi: MessagesApi,
   ansibleVars: Map[String, String],
   debugAvailable: Boolean,
   amiMetadataLookup: AmiMetadataLookup,
@@ -29,9 +29,9 @@ class BakeController(
   s3Client: AmazonS3,
   packerRunner: PackerRunner,
   bakeDeletionFrequencyMinutes: Int)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
-    extends AbstractController(components) with I18nSupport with Loggable {
+    extends Controller with AuthActions with I18nSupport with Loggable {
 
-  def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = authAction { request =>
+  def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = AuthAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
       Recipes.incrementAndGetBuildNumber(recipe.id) match {
         case Some(buildNumber) =>
@@ -46,7 +46,7 @@ class BakeController(
     }
   }
 
-  def showBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = authAction {
+  def showBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction {
     val previousBakeId = Bakes.findPreviousSuccessfulBake(recipeId, buildNumber - 1).map(_.bakeId)
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake: Bake =>
       val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
@@ -60,7 +60,7 @@ class BakeController(
     }
   }
 
-  def bakePackages(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = authAction {
+  def bakePackages(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction {
     val list = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
     if (list.isLeft) {
       NotFound(s"Could not find package list for recipe $recipeId, bake $buildNumber: ${list.left.get}")
@@ -69,7 +69,7 @@ class BakeController(
     }
   }
 
-  def bakeEvents(recipeId: RecipeId, buildNumber: Int) = authAction { implicit req =>
+  def bakeEvents(recipeId: RecipeId, buildNumber: Int) = AuthAction { implicit req =>
     val bakeId = BakeId(recipeId, buildNumber)
     val source = eventsSource
       .filter(_.bakeId == bakeId) // only include events relevant to this bake
@@ -77,7 +77,7 @@ class BakeController(
     Ok.chunked(source).as("text/event-stream")
   }
 
-  def allBakeUsages: Action[AnyContent] = authAction {
+  def allBakeUsages: Action[AnyContent] = AuthAction {
 
     val allUsages = RecipeUsage.getUsages(Recipes.list())(prism, dynamo)
 
@@ -85,14 +85,14 @@ class BakeController(
     Ok(Json.toJson(bakeUsages))
   }
 
-  def deleteConfirm(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = authAction { implicit request =>
+  def deleteConfirm(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
       val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
       Ok(views.html.confirmBakeDelete(bake.bakeId, recipeUsage.bakeUsage, bakeDeletionFrequencyMinutes))
     }
   }
 
-  def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = authAction { implicit request =>
+  def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = AuthAction { implicit request =>
     Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
       val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
 

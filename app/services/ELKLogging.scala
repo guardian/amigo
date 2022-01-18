@@ -1,15 +1,15 @@
 package services
 
-import ch.qos.logback.classic.{ AsyncAppender, Logger, LoggerContext }
+import ch.qos.logback.classic.{AsyncAppender, Logger, LoggerContext}
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.gu.cm.{ AwsInstanceImpl, Identity }
+import com.gu.cm.{AwsInstanceImpl, Identity}
 import com.gu.logback.appender.kinesis.KinesisAppender
 import net.logstash.logback.layout.LogstashLayout
-import org.slf4j.{ LoggerFactory, Logger => SLFLogger }
+import org.slf4j.{LoggerFactory, Logger => SLFLogger}
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.Json
 import amigo.BuildInfo
@@ -17,11 +17,12 @@ import amigo.BuildInfo
 import scala.util.control.NonFatal
 
 class ElkLogging(
-    identity: Identity,
-    awsInstance: AwsInstanceImpl,
-    loggingStreamName: Option[String],
-    awsCredentialsProvider: AWSCredentialsProvider,
-    applicationLifecycle: ApplicationLifecycle) extends Loggable {
+  identity: Identity,
+  awsInstance: AwsInstanceImpl,
+  loggingStreamName: Option[String],
+  awsCredentialsProvider: AWSCredentialsProvider,
+  applicationLifecycle: ApplicationLifecycle
+) extends Loggable {
   def getContextTags: Map[String, String] = {
     val effective = Map(
       "app" -> identity.app,

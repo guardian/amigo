@@ -1,6 +1,5 @@
 @import prism.BakeUsage
-@import views.html.helper.CSRF
-@(bakeId: BakeId, usages: Seq[BakeUsage], bakeDeletionFrequencyMinutes: Int)(implicit request: RequestHeader)
+@(bakeId: BakeId, usages: Seq[BakeUsage], bakeDeletionFrequencyMinutes: Int)
 @simpleLayout("AMIgo"){
 
     @if(usages.isEmpty) {
@@ -10,10 +9,7 @@
             <div class="panel-heading">Confirm delete</div>
             <div class="panel-body">
                 <p>Note that this will schedule the deletion of all encrypted copies of this bake within the next @bakeDeletionFrequencyMinutes minutes.</p>
-                @helper.form(routes.BakeController.deleteBake(bakeId.recipeId, bakeId.buildNumber)) {
-                    @CSRF.formField
-                    <button class="post btn btn-danger">Delete</button>
-                }
+                <p><a data-href="@routes.BakeController.deleteBake(bakeId.recipeId, bakeId.buildNumber)" class="post btn btn-danger">Delete</a></p>
             </div>
         </div>
     } else {
