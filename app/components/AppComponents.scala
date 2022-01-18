@@ -75,8 +75,6 @@ class AppComponents(context: Context, identity: AppIdentity)
     case AwsIdentity(_, _, stage, _) => stage
   }
 
-  override lazy val configuration: Configuration = context.initialConfiguration
-
   def mandatoryConfig(key: String): String = configuration.get[Option[String]](key).getOrElse(sys.error(s"Missing config key: $key"))
 
   val awsCreds = new AWSCredentialsProviderChain(

@@ -29,7 +29,7 @@
           <button class="post btn btn-primary">Bake!</button>
         }
         <a href="@routes.RecipeController.editRecipe(recipe.id)" class="btn btn-default">Edit</a>
-        @if(false){
+        @if(debugAvailable){
           @b3.form(routes.BakeController.startBaking(recipe.id, debug = true)) {
             @CSRF.formField
             <button class="post btn btn-warning mr-1">Bake with debug enabled</button>
