@@ -1,7 +1,7 @@
 package components
 
+import akka.actor.typed.ActorSystem
 import akka.stream.scaladsl.Source
-import akka.typed._
 import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
 import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
@@ -184,13 +184,13 @@ class AppComponents(context: Context)
 
   val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
   val eventsSource = Source.fromPublisher(IterateeStreams.enumeratorToPublisher(eventsEnumerator))
-  val eventBusActorSystem = {
+  val eventBusActorSystem: ActorSystem[BakeEvent] = {
     val eventListeners = Map(
       "channelSender" -> Behaviours.sendToChannel(eventsChannel),
       "logWriter" -> Behaviours.writeToLog,
       "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig)
     )
-    ActorSystem[BakeEvent]("EventBus", Behaviours.guardian(eventListeners))
+    ActorSystem[BakeEvent](Behaviours.guardian(eventListeners), "EventBus")
   }
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 

@@ -71,7 +71,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "scanamo" % "1.0.0-M4",
   "com.github.cb372" %% "automagic" % "0.1",
   "com.beachape" %% "enumeratum" % "1.3.7",
-  "com.typesafe.akka" %% "akka-typed-experimental" % "2.4.11",
+  "com.typesafe.akka" %% "akka-actor-typed" % "2.5.21",
   "com.typesafe.akka" %% "akka-agent" % "2.4.2",
   "com.gu" %% "configuration-magic-play2-4" % "1.3.0",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
