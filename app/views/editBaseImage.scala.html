@@ -1,10 +1,12 @@
-@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+@import views.html.helper.CSRF
+@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @simpleLayout("AMIgo"){
 
   @b3.form(routes.BaseImageController.updateBaseImage(image.id)) {
+    @CSRF.formField
     @b3.static("ID"){@image.id.value}
     @b3.text( form("amiId"), '_label -> "AMI ID", 'placeholder -> "ami-a1b2c3d4" )
     @b3.select( form("linuxDist"), models.LinuxDist.all.toList.map{ case (k,v) => k -> v.name }, '_label -> "Linux Distribution" )
@@ -41,14 +43,13 @@
                 </label>
               </div>
               <div>
-                <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
+                <input type="text" class="form-control hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
               </div>
             }
           </div>
         }
       </div>
     </div>
-
     @b3.submit('class -> "btn btn-primary"){ Save }
   }
 
