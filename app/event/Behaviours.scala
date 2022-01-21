@@ -18,23 +18,25 @@ object Behaviours extends Loggable {
    */
   def guardian(behaviours: Map[String, Behavior[BakeEvent]]): Behavior[BakeEvent] = Behaviors.setup { context =>
     val eventListeners = behaviours.map {
-      case (name, behavior) => context.spawn(behavior, name)
+      case (name, behavior) => context.spawn(automaticallyRestart(behavior), name)
     }
     broadcastEvents(eventListeners)
   }
 
   /**
-   * Broadcasts all incoming events to all event listeners and handles child failures by restarting the child
+   * Broadcasts all incoming events to all event listeners
    */
-  def broadcastEvents(eventListeners: Iterable[ActorRef[BakeEvent]]): Behavior[BakeEvent] = Behaviors
-    .supervise {
-      Behaviors.receiveMessage[BakeEvent] { bakeEvent =>
-        for (listener <- eventListeners)
-          listener ! bakeEvent
-        Behaviors.same
-      }
-    }
-    .onFailure(SupervisorStrategy.restart)
+  def broadcastEvents(eventListeners: Iterable[ActorRef[BakeEvent]]): Behavior[BakeEvent] = Behaviors.receiveMessage[BakeEvent] { bakeEvent =>
+    for (listener <- eventListeners)
+      listener ! bakeEvent
+    Behaviors.same
+  }
+
+  /**
+    * Ensures that child actors are restarted after encountering an exception
+    * For more details, see: https://doc.akka.io/docs/akka/2.5/typed/fault-tolerance.html
+    */
+  def automaticallyRestart(behavior: Behavior[BakeEvent]): Behavior[BakeEvent] = Behaviors.supervise(behavior).onFailure(SupervisorStrategy.restart)
 
   /**
    * Forwards all events to a Channel for sending as Server Sent Events
