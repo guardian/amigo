@@ -7,9 +7,9 @@ function makeRoleVariablesVisibilityToggleable() {
     var roleVariablesInput = $('input#role-'+roleName+'-variables');
     var checked = $this.prop('checked');
     if (!!checked)
-      roleVariablesInput.css('visibility', 'visible');
+      roleVariablesInput.removeClass('hidden');
     else
-      roleVariablesInput.css('visibility', 'hidden');
+      roleVariablesInput.addClass('hidden');
   });
 }
 

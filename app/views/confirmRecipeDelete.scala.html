@@ -1,5 +1,6 @@
 @import prism.BakeUsage
-@(recipeToDelete: Recipe, bakes: Seq[Bake], usages: Seq[BakeUsage])
+@import views.html.helper.CSRF
+@(recipeToDelete: Recipe, bakes: Seq[Bake], usages: Seq[BakeUsage])(implicit request: RequestHeader)
 @simpleLayout("AMIgo"){
 
     @if(usages.isEmpty) {
@@ -9,7 +10,10 @@
             <div class="panel-heading">Confirm delete</div>
             <div class="panel-body">
                 <p>Note that this will schedule the deletion of all associated AMIs and underlying EBS snapshots (@bakes.size).</p>
-                <p><a data-href="@routes.RecipeController.deleteRecipe(recipeToDelete.id)" class="post btn btn-danger">Delete</a></p>
+                @helper.form(routes.RecipeController.deleteRecipe(recipeToDelete.id)) {
+                    @CSRF.formField
+                    <button class="post btn btn-danger">Delete</button>
+                }
             </div>
         </div>
     } else {

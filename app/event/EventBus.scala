@@ -1,6 +1,6 @@
 package event
 
-import akka.typed.ActorSystem
+import akka.actor.typed.ActorSystem
 
 trait EventBus {
 
@@ -10,6 +10,6 @@ trait EventBus {
 
 class ActorSystemWrapper(system: ActorSystem[BakeEvent]) extends EventBus {
 
-  def publish(event: BakeEvent): Unit = system.tell(event)
+  def publish(event: BakeEvent): Unit = system ! event
 
 }

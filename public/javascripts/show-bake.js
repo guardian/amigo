@@ -25,8 +25,9 @@ function scrollToBottom() {
   }
 }
 
-function initShowBakePage(eventSourceUrl, initialHighestLogNumber) {
-  var highestLogNumber = initialHighestLogNumber;
+function initShowBakePage() {
+  var eventSourceUrl = document.getElementById("packer-output").dataset.eventsourceUrl;
+  var highestLogNumber = document.getElementById("packer-output").dataset.initialHighestLogNumber;
   var packerOutputDiv = document.getElementById("packer-output");
   var amiIdDiv = document.getElementById("ami-id");
   var statusDiv = document.getElementById("status");
@@ -59,5 +60,6 @@ function initShowBakePage(eventSourceUrl, initialHighestLogNumber) {
 
 $(function() {
   initPackerOutputComponent();
+  initShowBakePage();
   scrollToBottom();
 });

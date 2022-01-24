@@ -1,10 +1,12 @@
-@(form: Form[_], availableBaseImages: Seq[BaseImage], availableRoles: Seq[RoleId])(implicit messages: play.api.i18n.Messages)
+@import helper.CSRF
+@(form: Form[_], availableBaseImages: Seq[BaseImage], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
 @simpleLayout("AMIgo"){
 
   @b3.form(routes.RecipeController.createRecipe) {
+    @CSRF.formField
     @b3.text( form("id"), '_label -> "ID", 'placeholder -> "my-lovely-recipe" )
 
     @b3.textarea( form("description"), '_label -> "Description" )
@@ -34,7 +36,7 @@
               </label>
             </div>
             <div>
-              <input type="text" class="form-control" style="visibility:hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
+              <input type="text" class="form-control hidden" id="role-@role-variables" name="role-@role-variables" placeholder="Custom variables (optional) e.g. foo: bar, baz: wow">
             </div>
           </div>
         }
