@@ -12,7 +12,7 @@ class AppLoader extends ApplicationLoader with Loggable {
   override def load(context: Context): Application = {
     new LogbackLoggerConfigurator().configure(context.environment)
     try {
-      val identity = AppIdentity.whoAmI(defaultAppName = "myApp")
+      val identity = AppIdentity.whoAmI(defaultAppName = "amigo")
       val loadedConfig = ConfigurationLoader.load(identity) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
