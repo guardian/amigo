@@ -4,9 +4,9 @@ import data.{ Bakes, Dynamo, Recipes }
 import event.EventBus
 import models.RecipeId
 import packer.{ PackerConfig, PackerRunner }
-import services.{ AmiMetadataLookup, Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, Loggable, PrismData }
 
-class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismAgents, eventBus: EventBus,
+class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismData, eventBus: EventBus,
     ansibleVars: Map[String, String], amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String],
     packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
 

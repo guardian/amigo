@@ -7,7 +7,7 @@ import org.mockito.Mockito._
 import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.mock.MockitoSugar
 import prism.Prism.{ AWSAccount, Image, Instance, LaunchConfiguration }
-import services.PrismAgents
+import services.PrismData
 
 class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
 
@@ -54,7 +54,7 @@ class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
     val lc1 = LaunchConfiguration("lc-1", amiId1, account)
     val lc2 = LaunchConfiguration("lc-2", amiId3, account)
 
-    val mockPrismAgents = mock[PrismAgents]
+    val mockPrismAgents = mock[PrismData]
     when(mockPrismAgents.allInstances) thenReturn Seq(instance1, instance2, instance5)
     when(mockPrismAgents.allLaunchConfigurations) thenReturn Seq(lc1, lc2)
     when(mockPrismAgents.copiedImages(any())) thenReturn Map[AmiId, Seq[Image]]()

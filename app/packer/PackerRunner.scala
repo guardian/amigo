@@ -5,7 +5,7 @@ import event.EventBus
 import models.Bake
 import models.packer.PackerVariablesConfig
 import play.api.libs.json.Json
-import services.{ AmiMetadataLookup, Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, Loggable, PrismData }
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -24,7 +24,7 @@ class PackerRunner(maxInstances: Int) extends Loggable {
    *
    * @return a Future of the process's exit value
    */
-  def createImage(stage: String, bake: Bake, prism: PrismAgents, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean, amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): Future[Int] = {
+  def createImage(stage: String, bake: Bake, prism: PrismData, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean, amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): Future[Int] = {
     val sourceAmi = bake.recipe.baseImage.amiId.value
     val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).right.getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
 

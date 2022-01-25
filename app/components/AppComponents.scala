@@ -40,7 +40,7 @@ import play.filters.HttpFiltersComponents
 import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
-import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -146,7 +146,7 @@ class AppComponents(context: Context)
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
 
   val prism = new Prism(wsClient)
-  val prismAgents = new PrismAgents(prism, applicationLifecycle, actorSystem.scheduler, environment)
+  val prismAgents = new PrismData(prism, applicationLifecycle, actorSystem.scheduler, environment)
 
   // do this synchronously at startup so we can set permissions
   val accountNumbers: Seq[String] = Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
