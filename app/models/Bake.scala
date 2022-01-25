@@ -29,13 +29,25 @@ object Bake {
     val bakeId = BakeId(recipeId, buildNumber)
   }
 
-  import automagic._
+  def domain2db(bake: Bake): DbModel = DbModel(
+    recipeId = bake.recipe.id,
+    buildNumber = bake.buildNumber,
+    status = bake.status,
+    amiId = bake.amiId,
+    startedBy = bake.startedBy,
+    startedAt = bake.startedAt,
+    deleted = Some(bake.deleted)
+  )
 
-  def domain2db(bake: Bake): DbModel =
-    transform[Bake, Bake.DbModel](bake, "recipeId" -> bake.recipe.id, "deleted" -> Some(bake.deleted))
-
-  def db2domain(dbModel: DbModel, recipe: Recipe): Bake =
-    transform[Bake.DbModel, Bake](dbModel, "recipe" -> recipe, "deleted" -> dbModel.deleted.getOrElse(false))
+  def db2domain(dbModel: DbModel, recipe: Recipe): Bake = Bake(
+    recipe = recipe,
+    buildNumber = dbModel.buildNumber,
+    status = dbModel.status,
+    amiId = dbModel.amiId,
+    startedBy = dbModel.startedBy,
+    startedAt = dbModel.startedAt,
+    deleted = dbModel.deleted.getOrElse(false)
+  )
 
   def updateStatusAndNotifyFailure(bakeId: BakeId, status: BakeStatus, notificationConfig: Option[NotificationConfig])(implicit dynamo: Dynamo, exec: ExecutionContext): Unit = {
     if (status == BakeStatus.Failed || status == BakeStatus.TimedOut) {
