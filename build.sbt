@@ -63,6 +63,11 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 val jacksonVersion = "2.13.1"
 val awsVersion = "1.11.1017"
 val circeVersion = "0.9.0"
+
+// These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
+val awsV1SdkVersion = "1.11.1017"
+val awsV2SdkVersion = "2.17.117"
+
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
@@ -79,11 +84,16 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P26-B3",
   "org.quartz-scheduler" % "quartz" % "2.3.2",
   "com.lihaoyi" %% "fastparse" % "0.4.1",
-  "com.amazonaws" % "aws-java-sdk-ec2" % awsVersion,
-  "com.amazonaws" % "aws-java-sdk-sns" % awsVersion,
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsVersion,
-  "com.amazonaws" % "aws-java-sdk-sts" % awsVersion,
-  "com.amazonaws" % "aws-java-sdk-kinesis" % awsVersion,
+  "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
+  "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
+  "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
+  "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
+  // These v2 dependencies are pinned to avoid a transitive dependency brought in via simple-configuration-ssm
+  // When we upgrade to the Scala 2.12 (or above) and the latest version of simple-configuration-ssm we should
+  // be able to remove them.
+  "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
@@ -103,7 +113,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     topLevelDirectory in Universal := None,
     packageName in Universal := normalizedName.value,
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-ec2" % awsVersion,
+      "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
       "com.amazonaws" % "aws-lambda-java-events" % "2.0.2",
       "io.circe" %% "circe-parser" % circeVersion,
