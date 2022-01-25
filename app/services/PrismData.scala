@@ -1,6 +1,5 @@
 package services
 
-import akka.agent.Agent
 import akka.actor.{Cancellable, Scheduler}
 import models.AmiId
 import org.joda.time.DateTime
@@ -9,11 +8,12 @@ import play.api.{Environment, Mode}
 import prism.Prism
 import prism.Prism.{AWSAccount, Image, Instance, LaunchConfiguration}
 
+import java.util.concurrent.atomic.AtomicReference
 import scala.collection.SeqLike
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-object PrismAgents {
+object PrismData {
   val MAX_AGE: Long = 15 * 60 * 1000
 
   trait Failure
@@ -31,17 +31,17 @@ object PrismAgents {
 
 
 
-class PrismAgents(prism: Prism,
+class PrismData(prism: Prism,
     lifecycle: ApplicationLifecycle,
     scheduler: Scheduler,
     environment: Environment)(implicit exec: ExecutionContext) extends Loggable {
 
-  import PrismAgents._
+  import PrismData._
 
-  private val instancesAgent: Agent[CacheData[Seq[Instance]]] = Agent(Left(NotInitialised))
-  private val launchConfigurationsAgent: Agent[CacheData[Seq[LaunchConfiguration]]] = Agent(Left(NotInitialised))
-  private val copiedImagesAgent: Agent[CacheData[Map[AmiId, Seq[Image]]]] = Agent(Left(NotInitialised))
-  private val accountsAgent: Agent[CacheData[Seq[AWSAccount]]] = Agent(Left(NotInitialised))
+  private val instancesAgent: AtomicReference[CacheData[Seq[Instance]]] = new AtomicReference(Left(NotInitialised))
+  private val launchConfigurationsAgent: AtomicReference[CacheData[Seq[LaunchConfiguration]]] = new AtomicReference(Left(NotInitialised))
+  private val copiedImagesAgent: AtomicReference[CacheData[Map[AmiId, Seq[Image]]]] = new AtomicReference(Left(NotInitialised))
+  private val accountsAgent: AtomicReference[CacheData[Seq[AWSAccount]]] = new AtomicReference(Left(NotInitialised))
 
   val baseUrl: String = prism.baseUrl
 
@@ -70,11 +70,11 @@ class PrismAgents(prism: Prism,
     refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
   }
 
-  private def refresh[T <: SeqLike[_, _], R](source: => Future[T], agent: Agent[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {
+  private def refresh[T <: SeqLike[_, _], R](source: => Future[T], reference: AtomicReference[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {
     source
       .map { sourceData =>
         log.debug(s"Prism: Loaded ${sourceData.length} $name")
-        agent.send(Right(transform(sourceData) -> DateTime.now))
+        reference.set(Right(transform(sourceData) -> DateTime.now))
       }
       .recover {
         case t =>

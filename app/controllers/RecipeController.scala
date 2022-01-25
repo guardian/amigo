@@ -10,14 +10,14 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import prism.RecipeUsage
 import schedule.BakeScheduler
-import services.PrismAgents
+import services.PrismData
 
 import scala.util.Try
 
 class RecipeController(
     val authAction: AuthAction[AnyContent],
     bakeScheduler: BakeScheduler,
-    prismAgents: PrismAgents,
+    prismAgents: PrismData,
     components: ControllerComponents,
     debugAvailable: Boolean)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
   import RecipeController._

@@ -4,7 +4,7 @@ import data.{ Bakes, Dynamo, PackageList, Recipes }
 import models.{ AmiId, Bake, BakeId, Recipe, RecipeId }
 import play.api.libs.json.Json
 import prism.Prism.{ Image, Instance, LaunchConfiguration }
-import services.PrismAgents
+import services.PrismData
 
 case class Ami(account: String, id: AmiId)
 
@@ -34,7 +34,7 @@ object RecipeUsage {
 
   def noUsage(): RecipeUsage = RecipeUsage(Seq.empty[Instance], Seq.empty[LaunchConfiguration], Seq.empty[BakeUsage])
 
-  def allAmis(amiIds: Iterable[AmiId], amigoAccount: String)(implicit prismAgents: PrismAgents): List[Ami] = {
+  def allAmis(amiIds: Iterable[AmiId], amigoAccount: String)(implicit prismAgents: PrismData): List[Ami] = {
     val amis = amiIds.map(Ami(amigoAccount, _))
 
     val copiedAmiImages = prismAgents.copiedImages(amiIds.toSet).values.flatten
@@ -43,7 +43,7 @@ object RecipeUsage {
     amis.toList ++ copiedAmis
   }
 
-  def apply(bakes: Iterable[Bake])(implicit prismAgents: PrismAgents): RecipeUsage = {
+  def apply(bakes: Iterable[Bake])(implicit prismAgents: PrismData): RecipeUsage = {
     val bakedAmiLookupMap = bakes.flatMap(b => b.amiId.map(_ -> b)).toMap
     val bakedAmiIds = bakedAmiLookupMap.keys.toList
     val copiedAmis = prismAgents.copiedImages(bakedAmiIds.toSet).values.flatten
@@ -72,15 +72,15 @@ object RecipeUsage {
     RecipeUsage(instances, launchConfigurations, bakeUsage)
   }
 
-  def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(implicit prismAgents: PrismAgents): Map[Recipe, RecipeUsage] = {
+  def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(implicit prismAgents: PrismData): Map[Recipe, RecipeUsage] = {
     recipes.map(r => r -> apply(findBakes(r.id))).toMap
   }
 
-  def getUsagesMap(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo): Map[Recipe, RecipeUsage] = {
+  def getUsagesMap(recipes: Iterable[Recipe])(implicit prismAgents: PrismData, dynamo: Dynamo): Map[Recipe, RecipeUsage] = {
     forAll(recipes, findBakes = recipeId => Bakes.list(recipeId))(prismAgents)
   }
 
-  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismAgents, dynamo: Dynamo): Iterable[RecipeUsage] = {
+  def getUsages(recipes: Iterable[Recipe])(implicit prismAgents: PrismData, dynamo: Dynamo): Iterable[RecipeUsage] = {
     recipes.map(r => RecipeUsage(Bakes.list(r.id)))
   }
 

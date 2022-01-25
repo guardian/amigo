@@ -9,11 +9,11 @@ import play.api.data.Forms._
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import prism.RecipeUsage
-import services.PrismAgents
+import services.PrismData
 
 class BaseImageController(
     val authAction: AuthAction[AnyContent],
-    prismAgents: PrismAgents,
+    prismAgents: PrismData,
     components: ControllerComponents)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
   import BaseImageController._
 

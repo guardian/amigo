@@ -11,8 +11,8 @@ import models._
 import play.api.i18n.I18nSupport
 import play.api.libs.EventSource
 import play.api.mvc._
-import services.{ AmiMetadataLookup, Loggable, PrismAgents }
-import services.{ Loggable, PrismAgents }
+import services.{ AmiMetadataLookup, Loggable, PrismData }
+import services.{ Loggable, PrismData }
 import play.api.libs.json._
 import prism.{ RecipeUsage, SimpleBakeUsage }
 
@@ -20,7 +20,7 @@ class BakeController(
   val authAction: AuthAction[AnyContent],
   stage: String,
   eventsSource: Source[BakeEvent, _],
-  prism: PrismAgents,
+  prism: PrismData,
   components: ControllerComponents,
   ansibleVars: Map[String, String],
   debugAvailable: Boolean,

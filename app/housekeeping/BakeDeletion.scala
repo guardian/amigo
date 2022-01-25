@@ -5,19 +5,19 @@ import models.BakeId
 import notification.NotificationSender
 import org.quartz.SimpleScheduleBuilder
 import prism.RecipeUsage
-import services.{ Loggable, PrismAgents }
+import services.{ Loggable, PrismData }
 
 /*
   This class deletes bakes that have been marked deleted
  */
 class BakeDeletion(dynamo: Dynamo,
     amigoAwsAccount: String,
-    prismAgents: PrismAgents,
+    prismAgents: PrismData,
     notificationSender: NotificationSender,
     frequencyMinutes: Int) extends HousekeepingJob with Loggable {
 
   implicit private val implDynamo: Dynamo = dynamo
-  implicit private val implPrismAgents: PrismAgents = prismAgents
+  implicit private val implPrismAgents: PrismData = prismAgents
 
   override val schedule = SimpleScheduleBuilder.repeatMinutelyForever(frequencyMinutes)
 

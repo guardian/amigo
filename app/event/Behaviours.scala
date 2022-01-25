@@ -33,9 +33,9 @@ object Behaviours extends Loggable {
   }
 
   /**
-    * Ensures that child actors are restarted after encountering an exception
-    * For more details, see: https://doc.akka.io/docs/akka/2.5/typed/fault-tolerance.html
-    */
+   * Ensures that child actors are restarted after encountering an exception
+   * For more details, see: https://doc.akka.io/docs/akka/2.5/typed/fault-tolerance.html
+   */
   def automaticallyRestart(behavior: Behavior[BakeEvent]): Behavior[BakeEvent] = Behaviors.supervise(behavior).onFailure(SupervisorStrategy.restart)
 
   /**

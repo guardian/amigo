@@ -5,7 +5,7 @@ import models.{ Bake, RecipeId }
 import org.joda.time.{ DateTime, Duration }
 import org.quartz.SimpleScheduleBuilder
 import prism.RecipeUsage
-import services.{ Loggable, PrismAgents }
+import services.{ Loggable, PrismData }
 
 object MarkOldUnusedBakesForDeletion {
   val MAX_AGE = 30
@@ -30,11 +30,11 @@ object MarkOldUnusedBakesForDeletion {
   }
 }
 
-class MarkOldUnusedBakesForDeletion(prismAgents: PrismAgents, dynamo: Dynamo) extends HousekeepingJob with Loggable {
+class MarkOldUnusedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo) extends HousekeepingJob with Loggable {
   override val schedule = SimpleScheduleBuilder.repeatHourlyForever(1)
 
   override def housekeep(): Unit = {
-    implicit val implicitPrismAgents: PrismAgents = prismAgents
+    implicit val implicitPrismAgents: PrismData = prismAgents
     implicit val implicitDynamo: Dynamo = dynamo
     log.info(s"Started marking old, unused bakes for deletion")
     val now = new DateTime()
