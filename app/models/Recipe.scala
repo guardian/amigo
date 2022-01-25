@@ -31,10 +31,33 @@ object Recipe {
     bakeSchedule: Option[BakeSchedule],
     encryptFor: Option[List[AccountNumber]])
 
-  import automagic._
+  def db2domain(dbModel: DbModel, baseImage: BaseImage): Recipe = Recipe(
+    id = dbModel.id,
+    description = dbModel.description,
+    baseImage = baseImage,
+    diskSize = dbModel.diskSize,
+    roles = dbModel.roles,
+    createdBy = dbModel.createdBy,
+    createdAt = dbModel.createdAt,
+    modifiedBy = dbModel.modifiedBy,
+    modifiedAt = dbModel.modifiedAt,
+    bakeSchedule = dbModel.bakeSchedule,
+    encryptFor = dbModel.encryptFor.getOrElse(Nil)
+  )
 
-  def db2domain(dbModel: DbModel, baseImage: BaseImage): Recipe = transform[DbModel, Recipe](dbModel, "baseImage" -> baseImage, "encryptFor" -> dbModel.encryptFor.getOrElse(Nil))
-
-  def domain2db(recipe: Recipe, nextBuildNumber: Int): DbModel = transform[Recipe, DbModel](recipe, "baseImageId" -> recipe.baseImage.id, "nextBuildNumber" -> nextBuildNumber, "encryptFor" -> Some(recipe.encryptFor))
+  def domain2db(recipe: Recipe, nextBuildNumber: Int): DbModel = DbModel(
+    id = recipe.id,
+    description = recipe.description,
+    baseImageId = recipe.baseImage.id,
+    diskSize = recipe.diskSize,
+    roles = recipe.roles,
+    nextBuildNumber = nextBuildNumber,
+    createdBy = recipe.createdBy,
+    createdAt = recipe.createdAt,
+    modifiedBy = recipe.modifiedBy,
+    modifiedAt = recipe.modifiedAt,
+    bakeSchedule = recipe.bakeSchedule,
+    encryptFor = Some(recipe.encryptFor)
+  )
 
 }
