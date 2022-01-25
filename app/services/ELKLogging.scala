@@ -35,9 +35,9 @@ class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], aw
 
   def getContextTags: Map[String, String] = {
     val effective = Map(
-      "app" -> identity.map(_.app).getOrElse(""),
-      "stage" -> identity.map(_.stage).getOrElse("DEV"),
-      "stack" -> identity.map(_.stack).getOrElse("dev-stack"),
+      "app" -> identity.map(_.app).getOrElse("unknown"),
+      "stage" -> identity.map(_.stage).getOrElse("unknown"),
+      "stack" -> identity.map(_.stack).getOrElse("unknown"),
       "region" -> region,
       "buildNumber" -> BuildInfo.buildNumber,
       "instanceId" -> instanceId.getOrElse("unknown")
