@@ -43,6 +43,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
         case recipe1.id => Seq(bakeR1A1, bakeR1A2)
         case recipe2.id => Seq(bakeR2A3, bakeR2F)
         case recipe3.id => Seq(bakeR3A4)
+        case _ => Seq() // Without this compilation fails due to non-exhaustive match
       }
     }
 

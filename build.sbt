@@ -6,7 +6,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
 
 javaOptions in Universal ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -74,7 +74,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.gu" %% "scanamo" % "1.0.0-M4",
-  "com.beachape" %% "enumeratum" % "1.3.7",
+  "com.beachape" %% "enumeratum" % "1.6.1",
   "com.typesafe.akka" %% "akka-actor-typed" % "2.5.21",
   "com.gu" %% "simple-configuration-ssm" % "1.5.6",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
@@ -82,7 +82,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "play-googleauth" % "0.7.6",
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P26-B3",
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "0.4.1",
+  "com.lihaoyi" %% "fastparse" % "0.4.4",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
@@ -99,7 +99,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.11" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
-  "com.gu" % "anghammarad-client_2.11" % "1.1.3"
+  "com.gu" %% "anghammarad-client" % "1.1.3"
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
