@@ -64,16 +64,6 @@ export class AmigoStack extends GuStack {
         }),
 
         /*
-        Permissions to obtain configuration via configuration-magic
-        See https://github.com/guardian/configuration-magic/blob/master/core/src/main/scala/com/gu/cm/DynamoDbConfigurationSource.scala
-         */
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          actions: ["dynamodb:DescribeTable", "dynamodb:GetItem"],
-          resources: ["arn:aws:dynamodb:*:*:table/config-deploy"],
-        }),
-
-        /*
         Permissions to support encrypted bakes
         See https://github.com/guardian/amigo/pull/164
          */

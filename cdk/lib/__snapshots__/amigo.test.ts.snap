@@ -190,14 +190,6 @@ Object {
               },
             },
             Object {
-              "Action": Array [
-                "dynamodb:DescribeTable",
-                "dynamodb:GetItem",
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:dynamodb:*:*:table/config-deploy",
-            },
-            Object {
               "Action": "sns:ListTopics",
               "Effect": "Allow",
               "Resource": "*",
