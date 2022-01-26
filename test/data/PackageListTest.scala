@@ -1,9 +1,10 @@
 package data
 
 import models.{ BakeId, RecipeId }
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PackageListTest extends FlatSpec with Matchers {
+class PackageListTest extends AnyFlatSpec with Matchers {
 
   "s3Url" should "return valid S3 url of expected pattern" in {
     val url = PackageList.s3Url(BakeId(RecipeId("cauldron-cake"), 1), "mr-hole")

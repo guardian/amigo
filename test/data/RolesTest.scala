@@ -3,9 +3,10 @@ package data
 import models.Dependency
 import models._
 import org.joda.time.DateTime
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RolesTest extends FlatSpec with Matchers {
+class RolesTest extends AnyFlatSpec with Matchers {
 
   it should "find all transitive dependencies" in {
     val r0 = RoleSummary(RoleId("id0"), Set(RoleId("id1"), RoleId("id2")), null, null)

@@ -1,7 +1,8 @@
 package models
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class BakeIdTest extends FlatSpec with Matchers {
+class BakeIdTest extends AnyFlatSpec with Matchers {
 
   "toFilename" should "produce expected filename" in {
     val bakeId = BakeId(RecipeId("puking-pastilles"), 1)

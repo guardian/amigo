@@ -1,9 +1,10 @@
 package models
 
 import org.joda.time.DateTime
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class BaseImageTest extends FlatSpec with Matchers {
+class BaseImageTest extends AnyFlatSpec with Matchers {
 
   def makeBaseImage(eolDate: DateTime): BaseImage =
     BaseImage(

@@ -6,12 +6,14 @@ import models.{ BakeId, RecipeId }
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.{ FlatSpec, Matchers, OptionValues }
+import org.scalatest.OptionValues
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.collection.JavaConversions._
 
-class DeleteLongRunningEC2InstancesSpec extends FlatSpec with Matchers with MockitoSugar with OptionValues {
+class DeleteLongRunningEC2InstancesSpec extends AnyFlatSpec with Matchers with MockitoSugar with OptionValues {
 
   trait Mocks {
     val bakesRepo: BakesRepo = mock[BakesRepo]

@@ -4,12 +4,13 @@ import models._
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{ FlatSpec, Matchers }
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import prism.Prism.{ AWSAccount, Image, Instance, LaunchConfiguration }
 import services.PrismData
 
-class RecipeUsageSpec extends FlatSpec with Matchers with MockitoSugar {
+class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   def fixtureBaseImage(baseImageId: String): BaseImage = BaseImage(BaseImageId(baseImageId), "MyDescription", AmiId("ami-1"), List(), "Test", DateTime.now, "Test", DateTime.now)
   def fixtureRecipe(id: String): Recipe = Recipe(RecipeId(id), None, fixtureBaseImage(s"base-image-$id"), None, List(), "Test", DateTime.now, "Test", DateTime.now, None, Nil)

@@ -1,8 +1,9 @@
 package notification
 
-import org.scalatest.{ FlatSpec, ShouldMatchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SNSSpec extends FlatSpec with ShouldMatchers {
+class SNSSpec extends AnyFlatSpec with Matchers {
   "listAwsResource" should "return just the first set if there is no next token" in {
     val results = SNS.listAwsResource {
       case None => List(1, 2, 3, 4) -> None

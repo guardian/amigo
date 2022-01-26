@@ -1,9 +1,10 @@
 package packer
 
-import org.scalatest._
-import models.{ MessagePart, AmiId }
+import models.{ AmiId, MessagePart }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PackerOutputParserSpec extends FlatSpec with Matchers {
+class PackerOutputParserSpec extends AnyFlatSpec with Matchers {
 
   it should "parse a line of Packer output" in {
     PackerOutputParser.parseLine("1455354962,,ui,say,ubuntu-wily-java8 output will be in this color.") should be(

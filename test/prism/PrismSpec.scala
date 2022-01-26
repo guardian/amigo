@@ -1,7 +1,8 @@
 package prism
 
 import models.AmiId
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.{ Configuration, Environment }
 import play.api.http.DefaultFileMimeTypesProvider
 import play.api.http.HttpConfiguration.HttpConfigurationProvider
@@ -16,7 +17,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PrismSpec extends FlatSpec with Matchers {
+class PrismSpec extends AnyFlatSpec with Matchers {
 
   val environment = Environment.simple()
   val httpConfiguration = new HttpConfigurationProvider(Configuration.load(environment), environment).get

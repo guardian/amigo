@@ -95,8 +95,9 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
   "com.gu" % "kinesis-logback-appender" % "1.4.2",
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test,
-  "org.mockito" % "mockito-core" % "2.7.19" % Test,
+  "org.scalatest" %% "scalatest-flatspec" % "3.2.11" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.11" % Test,
+  "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" % "anghammarad-client_2.11" % "1.1.3"
 )
