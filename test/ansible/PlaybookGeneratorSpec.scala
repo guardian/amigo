@@ -2,9 +2,10 @@ package ansible
 
 import models._
 import org.joda.time.DateTime
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PlaybookGeneratorSpec extends FlatSpec with Matchers {
+class PlaybookGeneratorSpec extends AnyFlatSpec with Matchers {
 
   it should "generate an Ansible playbook containing the base image's builtin roles and the recipe's roles" in {
     val recipe = Recipe(

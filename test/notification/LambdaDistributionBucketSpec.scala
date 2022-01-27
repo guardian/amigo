@@ -1,8 +1,9 @@
 package notification
 
-import org.scalatest.{ FlatSpec, ShouldMatchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LambdaDistributionBucketSpec extends FlatSpec with ShouldMatchers {
+class LambdaDistributionBucketSpec extends AnyFlatSpec with Matchers {
   import LambdaDistributionBucket._
   "updateCopierStatement" should "replace the previous statement" in {
     val copierStatement = createCopierStatement("bucket", "TEST", List("234"))

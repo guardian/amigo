@@ -2,9 +2,10 @@ package housekeeping
 
 import models._
 import org.joda.time.{ DateTime, DateTimeZone }
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class MarkOrphanedBakesForDeletionSpec extends FlatSpec with Matchers {
+class MarkOrphanedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
   val date = new DateTime(2018, 5, 28, 0, 0, 0, DateTimeZone.UTC)
 
   def fixtureBakeDbModel(recipeId: String, amiId: Option[AmiId]): Bake.DbModel = {
