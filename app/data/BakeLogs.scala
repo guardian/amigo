@@ -10,7 +10,6 @@ import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 object BakeLogs extends Loggable {
-  import cats.syntax.either._
   import Dynamo._
 
   private val BATCH_SIZE = 25

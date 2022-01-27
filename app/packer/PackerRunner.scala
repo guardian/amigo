@@ -26,7 +26,7 @@ class PackerRunner(maxInstances: Int) extends Loggable {
    */
   def createImage(stage: String, bake: Bake, prism: PrismData, eventBus: EventBus, ansibleVars: Map[String, String], debug: Boolean, amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String])(implicit packerConfig: PackerConfig): Future[Int] = {
     val sourceAmi = bake.recipe.baseImage.amiId.value
-    val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).right.getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
+    val amiMetadata = amiMetadataLookup.lookupMetadataFor(sourceAmi).getOrElse(throw new IllegalStateException(s"Unable to identify the architecture for $sourceAmi"))
 
     val playbookYaml = PlaybookGenerator.generatePlaybook(bake.recipe,
       ansibleVars ++ Map(

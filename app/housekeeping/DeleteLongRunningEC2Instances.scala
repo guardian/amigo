@@ -1,6 +1,5 @@
 package housekeeping
 
-import cats.syntax.either._
 import com.amazonaws.services.ec2.model.Instance
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.BakeId

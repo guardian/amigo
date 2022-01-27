@@ -80,7 +80,7 @@ object Recipes {
     }
 
     val update = table.update('id -> recipe.id, updateExpr)
-    update.exec().right.map(Recipe.db2domain(_, baseImage))
+    update.exec().map(Recipe.db2domain(_, baseImage))
   }
 
   def delete(recipe: Recipe)(implicit dynamo: Dynamo): DeleteItemResult = {

@@ -6,7 +6,6 @@ import org.joda.time.DateTime
 
 object Bakes {
   import Dynamo._
-  import cats.syntax.either._
 
   def create(recipe: Recipe, buildNumber: Int, startedBy: String)(implicit dynamo: Dynamo): Bake = {
     val bake = Bake(recipe, buildNumber, status = BakeStatus.Running, amiId = None, startedBy = startedBy, startedAt = DateTime.now(), deleted = false)
