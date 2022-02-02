@@ -11,7 +11,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class DeleteLongRunningEC2InstancesSpec extends AnyFlatSpec with Matchers with MockitoSugar with OptionValues {
 
@@ -23,7 +23,7 @@ class DeleteLongRunningEC2InstancesSpec extends AnyFlatSpec with Matchers with M
 
   "getBakeIdFromInstance" should "successfully parse a bake id from a tag" in {
     val instance = mock[Instance]
-    when(instance.getTags).thenReturn(List(new Tag("BakeId", "recipe #2")))
+    when(instance.getTags).thenReturn(List(new Tag("BakeId", "recipe #2")).asJava)
     DeleteLongRunningEC2Instances.getBakeIdFromInstance(instance).value shouldEqual BakeId(RecipeId("recipe"), 2)
   }
 

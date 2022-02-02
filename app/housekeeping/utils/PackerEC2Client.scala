@@ -5,29 +5,28 @@ import com.amazonaws.services.ec2.model.{ DescribeInstancesRequest, Filter, Inst
 import models.BakeId
 import packer.PackerBuildConfigGenerator
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // EC2 methods, specifically related to Packer instances.
 class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
 
   private def hasTag(instance: Instance, key: String, value: String): Boolean =
-    instance.getTags.exists(tag => tag.getKey == key && tag.getValue == value)
+    instance.getTags.asScala.exists(tag => tag.getKey == key && tag.getValue == value)
 
   def getBakeInstance(bakeId: BakeId): Option[Instance] = {
     // Filters here are base on the instance tags that are set in PackerBuildConfigGenerator.
     val request = new DescribeInstancesRequest()
       .withFilters(
-        new Filter("tag:AmigoStage", List(amigoStage)),
-        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
-        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
-        new Filter("tag:BakeId", List(bakeId.toString)),
-        new Filter("instance-state-name", List("running", "stopped"))
+        new Filter("tag:AmigoStage", List(amigoStage).asJava),
+        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
+        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
+        new Filter("tag:BakeId", List(bakeId.toString).asJava),
+        new Filter("instance-state-name", List("running", "stopped").asJava)
       )
 
     underlying.describeInstances(request)
-      .getReservations
-      .flatMap(_.getInstances)
-      .toList
+      .getReservations.asScala
+      .flatMap(_.getInstances.asScala)
       .find { instance =>
         hasTag(instance, key = "Stage", value = PackerBuildConfigGenerator.stage) &&
           hasTag(instance, key = "Stack", value = PackerBuildConfigGenerator.stack) &&
@@ -43,16 +42,16 @@ class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
   def getRunningPackerInstances(): List[Instance] = {
     val request = new DescribeInstancesRequest()
       .withFilters(
-        new Filter("tag:AmigoStage", List(amigoStage)),
-        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage)),
-        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack)),
-        new Filter("tag:Name", List("Packer Builder")),
-        new Filter("instance-state-name", List("running", "stopped"))
+        new Filter("tag:AmigoStage", List(amigoStage).asJava),
+        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
+        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
+        new Filter("tag:Name", List("Packer Builder").asJava),
+        new Filter("instance-state-name", List("running", "stopped").asJava)
       )
 
     underlying.describeInstances(request)
-      .getReservations
-      .flatMap(_.getInstances)
+      .getReservations.asScala
+      .flatMap(_.getInstances.asScala)
       .toList
   }
 }

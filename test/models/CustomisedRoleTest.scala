@@ -2,7 +2,6 @@ package models
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import cats.syntax.either._
 import org.scalatest.EitherValues
 
 class CustomisedRoleTest extends AnyFlatSpec with Matchers with EitherValues {

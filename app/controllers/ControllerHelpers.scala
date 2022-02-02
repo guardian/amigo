@@ -12,7 +12,7 @@ object ControllerHelpers {
     val rolesOrErrors = enabledRoles.map { roleName =>
       val variablesString = form.get(s"role-$roleName-variables").flatMap(_.headOption).getOrElse("")
       val variables = CustomisedRole.formInputTextToVariables(variablesString)
-      variables.right.map(CustomisedRole(RoleId(roleName), _))
+      variables.map(CustomisedRole(RoleId(roleName), _))
     }
     val roles = rolesOrErrors.collect { case Right(role) => role }
     val errors = rolesOrErrors.collect { case Left(error) => error }

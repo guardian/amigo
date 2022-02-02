@@ -1,6 +1,5 @@
 package housekeeping
 
-import cats.syntax.either._
 import com.amazonaws.services.ec2.model.Instance
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.BakeId
@@ -8,7 +7,7 @@ import org.joda.time.DateTime
 import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
 import services.Loggable
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // TimeOutLongRunningBakes was failing to delete some long running EC2 instances.
 // The issue was that the bake corresponding to the long running EC2 instance would have status Failed.
@@ -63,7 +62,7 @@ object DeleteLongRunningEC2Instances {
 
   def getBakeIdFromInstance(instance: Instance): Option[BakeId] = {
     for {
-      raw <- instance.getTags.find(_.getKey == "BakeId")
+      raw <- instance.getTags.asScala.find(_.getKey == "BakeId")
       id <- BakeId.fromString(raw.getValue).toOption
     } yield id
   }

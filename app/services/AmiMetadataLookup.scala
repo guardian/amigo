@@ -1,10 +1,10 @@
-package services;
+package services
 
 import cats.syntax.either._
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.{ DescribeImagesRequest, Image }
 
-import scala.collection.JavaConverters._;
+import scala.collection.JavaConverters._
 
 case class AmiMetadata(architecture: String, debArchitecture: String)
 

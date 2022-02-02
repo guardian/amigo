@@ -60,7 +60,7 @@ object PackageList extends Loggable {
     previousBakeId.map { pid =>
       val oldPackageList = getPackageList(s3Client, pid, bucket)
       for {
-        oldList <- oldPackageList.right
+        oldList <- oldPackageList
       } yield diffPackageLists(newPackageList, oldList, pid)
     }
   }.getOrElse(Left("No previous bake to diff with"))

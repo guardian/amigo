@@ -3,7 +3,6 @@ package data
 import com.gu.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
-import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.DeleteItemResult
 import data.Recipes.table
 
