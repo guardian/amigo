@@ -28,6 +28,7 @@ lazy val root = (project in file("."))
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
 
     serverLoading in Debian := Some(Systemd),
+    riffRaffManifestProjectName := s"tools::${name.value}",
     riffRaffPackageType := (packageBin in Debian).value,
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
