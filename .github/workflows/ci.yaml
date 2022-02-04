@@ -24,7 +24,7 @@ jobs:
           node-version-file: 'cdk/.nvmrc'
       - uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'adopt'
       - name: CI
         run: |

@@ -40,6 +40,13 @@ it possible to SSH onto the instance that is being used to build the AMI.
 Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
 Amigo app locally and the associated packer process should have the sufficient AWS authorization.
 
+Note that you must use Java 11 to run this app. There are a few options for switching between Java versions at the
+time of writing:
+
+* [Coursier](https://get-coursier.io/docs/cli-java)
+* [asdf](https://asdf-vm.com/)
+* [sdkman](https://sdkman.io/usage)
+
 <details>
 <summary>Previous run locally advice</summary>
 
@@ -57,7 +64,6 @@ If you have created a custom VPC in your AWS account (i.e. your account contains
 
 ```shell
 $ cat ~/.configuration-magic/amigo.conf
-
 packer {
   vpcId = "vpc-1234abcd"
   subnetId = "subnet-5678efgh"
@@ -78,7 +84,7 @@ ansible {
 
 Optionally, you may want to set `associate_public_ip_address` to true if your subnet does not default to this, to ensure Packer can SSH into your instance.
 
-Once you have your credentials and config sorted out, just do: 
+Once you have your credentials and config sorted out, just do:
 
 ```shell
 $ sbt run
