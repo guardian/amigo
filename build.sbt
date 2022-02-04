@@ -28,9 +28,8 @@ lazy val root = (project in file("."))
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
 
     serverLoading in Debian := Some(Systemd),
+    riffRaffManifestProjectName := s"tools::${name.value}",
     riffRaffPackageType := (packageBin in Debian).value,
-    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-    riffRaffUploadManifestBucket := Option("riffraff-builds"),
     riffRaffArtifactResources ++= Seq(
       (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip",
       baseDirectory.value / "cdk/cdk.out/AMIgo.template.json" -> "cloudformation/AMIgo.template.json"
