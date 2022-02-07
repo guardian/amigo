@@ -957,7 +957,11 @@ dpkg -i /tmp/amigo.deb",
         "PolicyDocument": Object {
           "Statement": Array [
             Object {
-              "Action": "ssm:GetParametersByPath",
+              "Action": Array [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
               "Effect": "Allow",
               "Resource": Object {
                 "Fn::Join": Array [
@@ -975,7 +979,7 @@ dpkg -i /tmp/amigo.deb",
                     Object {
                       "Ref": "Stage",
                     },
-                    "/deploy/amigo",
+                    "/deploy/amigo*",
                   ],
                 ],
               },
