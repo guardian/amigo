@@ -77,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "simple-configuration-ssm" % "1.5.6",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
   "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
-  "com.gu" %% "play-googleauth" % "0.7.6",
+  "com.gu.play-googleauth" %% "play-v26" % "1.0.7",
   "com.gu.play-secret-rotation" %% "play-v26" % "0.33",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.33",
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P26-B3",

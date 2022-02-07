@@ -214,10 +214,10 @@ class AppComponents(context: Context, identity: AppIdentity)
     clientId = mandatoryConfig("google.clientId"),
     clientSecret = mandatoryConfig("google.clientSecret"),
     redirectUrl = mandatoryConfig("google.redirectUrl"),
-    domain = "guardian.co.uk",
+    domains = List("guardian.co.uk"),
     maxAuthAge = Some(Duration.standardDays(90)),
     enforceValidity = true,
-    antiForgeryChecker = AntiForgeryChecker.borrowSettingsFromPlay(httpConfiguration)
+    antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
 
   implicit val packerConfig = PackerConfig(
