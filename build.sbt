@@ -73,7 +73,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.gu" %% "scanamo" % "1.0.0-M4",
   "com.beachape" %% "enumeratum" % "1.6.1",
-  "com.typesafe.akka" %% "akka-actor-typed" % "2.5.26",
+  "com.typesafe.akka" %% "akka-actor-typed" % "2.6.18",
   "com.gu" %% "simple-configuration-ssm" % "1.5.6",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
   "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",

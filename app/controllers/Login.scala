@@ -16,7 +16,7 @@ class Login(val authConfig: GoogleAuthConfig, override val wsClient: WSClient, c
     processOauth2Callback
   }
 
-  override val failureRedirectTarget: Call = routes.Login.loginAction()
-  override val defaultRedirectTarget: Call = routes.RootController.index()
+  override val failureRedirectTarget: Call = routes.Login.loginAction
+  override val defaultRedirectTarget: Call = routes.RootController.index
 
 }

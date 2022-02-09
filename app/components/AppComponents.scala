@@ -236,13 +236,13 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val packerRunner = new PackerRunner(configuration.get[Int]("packer.maxInstances"))
 
-  val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
+  val quartzScheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
     val enabled = stage == "PROD" // don't run scheduled bakes on dev machines
     new ScheduledBakeRunner(stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket, packerRunner)
   }
-  val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
+  val bakeScheduler = new BakeScheduler(quartzScheduler, scheduledBakeRunner)
 
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
@@ -259,7 +259,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client)
   )
 
-  val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
+  val housekeepingScheduler = new HousekeepingScheduler(quartzScheduler, houseKeepingJobs)
   housekeepingScheduler.initialise()
 
   val debugAvailable = stage != "PROD"
@@ -269,7 +269,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   // This service is not accessible on the public internet
   override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
-  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction(), controllerComponents.parsers.default)(executionContext)
+  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction, controllerComponents.parsers.default)(executionContext)
 
   val rootController = new RootController(authAction, controllerComponents)
   val baseImageController = new BaseImageController(authAction, prismAgents, controllerComponents)
