@@ -16,6 +16,8 @@ import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.{ AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
 import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
 import com.gu.googleauth.{ AntiForgeryChecker, AuthAction, GoogleAuthConfig }
+import com.gu.play.secretrotation.aws.parameterstore.{ AwsSdkV2, SecretSupplier }
+import com.gu.play.secretrotation.{ RotatingSecretComponents, SnapshotProvider, TransitionTiming }
 import controllers._
 import data.{ Dynamo, Recipes }
 import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
@@ -27,7 +29,7 @@ import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.{ PackerConfig, PackerRunner }
-import play.api.{ BuiltInComponentsFromContext, Configuration }
+import play.api.BuiltInComponentsFromContext
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.iteratee.Concurrent
@@ -40,7 +42,15 @@ import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
+import software.amazon.awssdk.services.ssm.SsmClient
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
+  ProfileCredentialsProvider => ProfileCredentialsProviderV2,
+  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2
+}
+import software.amazon.awssdk.regions.Region
 
+import java.time.Duration.{ ofHours, ofMinutes }
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -68,7 +78,8 @@ class AppComponents(context: Context, identity: AppIdentity)
     with I18nComponents
     with Loggable
     with AssetsComponents
-    with HttpFiltersComponents {
+    with HttpFiltersComponents
+    with RotatingSecretComponents {
 
   val stage = identity match {
     case DevIdentity(_) => "DEV"
@@ -77,11 +88,20 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   def mandatoryConfig(key: String): String = configuration.get[Option[String]](key).getOrElse(sys.error(s"Missing config key: $key"))
 
-  val awsCreds = new AWSCredentialsProviderChain(
+  val awsCredsForV1 = new AWSCredentialsProviderChain(
     new ProfileCredentialsProvider("deployTools"),
     new ProfileCredentialsProvider(),
     InstanceProfileCredentialsProvider.getInstance()
   )
+
+  val awsCredsForV2 = AwsCredentialsProviderChainV2
+    .builder()
+    .credentialsProviders(
+      ProfileCredentialsProviderV2.create("deployTools"),
+      ProfileCredentialsProviderV2.create(),
+      InstanceProfileCredentialsProviderV2.create()
+    )
+    .build()
 
   val region = Regions.EU_WEST_1
 
@@ -93,13 +113,25 @@ class AppComponents(context: Context, identity: AppIdentity)
       false
     ))
 
+  val secretStateSupplier: SnapshotProvider = {
+    new SecretSupplier(
+      TransitionTiming(usageDelay = ofMinutes(3), overlapDuration = ofHours(2)),
+      s"/$stage/deploy/amigo/play.http.secret.key",
+      AwsSdkV2(SsmClient.builder
+        .credentialsProvider(awsCredsForV2)
+        .region(Region.of(region.getName))
+        .build()
+      )
+    )
+  }
+
   // initialise logging
   val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCreds)
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV1)
 
   implicit val dynamo = {
     val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
-      .withCredentials(awsCreds)
+      .withCredentials(awsCredsForV1)
       .withRegion(region)
       .withClientConfiguration(clientConfiguration)
       .build()
@@ -109,7 +141,7 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val awsAccount = {
     val stsClient: AWSSecurityTokenService = AWSSecurityTokenServiceClientBuilder.standard
-      .withCredentials(awsCreds)
+      .withCredentials(awsCredsForV1)
       .withRegion(region)
       .withClientConfiguration(clientConfiguration)
       .build()
@@ -119,7 +151,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   }
 
   val ec2Client: AmazonEC2 = AmazonEC2ClientBuilder.standard
-    .withCredentials(awsCreds)
+    .withCredentials(awsCredsForV1)
     .withRegion(region)
     .withClientConfiguration(clientConfiguration)
     .build()
@@ -135,7 +167,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   val sns: SNS = {
     val snsClient = AmazonSNSClientBuilder.standard
       .withRegion(region)
-      .withCredentials(awsCreds)
+      .withCredentials(awsCredsForV1)
       .withClientConfiguration(clientConfiguration)
       .build()
     new SNS(snsClient, stage, accountNumbers)
@@ -143,13 +175,13 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
     .withRegion(region)
-    .withCredentials(awsCreds)
+    .withCredentials(awsCredsForV1)
     .withClientConfiguration(clientConfiguration)
     .build()
 
   val anghammaradSNSClient: AmazonSNSAsync = AmazonSNSAsyncClientBuilder.standard
     .withRegion(region)
-    .withCredentials(awsCreds)
+    .withCredentials(awsCredsForV1)
     .withClientConfiguration(clientConfiguration)
     .build()
 

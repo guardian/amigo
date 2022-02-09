@@ -125,6 +125,7 @@ export class AmigoStack extends GuStack {
     });
 
     this.dataBucket = new GuS3Bucket(this, "AmigoDataBucket", {
+      app: AmigoStack.app.app,
       bucketName: importBucketName,
       existingLogicalId: {
         logicalId: "AmigoDataBucket",
