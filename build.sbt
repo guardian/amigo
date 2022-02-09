@@ -71,6 +71,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "com.gu" %% "scanamo" % "1.0.0-M4",
   "com.beachape" %% "enumeratum" % "1.6.1",
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.18",
