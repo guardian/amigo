@@ -265,7 +265,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   // Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
   // The allowedHostsFilter is removed here as it causes healthchecks to fail
   // This service is not accessible on the public internet
-  override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
+  override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
   val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction, controllerComponents.parsers.default)(executionContext)
 
