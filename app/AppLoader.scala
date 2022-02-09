@@ -16,7 +16,7 @@ class AppLoader extends ApplicationLoader with Loggable {
       val loadedConfig = ConfigurationLoader.load(identity) {
         case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
       }
-      val newContext = context.copy(initialConfiguration = context.initialConfiguration.withFallback(Configuration(loadedConfig)))
+      val newContext = context.copy(initialConfiguration = Configuration(loadedConfig).withFallback(context.initialConfiguration))
       val components = new AppComponents(newContext, identity)
       log.info("Starting the scheduler")
       components.quartzScheduler.start()
