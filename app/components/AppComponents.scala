@@ -38,16 +38,13 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{ AnyContent, EssentialFilter }
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
+import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
 import software.amazon.awssdk.services.ssm.SsmClient
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
-  ProfileCredentialsProvider => ProfileCredentialsProviderV2,
-  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2
-}
+import software.amazon.awssdk.auth.credentials.{ AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
 import software.amazon.awssdk.regions.Region
 
 import java.time.Duration.{ ofHours, ofMinutes }
@@ -79,7 +76,8 @@ class AppComponents(context: Context, identity: AppIdentity)
     with Loggable
     with AssetsComponents
     with HttpFiltersComponents
-    with RotatingSecretComponents {
+    with RotatingSecretComponents
+    with CSPComponents {
 
   val stage = identity match {
     case DevIdentity(_) => "DEV"
@@ -264,7 +262,7 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val debugAvailable = stage != "PROD"
 
-  // Play 2.6's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
+  // Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
   // The allowedHostsFilter is removed here as it causes healthchecks to fail
   // This service is not accessible on the public internet
   override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
