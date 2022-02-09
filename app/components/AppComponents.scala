@@ -262,9 +262,13 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val debugAvailable = stage != "PROD"
 
-  // Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
-  // The allowedHostsFilter is removed here as it causes healthchecks to fail
-  // This service is not accessible on the public internet
+  /**
+    * Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter).
+    * The allowedHostsFilter is removed here as it causes healthchecks to fail.
+    * This service is not accessible on the public internet.
+    *
+    * We also enable cspFilter, as per https://www.playframework.com/documentation/2.8.x/CspFilter#Enabling-Through-Compile-Time
+    */
   override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
   val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction, controllerComponents.parsers.default)(executionContext)
