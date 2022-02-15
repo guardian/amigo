@@ -52,22 +52,20 @@ class PrismData(prism: Prism,
 
   if (environment.mode != Mode.Test) {
 
-    val prismDataSchedule: Cancellable = scheduler.schedule(0.seconds, 1.minutes) {
-      log.debug(s"Refreshing Prism data")
-      refresh
+    val prismDataSchedule: Cancellable = scheduler.scheduleWithFixedDelay(0.seconds, 1.minutes) {
+      () => {
+        log.debug(s"Refreshing Prism data")
+        refresh(prism.findAllInstances(), instancesAgent, "instances")(identity)
+        refresh(prism.findAllLaunchConfigurations(), launchConfigurationsAgent, "launch configuration")(identity)
+        refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(_.groupBy(_.copiedFromAMI))
+        refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
+      }
     }
 
     lifecycle.addStopHook { () =>
       prismDataSchedule.cancel()
       Future.successful(())
     }
-  }
-
-  private def refresh: Future[Unit] = {
-    refresh(prism.findAllInstances(), instancesAgent, "instances")(identity)
-    refresh(prism.findAllLaunchConfigurations(), launchConfigurationsAgent, "launch configuration")(identity)
-    refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(_.groupBy(_.copiedFromAMI))
-    refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
   }
 
   private def refresh[T <: SeqLike[_, _], R](source: => Future[T], reference: AtomicReference[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {

@@ -126,7 +126,7 @@ class BaseImageController(
       val usedByRecipes = Recipes.findByBaseImage(id)
       if (usedByRecipes.isEmpty) {
         BaseImages.delete(image)
-        Redirect(routes.BaseImageController.listBaseImages()).flashing("info" -> s"Successfully deleted base image ${id.value}")
+        Redirect(routes.BaseImageController.listBaseImages).flashing("info" -> s"Successfully deleted base image ${id.value}")
       } else {
         Redirect(routes.BaseImageController.showBaseImage(id)).flashing("error" -> s"Failed to delete base image as it is in use")
       }

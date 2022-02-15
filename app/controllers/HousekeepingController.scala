@@ -29,6 +29,6 @@ class HousekeepingController(val authAction: AuthAction[AnyContent], components:
       }
     }
 
-    Redirect(routes.HousekeepingController.showOrphans())
+    Redirect(routes.HousekeepingController.showOrphans)
   }
 }

@@ -38,16 +38,13 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{ AnyContent, EssentialFilter }
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
+import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
 import software.amazon.awssdk.services.ssm.SsmClient
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
-  ProfileCredentialsProvider => ProfileCredentialsProviderV2,
-  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2
-}
+import software.amazon.awssdk.auth.credentials.{ AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
 import software.amazon.awssdk.regions.Region
 
 import java.time.Duration.{ ofHours, ofMinutes }
@@ -79,7 +76,8 @@ class AppComponents(context: Context, identity: AppIdentity)
     with Loggable
     with AssetsComponents
     with HttpFiltersComponents
-    with RotatingSecretComponents {
+    with RotatingSecretComponents
+    with CSPComponents {
 
   val stage = identity match {
     case DevIdentity(_) => "DEV"
@@ -214,10 +212,10 @@ class AppComponents(context: Context, identity: AppIdentity)
     clientId = mandatoryConfig("google.clientId"),
     clientSecret = mandatoryConfig("google.clientSecret"),
     redirectUrl = mandatoryConfig("google.redirectUrl"),
-    domain = "guardian.co.uk",
+    domains = List("guardian.co.uk"),
     maxAuthAge = Some(Duration.standardDays(90)),
     enforceValidity = true,
-    antiForgeryChecker = AntiForgeryChecker.borrowSettingsFromPlay(httpConfiguration)
+    antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
 
   implicit val packerConfig = PackerConfig(
@@ -236,13 +234,13 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val packerRunner = new PackerRunner(configuration.get[Int]("packer.maxInstances"))
 
-  val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
+  val quartzScheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
     val enabled = stage == "PROD" // don't run scheduled bakes on dev machines
     new ScheduledBakeRunner(stage, enabled, prismAgents, eventBus, ansibleVariables, amiMetadataLookup, amigoDataBucket, packerRunner)
   }
-  val bakeScheduler = new BakeScheduler(scheduler, scheduledBakeRunner)
+  val bakeScheduler = new BakeScheduler(quartzScheduler, scheduledBakeRunner)
 
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
@@ -259,17 +257,21 @@ class AppComponents(context: Context, identity: AppIdentity)
     new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client)
   )
 
-  val housekeepingScheduler = new HousekeepingScheduler(scheduler, houseKeepingJobs)
+  val housekeepingScheduler = new HousekeepingScheduler(quartzScheduler, houseKeepingJobs)
   housekeepingScheduler.initialise()
 
   val debugAvailable = stage != "PROD"
 
-  // Play 2.6's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter)
-  // The allowedHostsFilter is removed here as it causes healthchecks to fail
-  // This service is not accessible on the public internet
-  override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
+  /**
+   * Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter).
+   * The allowedHostsFilter is removed here as it causes healthchecks to fail.
+   * This service is not accessible on the public internet.
+   *
+   * We also enable cspFilter, as per https://www.playframework.com/documentation/2.8.x/CspFilter#Enabling-Through-Compile-Time
+   */
+  override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
-  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction(), controllerComponents.parsers.default)(executionContext)
+  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction, controllerComponents.parsers.default)(executionContext)
 
   val rootController = new RootController(authAction, controllerComponents)
   val baseImageController = new BaseImageController(authAction, prismAgents, controllerComponents)

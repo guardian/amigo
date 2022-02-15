@@ -179,7 +179,7 @@ class RecipeController(
         }
         Recipes.delete(recipe)
         // redirect back to the index page
-        Redirect(routes.RecipeController.listRecipes())
+        Redirect(routes.RecipeController.listRecipes)
       }
     }
   }
