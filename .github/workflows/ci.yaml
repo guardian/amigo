@@ -21,7 +21,7 @@ jobs:
         with:
           cache: 'yarn'
           cache-dependency-path: 'cdk/yarn.lock'
-          node-version-file: 'cdk/.nvmrc'
+          node-version-file: '.nvmrc'
       - uses: actions/setup-java@v2
         with:
           java-version: '11'

@@ -1,0 +1,18 @@
+name: Snyk
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  push:
+    branches:
+      - main
+  pull_request:    
+  workflow_dispatch:
+
+jobs:
+  security:
+    uses: guardian/.github/.github/workflows/sbt-node-snyk.yml@main
+    with:
+      ORG: 'guardian-devtools'
+    secrets:
+       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
