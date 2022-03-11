@@ -1,6 +1,15 @@
 ---
-- name: Add Elastic repository key
-  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+# See https://www.elastic.co/guide/en/beats/metricbeat/7.17/setup-repositories.html
 
-- name: Ensure Metricbeat is installed
-  apt: deb=https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{{ version }}-amd64.deb state=present
+- name: Add GPG key
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+
+- name: Add repository
+  ansible.builtin.apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/{{ major_version }}.x/apt stable main
+
+- name: Install
+  apt:
+    name: metricbeat={{full_version}}
+    update_cache: yes
