@@ -7,9 +7,9 @@
 
 - name: Add repository
   ansible.builtin.apt_repository:
-    repo: deb https://artifacts.elastic.co/packages/{{ major_version }}.x/apt stable main
+    repo: deb https://artifacts.elastic.co/packages/{{ version |regex_search('^(\\d*)\\.','\\1') }}.x/apt stable main
 
 - name: Install
   apt:
-    name: metricbeat={{full_version}}
+    name: metricbeat={{version}}
     update_cache: yes

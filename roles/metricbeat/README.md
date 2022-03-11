@@ -4,8 +4,8 @@ Install [metricbeat](https://www.elastic.co/beats/metricbeat) to gather metrics 
 
 Configuration to be supplied at launch time.
 
-Basic use allows the version of metricbeat to be specified:
+## Configure role
 
-```
-version: 7.8.1
-```
+You must specify the version of metricbeat to be installed:
+
+    version: 7.17.1
