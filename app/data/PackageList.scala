@@ -7,7 +7,7 @@ import models.{ Bake, BakeId }
 import services.Loggable
 import fun.mike.dmp.{ Diff, DiffMatchPatch }
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.{ immutable, mutable }
 import scala.util.control.NonFatal
 

@@ -1,7 +1,7 @@
 package com.gu.imageCopier
 
 import com.amazonaws.services.lambda.runtime.events.SNSEvent
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters
 
 case class SNSMessage(id: String, content: String)
 

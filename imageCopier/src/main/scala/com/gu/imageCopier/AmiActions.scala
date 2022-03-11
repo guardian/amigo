@@ -5,7 +5,7 @@ import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model._
 import com.gu.imageCopier.attempt.{Attempt, AwsSdkFailure}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters
 
 object AmiActions {
   def copyAmi(amiEvent: AmiEvent, kmsArn: String)(implicit ec2Client: AmazonEC2): Attempt[String] = {

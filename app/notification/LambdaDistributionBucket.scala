@@ -35,14 +35,11 @@ object LambdaDistributionBucket {
       Sid = Some(imageCopierDistributionSid(stage)),
       Effect = "Allow",
       Principal = Some(Json.obj(
-        "AWS" -> accounts
-      )),
+        "AWS" -> accounts)),
       Action = Some(JsString("s3:GetObject")),
       Resource = Some(JsArray(Seq(
         JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/imagecopier/*"),
-        JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/housekeeping-lambda/*")
-      )))
-    )
+        JsString(s"arn:aws:s3:::$bucketName/deploy/$stage/housekeeping-lambda/*")))))
   }
 
   /*
@@ -51,8 +48,7 @@ object LambdaDistributionBucket {
   def updateCopierStatement(stage: String, maybeBucketPolicyText: Option[String], newStatement: Statement): String = {
     val bucketPolicy = maybeBucketPolicyText.map(parsePolicyText).getOrElse(BucketPolicy(None, None, Nil))
     val newPolicy = bucketPolicy.copy(
-      Statement = newStatement :: bucketPolicy.Statement.filterNot(_.Sid.contains(imageCopierDistributionSid(stage)))
-    )
+      Statement = newStatement :: bucketPolicy.Statement.filterNot(_.Sid.contains(imageCopierDistributionSid(stage))))
     createPolicyText(newPolicy)
   }
 }

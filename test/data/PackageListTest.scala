@@ -15,8 +15,7 @@ class PackageListTest extends AnyFlatSpec with Matchers {
     val packageList = List(
       "Installed Packages",
       "p1",
-      "p2,"
-    )
+      "p2,")
     val removed = PackageList.removeNonPackageLines(packageList)
     removed.head should be("p1")
     removed.length should be(2)

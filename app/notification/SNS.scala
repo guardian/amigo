@@ -5,7 +5,7 @@ import com.amazonaws.services.sns.model._
 import services.Loggable
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 

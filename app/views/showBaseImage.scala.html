@@ -14,7 +14,7 @@
     </div>
     <div class="panel-body">
     @b3.form(routes.BaseImageController.cloneBaseImage(image.id)) {
-      @b3.inputWrapped( "newId", cloneForm("newId"), 'placeholder -> s"${image.id.value}-cloned" ) { input =>
+      @b3.inputWrapped( "newId", cloneForm("newId"), Symbol("placeholder") -> s"${image.id.value}-cloned" ) { input =>
         <div class="input-group">
           @input
           <span class="input-group-btn">

@@ -1,13 +1,13 @@
 package housekeeping
 
 import com.amazonaws.services.ec2.model.Instance
-import housekeeping.utils.{BakesRepo, PackerEC2Client}
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import models.BakeId
 import org.joda.time.DateTime
-import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
+import org.quartz.{ ScheduleBuilder, SimpleScheduleBuilder, Trigger }
 import services.Loggable
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // TimeOutLongRunningBakes was failing to delete some long running EC2 instances.
 // The issue was that the bake corresponding to the long running EC2 instance would have status Failed.
@@ -37,8 +37,7 @@ class DeleteLongRunningEC2Instances(bakesRepo: BakesRepo, packerEC2Client: Packe
     } else {
       log.warn(
         s"instances found to terminate that were launched before $earliestStartedAt: " +
-          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}"
-      )
+          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}")
 
       instancesToTerminate.foreach { instance =>
         log.info(s"terminating instance ${instance.getInstanceId}")

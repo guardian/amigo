@@ -25,7 +25,7 @@ class MarkOrphanedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo) exten
   override def housekeep(): Unit = {
     implicit val implicitPrismAgents: PrismData = prismAgents
     implicit val implicitDynamo: Dynamo = dynamo
-    val (errors, recipes) = Recipes.recipesWithErrors
+    val (errors, recipes) = Recipes.recipesWithErrors()
     errors match {
       case _ if errors.length > MarkOrphanedBakesForDeletion.FAULT_TOLERANCE =>
         log.info(s"Housekeeping found ${errors.length} database errors while searching for orphaned bakes")

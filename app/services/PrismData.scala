@@ -1,16 +1,16 @@
 package services
 
-import akka.actor.{Cancellable, Scheduler}
+import akka.actor.{ Cancellable, Scheduler }
 import models.AmiId
 import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
-import play.api.{Environment, Mode}
+import play.api.{ Environment, Mode }
 import prism.Prism
-import prism.Prism.{AWSAccount, Image, Instance, LaunchConfiguration}
+import prism.Prism.{ AWSAccount, Image, Instance, LaunchConfiguration }
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.SeqLike
-import scala.concurrent.{ExecutionContext, Future}
+import scala.collection.{ MapView, SeqLike, SeqOps }
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
 object PrismData {
@@ -23,18 +23,18 @@ object PrismData {
   def dataToResult[T](data: CacheData[T], now: DateTime)(implicit exec: ExecutionContext): T = data match {
     case Left(NotInitialised) =>
       throw new IllegalStateException(s"AMIgo internal data cache is not yet populated")
-    case Right((_ , staleTimeStamp)) if (now.getMillis - staleTimeStamp.getMillis) > MAX_AGE =>
+    case Left(_) => throw new IllegalStateException(s"CacheData failed for unknown reason")
+    case Right((_, staleTimeStamp)) if (now.getMillis - staleTimeStamp.getMillis) > MAX_AGE =>
       throw new IllegalStateException(s"AMIgo internal data cache is stale - last update at $staleTimeStamp")
     case Right((t, _)) => t
   }
 }
 
-
-
-class PrismData(prism: Prism,
-    lifecycle: ApplicationLifecycle,
-    scheduler: Scheduler,
-    environment: Environment)(implicit exec: ExecutionContext) extends Loggable {
+class PrismData(
+  prism: Prism,
+  lifecycle: ApplicationLifecycle,
+  scheduler: Scheduler,
+  environment: Environment)(implicit exec: ExecutionContext) extends Loggable {
 
   import PrismData._
 
@@ -47,19 +47,20 @@ class PrismData(prism: Prism,
 
   def allInstances: Seq[Instance] = dataToResult(instancesAgent.get, DateTime.now)
   def allLaunchConfigurations: Seq[LaunchConfiguration] = dataToResult(launchConfigurationsAgent.get, DateTime.now)
-  def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] = dataToResult(copiedImagesAgent.get, DateTime.now).filterKeys(sourceAmiIds.contains)
+  def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] = dataToResult(copiedImagesAgent.get, DateTime.now).view.filterKeys(sourceAmiIds.contains).toMap
   def accounts: Seq[AWSAccount] = dataToResult(accountsAgent.get, DateTime.now)
 
   if (environment.mode != Mode.Test) {
 
     val prismDataSchedule: Cancellable = scheduler.scheduleWithFixedDelay(0.seconds, 1.minutes) {
-      () => {
-        log.debug(s"Refreshing Prism data")
-        refresh(prism.findAllInstances(), instancesAgent, "instances")(identity)
-        refresh(prism.findAllLaunchConfigurations(), launchConfigurationsAgent, "launch configuration")(identity)
-        refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(_.groupBy(_.copiedFromAMI))
-        refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
-      }
+      () =>
+        {
+          log.debug(s"Refreshing Prism data")
+          refresh(prism.findAllInstances(), instancesAgent, "instances")(identity)
+          refresh(prism.findAllLaunchConfigurations(), launchConfigurationsAgent, "launch configuration")(identity)
+          refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(_.groupBy(_.copiedFromAMI))
+          refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(identity)
+        }
     }
 
     lifecycle.addStopHook { () =>
@@ -68,7 +69,7 @@ class PrismData(prism: Prism,
     }
   }
 
-  private def refresh[T <: SeqLike[_, _], R](source: => Future[T], reference: AtomicReference[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {
+  private def refresh[T <: SeqOps[_, Seq, _], R](source: => Future[T], reference: AtomicReference[CacheData[R]], name: String)(transform: T => R): Future[Unit] = {
     source
       .map { sourceData =>
         log.debug(s"Prism: Loaded ${sourceData.length} $name")

@@ -72,16 +72,14 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     recipe1Usages.launchConfigurations shouldBe Seq(lc1)
     recipe1Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
       BakeUsage(AmiId("1"), bakeR1A1, None, Seq(instance1), Seq(lc1)),
-      BakeUsage(AmiId("2"), bakeR1A2, None, Seq(instance2), Seq.empty)
-    )
+      BakeUsage(AmiId("2"), bakeR1A2, None, Seq(instance2), Seq.empty))
 
     val recipe2Usages = usages(recipe2)
     recipe2Usages.instances shouldBe Seq(instance5)
     recipe2Usages.launchConfigurations shouldBe Seq(lc2)
     recipe2Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
       BakeUsage(AmiId("3"), bakeR2A3, None, Seq.empty, Seq(lc2)),
-      BakeUsage(AmiId("5"), bakeR2A3, Some(Image(AmiId("5"), "1234", AmiId("3"), None, "available")), Seq(instance5), Seq.empty)
-    )
+      BakeUsage(AmiId("5"), bakeR2A3, Some(Image(AmiId("5"), "1234", AmiId("3"), None, "available")), Seq(instance5), Seq.empty))
 
     val recipe3Usages = usages(recipe3)
     recipe3Usages.instances shouldBe Seq.empty
@@ -94,8 +92,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val recipe2 = fixtureRecipe("recipe2")
     val usages = Map(
       recipe1 -> emptyUsage,
-      recipe2 -> nonEmptyusage
-    )
+      recipe2 -> nonEmptyusage)
 
     RecipeUsage.hasUsage(recipe1, usages) shouldBe false
     RecipeUsage.hasUsage(recipe2, usages) shouldBe true

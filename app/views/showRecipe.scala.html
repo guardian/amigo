@@ -41,7 +41,7 @@
     <div class="panel-body">
       @b3.form(routes.RecipeController.cloneRecipe(recipe.id)) {
         @CSRF.formField
-        @b3.inputWrapped( "newId", cloneForm("newId"), 'placeholder -> s"${recipe.id.value}-cloned" ) { input =>
+        @b3.inputWrapped( "newId", cloneForm("newId"), Symbol("placeholder") -> s"${recipe.id.value}-cloned" ) { input =>
           <div class="input-group">
             @input
             <span class="input-group-btn">

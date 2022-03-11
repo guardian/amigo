@@ -21,8 +21,7 @@ object BakeFailedNotifier extends Loggable {
     val statusString = bakeStatus.toString.toLowerCase()
     val actions = List(
       Action(s"View recipe ${bake.recipe.id} in AMIgo", s"${config.baseUrl}/recipes/${bake.recipe.id}"),
-      Action(s"Check bake log for ${bake.bakeId}", s"${config.baseUrl}/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}")
-    )
+      Action(s"Check bake log for ${bake.bakeId}", s"${config.baseUrl}/recipes/${bake.recipe.id}/bakes/${bake.buildNumber}"))
     val stageString = if (config.amigoStage != "PROD") s"(AMIgo ${config.amigoStage})" else ""
     if (targets.nonEmpty) {
       Some(
@@ -37,8 +36,7 @@ object BakeFailedNotifier extends Loggable {
           actions,
           targets,
           channel,
-          "AMIgo")
-      )
+          "AMIgo"))
     } else {
       log.info(s"No anghammarad targets available for bake ${bake.recipe.id},${bake.buildNumber} - likely no encrypted copies have been requested for the recipe.")
       None

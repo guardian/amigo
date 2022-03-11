@@ -19,7 +19,6 @@ object PackerVariablesConfig {
       recipe = bake.recipe.id.value,
       base_image_ami_id = bake.recipe.baseImage.amiId.value,
       build_number = bake.buildNumber.toString,
-      time = format.print(bake.startedAt)
-    )
+      time = format.print(bake.startedAt))
   }
 }

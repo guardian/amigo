@@ -15,11 +15,11 @@ import services.PrismData
 import scala.util.Try
 
 class RecipeController(
-    val authAction: AuthAction[AnyContent],
-    bakeScheduler: BakeScheduler,
-    prismAgents: PrismData,
-    components: ControllerComponents,
-    debugAvailable: Boolean)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
+  val authAction: AuthAction[AnyContent],
+  bakeScheduler: BakeScheduler,
+  prismAgents: PrismData,
+  components: ControllerComponents,
+  debugAvailable: Boolean)(implicit dynamo: Dynamo) extends AbstractController(components) with I18nSupport {
   import RecipeController._
 
   def listRecipes = authAction {
@@ -43,9 +43,7 @@ class RecipeController(
           RecipeUsage(bakes)(prismAgents),
           Roles.list,
           debugAvailable,
-          Forms.cloneRecipe
-        )
-      )
+          Forms.cloneRecipe))
     }
   }
 
@@ -58,13 +56,13 @@ class RecipeController(
 
   def updateRecipe(id: RecipeId) = authAction(parse.formUrlEncoded) { implicit request =>
     Recipes.findById(id).fold[Result](NotFound) { recipe =>
-      Forms.editRecipe.bindFromRequest.fold({ formWithErrors =>
+      Forms.editRecipe.bindFromRequest().fold({ formWithErrors =>
         BadRequest(views.html.editRecipe(recipe, formWithErrors, BaseImages.list().toSeq, Roles.listIds))
       }, {
         case (description, baseImageId, diskSize, bakeSchedule, encryptFor) =>
           BaseImages.findById(baseImageId) match {
             case Some(baseImage) =>
-              val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+              val customisedRoles = controllers.ControllerHelpers.parseEnabledRoles(request.body)
               customisedRoles.fold(
                 error => BadRequest(s"Problem parsing roles: $error"),
                 roles => {
@@ -74,8 +72,7 @@ class RecipeController(
                     bakeScheduler.reschedule(r)
                     Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully updated recipe")
                   })
-                }
-              )
+                })
             case None =>
               val formWithError = Forms.editRecipe.fill((description, baseImageId, diskSize, bakeSchedule, encryptFor)).withError("baseImageId", "Unknown base image")
               BadRequest(views.html.editRecipe(recipe, formWithError, BaseImages.list().toSeq, Roles.listIds))
@@ -89,7 +86,7 @@ class RecipeController(
   }
 
   def createRecipe = authAction(parse.formUrlEncoded) { implicit request =>
-    Forms.createRecipe.bindFromRequest.fold({ formWithErrors =>
+    Forms.createRecipe.bindFromRequest().fold({ formWithErrors =>
       BadRequest(views.html.newRecipe(formWithErrors, BaseImages.list().toSeq, Roles.listIds))
     }, {
       case (id, description, baseImageId, diskSize, bakeSchedule, encryptedCopies) =>
@@ -100,15 +97,14 @@ class RecipeController(
           case None =>
             BaseImages.findById(baseImageId) match {
               case Some(baseImage) =>
-                val customisedRoles = ControllerHelpers.parseEnabledRoles(request.body)
+                val customisedRoles = controllers.ControllerHelpers.parseEnabledRoles(request.body)
                 customisedRoles.fold(
                   error => BadRequest(s"Problem parsing roles: $error"),
                   roles => {
                     val recipe = Recipes.create(id, description, baseImage, diskSize, roles, createdBy = request.user.fullName, bakeSchedule, encryptedCopies) //TODO: FIX THIS
                     bakeScheduler.reschedule(recipe)
                     Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> "Successfully created recipe")
-                  }
-                )
+                  })
               case None =>
                 val formWithError = Forms.createRecipe.fill((id, description, baseImageId, diskSize, bakeSchedule, encryptedCopies)).withError("baseImageId", "Unknown base image")
                 BadRequest(views.html.newRecipe(formWithError, BaseImages.list().toSeq, Roles.listIds))
@@ -126,14 +122,12 @@ class RecipeController(
           recipe,
           recipeUsage.bakeUsage,
           prismAgents.accounts,
-          prismAgents.baseUrl
-        )
-      )
+          prismAgents.baseUrl))
     }
   }
 
   def cloneRecipe(id: RecipeId) = authAction { implicit request =>
-    Forms.cloneRecipe.bindFromRequest.fold(
+    Forms.cloneRecipe.bindFromRequest().fold(
       { form => Redirect(routes.RecipeController.showRecipe(id)).flashing("info" -> s"Failed to clone recipe: ${form.errors.head.message}") },
       { newId =>
         Recipes.findById(newId).fold[Result] {
@@ -146,13 +140,11 @@ class RecipeController(
               roles = recipe.roles,
               createdBy = request.user.fullName,
               bakeSchedule = recipe.bakeSchedule,
-              encryptedCopies = recipe.encryptFor
-            )
+              encryptedCopies = recipe.encryptFor)
             Redirect(routes.RecipeController.showRecipe(newId)).flashing("info" -> "Successfully cloned recipe")
           }
         }(_ => Conflict(s"$newId already exists"))
-      }
-    )
+      })
   }
 
   def deleteConfirm(id: RecipeId) = authAction { implicit request =>
@@ -179,7 +171,7 @@ class RecipeController(
         }
         Recipes.delete(recipe)
         // redirect back to the index page
-        Redirect(routes.RecipeController.listRecipes)
+        Redirect(routes.RecipeController.listRecipes())
       }
     }
   }
@@ -195,22 +187,19 @@ object RecipeController {
     private val bakeScheduleMapping = optional(
       text(maxLength = 50)
         .verifying("Invalid Quartz cron expression", validQuartzCronExpression)
-        .transform[BakeSchedule](BakeSchedule.apply, _.quartzCronExpression)
-    )
+        .transform[BakeSchedule](BakeSchedule.apply, _.quartzCronExpression))
     private val accountNumbersMapping = text()
       .verifying(_.forall(c => c.isDigit || c.isWhitespace || c == ','))
       .transform[List[AccountNumber]](
         _.split(',').toList.map(_.trim).filter(_.nonEmpty).map(AccountNumber.apply),
-        _.map(_.accountNumber).mkString(",")
-      )
+        _.map(_.accountNumber).mkString(","))
 
     val editRecipe = Form(tuple(
       "description" -> optional(text(maxLength = 10000)),
       "baseImageId" -> baseImageIdMapping,
       "diskSize" -> optional(number),
       "bakeSchedule" -> bakeScheduleMapping,
-      "encryptFor" -> accountNumbersMapping
-    ))
+      "encryptFor" -> accountNumbersMapping))
 
     val createRecipe = Form(tuple(
       "id" -> text(minLength = 3, maxLength = 50).transform[RecipeId](RecipeId.apply, _.value),
@@ -218,12 +207,10 @@ object RecipeController {
       "baseImageId" -> baseImageIdMapping,
       "diskSize" -> optional(number),
       "bakeSchedule" -> bakeScheduleMapping,
-      "encryptFor" -> accountNumbersMapping
-    ))
+      "encryptFor" -> accountNumbersMapping))
 
     val cloneRecipe = Form(
-      "newId" -> text(minLength = 3, maxLength = 50).transform[RecipeId](RecipeId.apply, _.value)
-    )
+      "newId" -> text(minLength = 3, maxLength = 50).transform[RecipeId](RecipeId.apply, _.value))
 
   }
 

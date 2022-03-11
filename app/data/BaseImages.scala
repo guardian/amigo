@@ -1,15 +1,14 @@
 package data
 
-import com.gu.scanamo.syntax._
+import org.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
-import com.amazonaws.services.dynamodbv2.model.DeleteItemResult
-import data.Recipes.table
 
 object BaseImages {
   import Dynamo._
 
-  def create(id: BaseImageId,
+  def create(
+    id: BaseImageId,
     description: String,
     amiId: AmiId,
     builtinRoles: List[CustomisedRole],
@@ -31,8 +30,7 @@ object BaseImages {
       builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now(),
-      eolDate = Some(eolDate)
-    )
+      eolDate = Some(eolDate))
     table.put(updated).exec()
   }
 
@@ -41,10 +39,10 @@ object BaseImages {
   }
 
   def findById(id: BaseImageId)(implicit dynamo: Dynamo): Option[BaseImage] =
-    table.get('id -> id).exec().flatMap(_.toOption)
+    table.get("id" === id).exec().flatMap(_.toOption)
 
-  def delete(baseImage: BaseImage)(implicit dynamo: Dynamo): DeleteItemResult = {
-    table.delete('id -> baseImage.id.value).exec()
+  def delete(baseImage: BaseImage)(implicit dynamo: Dynamo): Unit = {
+    table.delete("id" === baseImage.id.value).exec()
   }
 
   private def table(implicit dynamo: Dynamo) = dynamo.Tables.baseImages.table

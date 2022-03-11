@@ -5,7 +5,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
-import com.amazonaws.auth.AWSCredentialsProvider
+//import com.amazonaws.auth.AWSCredentialsProvider
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
 import com.gu.logback.appender.kinesis.KinesisAppender
 import net.logstash.logback.layout.LogstashLayout
@@ -17,7 +18,7 @@ import amigo.BuildInfo
 import scala.util.{ Success, Try }
 import scala.util.control.NonFatal
 
-class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], awsCredentialsProvider: AWSCredentialsProvider) extends Loggable {
+class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], awsCredentialsProvider: AwsCredentialsProvider) extends Loggable {
 
   val identity = appIdentity match {
     case DevIdentity(_) => None
@@ -40,8 +41,7 @@ class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], aw
       "stack" -> identity.map(_.stack).getOrElse("unknown"),
       "region" -> region,
       "buildNumber" -> BuildInfo.buildNumber,
-      "instanceId" -> instanceId.getOrElse("unknown")
-    )
+      "instanceId" -> instanceId.getOrElse("unknown"))
     log.info(s"Logging with context map: $effective")
     effective
   }
@@ -94,7 +94,7 @@ class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], aw
 
   private def getRootLogger = LoggerFactory.getLogger(SLFLogger.ROOT_LOGGER_NAME).asInstanceOf[Logger]
 
-  def init() {
+  def init(): Unit = {
     val maybeStreamName = loggingStreamName
 
     if (maybeStreamName.isEmpty) log.info("Not configuring log shipping as stream not configured")

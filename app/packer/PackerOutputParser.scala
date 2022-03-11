@@ -32,9 +32,9 @@ object PackerOutputParser {
 
   private def parseUiOutput(output: String): List[MessagePart] = {
     val message = output
-      .replaceAllLiterally("%!(PACKER_COMMA)", ",")
-      .replaceAllLiterally("\\n", "\n")
-      .replaceAllLiterally("\\r", "\r")
+      .replace("%!(PACKER_COMMA)", ",")
+      .replace("\\n", "\n")
+      .replace("\\r", "\r")
 
     parseAnsiColouredString(message).toList
   }
@@ -69,7 +69,7 @@ object PackerOutputParser {
       parts += MessagePart(message.substring(previousEndIndex), MessagePart.defaultColour)
     }
 
-    parts
+    parts.toSeq
   }
 
   // Only handle the foreground colours
@@ -79,6 +79,5 @@ object PackerOutputParser {
     "33" -> "#C7C400",
     "34" -> "#2744C7",
     "35" -> "#C040BE",
-    "36" -> "#00C5C7"
-  ) /* iTerm2's default theme */
+    "36" -> "#00C5C7") /* iTerm2's default theme */
 }

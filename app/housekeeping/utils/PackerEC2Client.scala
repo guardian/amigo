@@ -5,7 +5,7 @@ import com.amazonaws.services.ec2.model.{ DescribeInstancesRequest, Filter, Inst
 import models.BakeId
 import packer.PackerBuildConfigGenerator
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 // EC2 methods, specifically related to Packer instances.
 class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
@@ -21,8 +21,7 @@ class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
         new Filter("tag:BakeId", List(bakeId.toString).asJava),
-        new Filter("instance-state-name", List("running", "stopped").asJava)
-      )
+        new Filter("instance-state-name", List("running", "stopped").asJava))
 
     underlying.describeInstances(request)
       .getReservations.asScala
@@ -46,8 +45,7 @@ class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
         new Filter("tag:Name", List("Packer Builder").asJava),
-        new Filter("instance-state-name", List("running", "stopped").asJava)
-      )
+        new Filter("instance-state-name", List("running", "stopped").asJava))
 
     underlying.describeInstances(request)
       .getReservations.asScala

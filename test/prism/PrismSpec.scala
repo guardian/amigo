@@ -55,8 +55,7 @@ class PrismSpec extends AnyFlatSpec with Matchers {
       val instances = Await.result(prism.findAllInstances(), 10.seconds)
       instances should be(Seq(
         Instance("i-123456", AmiId("ami-fa123456"), AWSAccount("MyAccount", "1234567890")),
-        Instance("i-b123456", AmiId("ami-abcd4321"), AWSAccount("MyAccount", "1234567890"))
-      ))
+        Instance("i-b123456", AmiId("ami-abcd4321"), AWSAccount("MyAccount", "1234567890"))))
     }
   }
 
@@ -65,8 +64,7 @@ class PrismSpec extends AnyFlatSpec with Matchers {
       val launchConfigurations = Await.result(prism.findAllLaunchConfigurations(), 10.seconds)
       launchConfigurations should be(Seq(
         LaunchConfiguration("MyName", AmiId("ami-abcdefg1"), AWSAccount("MyAccount", "1234567890")),
-        LaunchConfiguration("MyId", AmiId("ami-gfedcba2"), AWSAccount("MyAccount", "1234567890"))
-      ))
+        LaunchConfiguration("MyId", AmiId("ami-gfedcba2"), AWSAccount("MyAccount", "1234567890"))))
     }
   }
 

@@ -4,7 +4,7 @@
   @for((role, deps) <- roles) {
     <li class="list-group-item">
       <div>
-        <a href="@routes.RoleController.listRoles#@role.roleId">@role.roleId</a>
+        <a href="@routes.RoleController.listRoles()#@role.roleId">@role.roleId</a>
 
         @if(role.variables.isEmpty) {
           <em>(No custom variables)</em>

@@ -7,7 +7,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClient }
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
 import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
@@ -41,7 +41,7 @@ import router.Routes
 import schedule.{ BakeScheduler, ScheduledBakeRunner }
 import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
 import software.amazon.awssdk.services.ssm.SsmClient
-import software.amazon.awssdk.auth.credentials.{ AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
+import software.amazon.awssdk.auth.credentials.{ StaticCredentialsProvider, AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
 import software.amazon.awssdk.regions.Region
 
 import java.time.Duration.{ ofHours, ofMinutes }
@@ -67,14 +67,14 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
 }
 
 class AppComponents(context: Context, identity: AppIdentity)
-    extends BuiltInComponentsFromContext(context)
-    with AhcWSComponents
-    with I18nComponents
-    with Loggable
-    with AssetsComponents
-    with HttpFiltersComponents
-    with RotatingSecretComponents
-    with CSPComponents {
+  extends BuiltInComponentsFromContext(context)
+  with AhcWSComponents
+  with I18nComponents
+  with Loggable
+  with AssetsComponents
+  with HttpFiltersComponents
+  with RotatingSecretComponents
+  with CSPComponents {
 
   val stage = identity match {
     case DevIdentity(_) => "DEV"
@@ -86,16 +86,14 @@ class AppComponents(context: Context, identity: AppIdentity)
   val awsCredsForV1 = new AWSCredentialsProviderChain(
     new ProfileCredentialsProvider("deployTools"),
     new ProfileCredentialsProvider(),
-    InstanceProfileCredentialsProvider.getInstance()
-  )
+    InstanceProfileCredentialsProvider.getInstance())
 
   val awsCredsForV2 = AwsCredentialsProviderChainV2
     .builder()
     .credentialsProviders(
       ProfileCredentialsProviderV2.create("deployTools"),
       ProfileCredentialsProviderV2.create(),
-      InstanceProfileCredentialsProviderV2.create()
-    )
+      InstanceProfileCredentialsProviderV2.create())
     .build()
 
   val region = Regions.EU_WEST_1
@@ -105,8 +103,7 @@ class AppComponents(context: Context, identity: AppIdentity)
       new LoggingRetryCondition(),
       PredefinedRetryPolicies.DEFAULT_BACKOFF_STRATEGY,
       20,
-      false
-    ))
+      false))
 
   val secretStateSupplier: SnapshotProvider = {
     new SecretSupplier(
@@ -115,20 +112,18 @@ class AppComponents(context: Context, identity: AppIdentity)
       AwsSdkV2(SsmClient.builder
         .credentialsProvider(awsCredsForV2)
         .region(Region.of(region.getName))
-        .build()
-      )
-    )
+        .build()))
   }
 
   // initialise logging
   val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV1)
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV2)
 
   implicit val dynamo = {
-    val dynamoClient: AmazonDynamoDB = AmazonDynamoDBClient.builder()
-      .withCredentials(awsCredsForV1)
-      .withRegion(region)
-      .withClientConfiguration(clientConfiguration)
+    val credentialsProvider = StaticCredentialsProvider.create(awsCredsForV2.resolveCredentials())
+    val dynamoClient: DynamoDbClient = DynamoDbClient.builder()
+      .credentialsProvider(credentialsProvider)
+      .region(Region.of(region.getName))
       .build()
     new Dynamo(dynamoClient, stage)
   }
@@ -196,8 +191,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     val eventListeners = Map(
       "logWriter" -> Behaviours.writeToLog,
       "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig),
-      "snsWriter" -> Behaviours.sendAmiCreatedNotification(sender.sendTopicMessage)
-    )
+      "snsWriter" -> Behaviours.sendAmiCreatedNotification(sender.sendTopicMessage))
     ActorSystem[BakeEvent](Behaviours.guardian(eventListeners), "EventBus")
   }
 
@@ -210,16 +204,14 @@ class AppComponents(context: Context, identity: AppIdentity)
     domains = List("guardian.co.uk"),
     maxAuthAge = Some(Duration.standardDays(90)),
     enforceValidity = true,
-    antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
-  )
+    antiForgeryChecker = AntiForgeryChecker(secretStateSupplier))
 
   implicit val packerConfig = PackerConfig(
     stage = stage,
     vpcId = configuration.get[Option[String]]("packer.vpcId"),
     subnetId = configuration.get[Option[String]]("packer.subnetId"),
     instanceProfile = configuration.get[Option[String]]("packer.instanceProfile"),
-    securityGroupId = configuration.get[Option[String]]("packer.securityGroupId")
-  )
+    securityGroupId = configuration.get[Option[String]]("packer.securityGroupId"))
 
   val ansibleVariables: Map[String, String] =
     Map("s3_prefix" -> configuration.get[String]("ansible.packages.s3prefix")) ++
@@ -249,8 +241,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     new MarkOldUnusedBakesForDeletion(prismAgents, dynamo),
     new MarkOrphanedBakesForDeletion(prismAgents, dynamo),
     new TimeOutLongRunningBakes(bakesRepo, packerEC2Client),
-    new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client)
-  )
+    new DeleteLongRunningEC2Instances(bakesRepo, packerEC2Client))
 
   val housekeepingScheduler = new HousekeepingScheduler(quartzScheduler, houseKeepingJobs)
   housekeepingScheduler.initialise()
@@ -266,7 +257,7 @@ class AppComponents(context: Context, identity: AppIdentity)
    */
   override def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
-  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction, controllerComponents.parsers.default)(executionContext)
+  val authAction = new AuthAction[AnyContent](googleAuthConfig, routes.Login.loginAction(), controllerComponents.parsers.default)(executionContext)
 
   val rootController = new RootController(authAction, controllerComponents)
   val baseImageController = new BaseImageController(authAction, prismAgents, controllerComponents)

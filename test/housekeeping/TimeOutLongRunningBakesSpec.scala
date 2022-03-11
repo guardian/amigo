@@ -32,8 +32,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None
-          ),
+            deleted = None),
           Bake.DbModel(
             recipeId = RecipeId("identity"),
             buildNumber = 3,
@@ -41,8 +40,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(30),
-            deleted = None
-          ),
+            deleted = None),
           Bake.DbModel(
             recipeId = RecipeId("dev-x"),
             buildNumber = 1,
@@ -50,8 +48,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(90),
-            deleted = None
-          ),
+            deleted = None),
           Bake.DbModel(
             recipeId = RecipeId("dev-x"),
             buildNumber = 2,
@@ -59,10 +56,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(61),
-            deleted = None
-          )
-        )
-      )
+            deleted = None)))
 
     val bakesToTimeOut = housekeepingJob.getBakesToTimeOut(earliestStartedAt = now.minusHours(1))
 
@@ -74,8 +68,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
         amiId = None,
         startedBy = "amigo-test",
         startedAt = now.minusHours(2),
-        deleted = None
-      ),
+        deleted = None),
       Bake.DbModel(
         recipeId = RecipeId("dev-x"),
         buildNumber = 2,
@@ -83,9 +76,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
         amiId = None,
         startedBy = "amigo-test",
         startedAt = now.minusMinutes(61),
-        deleted = None
-      )
-    )
+        deleted = None))
   }
 
   "runHouseKeeping" should "update the status to TimedOut and delete the respective EC2 instance for each bake running over an hour" in new Mocks {
@@ -102,8 +93,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None
-          ),
+            deleted = None),
           Bake.DbModel(
             recipeId = RecipeId("identity"),
             buildNumber = 3,
@@ -111,10 +101,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(30),
-            deleted = None
-          )
-        )
-      )
+            deleted = None)))
 
     val overrunningBakeId: BakeId = BakeId(RecipeId("identity"), buildNumber = 1)
     val overrunningInstance: Instance = mock[Instance]
@@ -157,10 +144,7 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None
-          )
-        )
-      )
+            deleted = None)))
 
     val overrunningBakeId: BakeId = BakeId(RecipeId("identity"), buildNumber = 1)
 

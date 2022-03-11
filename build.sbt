@@ -1,12 +1,14 @@
 import com.gu.riffraff.artifact.BuildInfo
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
+import scalariform.formatter.preferences._
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.12.0"
+scalaVersion := "2.13.7"
 
 javaOptions in Universal ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -60,11 +62,11 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
 val jacksonVersion = "2.13.1"
-val awsVersion = "1.11.1017"
+val awsVersion = "1.12.191"
 val circeVersion = "0.9.0"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.11.1017"
+val awsV1SdkVersion = "1.12.191"
 val awsV2SdkVersion = "2.17.117"
 
 libraryDependencies ++= Seq(
@@ -73,9 +75,9 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
-  "com.gu" %% "scanamo" % "1.0.0-M4",
+  "org.scanamo" %% "scanamo" % "1.0.0-M19",
   "com.beachape" %% "enumeratum" % "1.6.1",
-  "com.typesafe.akka" %% "akka-actor-typed" % "2.6.18",
+  "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
   "com.gu" %% "simple-configuration-ssm" % "1.5.6",
   "com.gu.play-googleauth" %% "play-v28" % "2.2.2",
   "com.gu.play-secret-rotation" %% "play-v28" % "0.33",
@@ -93,19 +95,16 @@ libraryDependencies ++= Seq(
   // be able to remove them.
   "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
-  "com.gu" % "kinesis-logback-appender" % "1.4.2",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
+  "com.gu" % "kinesis-logback-appender" % "2.0.2",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.11" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.11" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
-  "com.gu" %% "anghammarad-client" % "1.1.3"
+  "com.gu" %% "anghammarad-client" % "1.2.0"
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
-
-scalariformSettings
-
 
 lazy val imageCopier = (project in file("imageCopier"))
     .enablePlugins(JavaAppPackaging)

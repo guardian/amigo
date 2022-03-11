@@ -1,6 +1,6 @@
 package data
 
-import com.gu.scanamo.syntax._
+import org.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
 
@@ -16,41 +16,38 @@ object Bakes {
 
   def updateStatus(bakeId: BakeId, status: BakeStatus)(implicit dynamo: Dynamo): Unit = {
     table
-      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
-        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('status -> status)(BakeStatus.dynamoFormat)
-      )
+        ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
+        set("status", status)(BakeStatus.dynamoFormat))
       .exec()
   }
 
   def updateStatusIfRunning(bakeId: BakeId, status: BakeStatus)(implicit dynamo: Dynamo): Unit = {
     table
-      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
-        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('status -> status)(BakeStatus.dynamoFormat)
-      )
+        ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
+        set("status", status)(BakeStatus.dynamoFormat))
       .exec()
   }
 
   def updateAmiId(bakeId: BakeId, amiId: AmiId)(implicit dynamo: Dynamo): Unit = {
     table
-      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
-        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('amiId -> amiId)
-      )
+        ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
+        set("amiId", amiId))
       .exec()
   }
 
   def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[Bake] = {
-    val dbModels = table.query(('recipeId -> recipeId).descending) // return newest (highest build number) first
+    val dbModels = table.descending.query("recipeId" === recipeId) // return newest (highest build number) first
       .exec()
       .flatMap(_.toOption)
     val recipe = Recipes.findById(recipeId)
     for {
-      r <- recipe.toIterable
+      r <- recipe.toList
       dbModel <- dbModels
     } yield {
       Bake.db2domain(dbModel, r)
@@ -58,7 +55,7 @@ object Bakes {
   }
 
   def findById(recipeId: RecipeId, buildNumber: Int)(implicit dynamo: Dynamo): Option[Bake] = {
-    val dbModel = table.get(('recipeId -> recipeId) and ('buildNumber -> buildNumber))
+    val dbModel = table.get(("recipeId" === recipeId) and ("buildNumber" === buildNumber))
       .exec()
       .flatMap(_.toOption)
     val recipe = Recipes.findById(recipeId)
@@ -88,17 +85,16 @@ object Bakes {
 
   def markToDelete(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
     table
-      .given(attributeExists('recipeId) and attributeExists('buildNumber))
+      .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
-        ('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber),
-        set('deleted -> true)
-      )
+        ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
+        set("deleted", true))
       .exec()
   }
 
   def findDeleted(limit: Int = 10)(implicit dynamo: Dynamo): List[Bake.DbModel] = {
     table
-      .filter('deleted -> true)
+      .filter("deleted" === true)
       .limit(limit)
       .scan()
       .exec()
@@ -106,7 +102,7 @@ object Bakes {
   }
 
   def deleteById(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
-    table.delete(('recipeId -> bakeId.recipeId) and ('buildNumber -> bakeId.buildNumber)).exec()
+    table.delete(("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber)).exec()
   }
 
   private def table(implicit dynamo: Dynamo) = dynamo.Tables.bakes.table

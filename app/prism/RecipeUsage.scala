@@ -18,8 +18,7 @@ object SimpleBakeUsage {
   def fromBakeUsage(bakeUsage: BakeUsage, amigoDataBucket: Option[String]): SimpleBakeUsage =
     SimpleBakeUsage(
       bakeUsage.bake.bakeId,
-      PackageList.s3Url(bakeUsage.bake.bakeId, amigoDataBucket.getOrElse("unknown-bucket"))
-    )
+      PackageList.s3Url(bakeUsage.bake.bakeId, amigoDataBucket.getOrElse("unknown-bucket")))
 
   def fromRecipeUsages(recipeUsages: Iterable[RecipeUsage], amigoDataBucket: Option[String]): Iterable[SimpleBakeUsage] = {
     recipeUsages.flatMap { usage =>
@@ -92,8 +91,7 @@ object RecipeUsage {
     recipeUsage.copy(
       launchConfigurations = recipeUsage.launchConfigurations.filter(_.imageId == amiId),
       instances = recipeUsage.instances.filter(_.imageId == amiId),
-      bakeUsage = recipeUsage.bakeUsage.filter(bu => bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId))
-    )
+      bakeUsage = recipeUsage.bakeUsage.filter(bu => bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId)))
   }
 
   def amiIsUsed(recipeUsage: RecipeUsage, amiId: AmiId): Boolean = {

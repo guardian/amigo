@@ -26,7 +26,7 @@ class BakeController(
   s3Client: AmazonS3,
   packerRunner: PackerRunner,
   bakeDeletionFrequencyMinutes: Int)(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
-    extends AbstractController(components) with I18nSupport with Loggable {
+  extends AbstractController(components) with I18nSupport with Loggable {
 
   def startBaking(recipeId: RecipeId, debug: Boolean): Action[AnyContent] = authAction { request =>
     Recipes.findById(recipeId).fold[Result](NotFound) { recipe =>
@@ -60,9 +60,9 @@ class BakeController(
   def bakePackages(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] = authAction {
     val list = PackageList.getPackageList(s3Client, BakeId(recipeId, buildNumber), amigoDataBucket)
     if (list.isLeft) {
-      NotFound(s"Could not find package list for recipe $recipeId, bake $buildNumber: ${list.left.get}")
+      NotFound(s"Could not find package list for recipe $recipeId, bake $buildNumber: ${list.left.toOption.get}")
     } else {
-      Ok(Json.obj("packages" -> Json.toJson(list.right.get)))
+      Ok(Json.obj("packages" -> Json.toJson(list.toOption.get)))
     }
   }
 

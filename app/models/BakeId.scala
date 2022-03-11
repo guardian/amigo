@@ -1,7 +1,7 @@
 package models
 
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.{ DynamoReadError, TypeCoercionError }
+import org.scanamo.DynamoFormat
+import org.scanamo.{ DynamoReadError, TypeCoercionError }
 import data.PackageList
 import play.api.libs.json.{ JsObject, Json, OWrites, Writes }
 
@@ -14,8 +14,7 @@ object BakeId {
   implicit val writes: Writes[BakeId] = new Writes[BakeId] {
     def writes(bakeId: BakeId): JsObject = Json.obj(
       "recipeId" -> bakeId.recipeId.value,
-      "buildNumber" -> bakeId.buildNumber
-    )
+      "buildNumber" -> bakeId.buildNumber)
   }
 
   def toFilename(bakeId: BakeId) = s"${bakeId.recipeId.value}--${bakeId.buildNumber}.txt"
@@ -31,7 +30,7 @@ object BakeId {
   }
 
   implicit val dynamoFormat: DynamoFormat[BakeId] = {
-    DynamoFormat.xmap[BakeId, String](fromString)(bakeId => bakeId.toString)
+    DynamoFormat.xmap[BakeId, String](fromString, bakeId => bakeId.toString)
   }
 
 }
