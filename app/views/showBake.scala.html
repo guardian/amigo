@@ -43,11 +43,10 @@
       </div>
     </div>
 
-  <div>
-    <label>
-      <input id="tail-log" type="checkbox" value="" checked>
-      Auto scroll
-    </label>
+  <div class="well" id="packer-output">
+    @for(log <- bakeLogs) {
+      <div class="bake-log">[@log.timestamp.toString("YYYY-MM-dd HH:mm:ss")] @log.messageHtml</div>
+    }
   </div>
 
   <div class="package-list">
