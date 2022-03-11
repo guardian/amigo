@@ -31,8 +31,6 @@ import packer.{ PackerConfig, PackerRunner }
 import play.api.BuiltInComponentsFromContext
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
-import play.api.libs.iteratee.Concurrent
-import play.api.libs.iteratee.streams.IterateeStreams
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{ AnyContent, EssentialFilter }
 import play.api.routing.Router

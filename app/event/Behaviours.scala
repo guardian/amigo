@@ -5,7 +5,6 @@ import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy }
 import data.{ BakeLogs, Bakes, Dynamo }
 import event.BakeEvent._
 import models.{ Bake, BakeStatus, NotificationConfig }
-import play.api.libs.iteratee.Concurrent.Channel
 import services.Loggable
 
 import scala.concurrent.ExecutionContext
@@ -37,15 +36,6 @@ object Behaviours extends Loggable {
    * For more details, see: https://doc.akka.io/docs/akka/2.5/typed/fault-tolerance.html
    */
   def automaticallyRestart(behavior: Behavior[BakeEvent]): Behavior[BakeEvent] = Behaviors.supervise(behavior).onFailure(SupervisorStrategy.restart)
-
-  /**
-   * Forwards all events to a Channel for sending as Server Sent Events
-   */
-  def sendToChannel(channel: Channel[BakeEvent]): Behavior[BakeEvent] = Behaviors.receiveMessage[BakeEvent] {
-    event =>
-      channel.push(event)
-      Behaviors.same
-  }
 
   /**
    * Forwards all Packer-related logging to Amigo's application logs
