@@ -31,4 +31,4 @@
 
 - name: Add hardware data collection cronjob
   cron: name="send hardware data information to cloudwatch" minute="*/5" job="/usr/local/aws-scripts-mon/mon-put-instance-data.pl {{ mem_avail_option | default("") }} {{ mem_used_option | default("") }} {{ disk_space_avail_option | default("") }} {{ disk_space_util_option | default("") }} {{ disk_space_used_option | default("") }} {{ mem_util_option | default("") }} {{ item }} --auto-scaling --from-cron"
-  with_items: "{{ paths | map('regex_replace', '(.*)', '--disk-path \\1') | join(' ') }}"
+  with_items: "{{ paths | map('regex_replace', '(.+)', '--disk-path \\1') | join(' ') }}"
