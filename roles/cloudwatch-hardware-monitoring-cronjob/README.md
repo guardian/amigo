@@ -3,6 +3,10 @@
 Utilises [mon-put-instance-data.pl](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html) script to 
 collect and report to CloudWatch memory, swap and disk space utilization data. 
 
+Requires the instance to have `cloudwatch:PutMetricData` (probably on resource `*`). 
+
+Example params: `monitor_memory_utilisation: true, monitor_disk_space_utilisation: true, paths: [/, /data]`
+
 ## Gotchas
 
 - if `monitor_disk_space_available` or `monitor_disk_space_utilisation` are set to `true` then at least one 
