@@ -9,10 +9,8 @@ import models.BakeStatus.DeletionScheduled
 import packer._
 import models._
 import play.api.i18n.I18nSupport
-import play.api.libs.EventSource
 import play.api.mvc._
 import services.{ AmiMetadataLookup, Loggable, PrismData }
-import services.{ Loggable, PrismData }
 import play.api.libs.json._
 import prism.{ RecipeUsage, SimpleBakeUsage }
 
