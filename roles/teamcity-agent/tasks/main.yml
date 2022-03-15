@@ -95,10 +95,17 @@
 - name: disable systemd as default ddns server
   shell: ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-- name: set default java version # to get available versions run `update-java-alternatives --list`
+- name: set default java version (x86) # to get available versions run `update-java-alternatives --list`
+  when: ansible_architecture == "x86_64"
   shell: |
     update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
     update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+
+- name: set default java version (arm) # to get available versions run `update-java-alternatives --list`
+  when: ansible_architecture == "aarch64"
+  shell: |
+    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-arm64/jre/bin/java
+    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-arm64/bin/javac
 
 # download sbt
 - name: Add SBT repo
