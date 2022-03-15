@@ -44,8 +44,10 @@
     </div>
 
   <div class="well" id="packer-output">
-    @for(log <- bakeLogs) {
+    @if(bakeLogs.isEmpty){<div class="bake-log">Refresh the page to view new log messages</div>}else{
+      @for(log <- bakeLogs) {
       <div class="bake-log">[@log.timestamp.toString("YYYY-MM-dd HH:mm:ss")] @log.messageHtml</div>
+      }
     }
   </div>
 
