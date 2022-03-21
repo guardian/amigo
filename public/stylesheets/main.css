@@ -64,10 +64,6 @@ body { padding-top: 70px; }
     margin-left: auto;
 }
 
-.bake--info--refresh--message {
-    align-items: center;
-}
-
 .block-link {
     display: block;
     width: 100%;

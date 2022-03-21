@@ -3,8 +3,9 @@ package event
 import java.util.UUID
 
 import models.{ BakeLog, AmiId, BakeId }
+import org.joda.time.DateTime
 import play.api.libs.EventSource.{ EventIdExtractor, EventDataExtractor }
-import play.api.libs.json.{ JsNumber, JsString, JsObject }
+import play.api.libs.json.{ JsArray, JsNumber, JsString, JsObject }
 
 sealed abstract class BakeEvent(val bakeId: BakeId, val eventId: String = UUID.randomUUID().toString)
 
