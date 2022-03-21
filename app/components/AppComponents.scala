@@ -190,16 +190,18 @@ class AppComponents(context: Context, identity: AppIdentity)
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, stage, accountNumbers)
   }
 
+  val sender: NotificationSender = new NotificationSender(sns, region.getName, stage)
+
   val eventBusActorSystem: ActorSystem[BakeEvent] = {
     val eventListeners = Map(
       "logWriter" -> Behaviours.writeToLog,
-      "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig)
+      "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig),
+      "snsWriter" -> Behaviours.sendAmiCreatedNotification(sender.sendTopicMessage)
     )
     ActorSystem[BakeEvent](Behaviours.guardian(eventListeners), "EventBus")
   }
-  implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
-  val sender: NotificationSender = new NotificationSender(sns, region.getName, stage)
+  implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),
