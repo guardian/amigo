@@ -1,6 +1,7 @@
 package components
 
 import akka.actor.typed.ActorSystem
+import akka.stream.scaladsl.Source
 import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
 import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
@@ -23,7 +24,7 @@ import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import housekeeping._
 import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import models.NotificationConfig
-import notification.{ LambdaDistributionBucket, NotificationSender, SNS }
+import notification.{ AmiCreatedNotifier, LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
@@ -31,6 +32,8 @@ import packer.{ PackerConfig, PackerRunner }
 import play.api.BuiltInComponentsFromContext
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
+import play.api.libs.iteratee.Concurrent
+import play.api.libs.iteratee.streams.IterateeStreams
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{ AnyContent, EssentialFilter }
 import play.api.routing.Router
@@ -190,8 +193,11 @@ class AppComponents(context: Context, identity: AppIdentity)
     LambdaDistributionBucket.updateBucketPolicy(s3Client, bucketName, stage, accountNumbers)
   }
 
+  val (eventsEnumerator, eventsChannel) = Concurrent.broadcast[BakeEvent]
+  val eventsSource = Source.fromPublisher(IterateeStreams.enumeratorToPublisher(eventsEnumerator))
   val eventBusActorSystem: ActorSystem[BakeEvent] = {
     val eventListeners = Map(
+      "channelSender" -> Behaviours.sendToChannel(eventsChannel),
       "logWriter" -> Behaviours.writeToLog,
       "dynamoWriter" -> Behaviours.persistBakeEvent(notificationConfig)
     )
@@ -200,6 +206,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
 
   val sender: NotificationSender = new NotificationSender(sns, region.getName, stage)
+  val completedBakeNotifier: AmiCreatedNotifier = new AmiCreatedNotifier(eventsSource, sender.sendTopicMessage)
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),
@@ -274,6 +281,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   val bakeController = new BakeController(
     authAction,
     stage,
+    eventsSource,
     prismAgents,
     controllerComponents,
     ansibleVariables,

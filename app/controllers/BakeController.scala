@@ -9,14 +9,17 @@ import models.BakeStatus.DeletionScheduled
 import packer._
 import models._
 import play.api.i18n.I18nSupport
+import play.api.libs.EventSource
 import play.api.mvc._
 import services.{ AmiMetadataLookup, Loggable, PrismData }
+import services.{ Loggable, PrismData }
 import play.api.libs.json._
 import prism.{ RecipeUsage, SimpleBakeUsage }
 
 class BakeController(
   val authAction: AuthAction[AnyContent],
   stage: String,
+  eventsSource: Source[BakeEvent, _],
   prism: PrismData,
   components: ControllerComponents,
   ansibleVars: Map[String, String],
@@ -64,6 +67,14 @@ class BakeController(
     } else {
       Ok(Json.obj("packages" -> Json.toJson(list.right.get)))
     }
+  }
+
+  def bakeEvents(recipeId: RecipeId, buildNumber: Int) = authAction { implicit req =>
+    val bakeId = BakeId(recipeId, buildNumber)
+    val source = eventsSource
+      .filter(_.bakeId == bakeId) // only include events relevant to this bake
+      .via(EventSource.flow)
+    Ok.chunked(source).as("text/event-stream")
   }
 
   def allBakeUsages: Action[AnyContent] = authAction {
