@@ -2,10 +2,10 @@ package event
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ ActorRef, Behavior, SupervisorStrategy }
+import akka.stream.Materializer
 import data.{ BakeLogs, Bakes, Dynamo }
 import event.BakeEvent._
-import models.{ Bake, BakeStatus, NotificationConfig }
-import play.api.libs.iteratee.Concurrent.Channel
+import models.{ AmiId, Bake, BakeStatus, NotificationConfig }
 import services.Loggable
 
 import scala.concurrent.ExecutionContext
@@ -39,15 +39,6 @@ object Behaviours extends Loggable {
   def automaticallyRestart(behavior: Behavior[BakeEvent]): Behavior[BakeEvent] = Behaviors.supervise(behavior).onFailure(SupervisorStrategy.restart)
 
   /**
-   * Forwards all events to a Channel for sending as Server Sent Events
-   */
-  def sendToChannel(channel: Channel[BakeEvent]): Behavior[BakeEvent] = Behaviors.receiveMessage[BakeEvent] {
-    event =>
-      channel.push(event)
-      Behaviors.same
-  }
-
-  /**
    * Forwards all Packer-related logging to Amigo's application logs
    */
   val writeToLog: Behavior[BakeEvent] = Behaviors.receiveMessage[BakeEvent] { message =>
@@ -59,6 +50,23 @@ object Behaviours extends Loggable {
     Behaviors.same
   }
 
+  def sendAmiCreatedNotification(amiCreated: (Bake, AmiId) => Unit)(implicit dynamo: Dynamo, ec: ExecutionContext): Behavior[BakeEvent] = {
+    Behaviors.receiveMessage[BakeEvent] { message =>
+      message match {
+        case AmiCreated(bakeId, amiId) =>
+          log.info("Received an AMI created event")
+          for {
+            bake <- Bakes.findById(bakeId.recipeId, bakeId.buildNumber)
+          } {
+            log.info(s"Notifying that $amiId exists")
+            amiCreated(bake, amiId)
+          }
+        case _ => // discard
+
+      }
+      Behaviors.same
+    }
+  }
   /**
    * Writes updates to the appropriate Dynamo records and triggers bake failed notifications
    */
