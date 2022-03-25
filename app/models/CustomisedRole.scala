@@ -42,12 +42,6 @@ object ParamValue {
 }
 
 object CustomisedRole {
-  //  val White = ScalaWhitespace.Wrapper {
-  //    import fastparse.parse
-  //    NoTrace(" ".rep)
-  //  }
-  //  import fastparse.all._
-  //  import White._
   import fastparse._, ScalaWhitespace._
 
   def key[_: P]: P[String] = P(CharsWhile(_ != ':').!)

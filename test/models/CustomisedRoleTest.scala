@@ -4,7 +4,6 @@ import fastparse.Parsed
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.EitherValues
-import CustomisedRole._
 
 class CustomisedRoleTest extends AnyFlatSpec with Matchers with EitherValues {
 
@@ -41,11 +40,6 @@ class CustomisedRoleTest extends AnyFlatSpec with Matchers with EitherValues {
     println(s" sourceData.value = ${sourceData.value} \n\n\n\n\n\n")
     sourceData.value.shouldBe(Map("ssh_keys_bucket" -> SingleParamValue("bucket"), "ssh_keys_prefix" -> SingleParamValue("Team")))
   }
-
-  //  "CustomisedRole.formInputTextToVariables" should "parse a map of variables" in {
-  //    CustomisedRole.formInputTextToVariables("ssh_keys_bucket: bucket, ssh_keys_prefix: Team").value
-  //      .shouldBe(Map("ssh_keys_bucket" -> SingleParamValue("bucket"), "ssh_keys_prefix" -> SingleParamValue("Team")))
-  //  }
 
   "CustomisedRole.formInputTextToVariables" should "parse variable lists" in {
     CustomisedRole.formInputTextToVariables("packages: [python-pip, emacs24]").value
