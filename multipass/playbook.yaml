@@ -1,0 +1,12 @@
+---
+- name: TestPlayBook
+  hosts: localhost
+  connection: local
+  become: true
+
+  # Uncomment to pass vars to your roles
+  #vars:
+  #  foo=bar
+
+  roles:
+    - ROLE_GOES_HERE
