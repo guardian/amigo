@@ -25,7 +25,7 @@ if ! multipass list | grep $vm_name | grep Running > /dev/null
 then
     echo 'Creating and provisioning multipass VM...'
     multipass launch --name $vm_name 20.04
-    multipass mount ../roles $vm_name:$target_dir/.ansible/roles
+    multipass mount $script_dir/../roles $vm_name:$target_dir/.ansible/roles
     multipass mount $script_dir $vm_name:$target_dir/test
     multipass exec $vm_name -- $target_dir/test/bootstrap-vm.sh
 fi

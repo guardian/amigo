@@ -6,7 +6,7 @@
 
   # Uncomment to pass vars to your roles
   #vars:
-  #  foo=bar
+  #  foo: bar
 
   roles:
     - ROLE_GOES_HERE

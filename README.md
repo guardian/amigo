@@ -49,6 +49,17 @@ To test roles locally, run:
 This will install [Multipass](https://multipass.run/), a Canonical tool to
 manage Ubuntu VMs, and execute Ansible roles within it.
 
+If you want to run commands/debug directly in the VM then (post installing
+things via run.sh), run:
+
+    $ multipass shell amigo-test
+
+If the Multipass VM is timing out, try deleting and then re-running the script:
+
+    $ multipass stop amigo-test
+    $ multipass delete amigo-test
+    $ multipass purge amigo-test
+
 *Previously Vagrant was used but Virtualbox, which is used under the hood,
 doesn't support M1/arm64 macs unfortunately.*
 
