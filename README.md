@@ -37,6 +37,23 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ## How to run locally
 
+### Testing ansible scripts without runing amigo/packer
+
+Amigo roles are simply Ansible scripts and can be run independently of Amigo
+itself. This is often a lot easier than running Amigo itself.
+
+To test roles locally, run:
+
+    $ multipass/run.sh
+
+This will install [Multipass](https://multipass.run/), a Canonical tool to
+manage Ubuntu VMs, and execute Ansible roles within it.
+
+*Previously Vagrant was used but Virtualbox, which is used under the hood,
+doesn't support M1/arm64 macs unfortunately.*
+
+### Running the full app
+
 Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
 Amigo app locally and the associated packer process should have the sufficient AWS authorization.
 
@@ -137,25 +154,3 @@ $ sbt test
     ]
 }
 ```
-
-## Testing ansible scripts without runing amigo/packer
-
-Tired of waiting for amigo to build, deploy and bake only to discover you made a one character error in your ansible script?
-Then read on...
-
-You can use [Vagrant](https://www.vagrantup.com/downloads.html) to test ansible scripts. Once set up, it allows you to try out your script with a feedback loop
-of 20 seconds or so. There are some docs [here](https://docs.ansible.com/ansible/2.7/scenario_guides/guide_vagrant.html) 
-covering this, but, roughly speaking you need to:
-
-### Pre-requisites
-
-1. [Vagrant](https://www.vagrantup.com/downloads.html)
-1. [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
-
-### Running Ansible roles
-
-1. execute `./script/setup`
-2. `cd` into `ansible/`
-3. update files `playbook.yaml` and `extra-vars.yaml` accordingly
-4. run `vagrant up` to download the image and run your ansible script
-5. run `vagrant provision` to re-run the ansible script

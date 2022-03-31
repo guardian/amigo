@@ -1,8 +1,0 @@
----
-- name: TestPlayBook
-  hosts: all
-  connection: local
-  become: true
-
-  roles:
-    - role-to-test
