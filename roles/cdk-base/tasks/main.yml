@@ -8,7 +8,7 @@
 - name: Install instance-tag-discovery
   ansible.builtin.shell: |
     NAME=instance-tag-discovery
-    /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/00-$NAME
+    /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}/$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/00-$NAME
     chmod +x /var/lib/cloud/scripts/per-instance/00-$NAME
   when:
     - ansible_os_family == "Debian"
@@ -16,7 +16,7 @@
 - name: Install devx-logs
   ansible.builtin.shell: |
     NAME=devx-logs
-    /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/01-$NAME
+    /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}/$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/01-$NAME
     chmod +x /var/lib/cloud/scripts/per-instance/01-$NAME
   when:
     - ansible_os_family == "Debian"

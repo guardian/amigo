@@ -1,6 +1,9 @@
 CDK base config
 ===============
 
+**WARNING: this role is experimental and not recommended for Production use
+yet.**
+
 This role includes boot tasks that the Guardian's EC2 CDK patterns and best
 practices rely on.
 
