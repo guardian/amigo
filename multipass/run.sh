@@ -4,7 +4,7 @@ set -e
 
 script_dir=$(dirname "$0")
 target_dir=/home/ubuntu
-custom_playbook="$script_dir/playbook-custom.yaml"
+custom_playbook="playbook-custom.yaml"
 vm_name=amigo-test
 
 if ! command -v multipass &> /dev/null
@@ -13,7 +13,7 @@ then
     brew install --cask multipass
 fi
 
-if [ ! -e "$custom_playbook" ]
+if [ ! -e "$script_dir/$custom_playbook" ]
 then
     echo "Creating local playbook file ($custom_playbook)..."
     cp $script_dir/playbook.yaml $script_dir/playbook-custom.yaml
