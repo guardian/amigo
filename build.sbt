@@ -62,12 +62,12 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
 val jacksonVersion = "2.13.1"
-val awsVersion = "1.12.191"
+val awsVersion = "1.11.1017"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.191"
-val awsV2SdkVersion = "2.17.109"
+val awsV2SdkVersion = "2.16.104"
 
 libraryDependencies ++= Seq(
   ws,
@@ -93,8 +93,8 @@ libraryDependencies ++= Seq(
   // These v2 dependencies are pinned to avoid a transitive dependency brought in via simple-configuration-ssm
   // When we upgrade to the Scala 2.12 (or above) and the latest version of simple-configuration-ssm we should
   // be able to remove them.
-  "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
-  "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
+  //"software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
+  //"software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
   "com.gu" % "kinesis-logback-appender" % "2.0.2",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.11" % Test,
