@@ -1,6 +1,6 @@
 package com.gu.imageCopier.attempt
 
-import java.io.{PrintWriter, StringWriter}
+import java.io.{ PrintWriter, StringWriter }
 
 sealed trait Failure {
   def msg: String
@@ -10,8 +10,8 @@ sealed trait Failure {
 }
 
 /**
-  * This type of failure has a throwable which could potentially be logged
-  */
+ * This type of failure has a throwable which could potentially be logged
+ */
 sealed trait FailureWithThrowable extends Failure {
   def throwable: Throwable
   override def cause = Some(throwable)

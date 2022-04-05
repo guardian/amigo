@@ -10,7 +10,7 @@ name := "amigo"
 version := "1.0-latest"
 scalaVersion := "2.13.7"
 
-javaOptions in Universal ++= Seq(
+Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
   "-J-XX:MaxRAMFraction=2",
   "-J-XX:InitialRAMFraction=2",
@@ -25,19 +25,19 @@ javaOptions in Universal ++= Seq(
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin, SystemdPlugin)
   .settings(
-    packageName in Universal := normalizedName.value,
+    Universal / packageName := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
 
-    serverLoading in Debian := Some(Systemd),
+    Debian / serverLoading := Some(Systemd),
     riffRaffManifestProjectName := s"tools::${name.value}",
-    riffRaffPackageType := (packageBin in Debian).value,
+    riffRaffPackageType := (Debian / packageBin).value,
     riffRaffArtifactResources ++= Seq(
-      (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip",
+      (imageCopier / Universal / packageBin).value -> "imagecopier/imagecopier.zip",
       baseDirectory.value / "cdk/cdk.out/AMIgo-CODE.template.json" -> "cloudformation/AMIgo-CODE.template.json",
       baseDirectory.value / "cdk/cdk.out/AMIgo-PROD.template.json" -> "cloudformation/AMIgo-PROD.template.json"
     ),
     // Include the roles dir in the tarball for now
-    mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
+    Universal / mappings ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
     buildInfoPackage := "amigo",
     buildInfoKeys := {
       lazy val buildInfo = BuildInfo(baseDirectory.value)
@@ -63,7 +63,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 val jacksonVersion = "2.13.1"
 val awsVersion = "1.12.191"
-val circeVersion = "0.9.0"
+val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.191"
@@ -109,12 +109,13 @@ routesImport += "models._"
 lazy val imageCopier = (project in file("imageCopier"))
     .enablePlugins(JavaAppPackaging)
   .settings(
-    topLevelDirectory in Universal := None,
-    packageName in Universal := normalizedName.value,
+    scalaVersion := "2.13.7",
+    Universal / topLevelDirectory := None,
+    Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
-      "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-      "com.amazonaws" % "aws-lambda-java-events" % "2.0.2",
+      "com.amazonaws" % "aws-lambda-java-core" % "1.2.1",
+      "com.amazonaws" % "aws-lambda-java-events" % "3.11.0",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )

@@ -3,9 +3,8 @@ package com.gu.imageCopier
 import com.amazonaws.AmazonClientException
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model._
-import com.gu.imageCopier.attempt.{Attempt, AwsSdkFailure}
-
-import scala.jdk.CollectionConverters
+import com.gu.imageCopier.attempt.{ Attempt, AwsSdkFailure }
+import scala.jdk.CollectionConverters._
 
 object AmiActions {
   def copyAmi(amiEvent: AmiEvent, kmsArn: String)(implicit ec2Client: AmazonEC2): Attempt[String] = {
@@ -22,14 +21,15 @@ object AmiActions {
       println(s"New AMI is ${result.getImageId}")
       result.getImageId
     } {
-      case ace:AmazonClientException => AwsSdkFailure(ace)
+      case ace: AmazonClientException => AwsSdkFailure(ace)
     }
   }
 
   def tagAmi(amiEvent: AmiEvent, encryptedTagValue: String, newAmiId: String)(implicit ec2Client: AmazonEC2): Attempt[CreateTagsResult] = {
     Attempt.catchNonFatal {
       val tags = amiEvent.tags ++ Map("Encrypted" -> encryptedTagValue, "CopiedFromAMI" -> amiEvent.sourceAmi)
-      val awsTags = tags.map { case (k, v) =>
+      val awsTags = tags.map {
+        case (k, v) =>
           new Tag(k, v)
       }.toList
       val request = new CreateTagsRequest()
@@ -40,7 +40,7 @@ object AmiActions {
       println(s"Succeeded")
       result
     } {
-      case ace:AmazonClientException => AwsSdkFailure(ace)
+      case ace: AmazonClientException => AwsSdkFailure(ace)
     }
   }
 
@@ -58,7 +58,7 @@ object AmiActions {
         println(s"List of AMIs and snapshots: $ids")
         ids.toList
       } {
-        case ace:AmazonClientException => AwsSdkFailure(ace)
+        case ace: AmazonClientException => AwsSdkFailure(ace)
       }
     } else {
       Attempt.Right(Nil)
@@ -74,7 +74,7 @@ object AmiActions {
       println(s"Deregistered")
       amiId
     } {
-      case ace:AmazonClientException => AwsSdkFailure(ace)
+      case ace: AmazonClientException => AwsSdkFailure(ace)
     }
   }
 
@@ -87,7 +87,7 @@ object AmiActions {
       println(s"Deleted snapshot")
       snapshotId
     } {
-      case ace:AmazonClientException => AwsSdkFailure(ace)
+      case ace: AmazonClientException => AwsSdkFailure(ace)
     }
   }
 }

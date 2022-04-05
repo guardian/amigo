@@ -8,11 +8,11 @@ package object attempt {
     def toAttempt(whenNone: => Failure): Attempt[A] = Attempt.fromOption(option, whenNone)
   }
 
-  implicit class RichFailureEither[A](either: Either[Failure,A]) {
+  implicit class RichFailureEither[A](either: Either[Failure, A]) {
     def toAttempt = Attempt.fromEither(either)
   }
 
-  implicit class RichEither[Left,A](either: Either[Left,A]) {
+  implicit class RichEither[Left, A](either: Either[Left, A]) {
     def toAttempt(leftToFailure: Left => Failure) = Attempt.fromEither(either.leftMap(leftToFailure))
   }
 }
