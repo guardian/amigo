@@ -1,7 +1,8 @@
 ---
 - name: Setup target directory
-  shell: |
-    mkdir -p /var/lib/cloud/scripts/per-instance
+  file:
+    path: /var/lib/cloud/scripts/per-instance
+    state: directory
   when:
     - ansible_os_family == "Debian"
 
