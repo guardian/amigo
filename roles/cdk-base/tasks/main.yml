@@ -21,3 +21,8 @@
     chmod +x /var/lib/cloud/scripts/per-instance/01-$NAME
   when:
     - ansible_os_family == "Debian"
+
+- name: Enable Fluentbit (to run on startup)
+  ansible.builtin.systemd:
+    name: td-agent-bit.service
+    enabled: true
