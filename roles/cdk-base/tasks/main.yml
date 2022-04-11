@@ -22,7 +22,11 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: Enable Fluentbit (to run on startup)
-  ansible.builtin.systemd:
-    name: td-agent-bit.service
-    enabled: true
+# Note, this is required to ensure we start Fluentbit *after* updating the config.
+- name: Add start Fluentbit script
+  shell: |
+    NAME=start-fluentbit
+    echo -e '#!/bin/bash\nsystemctl start td-agent-bit.service' > /var/lib/cloud/scripts/per-instance/02-$NAME
+    chmod +x /var/lib/cloud/scripts/per-instance/02-$NAME
+  when:
+    - ansible_os_family == "Debian"
