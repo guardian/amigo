@@ -1,0 +1,4 @@
+---
+dependencies:
+  - aws-tools
+  - fluentbit

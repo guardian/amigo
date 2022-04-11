@@ -39,6 +39,9 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ### Testing ansible scripts without runing amigo/packer
 
+*Warning: Multipass seems to struggle if running at the same time as the VPN. We
+recommend not running the VPN when using Multipass locally.*
+
 Amigo roles are simply Ansible scripts and can be run independently of Amigo
 itself. This is often a lot easier than running Amigo itself.
 
@@ -48,6 +51,19 @@ To test roles locally, run:
 
 This will install [Multipass](https://multipass.run/), a Canonical tool to
 manage Ubuntu VMs, and execute Ansible roles within it.
+
+If you want to run commands/debug directly in the VM then (post installing
+things via run.sh), run:
+
+    $ multipass shell amigo-test
+
+If the Multipass VM is timing out, try deleting and then re-running the script:
+
+    $ multipass stop amigo-test
+    $ multipass delete amigo-test
+    $ multipass purge amigo-test
+
+You should also disconnect from the VPN too if using it.
 
 *Previously Vagrant was used but Virtualbox, which is used under the hood,
 doesn't support M1/arm64 macs unfortunately.*

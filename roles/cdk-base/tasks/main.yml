@@ -1,9 +1,23 @@
 ---
-- name: Download a package from an S3 bucket
-  command: /usr/local/bin/aws s3 cp s3://{{ s3_bucket }}/{{ s3_prefix }}instance-tag-discovery-{{ deb_arch }}_1.0-1.deb /tmp/instance-tag-discovery.deb
+- name: Setup target directory
+  file:
+    path: /var/lib/cloud/scripts/per-instance
+    state: directory
   when:
     - ansible_os_family == "Debian"
 
-- name: Install cloudwatch agent
-  apt:
-    deb: /tmp/instance-tag-discovery.deb
+- name: Install instance-tag-discovery
+  shell: |
+    NAME=instance-tag-discovery
+    /usr/local/bin/aws s3 cp s3://{{ dist_bucket | quote }}/packages/$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/00-$NAME
+    chmod +x /var/lib/cloud/scripts/per-instance/00-$NAME
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Install devx-logs
+  shell: |
+    NAME=devx-logs
+    /usr/local/bin/aws s3 cp s3://{{ dist_bucket | quote }}/packages/$NAME/$NAME-linux-{{ deb_arch }} /var/lib/cloud/scripts/per-instance/01-$NAME
+    chmod +x /var/lib/cloud/scripts/per-instance/01-$NAME
+  when:
+    - ansible_os_family == "Debian"
