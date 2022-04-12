@@ -1,9 +1,19 @@
 ---
-- name: Download oauth proxy
+- name: Download oauth proxy - amd64
   unarchive: src=https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ oauth_version }}/oauth2-proxy-v{{ oauth_version }}.linux-amd64.tar.gz dest=/opt remote_src=True
+  when: ansible_architecture == "x86_64"
 
-- name: Rename folder
+- name: Download oauth proxy - arm64
+  unarchive: src=https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ oauth_version }}/oauth2-proxy-v{{ oauth_version }}.linux-arm64.tar.gz dest=/opt remote_src=True
+  when: ansible_architecture == "aarch64"
+
+- name: Rename folder - amd64
   shell: mv /opt/oauth2-proxy-v{{ oauth_version }}.linux-amd64 /opt/oauth2-proxy
+  when: ansible_architecture == "x86_64"
+
+- name: Rename folder - arm64
+  shell: mv /opt/oauth2-proxy-v{{ oauth_version }}.linux-arm64 /opt/oauth2-proxy
+  when: ansible_architecture == "aarch64"
 
 - name: Create oauth2-proxy group
   group: name=oauth2-proxy
