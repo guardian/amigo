@@ -17,7 +17,9 @@ deployments:
         Recipe: arm64-bionic-java11-deploy-infrastructure
         AmigoStage: PROD
       amiEncrypted: true
-      templatePath: AMIgo.template.json
+      templateStagePaths:
+        CODE: AMIgo-CODE.template.json
+        PROD: AMIgo-PROD.template.json
       amiParameter: AMIAmigo
   # upload lambda
   imagecopier:
