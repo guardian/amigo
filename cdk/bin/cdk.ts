@@ -1,12 +1,26 @@
-import { App } from "@aws-cdk/core";
+import { App } from "aws-cdk-lib";
+import type { AmigoProps } from "../lib/amigo";
 import { AmigoStack } from "../lib/amigo";
-
-const cloudFormationStackName = process.env.GU_CFN_STACK_NAME;
 
 const app = new App();
 
-new AmigoStack(app, "AMIgo", {
+const stageAgnosticProps = {
   stack: "deploy",
   migratedFromCloudFormation: true,
-  cloudFormationStackName,
-});
+};
+
+const amigoCodeProps: AmigoProps = {
+  ...stageAgnosticProps,
+  stage: "CODE",
+  domainName: "amigo.code.dev-gutools.co.uk",
+};
+
+new AmigoStack(app, "AMIgo-CODE", amigoCodeProps);
+
+export const amigoProdProps: AmigoProps = {
+  ...stageAgnosticProps,
+  stage: "PROD",
+  domainName: "amigo.gutools.co.uk",
+};
+
+new AmigoStack(app, "AMIgo-PROD", amigoProdProps);
