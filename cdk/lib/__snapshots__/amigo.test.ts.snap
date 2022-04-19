@@ -220,6 +220,13 @@ Object {
             "Value": "guardian/amigo",
           },
           Object {
+            "Key": "LogKinesisStreamName",
+            "PropagateAtLaunch": true,
+            "Value": Object {
+              "Ref": "LoggingStreamName",
+            },
+          },
+          Object {
             "Key": "Name",
             "PropagateAtLaunch": true,
             "Value": "AMIgo/AutoScalingGroupAmigo",

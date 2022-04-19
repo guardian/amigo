@@ -22,7 +22,7 @@
     "aws-cdk": "2.20.0",
     "aws-cdk-lib": "2.20.0",
     "constructs": "10.0.106",
-    "@guardian/cdk": "41.0.2",
+    "@guardian/cdk": "41.1.0-beta.1",
     "eslint": "^7.29.0",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
