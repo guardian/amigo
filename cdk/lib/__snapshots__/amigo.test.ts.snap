@@ -2,22 +2,6 @@
 
 exports[`The Amigo stack matches the snapshot 1`] = `
 Object {
-  "Mappings": Object {
-    "amigo": Object {
-      "CODE": Object {
-        "DataBucketName": "amigo-data-code",
-        "domainName": "amigo.code.dev-gutools.co.uk",
-        "maxInstances": 2,
-        "minInstances": 1,
-      },
-      "PROD": Object {
-        "DataBucketName": "amigo-data-prod",
-        "domainName": "amigo.gutools.co.uk",
-        "maxInstances": 2,
-        "minInstances": 1,
-      },
-    },
-  },
   "Outputs": Object {
     "LoadBalancerAmigoDnsName": Object {
       "Description": "DNS entry for LoadBalancerAmigo",
@@ -53,18 +37,9 @@ Object {
       "Description": "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
       "Type": "String",
     },
-    "Stage": Object {
-      "AllowedValues": Array [
-        "CODE",
-        "PROD",
-      ],
-      "Default": "CODE",
-      "Description": "Stage name",
-      "Type": "String",
-    },
     "VpcId": Object {
       "Default": "/account/vpc/primary/id",
-      "Description": "Virtual Private Cloud to run EC2 instances within",
+      "Description": "Virtual Private Cloud to run EC2 instances within. Should NOT be the account default VPC.",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>",
     },
     "amigoPrivateSubnets": Object {
@@ -81,15 +56,7 @@ Object {
   "Resources": Object {
     "AmigoCname": Object {
       "Properties": Object {
-        "Name": Object {
-          "Fn::FindInMap": Array [
-            "amigo",
-            Object {
-              "Ref": "Stage",
-            },
-            "domainName",
-          ],
-        },
+        "Name": "amigo.gutools.co.uk",
         "RecordType": "CNAME",
         "ResourceRecords": Array [
           Object {
@@ -99,9 +66,7 @@ Object {
             ],
           },
         ],
-        "Stage": Object {
-          "Ref": "Stage",
-        },
+        "Stage": "PROD",
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
@@ -109,15 +74,7 @@ Object {
     "AmigoDataBucket": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "BucketName": Object {
-          "Fn::FindInMap": Array [
-            "amigo",
-            Object {
-              "Ref": "Stage",
-            },
-            "DataBucketName",
-          ],
-        },
+        "BucketName": "amigo-data-prod",
         "PublicAccessBlockConfiguration": Object {
           "BlockPublicAcls": true,
           "BlockPublicPolicy": true,
@@ -143,9 +100,7 @@ Object {
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
       },
@@ -182,18 +137,7 @@ Object {
             Object {
               "Action": "dynamodb:*",
               "Effect": "Allow",
-              "Resource": Object {
-                "Fn::Join": Array [
-                  "",
-                  Array [
-                    "arn:aws:dynamodb:*:*:table/amigo-",
-                    Object {
-                      "Ref": "Stage",
-                    },
-                    "-*",
-                  ],
-                ],
-              },
+              "Resource": "arn:aws:dynamodb:*:*:table/amigo-PROD-*",
             },
             Object {
               "Action": "sns:ListTopics",
@@ -204,30 +148,8 @@ Object {
               "Action": "sns:*",
               "Effect": "Allow",
               "Resource": Array [
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:aws:sns:*:*:amigo-",
-                      Object {
-                        "Ref": "Stage",
-                      },
-                      "-notify",
-                    ],
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:aws:sns:*:*:amigo-",
-                      Object {
-                        "Ref": "Stage",
-                      },
-                      "-housekeeping-notify",
-                    ],
-                  ],
-                },
+                "arn:aws:sns:*:*:amigo-PROD-notify",
+                "arn:aws:sns:*:*:amigo-PROD-housekeeping-notify",
               ],
             },
             Object {
@@ -274,24 +196,8 @@ Object {
         "LaunchConfigurationName": Object {
           "Ref": "AutoScalingGroupAmigoLaunchConfig93624D33",
         },
-        "MaxSize": Object {
-          "Fn::FindInMap": Array [
-            "amigo",
-            Object {
-              "Ref": "Stage",
-            },
-            "maxInstances",
-          ],
-        },
-        "MinSize": Object {
-          "Fn::FindInMap": Array [
-            "amigo",
-            Object {
-              "Ref": "Stage",
-            },
-            "minInstances",
-          ],
-        },
+        "MaxSize": "2",
+        "MinSize": "1",
         "Tags": Array [
           Object {
             "Key": "App",
@@ -314,6 +220,13 @@ Object {
             "Value": "guardian/amigo",
           },
           Object {
+            "Key": "LogKinesisStreamName",
+            "PropagateAtLaunch": true,
+            "Value": Object {
+              "Ref": "LoggingStreamName",
+            },
+          },
+          Object {
             "Key": "Name",
             "PropagateAtLaunch": true,
             "Value": "AMIgo/AutoScalingGroupAmigo",
@@ -326,9 +239,7 @@ Object {
           Object {
             "Key": "Stage",
             "PropagateAtLaunch": true,
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "TargetGroupARNs": Array [
@@ -364,6 +275,9 @@ Object {
           "Ref": "AMIAmigo",
         },
         "InstanceType": "t4g.small",
+        "MetadataOptions": Object {
+          "HttpTokens": "required",
+        },
         "SecurityGroups": Array [
           Object {
             "Fn::GetAtt": Array [
@@ -394,11 +308,7 @@ aws --region eu-west-1 s3 cp s3://",
                 Object {
                   "Ref": "DistributionBucketName",
                 },
-                "/deploy/",
-                Object {
-                  "Ref": "Stage",
-                },
-                "/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
+                "/deploy/PROD/amigo/amigo_1.0-latest_all.deb /tmp/amigo.deb
 dpkg -i /tmp/amigo.deb",
               ],
             ],
@@ -410,15 +320,7 @@ dpkg -i /tmp/amigo.deb",
     "CertificateAmigoE1AF5E0C": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "DomainName": Object {
-          "Fn::FindInMap": Array [
-            "amigo",
-            Object {
-              "Ref": "Stage",
-            },
-            "domainName",
-          ],
-        },
+        "DomainName": "amigo.gutools.co.uk",
         "Tags": Array [
           Object {
             "Key": "App",
@@ -438,9 +340,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "ValidationMethod": "DNS",
@@ -489,11 +389,7 @@ dpkg -i /tmp/amigo.deb",
                     Object {
                       "Ref": "DistributionBucketName",
                     },
-                    "/deploy/",
-                    Object {
-                      "Ref": "Stage",
-                    },
-                    "/amigo/*",
+                    "/deploy/PROD/amigo/*",
                   ],
                 ],
               },
@@ -564,9 +460,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "VpcId": Object {
@@ -703,9 +597,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
       },
@@ -781,9 +673,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "Type": "application",
@@ -812,9 +702,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "VpcId": Object {
@@ -902,17 +790,7 @@ dpkg -i /tmp/amigo.deb",
     "PackerSecurityGroup": Object {
       "Properties": Object {
         "GroupDescription": "Security group for instances created by Packer",
-        "GroupName": Object {
-          "Fn::Join": Array [
-            "",
-            Array [
-              "amigo-packer-",
-              Object {
-                "Ref": "Stage",
-              },
-            ],
-          ],
-        },
+        "GroupName": "amigo-packer-PROD",
         "SecurityGroupEgress": Array [
           Object {
             "CidrIp": "0.0.0.0/0",
@@ -941,9 +819,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "VpcId": Object {
@@ -971,11 +847,7 @@ dpkg -i /tmp/amigo.deb",
                     Object {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/",
-                    Object {
-                      "Ref": "Stage",
-                    },
-                    "/deploy/amigo",
+                    ":parameter/PROD/deploy/amigo",
                   ],
                 ],
               },
@@ -998,11 +870,7 @@ dpkg -i /tmp/amigo.deb",
                     Object {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/",
-                    Object {
-                      "Ref": "Stage",
-                    },
-                    "/deploy/amigo/*",
+                    ":parameter/PROD/deploy/amigo/*",
                   ],
                 ],
               },
@@ -1050,9 +918,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "VpcId": Object {
@@ -1154,9 +1020,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "TargetGroupAttributes": Array [
@@ -1198,10 +1062,6 @@ dpkg -i /tmp/amigo.deb",
         ],
         "Tags": Array [
           Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1215,9 +1075,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Key": "Stage",
-            "Value": Object {
-              "Ref": "Stage",
-            },
+            "Value": "PROD",
           },
         ],
         "VpcId": Object {

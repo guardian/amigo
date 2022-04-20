@@ -31,7 +31,8 @@ lazy val root = (project in file("."))
     riffRaffPackageType := (packageBin in Debian).value,
     riffRaffArtifactResources ++= Seq(
       (packageBin in Universal in imageCopier).value -> "imagecopier/imagecopier.zip",
-      baseDirectory.value / "cdk/cdk.out/AMIgo.template.json" -> "cloudformation/AMIgo.template.json"
+      baseDirectory.value / "cdk/cdk.out/AMIgo-CODE.template.json" -> "cloudformation/AMIgo-CODE.template.json",
+      baseDirectory.value / "cdk/cdk.out/AMIgo-PROD.template.json" -> "cloudformation/AMIgo-PROD.template.json"
     ),
     // Include the roles dir in the tarball for now
     mappings in Universal ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },

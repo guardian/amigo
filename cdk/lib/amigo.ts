@@ -1,13 +1,7 @@
-import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "@aws-cdk/aws-ec2";
-import { Effect, Policy, PolicyStatement } from "@aws-cdk/aws-iam";
-import type { Bucket } from "@aws-cdk/aws-s3";
-import type { App } from "@aws-cdk/core";
-import { Duration } from "@aws-cdk/core";
-import { AccessScope, GuPlayApp } from "@guardian/cdk";
-import { Stage } from "@guardian/cdk/lib/constants";
-import type { GuStackProps } from "@guardian/cdk/lib/constructs/core";
+import { GuPlayApp } from "@guardian/cdk";
+import { AccessScope } from "@guardian/cdk/lib/constants";
+import type { AppIdentity, GuStackProps } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
-import { AppIdentity } from "@guardian/cdk/lib/constructs/core/identity";
 import { GuCname } from "@guardian/cdk/lib/constructs/dns";
 import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
 import {
@@ -18,12 +12,17 @@ import {
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
+import { Duration } from "aws-cdk-lib";
+import type { App } from "aws-cdk-lib";
+import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
+import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import type { Bucket } from "aws-cdk-lib/aws-s3";
 
 const packerVersion = "1.6.6";
-const domainNames = {
-  [Stage.CODE]: { domainName: "amigo.code.dev-gutools.co.uk" },
-  [Stage.PROD]: { domainName: "amigo.gutools.co.uk" },
-};
+
+export interface AmigoProps extends GuStackProps {
+  domainName: string;
+}
 
 export class AmigoStack extends GuStack {
   private static app: AppIdentity = {
@@ -107,7 +106,7 @@ export class AmigoStack extends GuStack {
     });
   }
 
-  constructor(scope: App, id: string, props: GuStackProps) {
+  constructor(scope: App, id: string, props: AmigoProps) {
     super(scope, id, props);
 
     this.packerInstanceProfile = new GuStringParameter(this, "PackerInstanceProfile", {
@@ -115,18 +114,9 @@ export class AmigoStack extends GuStack {
         "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
     });
 
-    const importBucketName = this.withStageDependentValue({
-      app: AmigoStack.app.app,
-      variableName: "DataBucketName",
-      stageValues: {
-        [Stage.CODE]: "amigo-data-code",
-        [Stage.PROD]: "amigo-data-prod",
-      },
-    });
-
     this.dataBucket = new GuS3Bucket(this, "AmigoDataBucket", {
       app: AmigoStack.app.app,
-      bucketName: importBucketName,
+      bucketName: `amigo-data-${this.stage.toLowerCase()}`,
       existingLogicalId: {
         logicalId: "AmigoDataBucket",
         reason: "To prevent orphaning of the YAML defined bucket",
@@ -246,15 +236,8 @@ export class AmigoStack extends GuStack {
         scope: AccessScope.RESTRICTED,
         cidrRanges: [Peer.ipv4("77.91.248.0/21")],
       },
-      certificateProps: domainNames,
-      scaling: {
-        [Stage.CODE]: {
-          minimumInstances: 1,
-        },
-        [Stage.PROD]: {
-          minimumInstances: 1,
-        },
-      },
+      certificateProps: { domainName: props.domainName },
+      scaling: { minimumInstances: 1 },
       monitoringConfiguration: {
         noMonitoring: true,
       },
@@ -265,16 +248,9 @@ export class AmigoStack extends GuStack {
 
     new GuCname(this, "AmigoCname", {
       app: AmigoStack.app.app,
-      domainNameProps: domainNames,
+      domainName: props.domainName,
       ttl: Duration.hours(1),
       resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
-    /*
-    Looks like some @guardian/cdk constructs are not applying the App tag.
-    I suspect since https://github.com/guardian/cdk/pull/326.
-    Until that is fixed, we can safely, manually apply it to all constructs in tree from `this` as it's a single app stack.
-    TODO: remove this once @guardian/cdk has been fixed.
-    */
-    AppIdentity.taggedConstruct(AmigoStack.app, this);
   }
 }
