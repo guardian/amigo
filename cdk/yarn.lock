@@ -324,15 +324,17 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@guardian/cdk@41.1.0-beta.1":
-  version "41.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-41.1.0-beta.1.tgz#c54904cb638883d6febda15d7250df132a4788f0"
-  integrity sha512-kVvPXnzXKaOlh8elKDiKgkjUOfFXTizhak6ep5ZH/3RplmfXQ59PWRHMzcGGmIwwOLay9O9y7KqgTL5wvOkBUw==
+"@guardian/cdk@41.1.0":
+  version "41.1.0"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-41.1.0.tgz#b070bb7a8ffa111b7f024b3a5bd8232d5a564192"
+  integrity sha512-/RCQLCKf+DFle2BVhtbbXbef8+XmsgRl1V8RAAMjCdkAKfk4YAoMoBg/Z9xLKr+HKdMDfsSJowLZZ6gwswKpwg==
   dependencies:
     "@oclif/core" "1.7.0"
-    aws-sdk "^2.1109.0"
+    aws-cdk-lib "2.20.0"
+    aws-sdk "^2.1113.0"
     chalk "^4.1.2"
     codemaker "^1.55.1"
+    constructs "10.0.110"
     git-url-parse "^11.6.0"
     inquirer "^8.2.2"
     lodash.camelcase "^4.3.0"
@@ -1082,10 +1084,10 @@ aws-cdk@2.20.0:
   optionalDependencies:
     fsevents "2.3.2"
 
-aws-sdk@^2.1109.0:
-  version "2.1116.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1116.0.tgz#1187ab943e6bf730db282afe7950dd2af409cb5b"
-  integrity sha512-36JFrxPPh/fRQWsgGrZZbzTxRu7dq4KyCKKXPxgVMXylEJsG/KEAVMB1f3eq4PiI5eGxYrpt2OkKoMQZQZLjPA==
+aws-sdk@^2.1113.0:
+  version "2.1118.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1118.0.tgz#1789e881b1f43bef7807111d5716ab691ab965c2"
+  integrity sha512-R3g06c4RC0Gz/lwMA7wgC7+FwYf5vaO30sPIigoX5m6Tfb7tdzfCYD7pnpvkPRNUvWJ3f5kQk+pEeW25DstRrQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1426,6 +1428,11 @@ constructs@10.0.106:
   version "10.0.106"
   resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.0.106.tgz#e57222d13fa7c063de95e8c6c933ef379ded79cf"
   integrity sha512-6k8z7O3q6UigE62QW/z34YcSqa1elCDEGz1rTwaMkiVjdL93mB6YLNCpC21FYVUbx+rauTdsQCD3ejVxdAmazg==
+
+constructs@10.0.110:
+  version "10.0.110"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.0.110.tgz#f5563efca14648ddb7c633dc1b4369ac30f743fb"
+  integrity sha512-Ojh53qbHi5XxkOFd7acUQebVzEn00KXF93YRwd5vii7tiVrkjgufWPl5NgdhNmvmC/lcQ1w8ke77PN37gQdgoQ==
 
 convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   version "1.8.0"
