@@ -93,8 +93,8 @@ libraryDependencies ++= Seq(
   // These v2 dependencies are pinned to avoid a transitive dependency brought in via simple-configuration-ssm
   // When we upgrade to the Scala 2.12 (or above) and the latest version of simple-configuration-ssm we should
   // be able to remove them.
-  //"software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
-  //"software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
   "com.gu" % "kinesis-logback-appender" % "2.0.2",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.11" % Test,
