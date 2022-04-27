@@ -42,8 +42,7 @@ object Recipe {
     modifiedBy = dbModel.modifiedBy,
     modifiedAt = dbModel.modifiedAt,
     bakeSchedule = dbModel.bakeSchedule,
-    encryptFor = dbModel.encryptFor.getOrElse(Nil)
-  )
+    encryptFor = dbModel.encryptFor.getOrElse(Nil))
 
   def domain2db(recipe: Recipe, nextBuildNumber: Int): DbModel = DbModel(
     id = recipe.id,
@@ -57,7 +56,6 @@ object Recipe {
     modifiedBy = recipe.modifiedBy,
     modifiedAt = recipe.modifiedAt,
     bakeSchedule = recipe.bakeSchedule,
-    encryptFor = Some(recipe.encryptFor)
-  )
+    encryptFor = Some(recipe.encryptFor))
 
 }

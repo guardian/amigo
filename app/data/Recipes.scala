@@ -1,13 +1,14 @@
 package data
 
-import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.syntax._
+import software.amazon.awssdk.services.dynamodb.model._
 import models.Recipe.DbModel
 import models._
 import org.joda.time.DateTime
+import org.scanamo.DynamoReadError
+import org.scanamo.generic.auto.genericDerivedFormat
+import org.scanamo.syntax._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object Recipes {
   import Dynamo._
@@ -40,7 +41,8 @@ object Recipes {
     (errors, recipes)
   }
 
-  def create(id: RecipeId,
+  def create(
+    id: RecipeId,
     description: Option[String],
     baseImage: BaseImage,
     diskSize: Option[Int],
@@ -56,7 +58,8 @@ object Recipes {
     recipe
   }
 
-  def update(recipe: Recipe,
+  def update(
+    recipe: Recipe,
     description: Option[String],
     baseImage: BaseImage,
     diskSize: Option[Int],
@@ -66,29 +69,29 @@ object Recipes {
     encryptFor: List[AccountNumber])(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
     val baseUpdateExpr =
-      set('baseImageId -> baseImage.id) and
-        set('roles -> roles) and
-        set('modifiedBy -> modifiedBy) and
-        set('modifiedAt -> DateTime.now()) and
-        (if (bakeSchedule.isDefined) set('bakeSchedule -> bakeSchedule) else remove('bakeSchedule)) and
-        (if (encryptFor.nonEmpty) set('encryptFor -> encryptFor) else remove('encryptFor)) and
-        (if (diskSize.isDefined) set('diskSize -> diskSize) else remove('diskSize))
+      set("baseImageId", baseImage.id) and
+        set("roles", roles) and
+        set("modifiedBy", modifiedBy) and
+        set("modifiedAt", DateTime.now()) and
+        (if (bakeSchedule.isDefined) set("bakeSchedule", bakeSchedule) else remove("bakeSchedule")) and
+        (if (encryptFor.nonEmpty) set("encryptFor", encryptFor) else remove("encryptFor")) and
+        (if (diskSize.isDefined) set("diskSize", diskSize) else remove("diskSize"))
 
     val updateExpr = description match {
-      case Some(desc) => baseUpdateExpr and set('description -> desc)
+      case Some(desc) => baseUpdateExpr and set("description", desc)
       case None => baseUpdateExpr
     }
 
-    val update = table.update('id -> recipe.id, updateExpr)
+    val update = table.update("id" === recipe.id, updateExpr)
     update.exec().map(Recipe.db2domain(_, baseImage))
   }
 
-  def delete(recipe: Recipe)(implicit dynamo: Dynamo): DeleteItemResult = {
-    table.delete('id -> recipe.id.value).exec()
+  def delete(recipe: Recipe)(implicit dynamo: Dynamo): Unit = {
+    table.delete("id" === recipe.id.value).exec()
   }
 
   def findById(id: RecipeId)(implicit dynamo: Dynamo): Option[Recipe] = {
-    val dbModel: Option[DbModel] = table.get('id -> id).exec().flatMap { attempt =>
+    val dbModel: Option[DbModel] = table.get("id" === id).exec().flatMap { attempt =>
       attempt match {
         case Right(dbModel) => Some(dbModel)
         case Left(_) => None
@@ -105,16 +108,17 @@ object Recipes {
   def findByBaseImage(imageId: BaseImageId)(implicit dynamo: Dynamo): Iterable[Recipe] = filteredList(_.baseImageId == imageId)
 
   def incrementAndGetBuildNumber(id: RecipeId)(implicit dynamo: Dynamo): Option[Int] = {
-    val updateRequest = new UpdateItemRequest()
-      .withTableName(table.name)
-      .withKey(Map("id" -> new AttributeValue(id.value)).asJava)
-      .withUpdateExpression("ADD nextBuildNumber :val1")
-      .withConditionExpression("attribute_exists(id)") // to ensure the recipe exists in Dynamo
-      .withExpressionAttributeValues(Map(":val1" -> new AttributeValue().withN("1")).asJava)
-      .withReturnValues(ReturnValue.UPDATED_NEW) // TODO Scanamo doesn't support this
+    val updateRequest = UpdateItemRequest.builder()
+      .tableName(table.name)
+      .key(Map("id" -> AttributeValue.builder.s(id.value).build()).asJava)
+      .updateExpression("ADD nextBuildNumber :val1")
+      .conditionExpression("attribute_exists(id)") // to ensure the recipe exists in Dynamo
+      .expressionAttributeValues(Map(":val1" -> AttributeValue.builder().n("1").build()).asJava)
+      .returnValues(ReturnValue.UPDATED_NEW) // TODO Scanamo doesn't support this
+      .build
     val updateResult = dynamo.client.updateItem(updateRequest)
-    if (updateResult.getAttributes.containsKey("nextBuildNumber"))
-      Some(updateResult.getAttributes.get("nextBuildNumber").getN.toInt)
+    if (updateResult.attributes.containsKey("nextBuildNumber"))
+      Some(updateResult.attributes.get("nextBuildNumber").n.toInt)
     else
       None
   }

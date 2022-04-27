@@ -1,59 +1,87 @@
 package data
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.{ DynamoFormat, Scanamo, Table => ScanamoTable }
-import com.gu.scanamo.ops.ScanamoOps
+import org.scanamo.{ DynamoFormat, Scanamo, Table => ScanamoTable }
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.generic.auto._
 import models.{ Bake, BakeLog, BaseImage, Recipe }
 import services.Loggable
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model._
 
 import scala.annotation.tailrec
 import scala.util.Try
 
-class Dynamo(val client: AmazonDynamoDB, stage: String) extends Loggable {
+class Dynamo(val client: DynamoDbClient, stage: String) extends Loggable {
   import Dynamo._
   import DynamoFormats._
 
   object Tables {
 
     private def table[A: DynamoFormat](definition: CreateTableRequest): TableWrapper[A] = {
-      val name = definition.getTableName
+      val name = definition.tableName
       val scanamoTable = ScanamoTable[A](name)
       TableWrapper(definition, scanamoTable)
     }
 
+    private def generateKeySchemaElement(atttributeName: String, keyType: KeyType): KeySchemaElement = {
+      KeySchemaElement.builder()
+        .attributeName(atttributeName)
+        .keyType(keyType)
+        .build()
+    }
+
+    def generateAttributeDefinition(attributeName: String, attributeType: ScalarAttributeType): AttributeDefinition = {
+      AttributeDefinition.builder()
+        .attributeName(attributeName)
+        .attributeType(attributeType)
+        .build()
+    }
+
+    def generateProvisionedThroughtput(readCapacity: Long, writeCapacity: Long): ProvisionedThroughput = {
+      ProvisionedThroughput.builder()
+        .readCapacityUnits(readCapacity)
+        .writeCapacityUnits(writeCapacity)
+        .build()
+    }
+
     val baseImages = table[BaseImage](
-      new CreateTableRequest()
-        .withKeySchema(new KeySchemaElement("id", KeyType.HASH))
-        .withAttributeDefinitions(new AttributeDefinition("id", ScalarAttributeType.S))
-        .withTableName(tableName("base-images"))
-        .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
-    )
+      CreateTableRequest.builder()
+        .keySchema(generateKeySchemaElement("id", KeyType.HASH))
+        .attributeDefinitions(generateAttributeDefinition("id", ScalarAttributeType.S))
+        .tableName(tableName("base-images"))
+        .provisionedThroughput(generateProvisionedThroughtput(1L, 1L))
+        .build())
 
     val recipes = table[Recipe.DbModel](
-      new CreateTableRequest()
-        .withKeySchema(new KeySchemaElement("id", KeyType.HASH))
-        .withAttributeDefinitions(new AttributeDefinition("id", ScalarAttributeType.S))
-        .withTableName(tableName("recipes"))
-        .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
-    )
+      CreateTableRequest.builder()
+        .keySchema(generateKeySchemaElement("id", KeyType.HASH))
+        .attributeDefinitions(generateAttributeDefinition("id", ScalarAttributeType.S))
+        .tableName(tableName("recipes"))
+        .provisionedThroughput(generateProvisionedThroughtput(1L, 1L))
+        .build())
 
     val bakes = table[Bake.DbModel](
-      new CreateTableRequest()
-        .withKeySchema(new KeySchemaElement("recipeId", KeyType.HASH), new KeySchemaElement("buildNumber", KeyType.RANGE))
-        .withAttributeDefinitions(new AttributeDefinition("recipeId", ScalarAttributeType.S), new AttributeDefinition("buildNumber", ScalarAttributeType.N))
-        .withTableName(tableName("bakes"))
-        .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
-    )
+      CreateTableRequest.builder()
+        .keySchema(generateKeySchemaElement("recipeId", KeyType.HASH), generateKeySchemaElement("buildNumber", KeyType.RANGE))
+        .attributeDefinitions(generateAttributeDefinition("recipeId", ScalarAttributeType.S), generateAttributeDefinition("buildNumber", ScalarAttributeType.N))
+        .tableName(tableName("bakes"))
+        .provisionedThroughput(generateProvisionedThroughtput(1L, 1L))
+        .build())
 
     val bakeLogs = table[BakeLog](
-      new CreateTableRequest()
-        .withKeySchema(new KeySchemaElement("bakeId", KeyType.HASH), new KeySchemaElement("logNumber", KeyType.RANGE))
-        .withAttributeDefinitions(new AttributeDefinition("bakeId", ScalarAttributeType.S), new AttributeDefinition("logNumber", ScalarAttributeType.N))
-        .withTableName(tableName("bake-logs"))
-        .withProvisionedThroughput(new ProvisionedThroughput(10L, 10L))
-    )
+      CreateTableRequest.builder()
+        .keySchema(generateKeySchemaElement("bakeId", KeyType.HASH), generateKeySchemaElement("logNumber", KeyType.RANGE))
+        .attributeDefinitions(generateAttributeDefinition("bakeId", ScalarAttributeType.S), generateAttributeDefinition("logNumber", ScalarAttributeType.N))
+        .tableName(tableName("bake-logs"))
+        .provisionedThroughput(generateProvisionedThroughtput(10L, 10L))
+        .build())
 
+  }
+
+  def generateDescribeTableRequest(tableName: String): DescribeTableRequest = {
+    DescribeTableRequest.builder()
+      .tableName(tableName)
+      .build()
   }
 
   def initTables(): Unit = {
@@ -65,7 +93,7 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) extends Loggable {
   private def tableName(suffix: String) = s"amigo-$stage-$suffix"
 
   private def createTableIfDoesNotExist(table: TableWrapper[_]): Unit = {
-    if (Try(client.describeTable(table.name)).isFailure) {
+    if (Try(client.describeTable(generateDescribeTableRequest(table.name))).isFailure) {
       log.info(s"Creating Dynamo table ${table.name} ...")
       client.createTable(table.definition)
       waitForTableToBecomeActive(table.name)
@@ -76,8 +104,8 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) extends Loggable {
 
   @tailrec
   private def waitForTableToBecomeActive(name: String): Unit = {
-    Try(Option(client.describeTable(name).getTable)).toOption.flatten match {
-      case Some(table) if table.getTableStatus == TableStatus.ACTIVE.toString => ()
+    Try(Option(client.describeTable(generateDescribeTableRequest(name)))).toOption.flatten match {
+      case Some(table) if table.table.tableStatus.toString == TableStatus.ACTIVE.toString => ()
       case _ =>
         log.info(s"Waiting for table $name to become active ...")
         Thread.sleep(500L)
@@ -90,11 +118,11 @@ class Dynamo(val client: AmazonDynamoDB, stage: String) extends Loggable {
 object Dynamo {
 
   case class TableWrapper[A](private[Dynamo] val definition: CreateTableRequest, table: ScanamoTable[A]) {
-    val name = definition.getTableName
+    val name = definition.tableName
   }
 
   implicit class RichScanamoOps[A](val ops: ScanamoOps[A]) extends AnyVal {
-    def exec()(implicit dynamo: Dynamo): A = Scanamo.exec(dynamo.client)(ops)
+    def exec()(implicit dynamo: Dynamo): A = Scanamo.apply(dynamo.client).exec(ops)
   }
 }
 

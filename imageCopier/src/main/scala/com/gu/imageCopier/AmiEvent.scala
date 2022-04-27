@@ -16,7 +16,7 @@ object AmiEvent {
         targetAccounts <- c.downField("targetAccounts").as[List[String]]
         name <- c.downField("name").as[String]
         description <- c.downField("description").as[String]
-        tags <- c.downField("tags").as[Map[String,String]]
+        tags <- c.downField("tags").as[Map[String, String]]
       } yield {
         new AmiEvent(sourceAmi, sourceRegion, targetAccounts, name, description, tags)
       }

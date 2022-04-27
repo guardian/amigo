@@ -1,10 +1,10 @@
 package models
 
-import com.gu.scanamo.DynamoFormat
+import org.scanamo.DynamoFormat
 import models.packer.PackerProvisionerConfig
 import org.joda.time.DateTime
 import cats.syntax.either._
-import com.gu.scanamo.error.TypeCoercionError
+import org.scanamo.TypeCoercionError
 import BakeId.toMetadata
 import BakeId.toFilename
 import data.PackageList
@@ -18,8 +18,7 @@ sealed trait LinuxDist {
 object LinuxDist {
   implicit val dynamoFormat: DynamoFormat[LinuxDist] =
     DynamoFormat.xmap[LinuxDist, String](value => Either.fromOption(
-      LinuxDist.create(value), TypeCoercionError(new RuntimeException(s"$value is not a known LinuxDist"))
-    ))(_.name)
+      LinuxDist.create(value), TypeCoercionError(new RuntimeException(s"$value is not a known LinuxDist"))), _.name)
 
   def create(name: String): Option[LinuxDist] = all.get(name)
 
@@ -44,9 +43,7 @@ case object Ubuntu extends LinuxDist {
       // ansible ppa broken in ubuntu: https://github.com/ansible/ansible/issues/69203
       // and available in https://packages.ubuntu.com/focal/ansible
       "apt-get --yes update",
-      "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible"
-    ))
-  )
+      "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible")))
   def savePackageListCommand(bakeId: BakeId) =
     s"dpkg-query -W > ${LinuxDist.packageListTempPath(bakeId)}"
 }
@@ -59,9 +56,7 @@ case object RedHat extends LinuxDist {
       "rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm",
       "yum -y update",
       "yum -y install ansible",
-      "yum -y install libselinux-python-2.0.94-7.el6"
-    ))
-  )
+      "yum -y install libselinux-python-2.0.94-7.el6")))
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
 
@@ -76,9 +71,7 @@ case object AmazonLinux2 extends LinuxDist {
       "yum -y update",
       "yum -y install amazon-linux-extras", // should be a no-op
       "amazon-linux-extras enable ansible2",
-      "yum -y install ansible"
-    ))
-  )
+      "yum -y install ansible")))
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
 }

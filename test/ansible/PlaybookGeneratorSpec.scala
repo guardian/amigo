@@ -17,26 +17,22 @@ class PlaybookGeneratorSpec extends AnyFlatSpec with Matchers {
         amiId = AmiId(""),
         builtinRoles = List(
           CustomisedRole(RoleId("builtinRole1"), Map("foo" -> SingleParamValue("bar"))),
-          CustomisedRole(RoleId("builtinRole2"), Map.empty)
-        ),
+          CustomisedRole(RoleId("builtinRole2"), Map.empty)),
         createdBy = "Testy McTest",
         createdAt = DateTime.now(),
         modifiedBy = "Testy McTest",
-        modifiedAt = DateTime.now()
-      ),
+        modifiedAt = DateTime.now()),
       diskSize = None,
       roles = List(
         CustomisedRole(RoleId("recipeRole1"), Map("wow" -> ListParamValue.of("yeah", "bonza", "needs!quoting"))),
         CustomisedRole(RoleId("recipeRole7"), Map("wow" -> DictParamValue(Map("yeah" -> SingleParamValue("http://fdsfds.fdsfds/fdsfds/fds"))))),
-        CustomisedRole(RoleId("recipeRole2"), Map.empty)
-      ),
+        CustomisedRole(RoleId("recipeRole2"), Map.empty)),
       createdBy = "Testy McTest",
       createdAt = DateTime.now(),
       modifiedBy = "Testy McTest",
       modifiedAt = DateTime.now(),
       bakeSchedule = None,
-      encryptFor = Nil
-    )
+      encryptFor = Nil)
 
     PlaybookGenerator.generatePlaybook(recipe, Map("var1" -> "value1", "var2" -> "value2")) should be(
       """---
@@ -52,8 +48,7 @@ class PlaybookGeneratorSpec extends AnyFlatSpec with Matchers {
         |    - { role: recipeRole1, wow: [yeah, bonza, 'needs!quoting'] }
         |    - { role: recipeRole7, wow: {yeah: 'http://fdsfds.fdsfds/fdsfds/fds'} }
         |    - recipeRole2
-        |""".stripMargin
-    )
+        |""".stripMargin)
   }
 
 }

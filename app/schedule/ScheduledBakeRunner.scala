@@ -7,8 +7,8 @@ import packer.{ PackerConfig, PackerRunner }
 import services.{ AmiMetadataLookup, Loggable, PrismData }
 
 class ScheduledBakeRunner(stage: String, enabled: Boolean, prism: PrismData, eventBus: EventBus,
-    ansibleVars: Map[String, String], amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String],
-    packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
+  ansibleVars: Map[String, String], amiMetadataLookup: AmiMetadataLookup, amigoDataBucket: Option[String],
+  packerRunner: PackerRunner)(implicit dynamo: Dynamo, packerConfig: PackerConfig) extends Loggable {
 
   def bake(recipeId: RecipeId): Unit = {
     if (!enabled) {

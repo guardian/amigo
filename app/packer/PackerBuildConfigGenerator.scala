@@ -48,8 +48,7 @@ object PackerBuildConfigGenerator {
         "AmigoStage" -> amigoStage,
         "Stack" -> stack,
         "App" -> "{{user `recipe`}}",
-        "BakeId" -> s"${bake.bakeId.toString}"
-      ),
+        "BakeId" -> s"${bake.bakeId.toString}"),
       ami_name = imageDetails.name,
       ami_description = imageDetails.description,
       ami_users = awsAccounts,
@@ -58,8 +57,7 @@ object PackerBuildConfigGenerator {
       tags = imageDetails.tags,
       ami_block_device_mappings = disk,
       launch_block_device_mappings = disk,
-      security_group_id = packerConfig.securityGroupId
-    )
+      security_group_id = packerConfig.securityGroupId)
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
 
@@ -71,14 +69,12 @@ object PackerBuildConfigGenerator {
     }.toSeq
 
     val provisioners = baseImage.provisioners ++ Seq(
-      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
-    ) ++ uploadPackagesCommand
+      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))) ++ uploadPackagesCommand
 
     PackerBuildConfig(
       variables,
       Seq(builder),
-      provisioners
-    )
+      provisioners)
   }
 
 }

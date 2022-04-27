@@ -18,8 +18,7 @@ class NotificationSender(sns: SNS, region: String, stage: String) extends Loggab
       "targetAccounts" -> Json.toJson(bake.recipe.encryptFor.map(_.accountNumber)),
       "name" -> imageDetails.name,
       "description" -> imageDetails.description,
-      "tags" -> imageDetails.tags
-    )
+      "tags" -> imageDetails.tags)
     val messageStr = Json.stringify(message)
     log.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
     sns.client.publish(new PublishRequest().withTopicArn(sns.topicArn).withMessage(messageStr))

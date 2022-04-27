@@ -26,17 +26,13 @@ object BakeEvent {
         "log" -> JsObject(Seq(
           "level" -> JsString(log.logLevel),
           "number" -> JsNumber(log.logNumber),
-          "messageHtml" -> JsString(log.messageHtml.toString)
-        ))
-      ))
+          "messageHtml" -> JsString(log.messageHtml.toString)))))
       case AmiCreated(_, amiId) => JsObject(Seq(
         "eventType" -> JsString("ami-created"),
-        "amiId" -> JsString(amiId.value)
-      ))
+        "amiId" -> JsString(amiId.value)))
       case PackerProcessExited(_, exitCode) => JsObject(Seq(
         "eventType" -> JsString("packer-process-exited"),
-        "exitCode" -> JsNumber(exitCode)
-      ))
+        "exitCode" -> JsNumber(exitCode)))
     }
     json.toString()
   })

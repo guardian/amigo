@@ -1,11 +1,12 @@
 package models
 
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.TypeCoercionError
+import org.scanamo.DynamoFormat
+import org.scanamo.TypeCoercionError
+import org.scanamo.generic.auto.genericDerivedFormat
 
 case class CustomisedRole(
-    roleId: RoleId,
-    variables: Map[String, ParamValue]) {
+  roleId: RoleId,
+  variables: Map[String, ParamValue]) {
 
   def variablesToString = variables.map { case (k, v) => s"$k: $v" }.mkString("{ ", ", ", " }")
 
@@ -37,28 +38,28 @@ object ParamValue {
   implicit val format = DynamoFormat.xmap[ParamValue, String](
     fastparse.parse(_, CustomisedRole.paramValue(_)).fold(
       (_, _, _) => Left(TypeCoercionError(new RuntimeException("Unable to read ParamValue"))),
-      (pv, _) => Right(pv))
-  )(_.quoted)
+      (pv, _) => Right(pv)),
+    _.quoted)
 }
 
 object CustomisedRole {
   import fastparse._, ScalaWhitespace._
 
-  def key[_: P]: P[String] = P(CharsWhile(_ != ':').!)
+  def key[T: P]: P[String] = P(CharsWhile(_ != ':').!)
   def allowedUnquotedChars: Char => Boolean = c => c.isLetterOrDigit || c == '-' || c == '_' || c == '/' || c == '.'
-  def unquotedSingleValue[_: P]: P[SingleParamValue] = P(CharPred(allowedUnquotedChars).rep(1).!).map(SingleParamValue)
-  def quotedSingleValue[_: P]: P[SingleParamValue] = P("'" ~ CharsWhile(_ != '\'', 0).! ~ "'").map(SingleParamValue)
-  def singleValue[_: P]: P[SingleParamValue] = P(unquotedSingleValue | quotedSingleValue)
-  def multiValues[_: P]: P[ListParamValue] = P("[" ~/ singleValue.rep(sep = ",") ~ "]").map(
+  def unquotedSingleValue[T: P]: P[SingleParamValue] = P(CharPred(allowedUnquotedChars).rep(1).!).map(SingleParamValue)
+  def quotedSingleValue[T: P]: P[SingleParamValue] = P("'" ~ CharsWhile(_ != '\'', 0).! ~ "'").map(SingleParamValue)
+  def singleValue[T: P]: P[SingleParamValue] = P(unquotedSingleValue | quotedSingleValue)
+  def multiValues[T: P]: P[ListParamValue] = P("[" ~/ singleValue.rep(sep = ",") ~ "]").map(
     params => ListParamValue(params.toList))
-  def dictValues[_: P]: P[DictParamValue] = P("{" ~/ dictPair.rep(sep = ",") ~ "}").map {
+  def dictValues[T: P]: P[DictParamValue] = P("{" ~/ dictPair.rep(sep = ",") ~ "}").map {
     pairs => DictParamValue(pairs.toMap)
   }
-  def dictPair[_: P]: P[(String, SingleParamValue)] = P(key ~ ":" ~/ singleValue)
-  def paramValue[_: P]: P[ParamValue] = P(dictValues | multiValues | singleValue)
-  def pair[_: P]: P[(String, ParamValue)] = P(key ~ ":" ~ paramValue)
+  def dictPair[T: P]: P[(String, SingleParamValue)] = P(key ~ ":" ~/ singleValue)
+  def paramValue[T: P]: P[ParamValue] = P(dictValues | multiValues | singleValue)
+  def pair[T: P]: P[(String, ParamValue)] = P(key ~ ":" ~ paramValue)
 
-  def parameters[_: P]: P[Seq[(String, ParamValue)]] = P(Start ~ pair.rep(sep = ",") ~ End)
+  def parameters[T: P]: P[Seq[(String, ParamValue)]] = P(Start ~ pair.rep(sep = ",") ~ End)
 
   def formInputTextToVariables(input: String): Either[String, Map[String, ParamValue]] = {
     fastparse.parse(input, parameters(_)) match {

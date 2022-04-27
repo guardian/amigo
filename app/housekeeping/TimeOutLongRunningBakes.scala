@@ -1,9 +1,9 @@
 package housekeeping
 
-import housekeeping.utils.{BakesRepo, PackerEC2Client}
-import models.{Bake, BakeStatus}
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
+import models.{ Bake, BakeStatus }
 import org.joda.time.DateTime
-import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
+import org.quartz.{ ScheduleBuilder, SimpleScheduleBuilder, Trigger }
 import services.Loggable
 
 // This house keeping job is to mitigate against Amigo bakes that have failed, but have not reported as such.

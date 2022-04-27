@@ -3,11 +3,11 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.RootController.index
+GET     /                           controllers.RootController.index()
 
-GET     /base-images                controllers.BaseImageController.listBaseImages
-GET     /base-images/new            controllers.BaseImageController.newBaseImage
-POST    /base-images                controllers.BaseImageController.createBaseImage
+GET     /base-images                controllers.BaseImageController.listBaseImages()
+GET     /base-images/new            controllers.BaseImageController.newBaseImage()
+POST    /base-images                controllers.BaseImageController.createBaseImage()
 
 GET     /base-images/:id            controllers.BaseImageController.showBaseImage(id: BaseImageId)
 GET     /base-images/:id/edit       controllers.BaseImageController.editBaseImage(id: BaseImageId)
@@ -16,14 +16,14 @@ POST    /base-images/:id/clone      controllers.BaseImageController.cloneBaseIma
 GET     /base-images/:id/delete      controllers.BaseImageController.deleteConfirm(id: BaseImageId)
 POST    /base-images/:id/delete      controllers.BaseImageController.deleteBaseImage(id: BaseImageId)
 
-GET     /housekeeping                      controllers.HousekeepingController.showOrphans
-POST    /housekeeping/deleteOrphans        controllers.HousekeepingController.deleteOrphans
+GET     /housekeeping                      controllers.HousekeepingController.showOrphans()
+POST    /housekeeping/deleteOrphans        controllers.HousekeepingController.deleteOrphans()
 
-GET     /roles                      controllers.RoleController.listRoles
+GET     /roles                      controllers.RoleController.listRoles()
 
-GET     /recipes                    controllers.RecipeController.listRecipes
-GET     /recipes/new                controllers.RecipeController.newRecipe
-POST    /recipes                    controllers.RecipeController.createRecipe
+GET     /recipes                    controllers.RecipeController.listRecipes()
+GET     /recipes/new                controllers.RecipeController.newRecipe()
+POST    /recipes                    controllers.RecipeController.createRecipe()
 
 GET     /recipes/:id                controllers.RecipeController.showRecipe(id: RecipeId)
 GET     /recipes/:id/edit           controllers.RecipeController.editRecipe(id: RecipeId)
@@ -40,14 +40,14 @@ GET     /recipes/:recipeId/bakes/:buildNumber/packages  controllers.BakeControll
 GET     /recipes/:recipeId/bakes/:buildNumber/delete    controllers.BakeController.deleteConfirm(recipeId: models.RecipeId, buildNumber: Int)
 POST     /recipes/:recipeId/bakes/:buildNumber/delete   controllers.BakeController.deleteBake(recipeId: models.RecipeId, buildNumber: Int)
 
-GET     /bake-usages                 controllers.BakeController.allBakeUsages
+GET     /bake-usages                 controllers.BakeController.allBakeUsages()
 
 # Healthcheck
-GET     /healthcheck                controllers.RootController.healthcheck
+GET     /healthcheck                controllers.RootController.healthcheck()
 
 # Auth
-GET         /login                                                       controllers.Login.loginAction
-GET         /oauth2callback                                              controllers.Login.oauth2Callback
+GET         /login                                                       controllers.Login.loginAction()
+GET         /oauth2callback                                              controllers.Login.oauth2Callback()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

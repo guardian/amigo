@@ -11,7 +11,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class DeleteLongRunningEC2InstancesSpec extends AnyFlatSpec with Matchers with MockitoSugar with OptionValues {
 
@@ -44,8 +44,7 @@ class DeleteLongRunningEC2InstancesSpec extends AnyFlatSpec with Matchers with M
     when(instance.getInstanceId).thenReturn("3")
 
     when(packerEC2Client.getRunningPackerInstances()).thenReturn(
-      List(longRunningInstance1, longRunningInstance2, instance)
-    )
+      List(longRunningInstance1, longRunningInstance2, instance))
 
     housekeepingJob.runHouseKeeping(now.minusHours(1))
 

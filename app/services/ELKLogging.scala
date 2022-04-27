@@ -40,8 +40,7 @@ class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], aw
       "stack" -> identity.map(_.stack).getOrElse("unknown"),
       "region" -> region,
       "buildNumber" -> BuildInfo.buildNumber,
-      "instanceId" -> instanceId.getOrElse("unknown")
-    )
+      "instanceId" -> instanceId.getOrElse("unknown"))
     log.info(s"Logging with context map: $effective")
     effective
   }
@@ -94,7 +93,7 @@ class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], aw
 
   private def getRootLogger = LoggerFactory.getLogger(SLFLogger.ROOT_LOGGER_NAME).asInstanceOf[Logger]
 
-  def init() {
+  def init(): Unit = {
     val maybeStreamName = loggingStreamName
 
     if (maybeStreamName.isEmpty) log.info("Not configuring log shipping as stream not configured")

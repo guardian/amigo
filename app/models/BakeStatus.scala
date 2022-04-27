@@ -1,7 +1,7 @@
 package models
 
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.{ DynamoReadError, TypeCoercionError }
+import org.scanamo.DynamoFormat
+import org.scanamo.{ DynamoReadError, TypeCoercionError }
 import enumeratum._
 import cats.syntax.either._
 
@@ -20,9 +20,8 @@ object BakeStatus extends Enum[BakeStatus] {
   implicit val dynamoFormat = {
     def fromString(s: String): Either[DynamoReadError, BakeStatus] = Either.fromOption(
       withNameOption(s),
-      TypeCoercionError(new IllegalArgumentException(s"Invalid bake status: $s"))
-    )
-    DynamoFormat.xmap[BakeStatus, String](fromString)(_.entryName)
+      TypeCoercionError(new IllegalArgumentException(s"Invalid bake status: $s")))
+    DynamoFormat.xmap[BakeStatus, String](fromString, _.entryName)
   }
 
 }
