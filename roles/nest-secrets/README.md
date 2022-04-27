@@ -1,11 +1,7 @@
 # nest-secrets
 
-Installs the `nest-secrets` tool. Specify the desired version, for example
-`v1.0.0`. The full list of releases is
-[here](https://github.com/guardian/nest-secrets/releases).
+Installs the `nest-secrets` tool. Optionally, specify the desired version, for
+example `v1.3.0`.
 
-See the `nest-secrets` [README](https://github.com/guardian/nest-secrets) for
-more info.
-
-
-
+See the `nest-secrets` [repo](https://github.com/guardian/nest-secrets) for more
+info including available releases.

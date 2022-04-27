@@ -1,6 +1,8 @@
 ---
 - name: Download nest-secrets
   get_url:
-    url: "https://github.com/guardian/nest-secrets/releases/download/{{ version }}/nest-secrets-linux-amd64"
+    url: "https://github.com/guardian/nest-secrets/releases/download/{{ version }}/nest-secrets-linux-{{ deb_arch }}"
     dest: /usr/local/bin/nest-secrets
-    mode: '0111'
+    mode: "0111"
+  when:
+    - ansible_os_family == "Debian"
