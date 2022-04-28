@@ -120,9 +120,8 @@ class AppComponents(context: Context, identity: AppIdentity)
   val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV1)
 
   implicit val dynamo = {
-    val credentialsProvider = StaticCredentialsProvider.create(awsCredsForV2.resolveCredentials())
     val dynamoClient: DynamoDbClient = DynamoDbClient.builder()
-      .credentialsProvider(credentialsProvider)
+      .credentialsProvider(awsCredsForV2)
       .region(Region.of(region.getName))
       .build()
     new Dynamo(dynamoClient, stage)
