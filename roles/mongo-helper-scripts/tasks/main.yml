@@ -1,7 +1,0 @@
----
-- name: install ruby gems for helper scripts
-  gem: name={{item.name}} version={{item.version}} executable=true
-  with_items:
-    - { name: 'mongo', version: 2 }
-    - { name: 'bson', version: 3 }
-
