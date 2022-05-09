@@ -22,6 +22,9 @@
     </div>
 
     @b3.text( form("encryptFor"), Symbol("_label") -> "Request encrypted copy", Symbol("placeholder") -> "optional comma separated list of AWS account numbers" )
+    <div class="col-md-offset-2">
+      <span class="help-block">This is an optional comma separated list of <a target="_blank" href="https://docs.aws.amazon.com/general/latest/gr/acct-identifiers.html">AWS account identifiers</a> that the AMI produced will be available in.</span>
+    </div>
 
     @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), Symbol("_label") -> "Base image" )
 
