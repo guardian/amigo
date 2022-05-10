@@ -22,7 +22,10 @@
       <span class="help-block">This should be a weird Quartz cron expression (<a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger.html">docs</a>) (<a href="http://www.freeformatter.com/cron-expression-generator-quartz.html">online evaluator</a>)</span>
     </div>
 
-    @b3.text( form("encryptFor"), Symbol("_label") -> "Request encrypted copy", Symbol("placeholder") -> "optional comma separated list of AWS account numbers" )
+    @b3.text( form("encryptFor"), Symbol("_label") -> "Request encrypted copy", Symbol("placeholder") -> "e.g. 123456789012, 210987654321" )
+    <div class="col-md-offset-2">
+      <span class="help-block">This is an optional comma separated list of <a target="_blank" href="https://docs.aws.amazon.com/general/latest/gr/acct-identifiers.html">AWS account identifiers</a> that the AMI produced will be available in.</span>
+    </div>
 
     @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), Symbol("_label") -> "Base image" )
 
