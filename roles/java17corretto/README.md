@@ -1,6 +1,9 @@
-Java 17 Corretto
-================
+# Java 17 Corretto
 
-This is the AWS flavour of the JVM for which support is provided via AWS enterprise agreements.
+Corretto is an openjdk-based Java distribution, published by Amazon, with
+various performance and other changes to better suit AWS.
 
-This role installs the JDK and also modifies the default DNS cache control to cache for 60s instead of forever.
+It is the recommended Java distribution to use at the Guardian.
+
+This role installs the JDK and also modifies the default DNS cache control to
+cache for 60s instead of forever.
