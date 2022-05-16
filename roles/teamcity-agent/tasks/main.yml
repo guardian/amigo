@@ -70,6 +70,7 @@
     source /opt/teamcity/.nvm/nvm.sh
     # Gallium is Node 16
     nvm install --lts=Gallium
+    nvm alias default 16
   become: yes
   become_user: teamcity
   args:
