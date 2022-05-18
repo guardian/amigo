@@ -1,6 +1,6 @@
 # CDK Base
 
-**Note: this role is experimental. It is safe to use but the precise behaviour
+**Note: this role is experimental. It is safe* to use but the precise behaviour
 and required tags are still subject to change.**
 
 This role includes boot tasks that the Guardian's EC2 CDK patterns and best
@@ -32,3 +32,5 @@ as this allows tag lookup without requiring remote AWS API calls at runtime._
 For more information on behaviour, see
 [instance-tag-discovery](https://github.com/guardian/instance-tag-discovery) and
 [devx-logs](https://github.com/guardian/devx-logs).
+
+\* **safe** here means you can add this role to a recipe without the tags being set on all instances using that recipe, it may however add a few seconds to startup time as the script(s) will still run on the instance at startup.
