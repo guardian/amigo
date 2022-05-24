@@ -42,7 +42,6 @@ Resources:
 EC2 instances must have the following IAM permissions:
 - `kinesis:DescribeStream` scoped to the Kinesis stream above
 - `kinesis:PutRecord` scoped to the Kinesis stream above
-- `autoscaling:DescribeAutoScalingInstances`
 - `ec2:DescribeTags`
 - `ec2:DescribeInstances`
 
@@ -83,7 +82,6 @@ Resources:
         - Effect: Allow
           Resource: '*'
           Action:
-          - autoscaling:DescribeAutoScalingInstances
           - ec2:DescribeTags
           - ec2:DescribeInstances
   InstanceProfile:
