@@ -1,34 +1,111 @@
 # CDK Base
 
-**Note: this role is experimental. It is safe to use but the precise behaviour
+**Note: this role is experimental. It is safe to use but the precise behaviour 
 and required tags are still subject to change.**
 
-This role includes boot tasks that the Guardian's EC2 CDK patterns and best
+This role includes boot tasks that the Guardian's EC2 CDK patterns and best 
 practices rely on.
 
 At the moment this means the following:
+- fetch instance tags and store under `/etc/config` (via [`instance-tag-discovery`](https://github.com/guardian/instance-tag-discovery))
+- ship cloud-init logs to a Kinesis stream (via [`devx-logs`](https://github.com/guardian/devx-logs))
 
-- fetch instance tags and store under /etc/config
-- ship cloud-init logs to a Kinesis stream
+## Requirements
+ℹ If you are using [`@guardian/cdk`](http://github.com/guardian/cdk) version 41.1.0 or greater, these requirements are met automatically.
 
-To ship logs, ensure your instance has the following tag:
+### Kinesis
+EC2 instances must have a `LogKinesisStreamName` tag.
 
-    LogKinesisStreamName
+We ship logs into the Central ELK stack via a Kinesis stream. `devx-logs` discovers this stream via the `LogKinesisStreamName` tag on the EC2 instance.
 
-set to the name of your logging Kinesis stream.
+<details>
+<summary>CFN YAML snippet</summary>
 
-Also ensure your instances have permissions, scoped to the same Kinesis stream:
+```yaml
+Parameters:
+  LoggingStreamName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: SSM parameter containing the Name (not ARN) on the kinesis stream
+    Default: /account/services/logging.stream.name
+Resources:
+  MyAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      Tags:
+       - Key: LogKinesisStreamName
+         Value: !Ref LoggingStreamName
+         PropagateAtLaunch: true
+```
+</details>
 
-    kinesis:DescribeStream
-    kinesis:PutRecord
+### IAM permissions
+EC2 instances must have the following IAM permissions:
+- `kinesis:DescribeStream` scoped to the Kinesis stream above
+- `kinesis:PutRecord` scoped to the Kinesis stream above
+- `autoscaling:DescribeAutoScalingInstances`
+- `ec2:DescribeTags`
+- `ec2:DescribeInstances`
 
-If you are using @guardian/cdk version 41.1.0 or greater the required tag and
-permissions are automatically added.
+<details>
+<summary>CFN YAML snippet</summary>
+
+```yaml
+Parameters:
+  LoggingStreamName:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: SSM parameter containing the Name (not ARN) on the kinesis stream
+    Default: /account/services/logging.stream.name
+Resources:
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+  InstancePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+      - !Ref InstanceRole
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - kinesis:DescribeStream
+          - kinesis:PutRecord
+          Resource: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${LoggingStreamName}'
+        - Effect: Allow
+          Resource: '*'
+          Action:
+          - autoscaling:DescribeAutoScalingInstances
+          - ec2:DescribeTags
+          - ec2:DescribeInstances
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref InstanceRole
+  MyAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref 'MyLaunchConfig'
+      Tags:
+       - Key: LogKinesisStreamName
+         Value: !Ref LoggingStreamName
+  MyLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      IamInstanceProfile: !Ref 'InstanceProfile' 
+```
+</details>
 
 _While not required, it is strongly recommended to [enable tag metadata on your
 instance](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-launchtemplate-launchtemplatedata-metadataoptions.html#cfn-ec2-launchtemplate-launchtemplatedata-metadataoptions-instancemetadatatags)
 as this allows tag lookup without requiring remote AWS API calls at runtime._
-
-For more information on behaviour, see
-[instance-tag-discovery](https://github.com/guardian/instance-tag-discovery) and
-[devx-logs](https://github.com/guardian/devx-logs).
