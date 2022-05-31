@@ -122,7 +122,7 @@
 
 - name: Patch wazuh-agent service to call boot script before starting agent
   lineinfile:
-    path: /etc/systemd/system/wazuh-agent.service
+    path: /usr/lib/systemd/system/wazuh-agent.service
     insertbefore: '^ExecStart'
     line: ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh
 
