@@ -128,7 +128,7 @@
   with_items:
     - "ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh"
     - "Restart=on-failure"
-    - "RestartSec=120s"
+    - "RestartSec=300s"
 
 - name: Enable wazuh-agent service
   service:
