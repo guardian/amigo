@@ -122,7 +122,7 @@
 
 - name: Patch wazuh-agent service to call boot script before starting agent and restart on failure
   lineinfile:
-    path: /etc/systemd/system/wazuh-agent.service
+    path: /lib/systemd/system/wazuh-agent.service
     insertbefore: '^ExecStart'
     line: "{{ item }}"
   with_items:
