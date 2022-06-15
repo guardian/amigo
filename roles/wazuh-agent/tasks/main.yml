@@ -120,15 +120,10 @@
       fi
 
 
-- name: Patch wazuh-agent service to call boot script before starting agent and restart on failure
-  lineinfile:
-    path: /lib/systemd/system/wazuh-agent.service
-    insertbefore: '^ExecStart'
-    line: "{{ item }}"
-  with_items:
-    - "ExecStartPre=/usr/local/bin/authenticate-with-wazuh-manager.sh"
-    - "Restart=on-failure"
-    - "RestartSec=300s"
+- name: Template wazuh-agent systemd service file
+  template:
+    src: templates/wazuh-agent.service.template
+    dest: /etc/systemd/system/wazuh-agent.service
 
 - name: Enable wazuh-agent service
   service:
