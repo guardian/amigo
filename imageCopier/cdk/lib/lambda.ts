@@ -1,7 +1,7 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { CfnCondition, CfnParameter, Duration, Fn } from 'aws-cdk-lib';
+import { CfnParameter, Duration, Fn } from 'aws-cdk-lib';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SnsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -12,20 +12,10 @@ export class Lambda extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
-		const functionCodeBucketParam = new CfnParameter(
-			this,
-			'FunctionCodeBucket',
-			{
-				description: 'The S3 bucket from which to download the lambda function',
-				type: 'String',
-				default: 'deploy-tools-dist',
-			},
-		);
-
 		const functionCodeBucket = Bucket.fromBucketName(
 			this,
 			'function-code-bucket',
-			functionCodeBucketParam.valueAsString,
+			'deploy-tools-dist',
 		);
 
 		const kmsKeyArnParam = new CfnParameter(this, 'KmsKeyArn', {
@@ -34,21 +24,7 @@ export class Lambda extends GuStack {
 			default: '',
 		});
 
-		new CfnCondition(this, 'ImportKmsKeyArn', {
-			expression: Fn.conditionEquals(kmsKeyArnParam.valueAsString, ''),
-		});
-
-		const kmsKeyArn = Fn.conditionIf(
-			'ImportKmsKeyArn',
-			Fn.importValue('amigo-imagecopier-key'),
-			kmsKeyArnParam.valueAsString,
-		).toString();
-
-		const encryptedTagValueParam = new CfnParameter(this, 'EncryptedTagValue', {
-			description: 'The value of the Encrypted tag on the created AMI',
-			type: 'String',
-			default: true,
-		});
+		const kmsKeyArn = Fn.importValue('amigo-imagecopier-key');
 
 		const housekeepingTopicParam = new CfnParameter(
 			this,
@@ -83,7 +59,7 @@ export class Lambda extends GuStack {
 			environment: {
 				ACCOUNT_ID: this.account,
 				KMS_KEY_ARN: kmsKeyArn,
-				ENCRYPTED_TAG_VALUE: encryptedTagValueParam.valueAsString,
+				ENCRYPTED_TAG_VALUE: 'true',
 			},
 			code: Code.fromBucket(
 				functionCodeBucket,
@@ -138,7 +114,7 @@ export class Lambda extends GuStack {
 			environment: {
 				ACCOUNT_ID: this.account,
 				KMS_KEY_ARN: kmsKeyArn,
-				ENCRYPTED_TAG_VALUE: encryptedTagValueParam.valueAsString,
+				ENCRYPTED_TAG_VALUE: 'true',
 			},
 			code: Code.fromBucket(
 				functionCodeBucket,
