@@ -1,6 +1,6 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { KMSKey } from './kms';
+import { KMSKey } from './image-copier-kms';
 
 describe('The kms key stack', () => {
 	it('matches the snapshot', () => {
