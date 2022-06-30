@@ -117,10 +117,11 @@ export class AmigoStack extends GuStack {
     this.dataBucket = new GuS3Bucket(this, "AmigoDataBucket", {
       app: AmigoStack.app.app,
       bucketName: `amigo-data-${this.stage.toLowerCase()}`,
-      existingLogicalId: {
-        logicalId: "AmigoDataBucket",
-        reason: "To prevent orphaning of the YAML defined bucket",
-      },
+    });
+
+    this.overrideLogicalId(this.dataBucket, {
+      logicalId: "AmigoDataBucket",
+      reason: "To prevent orphaning of the YAML defined bucket",
     });
 
     const ssmPolicy = GuSSMRunCommandPolicy.getInstance(this);
@@ -184,7 +185,7 @@ export class AmigoStack extends GuStack {
       this.appPolicy,
     ];
 
-    new GuSecurityGroup(this, "PackerSecurityGroup", {
+    const sg = new GuSecurityGroup(this, "PackerSecurityGroup", {
       ...AmigoStack.app,
       vpc: GuVpc.fromIdParameter(this, "vpc"),
 
@@ -203,11 +204,12 @@ export class AmigoStack extends GuStack {
           description: "Allow all outbound TCP",
         },
       ],
-      existingLogicalId: {
-        logicalId: "PackerSecurityGroup",
-        reason:
-          "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
-      },
+    });
+
+    this.overrideLogicalId(sg, {
+      logicalId: "PackerSecurityGroup",
+      reason:
+        "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
     });
 
     const artifactPath = [
