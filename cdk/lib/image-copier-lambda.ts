@@ -60,13 +60,7 @@ export class ImageCopierLambda extends GuStack {
         new PolicyStatement({
           effect: Effect.ALLOW,
           actions: ["kms:Encrypt", "kms:Decrypt", "kms:CreateGrant", "kms:GenerateDataKey*", "kms:DescribeKey"],
-          resources: [
-            Fn.conditionIf(
-              "ImportKmsKeyArn",
-              Fn.importValue("amigo-imagecopier-key"),
-              kmsKeyArnParam.valueAsString
-            ).toString(),
-          ],
+          resources: [Fn.importValue("amigo-imagecopier-key")],
         }),
       ],
     });

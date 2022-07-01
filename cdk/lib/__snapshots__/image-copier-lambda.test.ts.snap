@@ -375,15 +375,7 @@ Object {
               ],
               "Effect": "Allow",
               "Resource": Object {
-                "Fn::If": Array [
-                  "ImportKmsKeyArn",
-                  Object {
-                    "Fn::ImportValue": "amigo-imagecopier-key",
-                  },
-                  Object {
-                    "Ref": "KmsKeyArn",
-                  },
-                ],
+                "Fn::ImportValue": "amigo-imagecopier-key",
               },
             },
           ],
