@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The kms key stack matches the snapshot 1`] = `
+Object {
+  "Outputs": Object {
+    "AmigoImageCopierKey": Object {
+      "Description": "Amigo image copier key arn",
+      "Export": Object {
+        "Name": "amigo-imagecopier-key",
+      },
+      "Value": Object {
+        "Fn::GetAtt": Array [
+          "KmsKey",
+          "Arn",
+        ],
+      },
+    },
+  },
+  "Resources": Object {
+    "KmsKey": Object {
+      "DeletionPolicy": "Retain",
+      "Properties": Object {
+        "EnableKeyRotation": true,
+        "KeyPolicy": Object {
+          "Statement": Array [
+            Object {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:iam::",
+                      Object {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+              "Sid": "Enable IAM User Permissions",
+            },
+            Object {
+              "Action": Array [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey",
+                "kms:CreateGrant",
+              ],
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:iam::",
+                      Object {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+              "Sid": "Allow use of the key",
+            },
+            Object {
+              "Action": "kms:CreateGrant",
+              "Condition": Object {
+                "Bool": Object {
+                  "kms:GrantIsForAWSResource": true,
+                },
+              },
+              "Effect": "Allow",
+              "Principal": Object {
+                "AWS": Object {
+                  "Fn::Join": Array [
+                    "",
+                    Array [
+                      "arn:aws:iam::",
+                      Object {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+              "Sid": "Allow attachment of persistent resources",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": Array [
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "cdk",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+}
+`;
