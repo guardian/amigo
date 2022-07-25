@@ -62,11 +62,11 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
 val jacksonVersion = "2.13.1"
-val awsVersion = "1.12.192"
+val awsVersion = "1.12.267"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.192"
+val awsV1SdkVersion = "1.12.267"
 val awsV2SdkVersion = "2.16.104"
 
 libraryDependencies ++= Seq(
