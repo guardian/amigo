@@ -61,7 +61,7 @@ lazy val root = (project in file("."))
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-val jacksonVersion = "2.13.1"
+val jacksonVersion = "2.13.3"
 val awsVersion = "1.12.192"
 val circeVersion = "0.14.1"
 
