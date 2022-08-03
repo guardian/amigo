@@ -1,6 +1,8 @@
 name: CI
 on:
   pull_request:
+    branches-ignore:
+      - dependency-updates
   workflow_dispatch:
   push:
     branches:
