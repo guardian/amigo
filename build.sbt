@@ -82,7 +82,7 @@ libraryDependencies ++= Seq(
   "com.gu.play-googleauth" %% "play-v28" % "2.2.2",
   "com.gu.play-secret-rotation" %% "play-v28" % "0.33",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.33",
-  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3",
+  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4",
   "org.quartz-scheduler" % "quartz" % "2.3.2",
   "com.lihaoyi" %% "fastparse" % "2.2.2",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
