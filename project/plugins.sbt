@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.15")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16")
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.9")
 addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "1.1.18")
