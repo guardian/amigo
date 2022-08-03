@@ -8,7 +8,7 @@ import scalariform.formatter.preferences._
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.8"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -109,7 +109,7 @@ routesImport += "models._"
 lazy val imageCopier = (project in file("imageCopier"))
     .enablePlugins(JavaAppPackaging)
   .settings(
-    scalaVersion := "2.13.7",
+    scalaVersion := "2.13.8",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
