@@ -84,7 +84,7 @@ libraryDependencies ++= Seq(
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.33",
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B4",
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "2.2.4",
+  "com.lihaoyi" %% "fastparse" % "2.3.3",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
