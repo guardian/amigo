@@ -48,9 +48,9 @@ lazy val root = (project in file("."))
       lazy val buildTime: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("UTC")))
 
       Seq[BuildInfoKey](
-        BuildInfoKey.constant("buildNumber", buildInfo.buildIdentifier),
-        BuildInfoKey.constant("buildTime", buildTime),
-        BuildInfoKey.constant("gitCommitId", buildInfo.revision)
+        BuildInfoKey("buildNumber" -> buildInfo.buildIdentifier),
+        BuildInfoKey("buildTime" -> buildTime),
+        BuildInfoKey("gitCommitId" -> buildInfo.revision)
       )
     },
     buildInfoOptions:= Seq(
