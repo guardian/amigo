@@ -1,49 +1,50 @@
 package components
 
 import akka.actor.typed.ActorSystem
-import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.{ AmazonClientException, AmazonWebServiceRequest, ClientConfiguration }
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
+import com.amazonaws.retry.{ PredefinedRetryPolicies, RetryPolicy }
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
-import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import com.amazonaws.services.ec2.{ AmazonEC2, AmazonEC2ClientBuilder }
+import com.amazonaws.services.s3.{ AmazonS3, AmazonS3ClientBuilder }
+import com.amazonaws.services.securitytoken.{ AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder }
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.securitytoken.{AWSSecurityTokenService, AWSSecurityTokenServiceClientBuilder}
-import com.amazonaws.services.sns.{AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder}
-import com.amazonaws.{AmazonClientException, AmazonWebServiceRequest, ClientConfiguration}
-import com.gu.googleauth.{AntiForgeryChecker, AuthAction, GoogleAuthConfig}
-import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV2, SecretSupplier}
-import com.gu.play.secretrotation.{RotatingSecretComponents, SnapshotProvider, TransitionTiming}
-import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
+import com.amazonaws.services.sns.{ AmazonSNSAsync, AmazonSNSAsyncClientBuilder, AmazonSNSClientBuilder }
+import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
+import com.gu.googleauth.{ AntiForgeryChecker, AuthAction, GoogleAuthConfig }
+import com.gu.play.secretrotation.aws.parameterstore.{ AwsSdkV2, SecretSupplier }
+import com.gu.play.secretrotation.{ RotatingSecretComponents, SnapshotProvider, TransitionTiming }
 import controllers._
-import data.{Dynamo, Recipes}
-import event.{ActorSystemWrapper, BakeEvent, Behaviours}
+import data.{ Dynamo, Recipes }
+import event.{ ActorSystemWrapper, BakeEvent, Behaviours }
 import housekeeping._
-import housekeeping.utils.{BakesRepo, PackerEC2Client}
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import models.NotificationConfig
-import notification.{LambdaDistributionBucket, NotificationSender, SNS}
+import notification.{ LambdaDistributionBucket, NotificationSender, SNS }
 import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import packer.{PackerConfig, PackerRunner}
-import play.api.ApplicationLoader.Context
+import packer.{ PackerConfig, PackerRunner }
 import play.api.BuiltInComponentsFromContext
+import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
-import play.api.mvc.{AnyContent, EssentialFilter}
+import play.api.mvc.{ AnyContent, EssentialFilter }
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
 import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
-import schedule.{BakeScheduler, ScheduledBakeRunner}
-import services.{AmiMetadataLookup, ElkLogging, Loggable, PrismData}
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProvider => AwsCredentialsProviderV2}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import schedule.{ BakeScheduler, ScheduledBakeRunner }
+import services.{ AmiMetadataLookup, ElkLogging, Loggable, PrismData }
 import software.amazon.awssdk.services.ssm.SsmClient
+import software.amazon.awssdk.auth.credentials.{ StaticCredentialsProvider, AwsCredentialsProviderChain => AwsCredentialsProviderChainV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2 }
+import software.amazon.awssdk.regions.Region
 
-import java.time.Duration.{ofHours, ofMinutes}
+import java.time.Duration.{ ofHours, ofMinutes }
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -65,12 +66,8 @@ class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   }
 }
 
-class AppComponents(
-  context: Context,
-  identity: AppIdentity,
-  awsCredsForV1: AWSCredentialsProvider,
-  awsCredsForV2: AwsCredentialsProviderV2
-) extends BuiltInComponentsFromContext(context)
+class AppComponents(context: Context, identity: AppIdentity)
+  extends BuiltInComponentsFromContext(context)
   with AhcWSComponents
   with I18nComponents
   with Loggable
@@ -85,6 +82,19 @@ class AppComponents(
   }
 
   def mandatoryConfig(key: String): String = configuration.get[Option[String]](key).getOrElse(sys.error(s"Missing config key: $key"))
+
+  val awsCredsForV1 = new AWSCredentialsProviderChain(
+    new ProfileCredentialsProvider("deployTools"),
+    new ProfileCredentialsProvider(),
+    InstanceProfileCredentialsProvider.getInstance())
+
+  val awsCredsForV2 = AwsCredentialsProviderChainV2
+    .builder()
+    .credentialsProviders(
+      ProfileCredentialsProviderV2.create("deployTools"),
+      ProfileCredentialsProviderV2.create(),
+      InstanceProfileCredentialsProviderV2.create())
+    .build()
 
   val region = Regions.EU_WEST_1
 

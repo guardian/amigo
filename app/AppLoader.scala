@@ -4,8 +4,6 @@ import play.api.libs.logback.LogbackLoggerConfigurator
 import play.api.{ Application, ApplicationLoader, Configuration, Mode }
 import components.AppComponents
 import play.api.ApplicationLoader.Context
-import play.api.libs.logback.LogbackLoggerConfigurator
-import play.api.{Application, ApplicationLoader, Configuration}
 import services.Loggable
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 
