@@ -117,7 +117,7 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   // initialise logging
   val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV1)
+  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV2)
 
   implicit val dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient.builder()
