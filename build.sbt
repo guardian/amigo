@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{ ZoneId, ZonedDateTime }
 import scalariform.formatter.preferences._
 
 name := "amigo"
@@ -62,12 +62,11 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
 val jacksonVersion = "2.13.3"
-val awsVersion = "1.12.277"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.277"
-val awsV2SdkVersion = "2.16.104"
+val awsV2SdkVersion = "2.17.248"
 
 libraryDependencies ++= Seq(
   ws,
@@ -91,12 +90,10 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
-  // These v2 dependencies are pinned to avoid a transitive dependency brought in via simple-configuration-ssm
-  // When we upgrade to the Scala 2.12 (or above) and the latest version of simple-configuration-ssm we should
-  // be able to remove them.
-  "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
-  "software.amazon.awssdk" % "autoscaling" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.0.1",
+  "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
   "com.gu" % "kinesis-logback-appender" % "2.0.3",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.11" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.11" % Test,
