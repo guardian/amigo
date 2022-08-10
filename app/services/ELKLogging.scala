@@ -5,7 +5,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.joran.spi.JoranException
 import ch.qos.logback.core.util.StatusPrinter
-import com.amazonaws.auth.AWSCredentialsProvider
 import com.gu.{ AppIdentity, AwsIdentity, DevIdentity }
 import com.gu.logback.appender.kinesis.KinesisAppender
 import net.logstash.logback.layout.LogstashLayout
@@ -13,11 +12,11 @@ import org.slf4j.{ LoggerFactory, Logger => SLFLogger }
 import play.api.libs.json.Json
 import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils
 import amigo.BuildInfo
-
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import scala.util.{ Success, Try }
 import scala.util.control.NonFatal
 
-class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], awsCredentialsProvider: AWSCredentialsProvider) extends Loggable {
+class ElkLogging(appIdentity: AppIdentity, loggingStreamName: Option[String], awsCredentialsProvider: AwsCredentialsProvider) extends Loggable {
 
   val identity = appIdentity match {
     case DevIdentity(_) => None
