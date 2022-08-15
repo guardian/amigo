@@ -81,8 +81,6 @@ libraryDependencies ++= Seq(
   "com.gu.play-secret-rotation" %% "play-v28" % "0.36",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.36",
   "com.gu.play-googleauth" %% "play-v28" % "2.2.6",
-  "com.gu.play-secret-rotation" %% "play-v28" % "0.33",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.33",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
