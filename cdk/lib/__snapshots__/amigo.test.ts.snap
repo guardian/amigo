@@ -2,6 +2,37 @@
 
 exports[`The Amigo stack matches the snapshot 1`] = `
 Object {
+  "Metadata": Object {
+    "gu:cdk:constructs": Array [
+      "GuStringParameter",
+      "GuS3Bucket",
+      "GuSSMRunCommandPolicy",
+      "GuLoggingStreamNameParameter",
+      "GuLogShippingPolicy",
+      "GuAllowPolicy",
+      "GuDescribeEC2Policy",
+      "GuAnghammaradTopicParameter",
+      "GuAnghammaradSenderPolicy",
+      "GuDistributionBucketParameter",
+      "GuVpcParameter",
+      "GuSecurityGroup",
+      "GuSubnetListParameter",
+      "GuCertificate",
+      "GuInstanceRole",
+      "GuGetDistributablePolicy",
+      "GuParameterStoreReadPolicy",
+      "GuAmiParameter",
+      "GuHttpsEgressSecurityGroup",
+      "GuAutoScalingGroup",
+      "GuWazuhAccess",
+      "GuSubnetListParameter",
+      "GuApplicationLoadBalancer",
+      "GuApplicationTargetGroup",
+      "GuHttpsApplicationListener",
+      "GuSecurityGroup",
+    ],
+    "gu:cdk:version": "47.3.0",
+  },
   "Outputs": Object {
     "LoadBalancerAmigoDnsName": Object {
       "Description": "DNS entry for LoadBalancerAmigo",
