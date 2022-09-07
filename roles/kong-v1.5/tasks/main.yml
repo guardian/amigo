@@ -1,0 +1,48 @@
+---
+- name: Install Kong's dependencies
+  apt:
+    name:
+    - netcat
+    - openssl
+    - libpcre3
+    - dnsmasq
+    - procps
+    - postgresql-client-{{postgres_version}}
+    state: latest
+
+- name: Create user for Kong
+  user: name={{kong_user}} system=yes
+
+- name: Overwrite kong.conf
+  copy: src=kong-{{kong_version}}.conf dest=/etc/kong.conf
+
+- name: Configure Kong log rotation
+  copy: src=kong.logrotate dest=/etc/logrotate.d/kong
+
+- name: Create /usr/local/kong directory
+  file: path=/usr/local/kong state=directory
+
+- name: Copy Kong configure.sh script
+  copy: src=configure.sh dest=/usr/local/kong/gu-configure.sh mode=u+x
+
+- name: Copy nginx.template file
+  copy: src=nginx.template dest=/usr/local/kong/nginx.template
+
+- name: Create shims directory
+  file: path=/usr/local/kong/shims state=directory
+
+- name: Copy Kong command shim
+  copy: src=kong-shim.sh dest=/usr/local/kong/shims/kong mode=a+x
+
+- name: Prepend shims directory to sudoers PATH
+  lineinfile: dest=/etc/sudoers regexp='^Defaults(.*)secure_path="(.*)"' line='Defaults\1secure_path="/usr/local/kong/shims:\2"' backrefs=yes
+
+- name: Copy truncate-ratelimiting_metrics.sh
+  copy: src=truncate-ratelimiting_metrics.sh dest=/usr/local/kong/truncate-ratelimiting_metrics.sh mode=u+x
+
+- name: Make 'kong user' own Kong
+  file: path=/usr/local/kong owner={{kong_user}} recurse=yes state=directory
+
+- name: Install truncation script crontab
+  cron: name="truncate ratelimiting_metrics table" minute=0 hour=*/2
+        user={{kong_user}} job="/usr/local/kong/truncate-ratelimiting_metrics.sh"

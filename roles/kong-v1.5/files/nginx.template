@@ -1,0 +1,19 @@
+worker_processes auto;
+daemon on;
+
+pid pids/nginx.pid;
+error_log logs/error.log notice;
+
+worker_rlimit_nofile 16384;
+
+events {
+  worker_connections 16384;
+  multi_accept on;
+}
+
+http {
+  proxy_buffer_size 128k;
+  proxy_buffers 4 256k;
+  proxy_busy_buffers_size 256k;
+  include 'nginx-kong.conf';
+}
