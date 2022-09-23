@@ -3,8 +3,10 @@ package data
 import org.scanamo.syntax._
 import models._
 import org.joda.time.DateTime
+import org.scanamo.DynamoReadError
+import services.Loggable
 
-object Bakes {
+object Bakes extends Loggable {
   import Dynamo._
 
   def create(recipe: Recipe, buildNumber: Int, startedBy: String)(implicit dynamo: Dynamo): Bake = {
@@ -93,12 +95,19 @@ object Bakes {
   }
 
   def findDeleted(limit: Int = 10)(implicit dynamo: Dynamo): List[Bake.DbModel] = {
-    table
+    val res = table
       .filter("deleted" === true)
       .limit(limit)
       .scan()
       .exec()
-      .flatMap(_.toOption)
+
+    res.foreach {
+      case Left(error) =>
+        log.error(s"findDeleted failed with a read error: ${DynamoReadError.describe(error)}")
+      case _ => // ignore
+    }
+
+    res.flatMap(_.toOption)
   }
 
   def deleteById(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
