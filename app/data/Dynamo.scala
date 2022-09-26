@@ -66,7 +66,14 @@ class Dynamo(val client: DynamoDbClient, stage: String) extends Loggable {
         .attributeDefinitions(generateAttributeDefinition("recipeId", ScalarAttributeType.S), generateAttributeDefinition("buildNumber", ScalarAttributeType.N))
         .tableName(tableName("bakes"))
         .provisionedThroughput(generateProvisionedThroughtput(1L, 1L))
-        .build())
+        .globalSecondaryIndexes(
+          GlobalSecondaryIndex.builder()
+            .indexName("DeletedIndex")
+            .keySchema(generateKeySchemaElement("deleted", KeyType.HASH))
+            .projection(Projection.builder().projectionType("ALL").build())
+            .provisionedThroughput(generateProvisionedThroughtput(1L, 1L))
+            .build()
+        ).build())
 
     val bakeLogs = table[BakeLog](
       CreateTableRequest.builder()
