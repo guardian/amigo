@@ -94,15 +94,9 @@ object Bakes extends Loggable {
       .exec()
   }
 
-  def findDeleted(limit: Int = 1000)(implicit dynamo: Dynamo): List[Bake.DbModel] = {
+  def findDeleted()(implicit dynamo: Dynamo): List[Bake.DbModel] = {
     val res = table
       .filter("deleted" === true)
-
-      // Note, this is a Dynamo limit so it doesn't do what you think!
-      // See:
-      // * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html#Scan.Limit
-      // * https://github.com/scanamo/scanamo/pull/996 (possible source of break when Scanamo was updated)
-      .limit(limit)
       .scan()
       .exec()
 
