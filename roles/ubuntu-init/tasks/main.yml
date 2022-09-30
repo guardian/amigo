@@ -9,13 +9,13 @@
   blockinfile:
     dest: /etc/security/limits.conf
     block: |
-      *  soft  nofile  16384
-      *  hard  nofile  16384
-      root  soft  nofile  16384
-      root  hard  nofile  16384
+      *  soft  nofile  {{ ulimit | default(16384) }}
+      *  hard  nofile  {{ ulimit | default(16384) }}
+      root  soft  nofile  {{ ulimit | default(16384) }}
+      root  hard  nofile  {{ ulimit | default(16384) }}
 
 - name: Bump ulimits for systemd
   blockinfile:
     dest: /etc/systemd/system.conf
     block: |
-      DefaultLimitNOFILE=65536
+      DefaultLimitNOFILE={{ ulimit | default(65536) }}
