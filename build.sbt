@@ -61,7 +61,7 @@ lazy val root = (project in file("."))
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-val jacksonVersion = "2.13.4"
+val jacksonVersion = "2.13.4.1"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
