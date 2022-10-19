@@ -5,6 +5,7 @@
 	rotate 4
 	compress
 	delaycompress
+	copytruncate
 	notifempty
 	nocreate
 	postrotate
