@@ -6,7 +6,6 @@ deployments:
   amigo:
     type: autoscaling
     parameters:
-      bucket: deploy-tools-dist
     dependencies:
       - cloudformation
   cloudformation:
@@ -25,6 +24,5 @@ deployments:
   imagecopier:
     type: aws-s3
     parameters:
-      bucket: deploy-tools-dist
       cacheControl: public, max-age=600
       publicReadAcl: false
