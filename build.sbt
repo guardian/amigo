@@ -61,11 +61,11 @@ lazy val root = (project in file("."))
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-val jacksonVersion = "2.13.4"
+val jacksonVersion = "2.14.0"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.314"
+val awsV1SdkVersion = "1.12.335"
 val awsV2SdkVersion = "2.17.248"
 
 libraryDependencies ++= Seq(
@@ -74,7 +74,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
-  "org.scanamo" %% "scanamo" % "1.0.0-M20",
+  "org.scanamo" %% "scanamo" % "1.0.0-M23",
   "com.beachape" %% "enumeratum" % "1.7.0",
   // Pin akka version until Play updates its own akka dependency
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19", // scala-steward:off
