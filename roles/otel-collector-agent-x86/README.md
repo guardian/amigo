@@ -14,8 +14,8 @@ By itself, applying this role will not start anything up on your instance.
 Once Amigo has installed the agent on your base image, you'll need to supply a configuration file during your instance's
 cloudformation setup.
 
-The agent lives in the path `/opt/aws/aws-otel-collector` and has its own startup script independent of systemd (I know, I know.....
-it wasn't me that designed it to work like that!)
+The agent lives in the path `/opt/aws/aws-otel-collector` and has its own startup script which then chains onto systemd
+(I know, I know..... it wasn't me that designed it to work like that!)
 
 At the end of your instance userdata script, you should start up the agent and point it to your configuration file like this:
 
@@ -50,6 +50,13 @@ exporters:
     endpoint: "{amazon managed prometheus write endpoint}"
     auth:
       authenticator: sigv4auth
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch/metrics]
+      exporters: [prometheusremotewrite]
 ```
 
 You will also need to **add permissions to allow your instance to write into Prometheus**.  This can be done
@@ -61,6 +68,13 @@ The service status can be checked by running:
 sudo /opt/aws/aws-otel-collector/bin/aws-otel-collector-ctl  -a status
 ```
 on your instance.
+
+OTEL agent logs can be found by running:
+
+```bash
+sudo journalctl -u aws-otel-collector -f 
+```
+as per usual.
 
 ### Enabling debug logging
 

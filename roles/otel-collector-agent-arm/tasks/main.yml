@@ -5,3 +5,7 @@
 - name: Install latest otel collector package
   apt: deb=https://aws-otel-collector.s3.amazonaws.com/ubuntu/arm64/latest/aws-otel-collector.deb state=present
 
+- name: Remove default otel configuration file
+  file:
+    state: absent
+    path: /opt/aws/aws-otel-collector/etc/config.yaml
