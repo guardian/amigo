@@ -1,0 +1,7 @@
+---
+- name: Add AWS OTEL key
+  apt_key: url=https://aws-otel-collector.s3.amazonaws.com/aws-otel-collector.gpg state=present
+
+- name: Install latest otel collector package
+  apt: deb=https://aws-otel-collector.s3.amazonaws.com/ubuntu/arm64/latest/aws-otel-collector.deb state=present
+
