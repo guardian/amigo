@@ -1,4 +1,0 @@
----
-kong_version: 0.14.0
-kong_user: content-api
-postgres_version: 10
