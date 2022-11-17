@@ -49,3 +49,15 @@
 - name: Install truncation script crontab
   cron: name="truncate ratelimiting_metrics table" minute=0 hour=*/2
         user={{kong_user}} job="/usr/local/kong/truncate-ratelimiting_metrics.sh"
+
+- name: Update logrotate master timer frequency
+  lineinfile:
+    dest: /lib/systemd/system/logrotate.timer
+    regexp: OnCalendar=(.*)$
+    line: OnCalendar=hourly
+
+- name: Update logrotate master timer window
+  lineinfile:
+    dest: /lib/systemd/system/logrotate.timer
+    regexp: AccuracySec=(.*)$
+    line: AccuracySec=5m
