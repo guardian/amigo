@@ -61,11 +61,11 @@ lazy val root = (project in file("."))
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 
-val jacksonVersion = "2.14.0"
+val jacksonVersion = "2.14.1"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.335"
+val awsV1SdkVersion = "1.12.353"
 val awsV2SdkVersion = "2.17.248"
 
 libraryDependencies ++= Seq(
@@ -95,7 +95,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
-  "com.gu" % "kinesis-logback-appender" % "2.1.0",
+  "com.gu" % "kinesis-logback-appender" % "2.1.1",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.14" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.14" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
