@@ -19,7 +19,7 @@ import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticlo
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
 
-const packerVersion = "1.6.6";
+const packerVersion = "1.8.4";
 
 export interface AmigoProps extends GuStackProps {
   domainName: string;
@@ -222,7 +222,7 @@ export class AmigoStack extends GuStack {
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
       userData: [
         "#!/bin/bash -ev",
-        `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_1.6.6_linux_arm64.zip`,
+        `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
         "mkdir /opt/packer",
         "unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip",
         "echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
