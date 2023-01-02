@@ -1,12 +1,18 @@
 package controllers
 
-import com.gu.googleauth.{ GoogleAuthConfig, LoginSupport }
+import com.gu.googleauth.{GoogleAuthConfig, LoginSupport}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class Login(val authConfig: GoogleAuthConfig, override val wsClient: WSClient, components: ControllerComponents)(implicit executionContext: ExecutionContext) extends AbstractController(components) with LoginSupport {
+class Login(
+    val authConfig: GoogleAuthConfig,
+    override val wsClient: WSClient,
+    components: ControllerComponents
+)(implicit executionContext: ExecutionContext)
+    extends AbstractController(components)
+    with LoginSupport {
 
   def loginAction = Action.async { implicit request =>
     startGoogleLogin()

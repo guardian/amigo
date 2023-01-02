@@ -1,8 +1,8 @@
 package housekeeping
 
 import com.amazonaws.services.ec2.model.Instance
-import housekeeping.utils.{ BakesRepo, PackerEC2Client }
-import models.{ Bake, BakeId, BakeStatus, RecipeId }
+import housekeeping.utils.{BakesRepo, PackerEC2Client}
+import models.{Bake, BakeId, BakeStatus, RecipeId}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -10,12 +10,16 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 
-class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with MockitoSugar {
+class TimeOutLongRunningBakesSpec
+    extends AnyFlatSpec
+    with Matchers
+    with MockitoSugar {
 
   trait Mocks {
     val bakesRepo: BakesRepo = mock[BakesRepo]
     val packerEC2Client: PackerEC2Client = mock[PackerEC2Client]
-    val housekeepingJob = new TimeOutLongRunningBakes(bakesRepo, packerEC2Client)
+    val housekeepingJob =
+      new TimeOutLongRunningBakes(bakesRepo, packerEC2Client)
   }
 
   "getBakesToTimeOut" should "should retrieve all bakes from database and filter the result to include only bakes that need to be timed out" in new Mocks {
@@ -32,7 +36,8 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None),
+            deleted = None
+          ),
           Bake.DbModel(
             recipeId = RecipeId("identity"),
             buildNumber = 3,
@@ -40,7 +45,8 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(30),
-            deleted = None),
+            deleted = None
+          ),
           Bake.DbModel(
             recipeId = RecipeId("dev-x"),
             buildNumber = 1,
@@ -48,7 +54,8 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(90),
-            deleted = None),
+            deleted = None
+          ),
           Bake.DbModel(
             recipeId = RecipeId("dev-x"),
             buildNumber = 2,
@@ -56,9 +63,13 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(61),
-            deleted = None)))
+            deleted = None
+          )
+        )
+      )
 
-    val bakesToTimeOut = housekeepingJob.getBakesToTimeOut(earliestStartedAt = now.minusHours(1))
+    val bakesToTimeOut =
+      housekeepingJob.getBakesToTimeOut(earliestStartedAt = now.minusHours(1))
 
     bakesToTimeOut shouldEqual List(
       Bake.DbModel(
@@ -68,7 +79,8 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
         amiId = None,
         startedBy = "amigo-test",
         startedAt = now.minusHours(2),
-        deleted = None),
+        deleted = None
+      ),
       Bake.DbModel(
         recipeId = RecipeId("dev-x"),
         buildNumber = 2,
@@ -76,7 +88,9 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
         amiId = None,
         startedBy = "amigo-test",
         startedAt = now.minusMinutes(61),
-        deleted = None))
+        deleted = None
+      )
+    )
   }
 
   "runHouseKeeping" should "update the status to TimedOut and delete the respective EC2 instance for each bake running over an hour" in new Mocks {
@@ -93,7 +107,8 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None),
+            deleted = None
+          ),
           Bake.DbModel(
             recipeId = RecipeId("identity"),
             buildNumber = 3,
@@ -101,13 +116,21 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusMinutes(30),
-            deleted = None)))
+            deleted = None
+          )
+        )
+      )
 
-    val overrunningBakeId: BakeId = BakeId(RecipeId("identity"), buildNumber = 1)
+    val overrunningBakeId: BakeId =
+      BakeId(RecipeId("identity"), buildNumber = 1)
     val overrunningInstance: Instance = mock[Instance]
-    when(overrunningInstance.getInstanceId).thenReturn("overrunning-instance-id")
+    when(overrunningInstance.getInstanceId).thenReturn(
+      "overrunning-instance-id"
+    )
 
-    when(packerEC2Client.getBakeInstance(ArgumentMatchers.eq(overrunningBakeId)))
+    when(
+      packerEC2Client.getBakeInstance(ArgumentMatchers.eq(overrunningBakeId))
+    )
       .thenReturn(Some(overrunningInstance))
 
     when(packerEC2Client.getRunningPackerInstances()).thenReturn(List.empty)
@@ -115,8 +138,12 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
     housekeepingJob.runHouseKeeping(earliestStartedAt = now.minusHours(1))
 
     // Check that we get overrunning instance and terminate it.
-    verify(packerEC2Client).getBakeInstance(ArgumentMatchers.eq(overrunningBakeId))
-    verify(packerEC2Client).terminateEC2Instance(ArgumentMatchers.eq("overrunning-instance-id"))
+    verify(packerEC2Client).getBakeInstance(
+      ArgumentMatchers.eq(overrunningBakeId)
+    )
+    verify(packerEC2Client).terminateEC2Instance(
+      ArgumentMatchers.eq("overrunning-instance-id")
+    )
 
     // Check we don't terminate the instances that aren't overruning.
     verifyNoMoreInteractions(packerEC2Client)
@@ -124,7 +151,9 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
     // Check we set the status of overrunning bakes to timed out
     verify(bakesRepo, times(1)).getBakes
     verify(bakesRepo, times(1))
-      .updateStatusToTimedOutIfRunning(ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1)))
+      .updateStatusToTimedOutIfRunning(
+        ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1))
+      )
 
     // Check that the status of bakes that aren't overruning aren't updated.
     verifyNoMoreInteractions(bakesRepo)
@@ -144,22 +173,32 @@ class TimeOutLongRunningBakesSpec extends AnyFlatSpec with Matchers with Mockito
             amiId = None,
             startedBy = "amigo-test",
             startedAt = now.minusHours(2),
-            deleted = None)))
+            deleted = None
+          )
+        )
+      )
 
-    val overrunningBakeId: BakeId = BakeId(RecipeId("identity"), buildNumber = 1)
+    val overrunningBakeId: BakeId =
+      BakeId(RecipeId("identity"), buildNumber = 1)
 
     // Simulate EC2 instance not being found.
-    when(packerEC2Client.getBakeInstance(ArgumentMatchers.eq(overrunningBakeId)))
+    when(
+      packerEC2Client.getBakeInstance(ArgumentMatchers.eq(overrunningBakeId))
+    )
       .thenReturn(None)
 
     housekeepingJob.runHouseKeeping(earliestStartedAt = now.minusHours(1))
 
     // Check that we get overrunning instance and terminate it.
-    verify(packerEC2Client).getBakeInstance(ArgumentMatchers.eq(overrunningBakeId))
+    verify(packerEC2Client).getBakeInstance(
+      ArgumentMatchers.eq(overrunningBakeId)
+    )
 
     // Check we still set the status of overrunning bakes to timed out.
     verify(bakesRepo, times(1)).getBakes
     verify(bakesRepo, times(1))
-      .updateStatusToTimedOutIfRunning(ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1)))
+      .updateStatusToTimedOutIfRunning(
+        ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1))
+      )
   }
 }

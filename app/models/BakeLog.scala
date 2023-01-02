@@ -21,9 +21,14 @@ object MessagePart {
 
 }
 
-case class BakeLog(bakeId: BakeId, logNumber: Int, timestamp: DateTime, logLevel: String, messageParts: List[MessagePart]) {
+case class BakeLog(
+    bakeId: BakeId,
+    logNumber: Int,
+    timestamp: DateTime,
+    logLevel: String,
+    messageParts: List[MessagePart]
+) {
 
   def messageHtml = Html(messageParts.map(_.toHtml).mkString)
 
 }
-
