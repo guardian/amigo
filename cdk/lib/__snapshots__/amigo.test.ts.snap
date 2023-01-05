@@ -30,6 +30,7 @@ Object {
       "GuApplicationTargetGroup",
       "GuHttpsApplicationListener",
       "GuSecurityGroup",
+      "GuStringParameter",
     ],
     "gu:cdk:version": "47.3.0",
   },
@@ -67,6 +68,10 @@ Object {
     "PackerInstanceProfile": Object {
       "Description": "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
       "Type": "String",
+    },
+    "PrimaryWedAclArn": Object {
+      "Default": "/account/services/waf/web-acl/primary",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "VpcId": Object {
       "Default": "/account/vpc/primary/id",
@@ -1114,6 +1119,17 @@ dpkg -i /tmp/amigo.deb",
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
+    },
+    "WebACLAssociation": Object {
+      "Properties": Object {
+        "ResourceArn": Object {
+          "Ref": "LoadBalancerAmigoC3017FAF",
+        },
+        "WebACLArn": Object {
+          "Ref": "PrimaryWedAclArn",
+        },
+      },
+      "Type": "AWS::WAFv2::WebACLAssociation",
     },
   },
 }

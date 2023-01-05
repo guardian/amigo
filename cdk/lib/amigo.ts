@@ -17,6 +17,7 @@ import type { App } from "aws-cdk-lib";
 import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
+import { CfnWebACLAssociation } from "aws-cdk-lib/aws-wafv2";
 
 const packerVersion = "1.6.6";
 
@@ -220,7 +221,7 @@ export class AmigoStack extends GuStack {
       "amigo_1.0-latest_all.deb",
     ].join("/");
 
-    const guPlayApp = new GuPlayApp(this, {
+    const { loadBalancer } = new GuPlayApp(this, {
       ...AmigoStack.app,
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
       userData: [
@@ -252,7 +253,17 @@ export class AmigoStack extends GuStack {
       app: AmigoStack.app.app,
       domainName: props.domainName,
       ttl: Duration.hours(1),
-      resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
+      resourceRecord: loadBalancer.loadBalancerDnsName,
+    });
+
+    const primaryWebAclArn = new GuStringParameter(this, "PrimaryWedAclArn", {
+      fromSSM: true,
+      default: "/account/services/waf/web-acl/primary",
+    }).valueAsString;
+
+    new CfnWebACLAssociation(this, "WebACLAssociation", {
+      resourceArn: loadBalancer.loadBalancerArn,
+      webAclArn: primaryWebAclArn,
     });
   }
 }
