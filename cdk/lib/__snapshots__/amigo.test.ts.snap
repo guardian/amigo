@@ -506,7 +506,7 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::EC2::SecurityGroup",
     },
-    "GuHttpsEgressSecurityGroupAmigofromAMIgoIdpaccessAmigo4AAB847A9000B7BF2D1B": Object {
+    "GuHttpsEgressSecurityGroupAmigofromAMIgoIdPaccessAmigo4AE1B4709000BF8805C1": Object {
       "Properties": Object {
         "Description": "Load balancer to target",
         "FromPort": 9000,
@@ -519,7 +519,7 @@ dpkg -i /tmp/amigo.deb",
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": Object {
           "Fn::GetAtt": Array [
-            "IdpaccessAmigo3AA037D6",
+            "IdPaccessAmigo15F4FC41",
             "GroupId",
           ],
         },
@@ -611,7 +611,7 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::IAM::Policy",
     },
-    "IdpaccessAmigo3AA037D6": Object {
+    "IdPaccessAmigo15F4FC41": Object {
       "Properties": Object {
         "GroupDescription": "Allow all outbound HTTPS traffic",
         "SecurityGroupEgress": Array [
@@ -651,7 +651,7 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::EC2::SecurityGroup",
     },
-    "IdpaccessAmigotoAMIgoGuHttpsEgressSecurityGroupAmigo34A5A8389000691E1B98": Object {
+    "IdPaccessAmigotoAMIgoGuHttpsEgressSecurityGroupAmigo34A5A83890007FBC5E83": Object {
       "Properties": Object {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": Object {
@@ -663,7 +663,7 @@ dpkg -i /tmp/amigo.deb",
         "FromPort": 9000,
         "GroupId": Object {
           "Fn::GetAtt": Array [
-            "IdpaccessAmigo3AA037D6",
+            "IdPaccessAmigo15F4FC41",
             "GroupId",
           ],
         },
@@ -741,7 +741,7 @@ dpkg -i /tmp/amigo.deb",
               "ClientId": Object {
                 "Ref": "ClientId",
               },
-              "ClientSecret": "{{resolve:secretsmanager:/PROD/deploy/amigo/client-secret:SecretString:::}}",
+              "ClientSecret": "{{resolve:secretsmanager:/PROD/deploy/amigo/clientSecret:SecretString:::}}",
               "Issuer": "https://accounts.google.com",
               "OnUnauthenticatedRequest": "authenticate",
               "Scope": "openid",
@@ -791,7 +791,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Fn::GetAtt": Array [
-              "IdpaccessAmigo3AA037D6",
+              "IdPaccessAmigo15F4FC41",
               "GroupId",
             ],
           },

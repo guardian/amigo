@@ -3,7 +3,7 @@ import { AccessScope } from "@guardian/cdk/lib/constants";
 import type { AppIdentity, GuStackProps } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
 import { GuCname } from "@guardian/cdk/lib/constructs/dns";
-import {GuHttpsEgressSecurityGroup, GuSecurityGroup, GuVpc} from "@guardian/cdk/lib/constructs/ec2";
+import { GuHttpsEgressSecurityGroup, GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
@@ -12,12 +12,12 @@ import {
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
-import {Duration, SecretValue} from "aws-cdk-lib";
+import { Duration, SecretValue } from "aws-cdk-lib";
 import type { App } from "aws-cdk-lib";
 import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
+import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
-import {ListenerAction, UnauthenticatedAction} from "aws-cdk-lib/aws-elasticloadbalancingv2";
 
 const packerVersion = "1.6.6";
 
@@ -256,18 +256,19 @@ export class AmigoStack extends GuStack {
       resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
 
-    const securityGroup = new GuHttpsEgressSecurityGroup(this, "Idp-access", {
+    // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
+    const albEgressSg = new GuHttpsEgressSecurityGroup(this, "IdP-access", {
       app: AmigoStack.app.app,
       vpc: guPlayApp.vpc,
     });
 
-    guPlayApp.loadBalancer.addSecurityGroup(securityGroup);
+    guPlayApp.loadBalancer.addSecurityGroup(albEgressSg);
 
     const clientId = new GuStringParameter(this, "ClientId", {
       description: "Google OAuth client ID",
     });
 
-    guPlayApp.listener.addAction("DefaultAction", {
+    guPlayApp.listener.addAction("Google Auth", {
       action: ListenerAction.authenticateOidc({
         authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
         issuer: "https://accounts.google.com",
@@ -279,9 +280,7 @@ export class AmigoStack extends GuStack {
 
         userInfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
         clientId: clientId.valueAsString,
-        clientSecret: SecretValue.secretsManager(
-          `/${this.stage}/deploy/amigo/client-secret`
-        ),
+        clientSecret: SecretValue.secretsManager(`/${this.stage}/deploy/amigo/clientSecret`),
         next: ListenerAction.forward([guPlayApp.targetGroup]),
       }),
     });
