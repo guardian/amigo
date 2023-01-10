@@ -93,7 +93,7 @@ Object {
   "Resources": Object {
     "AmigoCname": Object {
       "Properties": Object {
-        "Name": "amigo.gutools.co.uk",
+        "Name": "public.amigo.gutools.co.uk",
         "RecordType": "CNAME",
         "ResourceRecords": Array [
           Object {
@@ -341,6 +341,12 @@ unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
 echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
 dpkg -i /tmp/session-manager-plugin.deb
+mkdir /amigo
+aws --region eu-west-1 s3 cp s3://",
+                Object {
+                  "Ref": "DistributionBucketName",
+                },
+                "/deploy/PROD/amigo/conf/amigo-service-account-cert.json /amigo/
 aws --region eu-west-1 s3 cp s3://",
                 Object {
                   "Ref": "DistributionBucketName",
@@ -357,7 +363,7 @@ dpkg -i /tmp/amigo.deb",
     "CertificateAmigoE1AF5E0C": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "DomainName": "amigo.gutools.co.uk",
+        "DomainName": "public.amigo.gutools.co.uk",
         "Tags": Array [
           Object {
             "Key": "App",

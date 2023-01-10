@@ -1,10 +1,8 @@
 import com.gu.riffraff.artifact.BuildInfo
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
 import java.time.{ ZoneId, ZonedDateTime }
-import scalariform.formatter.preferences._
 
 name := "amigo"
 version := "1.0-latest"

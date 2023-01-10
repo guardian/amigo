@@ -5,15 +5,22 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
+import com.gu.googleauth.GoogleGroupChecker
 
-class Login(val authConfig: GoogleAuthConfig, override val wsClient: WSClient, components: ControllerComponents)(implicit executionContext: ExecutionContext) extends AbstractController(components) with LoginSupport {
+class Login(
+  val authConfig: GoogleAuthConfig,
+  override val wsClient: WSClient,
+  components: ControllerComponents,
+  requiredGoogleGroups: Set[String],
+  groupChecker: GoogleGroupChecker,
+)(implicit executionContext: ExecutionContext) extends AbstractController(components) with LoginSupport {
 
   def loginAction = Action.async { implicit request =>
     startGoogleLogin()
   }
 
   def oauth2Callback = Action.async { implicit request =>
-    processOauth2Callback()
+    processOauth2Callback(requiredGoogleGroups, groupChecker)
   }
 
   override val failureRedirectTarget: Call = routes.Login.loginAction()

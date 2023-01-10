@@ -213,13 +213,9 @@ export class AmigoStack extends GuStack {
         "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
     });
 
-    const artifactPath = [
-      GuDistributionBucketParameter.getInstance(this).valueAsString,
-      this.stack,
-      this.stage,
-      AmigoStack.app.app,
-      "amigo_1.0-latest_all.deb",
-    ].join("/");
+    const distBucket = GuDistributionBucketParameter.getInstance(this).valueAsString;
+
+    const artifactPath = [distBucket, this.stack, this.stage, AmigoStack.app.app, "amigo_1.0-latest_all.deb"].join("/");
 
     const guPlayApp = new GuPlayApp(this, {
       ...AmigoStack.app,
@@ -232,6 +228,10 @@ export class AmigoStack extends GuStack {
         "echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
         "wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb",
         "dpkg -i /tmp/session-manager-plugin.deb",
+
+        "mkdir /amigo",
+        `aws --region eu-west-1 s3 cp s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/amigo-service-account-cert.json /amigo/`,
+
         `aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
         "dpkg -i /tmp/amigo.deb",
       ].join("\n"),
