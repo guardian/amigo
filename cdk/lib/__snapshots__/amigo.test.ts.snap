@@ -29,7 +29,6 @@ Object {
       "GuApplicationLoadBalancer",
       "GuApplicationTargetGroup",
       "GuHttpsApplicationListener",
-      "GuSecurityGroup",
       "GuHttpsEgressSecurityGroup",
       "GuStringParameter",
     ],
@@ -554,27 +553,6 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
-    "GuHttpsEgressSecurityGroupAmigofromAMIgoRestrictedIngressSecurityGroupAmigoE4F60B0990004CAF7118": Object {
-      "Properties": Object {
-        "Description": "Load balancer to target",
-        "FromPort": 9000,
-        "GroupId": Object {
-          "Fn::GetAtt": Array [
-            "GuHttpsEgressSecurityGroupAmigo28861996",
-            "GroupId",
-          ],
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": Object {
-          "Fn::GetAtt": Array [
-            "RestrictedIngressSecurityGroupAmigoF34D371D",
-            "GroupId",
-          ],
-        },
-        "ToPort": 9000,
-      },
-      "Type": "AWS::EC2::SecurityGroupIngress",
-    },
     "GuLogShippingPolicy981BFE5A": Object {
       "Properties": Object {
         "PolicyDocument": Object {
@@ -791,12 +769,6 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Fn::GetAtt": Array [
-              "RestrictedIngressSecurityGroupAmigoF34D371D",
-              "GroupId",
-            ],
-          },
-          Object {
-            "Fn::GetAtt": Array [
               "IdPaccessAmigo15F4FC41",
               "GroupId",
             ],
@@ -834,6 +806,15 @@ dpkg -i /tmp/amigo.deb",
     "LoadBalancerAmigoSecurityGroup304D707B": Object {
       "Properties": Object {
         "GroupDescription": "Automatically created Security Group for ELB AMIgoLoadBalancerAmigo85BA3984",
+        "SecurityGroupIngress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow from anyone on port 443",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
         "Tags": Array [
           Object {
             "Key": "App",
@@ -1037,67 +1018,6 @@ dpkg -i /tmp/amigo.deb",
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "RestrictedIngressSecurityGroupAmigoF34D371D": Object {
-      "Properties": Object {
-        "GroupDescription": "Allow restricted ingress from CIDR ranges",
-        "SecurityGroupIngress": Array [
-          Object {
-            "CidrIp": "77.91.248.0/21",
-            "Description": "Allow access on port 443 from 77.91.248.0/21",
-            "FromPort": 443,
-            "IpProtocol": "tcp",
-            "ToPort": 443,
-          },
-        ],
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VpcId",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
-    },
-    "RestrictedIngressSecurityGroupAmigotoAMIgoGuHttpsEgressSecurityGroupAmigo34A5A8389000A797C6B3": Object {
-      "Properties": Object {
-        "Description": "Load balancer to target",
-        "DestinationSecurityGroupId": Object {
-          "Fn::GetAtt": Array [
-            "GuHttpsEgressSecurityGroupAmigo28861996",
-            "GroupId",
-          ],
-        },
-        "FromPort": 9000,
-        "GroupId": Object {
-          "Fn::GetAtt": Array [
-            "RestrictedIngressSecurityGroupAmigoF34D371D",
-            "GroupId",
-          ],
-        },
-        "IpProtocol": "tcp",
-        "ToPort": 9000,
-      },
-      "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SSMRunCommandPolicy244E1613": Object {
       "Properties": Object {

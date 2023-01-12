@@ -236,8 +236,7 @@ export class AmigoStack extends GuStack {
         "dpkg -i /tmp/amigo.deb",
       ].join("\n"),
       access: {
-        scope: AccessScope.RESTRICTED,
-        cidrRanges: [Peer.ipv4("77.91.248.0/21")],
+        scope: AccessScope.PUBLIC,
       },
       certificateProps: { domainName: props.domainName },
       scaling: { minimumInstances: 1 },
