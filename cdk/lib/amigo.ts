@@ -19,7 +19,7 @@ import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticlo
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
 
-const packerVersion = "1.8.4";
+const packerVersion = "1.8.5";
 
 export interface AmigoProps extends GuStackProps {
   domainName: string;
