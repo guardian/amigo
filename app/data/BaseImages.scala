@@ -8,41 +8,21 @@ object BaseImages {
   import Dynamo._
 
   def create(
-      id: BaseImageId,
-      description: String,
-      amiId: AmiId,
-      builtinRoles: List[CustomisedRole],
-      createdBy: String,
-      linuxDist: LinuxDist,
-      eolDate: Option[DateTime]
-  )(implicit dynamo: Dynamo): BaseImage = {
+    id: BaseImageId,
+    description: String,
+    amiId: AmiId,
+    builtinRoles: List[CustomisedRole],
+    createdBy: String,
+    linuxDist: LinuxDist,
+    eolDate: Option[DateTime])(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
-    val baseImage = BaseImage(
-      id,
-      description,
-      amiId,
-      builtinRoles,
-      createdBy,
-      createdAt = now,
-      modifiedBy = createdBy,
-      modifiedAt = now,
-      Some(linuxDist),
-      eolDate
-    )
+    val baseImage = BaseImage(id, description, amiId, builtinRoles, createdBy, createdAt = now, modifiedBy = createdBy, modifiedAt = now, Some(linuxDist), eolDate)
 
     table.put(baseImage).exec()
     baseImage
   }
 
-  def update(
-      baseImage: BaseImage,
-      description: String,
-      amiId: AmiId,
-      linuxDist: LinuxDist,
-      builtinRoles: List[CustomisedRole],
-      modifiedBy: String,
-      eolDate: DateTime
-  )(implicit dynamo: Dynamo): Unit = {
+  def update(baseImage: BaseImage, description: String, amiId: AmiId, linuxDist: LinuxDist, builtinRoles: List[CustomisedRole], modifiedBy: String, eolDate: DateTime)(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
       description = description,
       amiId = amiId,
@@ -50,8 +30,7 @@ object BaseImages {
       builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now(),
-      eolDate = Some(eolDate)
-    )
+      eolDate = Some(eolDate))
     table.put(updated).exec()
   }
 

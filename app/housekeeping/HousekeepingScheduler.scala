@@ -1,13 +1,10 @@
 package housekeeping
 
-import org.quartz.{JobDataMap, Scheduler}
+import org.quartz.{ JobDataMap, Scheduler }
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 
-class HousekeepingScheduler(
-    scheduler: Scheduler,
-    housekeepingJobs: List[HousekeepingJob]
-) {
+class HousekeepingScheduler(scheduler: Scheduler, housekeepingJobs: List[HousekeepingJob]) {
 
   def initialise(): Unit = {
     housekeepingJobs.foreach { housekeepingJob =>

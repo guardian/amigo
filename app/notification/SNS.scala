@@ -10,14 +10,9 @@ import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
 object SNS extends Loggable {
-  def listAwsResource[T](
-      request: Option[String] => (List[T], Option[String])
-  ): List[T] = {
+  def listAwsResource[T](request: Option[String] => (List[T], Option[String])): List[T] = {
     @tailrec
-    def listAwsResourceRec(
-        soFar: List[T],
-        nextToken: Option[String]
-    ): List[T] = {
+    def listAwsResourceRec(soFar: List[T], nextToken: Option[String]): List[T] = {
       nextToken match {
         case None => soFar
         case Some(next) =>
@@ -30,9 +25,7 @@ object SNS extends Loggable {
   }
 
   @tailrec
-  private def waitForTopicToBecomeAvailable(
-      arn: String
-  )(implicit client: AmazonSNS): Unit = {
+  private def waitForTopicToBecomeAvailable(arn: String)(implicit client: AmazonSNS): Unit = {
     if (!listTopicArns.exists(arn ==)) {
       log.info(s"Waiting for topic $arn to become available ...")
       Thread.sleep(500L)
@@ -40,26 +33,19 @@ object SNS extends Loggable {
     }
   }
 
-  def listTopicArns(implicit client: AmazonSNS): List[String] = SNS
-    .listAwsResource[Topic] { nextToken =>
-      val result = client.listTopics(
-        new ListTopicsRequest().withNextToken(nextToken.orNull)
-      )
-      result.getTopics.asScala.toList -> Option(result.getNextToken)
-    }
-    .map(_.getTopicArn)
+  def listTopicArns(implicit client: AmazonSNS): List[String] = SNS.listAwsResource[Topic] { nextToken =>
+    val result = client.listTopics(new ListTopicsRequest().withNextToken(nextToken.orNull))
+    result.getTopics.asScala.toList -> Option(result.getNextToken)
+  }.map(_.getTopicArn)
 
   def createTopic(topicName: String)(implicit client: AmazonSNS): String = {
-    val result =
-      client.createTopic(new CreateTopicRequest().withName(topicName))
+    val result = client.createTopic(new CreateTopicRequest().withName(topicName))
     val topicArn = result.getTopicArn
     SNS.waitForTopicToBecomeAvailable(topicArn)
     topicArn
   }
 
-  def updatePermissions(topicArn: String, accounts: Seq[String])(implicit
-      client: AmazonSNS
-  ): Unit = {
+  def updatePermissions(topicArn: String, accounts: Seq[String])(implicit client: AmazonSNS): Unit = {
     val removeRequest = new RemovePermissionRequest()
       .withTopicArn(topicArn)
       .withLabel("amigo_lambda_subs")
@@ -72,11 +58,9 @@ object SNS extends Loggable {
     client.addPermission(addRequest)
   }
 
-  def findOrCreateTopic(topicName: String, accountNumbers: Seq[String])(implicit
-      client: AmazonSNS
-  ): String = {
+  def findOrCreateTopic(topicName: String, accountNumbers: Seq[String])(implicit client: AmazonSNS): String = {
     val topicArn = listTopicArns.find(_.endsWith(s":$topicName")) match {
-      case None      => createTopic(topicName)
+      case None => createTopic(topicName)
       case Some(arn) => arn
     }
     updatePermissions(topicArn, accountNumbers)
@@ -84,14 +68,11 @@ object SNS extends Loggable {
   }
 }
 
-class SNS(sns: AmazonSNS, stage: String, accountNumbers: Seq[String])(implicit
-    exec: ExecutionContext
-) {
+class SNS(sns: AmazonSNS, stage: String, accountNumbers: Seq[String])(implicit exec: ExecutionContext) {
   implicit val client: AmazonSNS = sns
   val topicName: String = s"amigo-$stage-notify"
   val topicArn: String = SNS.findOrCreateTopic(topicName, accountNumbers)
 
   val housekeepingTopicName: String = s"amigo-$stage-housekeeping-notify"
-  val housekeepingTopicArn: String =
-    SNS.findOrCreateTopic(housekeepingTopicName, accountNumbers)
+  val housekeepingTopicArn: String = SNS.findOrCreateTopic(housekeepingTopicName, accountNumbers)
 }

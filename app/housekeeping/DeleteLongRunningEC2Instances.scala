@@ -1,10 +1,10 @@
 package housekeeping
 
 import com.amazonaws.services.ec2.model.Instance
-import housekeeping.utils.{BakesRepo, PackerEC2Client}
+import housekeeping.utils.{ BakesRepo, PackerEC2Client }
 import models.BakeId
 import org.joda.time.DateTime
-import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
+import org.quartz.{ ScheduleBuilder, SimpleScheduleBuilder, Trigger }
 import services.Loggable
 
 import scala.jdk.CollectionConverters._
@@ -15,20 +15,14 @@ import scala.jdk.CollectionConverters._
 // and therefore it's corresponding EC2 instance wouldn't be considered for termination.
 // To mitigate against this, 'go from the other direction' i.e. query for long running EC2 instances, terminate them
 // and then set the status of the corresponding bake to timed out (if it's status is Running).
-class DeleteLongRunningEC2Instances(
-    bakesRepo: BakesRepo,
-    packerEC2Client: PackerEC2Client
-) extends HousekeepingJob
-    with Loggable {
+class DeleteLongRunningEC2Instances(bakesRepo: BakesRepo, packerEC2Client: PackerEC2Client)
+  extends HousekeepingJob with Loggable {
 
   import DeleteLongRunningEC2Instances._
 
-  override val schedule: ScheduleBuilder[_ <: Trigger] =
-    SimpleScheduleBuilder.repeatMinutelyForever(20)
+  override val schedule: ScheduleBuilder[_ <: Trigger] = SimpleScheduleBuilder.repeatMinutelyForever(20)
 
-  def getRunningPackerInstancesLaunchedBefore(
-      dateTime: DateTime
-  ): List[Instance] =
+  def getRunningPackerInstancesLaunchedBefore(dateTime: DateTime): List[Instance] =
     packerEC2Client.getRunningPackerInstances().filter { instance =>
       val launchTime = new DateTime(instance.getLaunchTime)
       launchTime.isBefore(dateTime)
@@ -36,17 +30,14 @@ class DeleteLongRunningEC2Instances(
 
   def runHouseKeeping(earliestStartedAt: DateTime): Unit = {
 
-    val instancesToTerminate = getRunningPackerInstancesLaunchedBefore(
-      earliestStartedAt
-    )
+    val instancesToTerminate = getRunningPackerInstancesLaunchedBefore(earliestStartedAt)
 
     if (instancesToTerminate.isEmpty) {
       log.info("no instances found to terminate")
     } else {
       log.warn(
         s"instances found to terminate that were launched before $earliestStartedAt: " +
-          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}"
-      )
+          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}")
 
       instancesToTerminate.foreach { instance =>
         log.info(s"terminating instance ${instance.getInstanceId}")
@@ -54,9 +45,7 @@ class DeleteLongRunningEC2Instances(
 
         getBakeIdFromInstance(instance) match {
           case None =>
-            log.warn(
-              s"unable to get bake id for instance ${instance.getInstanceId}"
-            )
+            log.warn(s"unable to get bake id for instance ${instance.getInstanceId}")
           case Some(id) =>
             log.info(s"updating status of $id to timed out")
             bakesRepo.updateStatusToTimedOutIfRunning(id)

@@ -1,10 +1,10 @@
 package ansible
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{ Files, Path }
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import models.{Markdown, RoleId, RoleSummary, Yaml}
+import models.{ Markdown, RoleId, RoleSummary, Yaml }
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
@@ -34,36 +34,27 @@ object RoleParser {
   }
 
   def parseDependencies(metaMainYaml: Path): Set[RoleId] = {
-    readYamlFile(metaMainYaml)
-      .map(parseDependenciesFromYaml)
-      .getOrElse(Set.empty)
+    readYamlFile(metaMainYaml).map(parseDependenciesFromYaml).getOrElse(Set.empty)
   }
 
-  /** Extracts the role IDs from YAML that looks like this:
-    *
-    * {{{
-    * ---
-    * dependencies:
-    *   - foo
-    *   - { role: bar, baz: wow }
-    * }}}
-    */
+  /**
+   * Extracts the role IDs from YAML that looks like this:
+   *
+   * {{{
+   * ---
+   * dependencies:
+   *   - foo
+   *   - { role: bar, baz: wow }
+   * }}}
+   */
   def parseDependenciesFromYaml(yaml: Yaml): Set[RoleId] = {
     val mapper = new ObjectMapper(yamlFactory)
-    val jmap =
-      mapper.readValue(yaml.content, classOf[java.util.Map[String, Any]])
-    val deps = jmap.asScala
-      .get("dependencies")
-      .map(_.asInstanceOf[java.util.List[Any]].asScala)
-      .getOrElse(Nil)
-    deps
-      .collect {
-        case roleId: String => Some(RoleId(roleId))
-        case customisedRole: java.util.Map[String, String] @unchecked =>
-          customisedRole.asScala.get("role").map(RoleId(_))
-      }
-      .flatten
-      .toSet
+    val jmap = mapper.readValue(yaml.content, classOf[java.util.Map[String, Any]])
+    val deps = jmap.asScala.get("dependencies").map(_.asInstanceOf[java.util.List[Any]].asScala).getOrElse(Nil)
+    deps.collect {
+      case roleId: String => Some(RoleId(roleId))
+      case customisedRole: java.util.Map[String, String] @unchecked => customisedRole.asScala.get("role").map(RoleId(_))
+    }.flatten.toSet
   }
 
   private def readYamlFile(path: Path): Option[Yaml] = {
