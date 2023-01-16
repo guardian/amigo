@@ -63,8 +63,8 @@ val jacksonVersion = "2.14.1"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.353"
-val awsV2SdkVersion = "2.17.248"
+val awsV1SdkVersion = "1.12.384"
+val awsV2SdkVersion = "2.19.13"
 
 libraryDependencies ++= Seq(
   ws,
@@ -73,12 +73,12 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "1.0.0-M23",
-  "com.beachape" %% "enumeratum" % "1.7.0",
+  "com.beachape" %% "enumeratum" % "1.7.2",
   // Pin akka version until Play updates its own akka dependency
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19", // scala-steward:off
   "com.gu" %% "simple-configuration-ssm" % "1.5.7",
-  "com.gu.play-secret-rotation" %% "play-v28" % "0.36",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.36",
+  "com.gu.play-secret-rotation" %% "play-v28" % "0.37",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.37",
   "com.gu.play-googleauth" %% "play-v28" % "2.2.6",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
@@ -94,8 +94,8 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
   "com.gu" % "kinesis-logback-appender" % "2.1.1",
-  "org.scalatest" %% "scalatest-flatspec" % "3.2.14" % Test,
-  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.14" % Test,
+  "org.scalatest" %% "scalatest-flatspec" % "3.2.15" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.15" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "1.2.0"
