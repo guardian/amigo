@@ -8,4 +8,4 @@ set -e
  ./script/ci
 )
 
-sbt clean compile test riffRaffUpload
+sbt clean scalafmtCheckAll compile test riffRaffUpload
