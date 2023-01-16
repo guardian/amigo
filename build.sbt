@@ -21,11 +21,16 @@ Universal / javaOptions ++= Seq(
 )
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, BuildInfoPlugin, SystemdPlugin)
+  .enablePlugins(
+    PlayScala,
+    RiffRaffArtifact,
+    JDebPackaging,
+    BuildInfoPlugin,
+    SystemdPlugin
+  )
   .settings(
     Universal / packageName := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
-
     Debian / serverLoading := Some(Systemd),
     riffRaffManifestProjectName := s"tools::${name.value}",
     riffRaffPackageType := (Debian / packageBin).value,
@@ -35,7 +40,9 @@ lazy val root = (project in file("."))
       baseDirectory.value / "cdk/cdk.out/AMIgo-PROD.template.json" -> "cloudformation/AMIgo-PROD.template.json"
     ),
     // Include the roles dir in the tarball for now
-    Universal / mappings ++= (file("roles") ** "*").get.map { f => f.getAbsoluteFile -> f.toString },
+    Universal / mappings ++= (file("roles") ** "*").get.map { f =>
+      f.getAbsoluteFile -> f.toString
+    },
     buildInfoPackage := "amigo",
     buildInfoKeys := {
       lazy val buildInfo = BuildInfo(baseDirectory.value)
@@ -43,7 +50,8 @@ lazy val root = (project in file("."))
       // so this next one is constant to avoid it always recompiling on dev machines.
       // we only really care about build time on teamcity, when a constant based on when
       // it was loaded is just fine
-      lazy val buildTime: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("UTC")))
+      lazy val buildTime: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        .format(ZonedDateTime.now(ZoneId.of("UTC")))
 
       Seq[BuildInfoKey](
         BuildInfoKey("buildNumber" -> buildInfo.buildIdentifier),
@@ -51,13 +59,18 @@ lazy val root = (project in file("."))
         BuildInfoKey("gitCommitId" -> buildInfo.revision)
       )
     },
-    buildInfoOptions:= Seq(
+    buildInfoOptions := Seq(
       BuildInfoOption.Traits("management.BuildInfo"),
       BuildInfoOption.ToJson
     )
   )
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+scalacOptions ++= Seq(
+  "-unchecked",
+  "-deprecation",
+  "-feature",
+  "-Xfatal-warnings"
+)
 
 val jacksonVersion = "2.14.1"
 val circeVersion = "0.14.1"
@@ -104,7 +117,7 @@ routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
 lazy val imageCopier = (project in file("imageCopier"))
-    .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging)
   .settings(
     scalaVersion := "2.13.10",
     Universal / topLevelDirectory := None,
