@@ -14,7 +14,7 @@ const stageAgnosticProps = {
 const amigoCodeProps: AmigoProps = {
   ...stageAgnosticProps,
   stage: "CODE",
-  domainName: "amigo.code.dev-gutools.co.uk",
+  domainName: "public.amigo.code.dev-gutools.co.uk",
 };
 
 new AmigoStack(app, "AMIgo-CODE", amigoCodeProps);
@@ -22,7 +22,7 @@ new AmigoStack(app, "AMIgo-CODE", amigoCodeProps);
 export const amigoProdProps: AmigoProps = {
   ...stageAgnosticProps,
   stage: "PROD",
-  domainName: "amigo.gutools.co.uk",
+  domainName: "public.amigo.gutools.co.uk",
 };
 
 new AmigoStack(app, "AMIgo-PROD", amigoProdProps);

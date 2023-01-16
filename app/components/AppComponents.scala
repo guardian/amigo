@@ -48,6 +48,14 @@ import java.time.Duration.{ ofHours, ofMinutes }
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import java.io.FileInputStream
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import scala.util.Try
+import com.gu.googleauth.GoogleServiceAccount
+import com.gu.googleauth.GoogleGroupChecker
+import com.google.auth.oauth2.ServiceAccountCredentials
+import com.google.api.client
+import com.google.auth.oauth2.ServiceAccountCredentials
 
 class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
@@ -247,6 +255,18 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val debugAvailable = stage != "PROD"
 
+  val requiredGoogleGroups = Set(configuration.get[String]("auth.google.departmentGroupId"))
+
+  val groupChecker = {
+    val serviceAccountCertPath = configuration.get[String]("auth.google.serviceAccountCertPath")
+    val serviceAccountCert = Try(new FileInputStream(serviceAccountCertPath))
+      .getOrElse(throw new RuntimeException(s"Could not load service account JSON from $serviceAccountCertPath"))
+    val serviceAccount = ServiceAccountCredentials.fromStream(serviceAccountCert)
+    val impersonatedUser = configuration.get[String]("auth.google.impersonatedUser")
+
+    new GoogleGroupChecker(impersonatedUser, serviceAccount)
+  }
+
   /**
    * Play 2.8's default is Seq(csrfFilter, securityHeadersFilter, allowedHostsFilter).
    * The allowedHostsFilter is removed here as it causes healthchecks to fail.
@@ -275,7 +295,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     s3Client,
     packerRunner,
     bakeDeletionFrequencyMinutes)
-  val loginController = new Login(googleAuthConfig, wsClient, controllerComponents)
+  val loginController = new Login(googleAuthConfig, wsClient, controllerComponents, requiredGoogleGroups, groupChecker)
   lazy val router: Router = new Routes(
     httpErrorHandler,
     rootController,

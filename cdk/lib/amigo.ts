@@ -3,7 +3,7 @@ import { AccessScope } from "@guardian/cdk/lib/constants";
 import type { AppIdentity, GuStackProps } from "@guardian/cdk/lib/constructs/core";
 import { GuDistributionBucketParameter, GuStack, GuStringParameter } from "@guardian/cdk/lib/constructs/core";
 import { GuCname } from "@guardian/cdk/lib/constructs/dns";
-import { GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
+import { GuHttpsEgressSecurityGroup, GuSecurityGroup, GuVpc } from "@guardian/cdk/lib/constructs/ec2";
 import {
   GuAllowPolicy,
   GuAnghammaradSenderPolicy,
@@ -12,9 +12,10 @@ import {
   GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
-import { Duration } from "aws-cdk-lib";
+import { Duration, SecretValue } from "aws-cdk-lib";
 import type { App } from "aws-cdk-lib";
 import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
+import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
 
@@ -212,13 +213,9 @@ export class AmigoStack extends GuStack {
         "Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
     });
 
-    const artifactPath = [
-      GuDistributionBucketParameter.getInstance(this).valueAsString,
-      this.stack,
-      this.stage,
-      AmigoStack.app.app,
-      "amigo_1.0-latest_all.deb",
-    ].join("/");
+    const distBucket = GuDistributionBucketParameter.getInstance(this).valueAsString;
+
+    const artifactPath = [distBucket, this.stack, this.stage, AmigoStack.app.app, "amigo_1.0-latest_all.deb"].join("/");
 
     const guPlayApp = new GuPlayApp(this, {
       ...AmigoStack.app,
@@ -231,12 +228,15 @@ export class AmigoStack extends GuStack {
         "echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
         "wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb",
         "dpkg -i /tmp/session-manager-plugin.deb",
+
+        "mkdir /amigo",
+        `aws --region eu-west-1 s3 cp s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/amigo-service-account-cert.json /amigo/`,
+
         `aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
         "dpkg -i /tmp/amigo.deb",
       ].join("\n"),
       access: {
-        scope: AccessScope.RESTRICTED,
-        cidrRanges: [Peer.ipv4("77.91.248.0/21")],
+        scope: AccessScope.PUBLIC,
       },
       certificateProps: { domainName: props.domainName },
       scaling: { minimumInstances: 1 },
@@ -253,6 +253,35 @@ export class AmigoStack extends GuStack {
       domainName: props.domainName,
       ttl: Duration.hours(1),
       resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
+    });
+
+    // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
+    const albEgressSg = new GuHttpsEgressSecurityGroup(this, "IdP-access", {
+      app: AmigoStack.app.app,
+      vpc: guPlayApp.vpc,
+    });
+
+    guPlayApp.loadBalancer.addSecurityGroup(albEgressSg);
+
+    const clientId = new GuStringParameter(this, "ClientId", {
+      description: "Google OAuth client ID",
+    });
+
+    guPlayApp.listener.addAction("Google Auth", {
+      action: ListenerAction.authenticateOidc({
+        authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+        issuer: "https://accounts.google.com",
+        scope: "openid",
+        authenticationRequestExtraParams: { hd: "guardian.co.uk" },
+        onUnauthenticatedRequest: UnauthenticatedAction.AUTHENTICATE,
+
+        tokenEndpoint: "https://oauth2.googleapis.com/token",
+
+        userInfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
+        clientId: clientId.valueAsString,
+        clientSecret: SecretValue.secretsManager(`/${this.stage}/deploy/amigo/clientSecret`),
+        next: ListenerAction.forward([guPlayApp.targetGroup]),
+      }),
     });
   }
 }

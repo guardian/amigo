@@ -29,7 +29,8 @@ Object {
       "GuApplicationLoadBalancer",
       "GuApplicationTargetGroup",
       "GuHttpsApplicationListener",
-      "GuSecurityGroup",
+      "GuHttpsEgressSecurityGroup",
+      "GuStringParameter",
     ],
     "gu:cdk:version": "47.3.0",
   },
@@ -53,6 +54,10 @@ Object {
       "Default": "/account/services/anghammarad.topic.arn",
       "Description": "SSM parameter containing the ARN of the Anghammarad SNS topic",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "ClientId": Object {
+      "Description": "Google OAuth client ID",
+      "Type": "String",
     },
     "DistributionBucketName": Object {
       "Default": "/account/services/artifact.bucket",
@@ -87,7 +92,7 @@ Object {
   "Resources": Object {
     "AmigoCname": Object {
       "Properties": Object {
-        "Name": "amigo.gutools.co.uk",
+        "Name": "public.amigo.gutools.co.uk",
         "RecordType": "CNAME",
         "ResourceRecords": Array [
           Object {
@@ -335,6 +340,12 @@ unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
 echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
 wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
 dpkg -i /tmp/session-manager-plugin.deb
+mkdir /amigo
+aws --region eu-west-1 s3 cp s3://",
+                Object {
+                  "Ref": "DistributionBucketName",
+                },
+                "/deploy/PROD/amigo/conf/amigo-service-account-cert.json /amigo/
 aws --region eu-west-1 s3 cp s3://",
                 Object {
                   "Ref": "DistributionBucketName",
@@ -351,7 +362,7 @@ dpkg -i /tmp/amigo.deb",
     "CertificateAmigoE1AF5E0C": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "DomainName": "amigo.gutools.co.uk",
+        "DomainName": "public.amigo.gutools.co.uk",
         "Tags": Array [
           Object {
             "Key": "App",
@@ -500,6 +511,27 @@ dpkg -i /tmp/amigo.deb",
       },
       "Type": "AWS::EC2::SecurityGroup",
     },
+    "GuHttpsEgressSecurityGroupAmigofromAMIgoIdPaccessAmigo4AE1B4709000BF8805C1": Object {
+      "Properties": Object {
+        "Description": "Load balancer to target",
+        "FromPort": 9000,
+        "GroupId": Object {
+          "Fn::GetAtt": Array [
+            "GuHttpsEgressSecurityGroupAmigo28861996",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": Object {
+          "Fn::GetAtt": Array [
+            "IdPaccessAmigo15F4FC41",
+            "GroupId",
+          ],
+        },
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
     "GuHttpsEgressSecurityGroupAmigofromAMIgoLoadBalancerAmigoSecurityGroup730D090E90006200512B": Object {
       "Properties": Object {
         "Description": "Load balancer to target",
@@ -514,27 +546,6 @@ dpkg -i /tmp/amigo.deb",
         "SourceSecurityGroupId": Object {
           "Fn::GetAtt": Array [
             "LoadBalancerAmigoSecurityGroup304D707B",
-            "GroupId",
-          ],
-        },
-        "ToPort": 9000,
-      },
-      "Type": "AWS::EC2::SecurityGroupIngress",
-    },
-    "GuHttpsEgressSecurityGroupAmigofromAMIgoRestrictedIngressSecurityGroupAmigoE4F60B0990004CAF7118": Object {
-      "Properties": Object {
-        "Description": "Load balancer to target",
-        "FromPort": 9000,
-        "GroupId": Object {
-          "Fn::GetAtt": Array [
-            "GuHttpsEgressSecurityGroupAmigo28861996",
-            "GroupId",
-          ],
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": Object {
-          "Fn::GetAtt": Array [
-            "RestrictedIngressSecurityGroupAmigoF34D371D",
             "GroupId",
           ],
         },
@@ -583,6 +594,67 @@ dpkg -i /tmp/amigo.deb",
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "IdPaccessAmigo15F4FC41": Object {
+      "Properties": Object {
+        "GroupDescription": "Allow all outbound HTTPS traffic",
+        "SecurityGroupEgress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound HTTPS traffic",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": Array [
+          Object {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          Object {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          Object {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          Object {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          Object {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VpcId": Object {
+          "Ref": "VpcId",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "IdPaccessAmigotoAMIgoGuHttpsEgressSecurityGroupAmigo34A5A83890007FBC5E83": Object {
+      "Properties": Object {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": Object {
+          "Fn::GetAtt": Array [
+            "GuHttpsEgressSecurityGroupAmigo28861996",
+            "GroupId",
+          ],
+        },
+        "FromPort": 9000,
+        "GroupId": Object {
+          "Fn::GetAtt": Array [
+            "IdPaccessAmigo15F4FC41",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "InstanceRoleAmigo75944747": Object {
       "Properties": Object {
@@ -645,6 +717,26 @@ dpkg -i /tmp/amigo.deb",
         ],
         "DefaultActions": Array [
           Object {
+            "AuthenticateOidcConfig": Object {
+              "AuthenticationRequestExtraParams": Object {
+                "hd": "guardian.co.uk",
+              },
+              "AuthorizationEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+              "ClientId": Object {
+                "Ref": "ClientId",
+              },
+              "ClientSecret": "{{resolve:secretsmanager:/PROD/deploy/amigo/clientSecret:SecretString:::}}",
+              "Issuer": "https://accounts.google.com",
+              "OnUnauthenticatedRequest": "authenticate",
+              "Scope": "openid",
+              "TokenEndpoint": "https://oauth2.googleapis.com/token",
+              "UserInfoEndpoint": "https://openidconnect.googleapis.com/v1/userinfo",
+            },
+            "Order": 1,
+            "Type": "authenticate-oidc",
+          },
+          Object {
+            "Order": 2,
             "TargetGroupArn": Object {
               "Ref": "TargetGroupAmigoB9501F07",
             },
@@ -677,7 +769,7 @@ dpkg -i /tmp/amigo.deb",
           },
           Object {
             "Fn::GetAtt": Array [
-              "RestrictedIngressSecurityGroupAmigoF34D371D",
+              "IdPaccessAmigo15F4FC41",
               "GroupId",
             ],
           },
@@ -714,6 +806,15 @@ dpkg -i /tmp/amigo.deb",
     "LoadBalancerAmigoSecurityGroup304D707B": Object {
       "Properties": Object {
         "GroupDescription": "Automatically created Security Group for ELB AMIgoLoadBalancerAmigo85BA3984",
+        "SecurityGroupIngress": Array [
+          Object {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow from anyone on port 443",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
         "Tags": Array [
           Object {
             "Key": "App",
@@ -917,67 +1018,6 @@ dpkg -i /tmp/amigo.deb",
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "RestrictedIngressSecurityGroupAmigoF34D371D": Object {
-      "Properties": Object {
-        "GroupDescription": "Allow restricted ingress from CIDR ranges",
-        "SecurityGroupIngress": Array [
-          Object {
-            "CidrIp": "77.91.248.0/21",
-            "Description": "Allow access on port 443 from 77.91.248.0/21",
-            "FromPort": 443,
-            "IpProtocol": "tcp",
-            "ToPort": 443,
-          },
-        ],
-        "Tags": Array [
-          Object {
-            "Key": "App",
-            "Value": "amigo",
-          },
-          Object {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          Object {
-            "Key": "gu:repo",
-            "Value": "guardian/amigo",
-          },
-          Object {
-            "Key": "Stack",
-            "Value": "deploy",
-          },
-          Object {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "VpcId": Object {
-          "Ref": "VpcId",
-        },
-      },
-      "Type": "AWS::EC2::SecurityGroup",
-    },
-    "RestrictedIngressSecurityGroupAmigotoAMIgoGuHttpsEgressSecurityGroupAmigo34A5A8389000A797C6B3": Object {
-      "Properties": Object {
-        "Description": "Load balancer to target",
-        "DestinationSecurityGroupId": Object {
-          "Fn::GetAtt": Array [
-            "GuHttpsEgressSecurityGroupAmigo28861996",
-            "GroupId",
-          ],
-        },
-        "FromPort": 9000,
-        "GroupId": Object {
-          "Fn::GetAtt": Array [
-            "RestrictedIngressSecurityGroupAmigoF34D371D",
-            "GroupId",
-          ],
-        },
-        "IpProtocol": "tcp",
-        "ToPort": 9000,
-      },
-      "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SSMRunCommandPolicy244E1613": Object {
       "Properties": Object {
