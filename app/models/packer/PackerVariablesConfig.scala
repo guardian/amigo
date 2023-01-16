@@ -5,10 +5,11 @@ import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.Json
 
 case class PackerVariablesConfig(
-  recipe: String,
-  base_image_ami_id: String,
-  build_number: String,
-  time: String)
+    recipe: String,
+    base_image_ami_id: String,
+    build_number: String,
+    time: String
+)
 
 object PackerVariablesConfig {
   implicit val jsonWrites = Json.writes[PackerVariablesConfig]
@@ -19,6 +20,7 @@ object PackerVariablesConfig {
       recipe = bake.recipe.id.value,
       base_image_ami_id = bake.recipe.baseImage.amiId.value,
       build_number = bake.buildNumber.toString,
-      time = format.print(bake.startedAt))
+      time = format.print(bake.startedAt)
+    )
   }
 }

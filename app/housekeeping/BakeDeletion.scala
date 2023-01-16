@@ -1,26 +1,29 @@
 package housekeeping
 
-import data.{ BakeLogs, Bakes, Dynamo }
+import data.{BakeLogs, Bakes, Dynamo}
 import models.BakeId
 import notification.NotificationSender
 import org.quartz.SimpleScheduleBuilder
 import prism.RecipeUsage
-import services.{ Loggable, PrismData }
+import services.{Loggable, PrismData}
 
 /*
   This class deletes bakes that have been marked deleted
  */
 class BakeDeletion(
-  dynamo: Dynamo,
-  amigoAwsAccount: String,
-  prismAgents: PrismData,
-  notificationSender: NotificationSender,
-  frequencyMinutes: Int) extends HousekeepingJob with Loggable {
+    dynamo: Dynamo,
+    amigoAwsAccount: String,
+    prismAgents: PrismData,
+    notificationSender: NotificationSender,
+    frequencyMinutes: Int
+) extends HousekeepingJob
+    with Loggable {
 
   implicit private val implDynamo: Dynamo = dynamo
   implicit private val implPrismAgents: PrismData = prismAgents
 
-  override val schedule = SimpleScheduleBuilder.repeatMinutelyForever(frequencyMinutes)
+  override val schedule =
+    SimpleScheduleBuilder.repeatMinutelyForever(frequencyMinutes)
 
   def housekeep(): Unit = {
     log.info(s"Started bake deletion housekeeping")
@@ -48,7 +51,8 @@ class BakeDeletion(
         Thread.sleep(2000)
       }
     } catch {
-      case e: Exception => log.error(s"Error raised during bake deletion housekeeping", e)
+      case e: Exception =>
+        log.error(s"Error raised during bake deletion housekeeping", e)
     }
 
   }
