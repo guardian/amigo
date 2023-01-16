@@ -13,7 +13,7 @@ libraryDependencies += "org.vafer" % "jdeb" % "1.10" artifacts Artifact(
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.11.0")
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.10.0-RC1")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
 
 /*
  * This is required for Scala Steward to run until SBT plugins all migrated to scala-xml 2.
