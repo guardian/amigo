@@ -1,0 +1,6 @@
+---
+- name: install nfs-common and proftpd-basic
+  apt:
+    name: ['nfs-common', 'proftpd-basic']
+    update_cache: yes
+    state: latest
