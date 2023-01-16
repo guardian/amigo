@@ -4,15 +4,18 @@ import ansible.PlaybookGenerator
 import event.EventBus
 import models.Bake
 import models.packer.PackerVariablesConfig
+import org.apache.http.concurrent.BasicFuture
 import play.api.libs.json.Json
 import services.{AmiMetadataLookup, Loggable, PrismData}
 
-import java.io.File
+import java.io.{File, IOException}
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.jdk.StreamConverters._
 import scala.util.Try
 
 class PackerRunner(maxInstances: Int) extends Loggable {
@@ -100,10 +103,15 @@ class PackerRunner(maxInstances: Int) extends Loggable {
       case s: String       => s
       case Some(s: String) => s
     }
-    val packerProcess = new ProcessBuilder()
+    val packerCacheDir =
+      Files.createTempDirectory(s"amigo-packer-cache-${bake.recipe.id.value}")
+    val packerBuilder = new ProcessBuilder()
       .command(command: _*)
       .directory(new File(System.getProperty("java.io.tmpdir")))
-      .start()
+    packerBuilder
+      .environment()
+      .put("PACKER_CACHE_DIR", packerCacheDir.toAbsolutePath.toString)
+    val packerProcess = packerBuilder.start()
 
     val exitValuePromise = Promise[Int]()
 
@@ -129,9 +137,19 @@ class PackerRunner(maxInstances: Int) extends Loggable {
     val exitValueFuture = exitValuePromise.future
 
     // Make sure to delete the tmp files after Packer completes, regardless of success or failure
-    exitValueFuture.onComplete { case _ =>
+    exitValueFuture.onComplete { _ =>
       Try(Files.deleteIfExists(playbookFile))
+        .fold(log.error("Failed to delete playbook file", _), _ => ())
       Try(Files.deleteIfExists(packerConfigFile))
+        .fold(log.error("Failed to delete config file", _), _ => ())
+      Try(
+        Files
+          .walk(packerCacheDir)
+          .map(_.toFile)
+          .toScala(List)
+          .reverse
+          .foreach(_.delete)
+      ).fold(log.error("Failed to delete cache directory", _), _ => ())
     }
 
     exitValueFuture
