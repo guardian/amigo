@@ -90,6 +90,25 @@ Object {
     },
   },
   "Resources": Object {
+    "AlbSsmParam485C1D52": Object {
+      "Properties": Object {
+        "DataType": "text",
+        "Description": "The arn of the ALB for amigo-PROD. N.B. this parameter is created via cdk",
+        "Name": "/infosec/waf/services/PROD/amigo-alb-arn",
+        "Tags": Object {
+          "Stack": "deploy",
+          "Stage": "PROD",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/amigo",
+        },
+        "Tier": "Standard",
+        "Type": "String",
+        "Value": Object {
+          "Ref": "LoadBalancerAmigoC3017FAF",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
     "AmigoCname": Object {
       "Properties": Object {
         "Name": "public.amigo.gutools.co.uk",

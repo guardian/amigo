@@ -18,6 +18,7 @@ import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-l
 import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
+import { ParameterDataType, ParameterTier, StringParameter } from "aws-cdk-lib/aws-ssm";
 
 const packerVersion = "1.8.5";
 
@@ -262,6 +263,16 @@ export class AmigoStack extends GuStack {
     });
 
     guPlayApp.loadBalancer.addSecurityGroup(albEgressSg);
+
+    // This parameter is used by https://github.com/guardian/waf
+    new StringParameter(this, "AlbSsmParam", {
+      parameterName: `/infosec/waf/services/${this.stage}/amigo-alb-arn`,
+      description: `The arn of the ALB for amigo-${this.stage}. N.B. this parameter is created via cdk`,
+      simpleName: false,
+      stringValue: guPlayApp.loadBalancer.loadBalancerArn,
+      tier: ParameterTier.STANDARD,
+      dataType: ParameterDataType.TEXT,
+    });
 
     const clientId = new GuStringParameter(this, "ClientId", {
       description: "Google OAuth client ID",
