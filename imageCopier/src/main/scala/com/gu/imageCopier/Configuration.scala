@@ -1,6 +1,10 @@
 package com.gu.imageCopier
 
-case class Configuration(ownAccountNumber: String, kmsKeyArn: Option[String], encryptedTagValue: Option[String])
+case class Configuration(
+    ownAccountNumber: String,
+    kmsKeyArn: Option[String],
+    encryptedTagValue: Option[String]
+)
 
 object Configuration {
   def fromEnvironment: Configuration = {
