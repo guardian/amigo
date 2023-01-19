@@ -1,6 +1,6 @@
 package com.gu.imageCopier.attempt
 
-import java.io.{ PrintWriter, StringWriter }
+import java.io.{PrintWriter, StringWriter}
 
 sealed trait Failure {
   def msg: String
@@ -9,9 +9,8 @@ sealed trait Failure {
   def toThrowable: Throwable = cause.getOrElse(new RuntimeException(msg))
 }
 
-/**
- * This type of failure has a throwable which could potentially be logged
- */
+/** This type of failure has a throwable which could potentially be logged
+  */
 sealed trait FailureWithThrowable extends Failure {
   def throwable: Throwable
   override def cause = Some(throwable)
@@ -41,9 +40,11 @@ case class UnknownFailure(throwable: Throwable) extends FailureWithThrowable
 case class AwsSdkFailure(throwable: Throwable) extends FailureWithThrowable
 
 object Failure {
-  def collect[A](eithers: List[Either[Failure, A]])(recurse: A => List[Failure]): List[Failure] = {
+  def collect[A](
+      eithers: List[Either[Failure, A]]
+  )(recurse: A => List[Failure]): List[Failure] = {
     eithers.flatMap {
-      case Left(failure) => List(failure)
+      case Left(failure)  => List(failure)
       case Right(success) => recurse(success)
     }
   }
