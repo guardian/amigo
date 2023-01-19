@@ -61,3 +61,21 @@
     dest: /lib/systemd/system/logrotate.timer
     regexp: AccuracySec=(.*)$
     line: AccuracySec=5m
+
+- name: Install htpasswd tool
+  apt:
+    name:
+      - apache2-utils
+  state: latest
+
+- name: Install protect-admin-port nginx configuration
+  copy: src=protect-admin-port/nginx.conf dest=/etc/protect-admin-port/nginx.conf
+
+- name: Install protect-admin-port service
+  copy: src=protect-admin-port/protect-admin-port.service dest=/etc/systemd/system/protect-admin-port.service
+
+- name: Set up protect-admin-port working area
+  file: path=/var/lib/protect-admin-port owner={{kong_user}} recurse=yes state=directory
+
+- name: Set up protect-admin-port logging area
+  file: path=/var/log/protect-admin-port owner={{kong_user}} recurse=yes state=directory
