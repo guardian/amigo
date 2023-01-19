@@ -5,7 +5,8 @@ import cats.syntax.either._
 package object attempt {
 
   implicit class RichOption[A](option: Option[A]) {
-    def toAttempt(whenNone: => Failure): Attempt[A] = Attempt.fromOption(option, whenNone)
+    def toAttempt(whenNone: => Failure): Attempt[A] =
+      Attempt.fromOption(option, whenNone)
   }
 
   implicit class RichFailureEither[A](either: Either[Failure, A]) {
@@ -13,6 +14,7 @@ package object attempt {
   }
 
   implicit class RichEither[Left, A](either: Either[Left, A]) {
-    def toAttempt(leftToFailure: Left => Failure) = Attempt.fromEither(either.leftMap(leftToFailure))
+    def toAttempt(leftToFailure: Left => Failure) =
+      Attempt.fromEither(either.leftMap(leftToFailure))
   }
 }
