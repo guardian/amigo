@@ -74,14 +74,17 @@
 - name: Install protect-admin-port nginx configuration
   copy: src=protect-admin-port/nginx.conf dest=/etc/protect-admin-port/nginx.conf
 
+- name: Fix up configuration permissions
+  file: path=/etc/protect-admin-port owner={{kong_user}} mode=u=rX,g=rX,o= recurse=yes
+
 - name: Install protect-admin-port service
   copy: src=protect-admin-port/protect-admin-port.service dest=/etc/systemd/system/protect-admin-port.service
 
 - name: Prepare protect-admin-port healthcheck
-  file: path=/var/www owner={{kong_user}}  state=directory
+  file: path=/var/www/healthcheck owner={{kong_user}}  state=directory
 
 - name: Install protect-admin-port healthcheck
-  copy: src=protect-admin-port/healthcheck-index.html dest=/var/www/healthcheck-index.html
+  copy: src=protect-admin-port/healthcheck-index.html dest=/var/www/healthcheck/index.html
 
 - name: Fix up permissions
   #here X means "execute (enter) if directory, nothing if file"
