@@ -66,7 +66,7 @@
   apt:
     name:
       - apache2-utils
-  state: latest
+    state: latest
 
 - name: Install protect-admin-port nginx configuration
   copy: src=protect-admin-port/nginx.conf dest=/etc/protect-admin-port/nginx.conf
