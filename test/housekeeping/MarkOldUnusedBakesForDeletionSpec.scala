@@ -147,4 +147,14 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
     markedBakes.size shouldEqual 1
     markedBakes.map(_.bakeId) shouldEqual Set(BakeId(RecipeId("recipe-1"), 1))
   }
+
+  it should "not include TeamCity agent AMIs, even if they are old" in {
+    val housekeepingDate = new DateTime(2018, 7, 12, 0, 0, 0, DateTimeZone.UTC)
+    val recipeIds = Set(RecipeId("teamcity-agent-focal"))
+    val oldTeamCityAgent = fixtureBake(fixtureRecipe("teamcity-agent-focal", oldDate), Some(AmiId("ami-1")), oldDate)
+    def getBakesWithTeamCityAgent(recipeId: RecipeId): Iterable[Bake] = Iterable(oldTeamCityAgent)
+    val markedBakes = MarkOldUnusedBakesForDeletion.getOldUnusedBakes(recipeIds, housekeepingDate, getBakesWithTeamCityAgent, getEmptyRecipeUsage)
+
+    markedBakes.size shouldEqual 0
+  }
 }

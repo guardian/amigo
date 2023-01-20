@@ -24,10 +24,16 @@ object MarkOldUnusedBakesForDeletion {
       duration.getStandardDays > MAX_AGE
     }
 
-    val recipeUsage = getRecipeUsage(oldBakes)
+    // Exclude TeamCity Agent AMIs, which have been incorrectly assumed to be unused in the past. This happens
+    // because TeamCity Agents are typically terminated overnight and are not linked to a launch configuration.
+    val oldBakesExcludingTeamCityAgents = oldBakes.filterNot { bake =>
+      bake.recipe.id.value.startsWith("teamcity-agent")
+    }
+
+    val recipeUsage = getRecipeUsage(oldBakesExcludingTeamCityAgents)
     val usedBakes = recipeUsage.bakeUsage.map(_.bake).distinct.toSet
 
-    oldBakes -- usedBakes
+    oldBakesExcludingTeamCityAgents -- usedBakes
   }
 }
 
