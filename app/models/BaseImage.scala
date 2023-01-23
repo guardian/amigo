@@ -27,7 +27,7 @@ object LinuxDist {
   def uploadPackageListCommand(bakeId: BakeId, region: String, bucket: String) =
     s"aws s3 cp ${packageListTempPath(bakeId)} ${PackageList.s3Url(bakeId, bucket)} --region ${region} --metadata ${toMetadata(bakeId)}"
 
-  val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2)
+  val all = Map("ubuntu" -> Ubuntu, "redhat" -> RedHat, "amazon linux 2" -> AmazonLinux2, "debian" -> Debian)
 }
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"
@@ -46,6 +46,13 @@ case object Ubuntu extends LinuxDist {
       "DEBIAN_FRONTEND=noninteractive apt-get --yes install ansible")))
   def savePackageListCommand(bakeId: BakeId) =
     s"dpkg-query -W > ${LinuxDist.packageListTempPath(bakeId)}"
+}
+
+case object Debian extends LinuxDist {
+  val name = "debian"
+  val loginName = "admin"
+  val provisioners = Ubuntu.provisioners
+  def savePackageListCommand(bakeId: BakeId) = Ubuntu.savePackageListCommand(bakeId)
 }
 
 case object RedHat extends LinuxDist {
