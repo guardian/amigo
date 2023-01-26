@@ -68,7 +68,7 @@ case object Ubuntu extends LinuxDist {
 
 case object Debian extends LinuxDist {
   val name = "debian"
-  val loginName = "admin"
+  val loginName = "root"
   val provisioners = Ubuntu.provisioners
   def savePackageListCommand(bakeId: BakeId) =
     Ubuntu.savePackageListCommand(bakeId)
