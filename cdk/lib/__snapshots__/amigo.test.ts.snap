@@ -382,6 +382,9 @@ dpkg -i /tmp/amigo.deb",
       "DeletionPolicy": "Retain",
       "Properties": Object {
         "DomainName": "public.amigo.gutools.co.uk",
+        "SubjectAlternativeNames": Array [
+          "amigo.gutools.co.uk",
+        ],
         "Tags": Array [
           Object {
             "Key": "App",
@@ -434,6 +437,23 @@ dpkg -i /tmp/amigo.deb",
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "DnsRecord": Object {
+      "Properties": Object {
+        "Name": "amigo.gutools.co.uk",
+        "RecordType": "CNAME",
+        "ResourceRecords": Array [
+          Object {
+            "Fn::GetAtt": Array [
+              "LoadBalancerAmigoC3017FAF",
+              "DNSName",
+            ],
+          },
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "GetDistributablePolicyAmigoB25A5D2B": Object {
       "Properties": Object {
@@ -769,6 +789,34 @@ dpkg -i /tmp/amigo.deb",
         "Protocol": "HTTPS",
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "ListenerAmigoredirectRule5D74B08F": Object {
+      "Properties": Object {
+        "Actions": Array [
+          Object {
+            "RedirectConfig": Object {
+              "Host": "amigo.gutools.co.uk",
+              "StatusCode": "HTTP_301",
+            },
+            "Type": "redirect",
+          },
+        ],
+        "Conditions": Array [
+          Object {
+            "Field": "host-header",
+            "HostHeaderConfig": Object {
+              "Values": Array [
+                "public.amigo.gutools.co.uk",
+              ],
+            },
+          },
+        ],
+        "ListenerArn": Object {
+          "Ref": "ListenerAmigo0180B42C",
+        },
+        "Priority": 1,
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "LoadBalancerAmigoC3017FAF": Object {
       "Properties": Object {
