@@ -16,17 +16,17 @@ object PlaybookGenerator {
       |      ansible.builtin.dpkg_selections:
       |        name: grub-efi-arm64
       |        selection: hold
-      |      when: ansible_facts['distribution_major_version'] == "18"
+      |      when: ansible_facts['distribution_major_version'] == "18" and ansible_facts['architecture'] == "aarch64"
       |    - name: Prevent apt from upgrading grub-efi-arm64-bin
       |      ansible.builtin.dpkg_selections:
       |        name: grub-efi-arm64-bin
       |        selection: hold
-      |      when: ansible_facts['distribution_major_version'] == "18"
+      |      when: ansible_facts['distribution_major_version'] == "18" and ansible_facts['architecture'] == "aarch64"
       |    - name: Prevent apt from upgrading grub-efi-arm64-signed
       |      ansible.builtin.dpkg_selections:
       |        name: grub-efi-arm64-signed
       |        selection: hold
-      |      when: ansible_facts['distribution_major_version'] == "18"
+      |      when: ansible_facts['distribution_major_version'] == "18" and ansible_facts['architecture'] == "aarch64"
       |  vars:
       |${allVars.map { case (k, v) => s"    $k: $v" }.mkString("\n")}
       |  roles:
