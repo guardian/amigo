@@ -50,7 +50,7 @@
     owner: teamcity
 - name: download agent
   get_url:
-    url: https://teamcity.gutools.co.uk/update/buildAgent.zip
+    url: https://communications.teamcity.gutools.co.uk/update/buildAgent.zip
     dest: /tmp/buildAgent.zip
 - name: unzip buildagent
   unarchive:
@@ -59,6 +59,11 @@
     owner: teamcity
 - name: set home path for agent
   shell: echo 'env.home=/opt/teamcity' >> /opt/teamcity/buildAgent/conf/buildAgent.properties
+
+# By default, the server injects this URL to the agents, setting it to the value of the server URL.
+# We explicitly set `serverUrl` on the agent to override this, as the server's URL has an `authenticate-oidc` flow attached to it, which agents cannot pass.
+- name: set serverUrl for agent
+  shell: echo 'serverUrl=https:/communications.teamcity.gutools.co.uk/' >> /opt/teamcity/buildAgent/conf/buildAgent.properties
 - name: make agent executable
   file:
     path: /opt/teamcity/buildAgent/bin/agent.sh
