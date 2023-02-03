@@ -125,7 +125,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
-      "com.amazonaws" % "aws-lambda-java-core" % "1.2.1",
+      "com.amazonaws" % "aws-lambda-java-core" % "1.2.2",
       "com.amazonaws" % "aws-lambda-java-events" % "3.11.0",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
