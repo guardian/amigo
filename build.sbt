@@ -21,6 +21,7 @@ Universal / javaOptions ++= Seq(
 )
 
 lazy val root = (project in file("."))
+  .aggregate(imageCopier)
   .enablePlugins(
     PlayScala,
     RiffRaffArtifact,
