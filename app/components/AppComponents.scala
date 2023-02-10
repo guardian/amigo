@@ -343,7 +343,8 @@ class AppComponents(context: Context, identity: AppIdentity)
   val debugAvailable = stage != "PROD"
 
   val requiredGoogleGroups = Set(
-    configuration.get[String]("auth.google.departmentGroupId")
+    configuration.get[String]("auth.google.departmentGroupId"),
+    configuration.get[String]("auth.google.dataScientistsGroupId")
   )
 
   val groupChecker = {
