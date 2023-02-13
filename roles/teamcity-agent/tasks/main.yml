@@ -50,7 +50,14 @@
     owner: teamcity
 - name: download agent
   get_url:
-    url: https://teamcity.gutools.co.uk/update/buildAgent.zip
+    # https://teamcity.gutools.co.uk has an `authenticate-oidc` flow attached to it, which machines cannot pass through.
+    # https://communications.teamcity.gutools.co.uk is our machine-to-machine domain.
+    # Note: When the agent is running, it gets the URL via the Cloud Profile and NOT via `serverUrl` in `buildAgent.properties`.
+    #
+    # See:
+    #   - https://www.jetbrains.com/help/teamcity/configure-agent-installation.html#General+Agent+Configuration
+    #   - https://www.jetbrains.com/help/teamcity/agent-cloud-profile.html#Specifying+Profile+Settings
+    url: https://communications.teamcity.gutools.co.uk/update/buildAgent.zip
     dest: /tmp/buildAgent.zip
 - name: unzip buildagent
   unarchive:

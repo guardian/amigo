@@ -1,21 +1,22 @@
 package housekeeping
 
-import data.{ Bakes, Dynamo, Recipes }
-import models.{ Bake, RecipeId }
-import org.joda.time.{ DateTime, Duration }
+import data.{Bakes, Dynamo, Recipes}
+import models.{Bake, RecipeId}
+import org.joda.time.{DateTime, Duration}
 import org.quartz.SimpleScheduleBuilder
 import prism.RecipeUsage
-import services.{ Loggable, PrismData }
+import services.{Loggable, PrismData}
 
 object MarkOldUnusedBakesForDeletion {
   val MAX_AGE = 30
   val BATCH_SIZE = 100
 
   def getOldUnusedBakes(
-    recipeIds: Set[RecipeId],
-    now: DateTime,
-    listBakes: RecipeId => Iterable[Bake],
-    getRecipeUsage: Iterable[Bake] => RecipeUsage): Set[Bake] = {
+      recipeIds: Set[RecipeId],
+      now: DateTime,
+      listBakes: RecipeId => Iterable[Bake],
+      getRecipeUsage: Iterable[Bake] => RecipeUsage
+  ): Set[Bake] = {
     val allBakes = recipeIds.flatMap(listBakes)
 
     val oldBakes = allBakes.filter { bake =>
@@ -23,14 +24,22 @@ object MarkOldUnusedBakesForDeletion {
       duration.getStandardDays > MAX_AGE
     }
 
-    val recipeUsage = getRecipeUsage(oldBakes)
+    // Exclude TeamCity Agent AMIs, which have been incorrectly assumed to be unused in the past. This happens
+    // because TeamCity Agents are typically terminated overnight and are not linked to a launch configuration.
+    val oldBakesExcludingTeamCityAgents = oldBakes.filterNot { bake =>
+      bake.recipe.id.value.startsWith("teamcity-agent")
+    }
+
+    val recipeUsage = getRecipeUsage(oldBakesExcludingTeamCityAgents)
     val usedBakes = recipeUsage.bakeUsage.map(_.bake).distinct.toSet
 
-    oldBakes -- usedBakes
+    oldBakesExcludingTeamCityAgents -- usedBakes
   }
 }
 
-class MarkOldUnusedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo) extends HousekeepingJob with Loggable {
+class MarkOldUnusedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo)
+    extends HousekeepingJob
+    with Loggable {
   override val schedule = SimpleScheduleBuilder.repeatHourlyForever(1)
 
   override def housekeep(): Unit = {
@@ -39,11 +48,21 @@ class MarkOldUnusedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo) exte
     log.info(s"Started marking old, unused bakes for deletion")
     val now = new DateTime()
     val recipeIds = Recipes.list().map(_.id).toSet
-    val oldUnusedBakes = MarkOldUnusedBakesForDeletion.getOldUnusedBakes(recipeIds, now, Bakes.list, RecipeUsage.apply)
-    if (oldUnusedBakes.nonEmpty) log.info(s"Found ${oldUnusedBakes.size} unused bakes over ${MarkOldUnusedBakesForDeletion.MAX_AGE} days old")
+    val oldUnusedBakes = MarkOldUnusedBakesForDeletion.getOldUnusedBakes(
+      recipeIds,
+      now,
+      Bakes.list,
+      RecipeUsage.apply
+    )
+    if (oldUnusedBakes.nonEmpty)
+      log.info(
+        s"Found ${oldUnusedBakes.size} unused bakes over ${MarkOldUnusedBakesForDeletion.MAX_AGE} days old"
+      )
 
-    val bakesToMark = oldUnusedBakes.take(MarkOldUnusedBakesForDeletion.BATCH_SIZE)
-    if (bakesToMark.nonEmpty) log.info(s"Marking ${bakesToMark.size} unused bakes for deletion")
+    val bakesToMark =
+      oldUnusedBakes.take(MarkOldUnusedBakesForDeletion.BATCH_SIZE)
+    if (bakesToMark.nonEmpty)
+      log.info(s"Marking ${bakesToMark.size} unused bakes for deletion")
 
     bakesToMark.foreach { bake =>
       Bakes.markToDelete(bake.bakeId)

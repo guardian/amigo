@@ -1,0 +1,10 @@
+[Unit]
+Description=Proxy Kong's admin port
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+ExecStart=/usr/local/openresty/nginx/sbin/nginx -p /var/lib/protect-admin-port -c /etc/protect-admin-port/nginx.conf
+ExecStop=/bin/kill -s QUIT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

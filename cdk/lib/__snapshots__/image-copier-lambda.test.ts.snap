@@ -2,6 +2,10 @@
 
 exports[`the lambda stack matches the snapshot 1`] = `
 Object {
+  "Metadata": Object {
+    "gu:cdk:constructs": Array [],
+    "gu:cdk:version": "47.3.0",
+  },
   "Parameters": Object {
     "AmigoHousekeepingTopicArn": Object {
       "Description": "The housekeeping SNS topic to subscribe to",

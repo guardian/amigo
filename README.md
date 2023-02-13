@@ -37,7 +37,7 @@ it possible to SSH onto the instance that is being used to build the AMI.
 
 ## How to run locally
 
-### Testing ansible scripts without runing amigo/packer
+### Testing ansible scripts without running amigo/packer
 
 *Warning: Multipass seems to struggle if running at the same time as the VPN. We
 recommend not running the VPN when using Multipass locally.*

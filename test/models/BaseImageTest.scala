@@ -15,7 +15,10 @@ class BaseImageTest extends AnyFlatSpec with Matchers {
       "Detritus",
       DateTime.now,
       "Rincewind",
-      DateTime.now, None, Some(eolDate))
+      DateTime.now,
+      None,
+      Some(eolDate)
+    )
 
   "eolStatus" should "determinee correct eol status" in {
     val baseImageLongSupport = makeBaseImage(DateTime.now.plusMonths(24))
