@@ -14,9 +14,9 @@
 
 - name: Install ruby gems with specific versions
   gem:
-    name: "{{ item.name }}"
+    name: "{{ item.split('=')[0] }}"
     state: installed
-    version: "{{ item.version }}"
+    version: "{{ item.split('=')[1] }}"
     user_install: no
   with_items: "{{ version_gems }}"
   when: version_gems is defined
