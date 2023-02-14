@@ -1,7 +1,7 @@
 package data
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.scanamo.query.{ UniqueKeyConditions, UniqueKeys }
+import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
 import org.scanamo.syntax._
 import models._
 import org.scanamo.DynamoObject
@@ -19,7 +19,9 @@ object BakeLogs extends Loggable {
 
   def save(bakeLog: BakeLog)(implicit dynamo: Dynamo): Unit = {
     // Make sure we don't try to save an empty string to Dynamo
-    val safeMessageParts = bakeLog.messageParts.map(part => part.copy(text = if (part.text.nonEmpty) part.text else " "))
+    val safeMessageParts = bakeLog.messageParts.map(part =>
+      part.copy(text = if (part.text.nonEmpty) part.text else " ")
+    )
     val safeBakeLog = bakeLog.copy(messageParts = safeMessageParts)
     table.put(safeBakeLog).exec()
   }
@@ -28,11 +30,18 @@ object BakeLogs extends Loggable {
     table.query("bakeId" === bakeId).exec().flatMap(_.toOption)
   }
 
-  def delete(bakeId: BakeId, attempt: Int = 0)(implicit dynamo: Dynamo): Unit = {
-    val logNumbers: Seq[Int] = table.query("bakeId" === bakeId).exec().flatMap(_.toOption).map(_.logNumber)
+  def delete(bakeId: BakeId, attempt: Int = 0)(implicit
+      dynamo: Dynamo
+  ): Unit = {
+    val logNumbers: Seq[Int] = table
+      .query("bakeId" === bakeId)
+      .exec()
+      .flatMap(_.toOption)
+      .map(_.logNumber)
     val uniqueKeyTuples: Seq[(BakeId, Int)] = logNumbers.map((bakeId, _))
     uniqueKeyTuples.grouped(BATCH_SIZE).foreach { batch =>
-      val uniqueKeys: UniqueKeys[_] = (HashAndRangeKeyNames("bakeId", "logNumber"), batch.toSet)
+      val uniqueKeys: UniqueKeys[_] =
+        (HashAndRangeKeyNames("bakeId", "logNumber"), batch.toSet)
       doDelete(uniqueKeys)
       // avoid overwhelming the DB by pausing briefly after each batch
       Thread.sleep(BATCH_PAUSE)
@@ -40,11 +49,15 @@ object BakeLogs extends Loggable {
   }
 
   type UniqueKeySet = Set[DynamoObject]
-  implicit private val identityKeyConditions: UniqueKeyConditions[UniqueKeySet] = new UniqueKeyConditions[UniqueKeySet] {
-    override def toDynamoObject(t: UniqueKeySet): Set[DynamoObject] = t
-  }
+  implicit private val identityKeyConditions
+      : UniqueKeyConditions[UniqueKeySet] =
+    new UniqueKeyConditions[UniqueKeySet] {
+      override def toDynamoObject(t: UniqueKeySet): Set[DynamoObject] = t
+    }
 
-  private def doDelete(logLines: UniqueKeys[_], attempt: Int = 0)(implicit dynamo: Dynamo): Unit = {
+  private def doDelete(logLines: UniqueKeys[_], attempt: Int = 0)(implicit
+      dynamo: Dynamo
+  ): Unit = {
     table.deleteAll(logLines).exec()
   }
 

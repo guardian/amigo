@@ -6,7 +6,6 @@ deployments:
   amigo:
     type: autoscaling
     parameters:
-      bucket: deploy-tools-dist
     dependencies:
       - cloudformation
   cloudformation:
@@ -14,7 +13,7 @@ deployments:
     app: amigo
     parameters:
       amiTags:
-        Recipe: arm64-bionic-java11-deploy-infrastructure
+        Recipe: arm64-focal-java11-deploy-infrastructure
         AmigoStage: PROD
       amiEncrypted: true
       templateStagePaths:
