@@ -7,12 +7,9 @@ gems: [gem-1, gem-2]
 ```
 
 If specific versions of gems are needed, the `version_gems` parameter can be used alongside
-or instead of the `gems` parameter.
+or instead of the `gems` parameter, as shown below. The items will be split on the "=" 
+delimiter, with the first part used as the package name, and the second as the version.
 
 ```
-version_gems:
-  - name: gem-1,
-    version: 1.2.3
-  - name: gem-2
-    version: 5.2.3
+version_gems: [ "gem1=1.2.3", "gem2=5.8.3" ]
 ```
