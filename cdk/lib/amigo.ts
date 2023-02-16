@@ -14,9 +14,8 @@ import {
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 import { Duration, SecretValue } from "aws-cdk-lib";
 import type { App } from "aws-cdk-lib";
-import { CfnCertificate } from "aws-cdk-lib/aws-certificatemanager";
 import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
-import { ListenerAction, ListenerCondition, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
 import { ParameterDataType, ParameterTier, StringParameter } from "aws-cdk-lib/aws-ssm";
@@ -113,7 +112,6 @@ export class AmigoStack extends GuStack {
     super(scope, id, props);
 
     const { domainName } = props;
-    const legacyDomainName = `public.${domainName}`;
 
     this.packerInstanceProfile = new GuStringParameter(this, "PackerInstanceProfile", {
       description:
@@ -243,7 +241,7 @@ export class AmigoStack extends GuStack {
       access: {
         scope: AccessScope.PUBLIC,
       },
-      certificateProps: { domainName: legacyDomainName },
+      certificateProps: { domainName },
       scaling: { minimumInstances: 1 },
       monitoringConfiguration: {
         noMonitoring: true,
@@ -251,13 +249,6 @@ export class AmigoStack extends GuStack {
       roleConfiguration: {
         additionalPolicies: policiesToAttachToRootRole,
       },
-    });
-
-    new GuCname(this, "AmigoCname", {
-      app: AmigoStack.app.app,
-      domainName: legacyDomainName,
-      ttl: Duration.hours(1),
-      resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
 
     // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
@@ -299,24 +290,11 @@ export class AmigoStack extends GuStack {
       }),
     });
 
-    const certificate = this.node.findAll().find((_) => _ instanceof CfnCertificate) as CfnCertificate;
-
-    certificate.subjectAlternativeNames = [...(certificate.subjectAlternativeNames ?? []), domainName];
-
     new GuCname(this, "DnsRecord", {
       app: AmigoStack.app.app,
       domainName: domainName,
       ttl: Duration.hours(1),
       resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
-    });
-
-    guPlayApp.listener.addAction("redirect", {
-      action: ListenerAction.redirect({
-        permanent: true,
-        host: domainName,
-      }),
-      conditions: [ListenerCondition.hostHeaders([legacyDomainName])],
-      priority: 1,
     });
   }
 }
