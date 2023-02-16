@@ -7,7 +7,7 @@
 - name: Install ruby gems with specific versions
   gem:
     name: "{{ item.split('=')[0] }}"
-    state: installed
+    state: present
     version: "{{ item.split('=')[1] }}"
     user_install: no
   with_items: "{{ version_gems }}"
