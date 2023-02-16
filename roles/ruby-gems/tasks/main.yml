@@ -4,14 +4,6 @@
     msg: Define gems to install or disable this role
   when: gems is not defined and version_gems is not defined
 
-- name: Install ruby gems
-  gem:
-    name: "{{ item }}"
-    state: latest
-    user_install: no
-  with_items: "{{ gems }}"
-  when: gems is defined
-
 - name: Install ruby gems with specific versions
   gem:
     name: "{{ item.split('=')[0] }}"
@@ -20,3 +12,11 @@
     user_install: no
   with_items: "{{ version_gems }}"
   when: version_gems is defined
+
+- name: Install ruby gems
+  gem:
+    name: "{{ item }}"
+    state: latest
+    user_install: no
+  with_items: "{{ gems }}"
+  when: gems is defined
