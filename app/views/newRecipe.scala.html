@@ -1,5 +1,7 @@
 @import helper.CSRF
 @(form: Form[_], availableBaseImages: Seq[BaseImage], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
+@import prism.Prism.AWSAccount
+@(accounts: Seq[AWSAccount])(implicit flash: Flash)
 
 @implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
 
@@ -21,9 +23,21 @@
       <span class="help-block">This should be a weird Quartz cron expression (<a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/crontrigger.html">docs</a>)</span>
     </div>
 
-    @b3.text( form("encryptFor"), Symbol("_label") -> "Request encrypted copy", Symbol("placeholder") -> "e.g. 123456789012, 210987654321" )
+    <!-- @b3.text( form("encryptFor"), Symbol("_label") -> "Request encrypted copy", Symbol("placeholder") -> "e.g. 123456789012, 210987654321" )
     <div class="col-md-offset-2">
       <span class="help-block">This is an optional comma separated list of <a target="_blank" href="https://docs.aws.amazon.com/general/latest/gr/acct-identifiers.html">AWS account identifiers</a> that the AMI produced will be available in.</span>
+    </div> -->
+
+    <div class="form-group">
+      <label class="control-label col-md-2" for="encrypted-copies">Request encrypted copy</label>
+        @accounts.map { account =>
+          <div class="checkbox">
+            <label for="@account.accountName-@account.accountNumber">
+              <input type="checkbox" name="aws-accounts" value="@account.accountNumber"> @account.accountName (@account.accountNumber)
+            </label>
+          </div>
+        }
+      </label>
     </div>
 
     @b3.select( form("baseImageId"), availableBaseImages.map(_.id.value).zip(availableBaseImages.map(_.id.value)), Symbol("_label") -> "Base image" )
