@@ -76,7 +76,7 @@ case object Debian extends LinuxDist {
 
 case object RedHat extends LinuxDist {
   val name = "redhat"
-  val loginName = "ec2-user"
+  val loginName = "ssm-user"
   val provisioners = Seq(
     PackerProvisionerConfig.executeRemoteCommands(
       Seq(
