@@ -109,23 +109,6 @@ Object {
       },
       "Type": "AWS::SSM::Parameter",
     },
-    "AmigoCname": Object {
-      "Properties": Object {
-        "Name": "public.amigo.gutools.co.uk",
-        "RecordType": "CNAME",
-        "ResourceRecords": Array [
-          Object {
-            "Fn::GetAtt": Array [
-              "LoadBalancerAmigoC3017FAF",
-              "DNSName",
-            ],
-          },
-        ],
-        "Stage": "PROD",
-        "TTL": 3600,
-      },
-      "Type": "Guardian::DNS::RecordSet",
-    },
     "AmigoDataBucket": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
@@ -381,7 +364,7 @@ dpkg -i /tmp/amigo.deb",
     "CertificateAmigoE1AF5E0C": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
-        "DomainName": "public.amigo.gutools.co.uk",
+        "DomainName": "amigo.gutools.co.uk",
         "Tags": Array [
           Object {
             "Key": "App",
@@ -434,6 +417,23 @@ dpkg -i /tmp/amigo.deb",
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "DnsRecord": Object {
+      "Properties": Object {
+        "Name": "amigo.gutools.co.uk",
+        "RecordType": "CNAME",
+        "ResourceRecords": Array [
+          Object {
+            "Fn::GetAtt": Array [
+              "LoadBalancerAmigoC3017FAF",
+              "DNSName",
+            ],
+          },
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "GetDistributablePolicyAmigoB25A5D2B": Object {
       "Properties": Object {

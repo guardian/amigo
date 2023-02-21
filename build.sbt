@@ -2,7 +2,7 @@ import com.gu.riffraff.artifact.BuildInfo
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
-import java.time.{ ZoneId, ZonedDateTime }
+import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
@@ -21,6 +21,7 @@ Universal / javaOptions ++= Seq(
 )
 
 lazy val root = (project in file("."))
+  .aggregate(imageCopier)
   .enablePlugins(
     PlayScala,
     RiffRaffArtifact,
@@ -72,11 +73,11 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.14.1"
+val jacksonVersion = "2.14.2"
 val circeVersion = "0.14.1"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.384"
+val awsV1SdkVersion = "1.12.398"
 val awsV2SdkVersion = "2.19.13"
 
 libraryDependencies ++= Seq(
@@ -92,7 +93,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "simple-configuration-ssm" % "1.5.7",
   "com.gu.play-secret-rotation" %% "play-v28" % "0.37",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.37",
-  "com.gu.play-googleauth" %% "play-v28" % "2.2.6",
+  "com.gu.play-googleauth" %% "play-v28" % "2.2.7",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",

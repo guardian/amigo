@@ -111,6 +111,8 @@ export class AmigoStack extends GuStack {
   constructor(scope: App, id: string, props: AmigoProps) {
     super(scope, id, props);
 
+    const { domainName } = props;
+
     this.packerInstanceProfile = new GuStringParameter(this, "PackerInstanceProfile", {
       description:
         "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
@@ -239,7 +241,7 @@ export class AmigoStack extends GuStack {
       access: {
         scope: AccessScope.PUBLIC,
       },
-      certificateProps: { domainName: props.domainName },
+      certificateProps: { domainName },
       scaling: { minimumInstances: 1 },
       monitoringConfiguration: {
         noMonitoring: true,
@@ -247,13 +249,6 @@ export class AmigoStack extends GuStack {
       roleConfiguration: {
         additionalPolicies: policiesToAttachToRootRole,
       },
-    });
-
-    new GuCname(this, "AmigoCname", {
-      app: AmigoStack.app.app,
-      domainName: props.domainName,
-      ttl: Duration.hours(1),
-      resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
 
     // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
@@ -293,6 +288,13 @@ export class AmigoStack extends GuStack {
         clientSecret: SecretValue.secretsManager(`/${this.stage}/deploy/amigo/clientSecret`),
         next: ListenerAction.forward([guPlayApp.targetGroup]),
       }),
+    });
+
+    new GuCname(this, "DnsRecord", {
+      app: AmigoStack.app.app,
+      domainName: domainName,
+      ttl: Duration.hours(1),
+      resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
     });
   }
 }
