@@ -93,7 +93,8 @@ case object RedHat extends LinuxDist {
   )
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
-  val blockDeviceName = "/dev/sda1"// NOTE: this may never have been tested as we don't use redhat at the moment
+  val blockDeviceName =
+    "/dev/sda1" // NOTE: this may never have been tested as we don't use redhat at the moment
 
 }
 
@@ -114,7 +115,8 @@ case object AmazonLinux2 extends LinuxDist {
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
 
-  val blockDeviceName = "/dev/sda1" // NOTE: this may never have been tested as we don't use amazon linux at the moment
+  val blockDeviceName =
+    "/dev/sda1" // NOTE: this may never have been tested as we don't use amazon linux at the moment
 }
 
 case class BaseImage(
