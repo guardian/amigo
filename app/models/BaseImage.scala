@@ -1,7 +1,7 @@
 package models
 
 import org.scanamo.DynamoFormat
-import models.packer.PackerProvisionerConfig
+import models.packer.{BlockDeviceMapping, PackerProvisionerConfig}
 import org.joda.time.DateTime
 import cats.syntax.either._
 import org.scanamo.TypeCoercionError
@@ -14,6 +14,7 @@ sealed trait LinuxDist {
   val provisioners: Seq[PackerProvisionerConfig]
   def savePackageListCommand(bakeId: BakeId): String
   val loginName: String
+  val blockDeviceName: String
 }
 object LinuxDist {
   implicit val dynamoFormat: DynamoFormat[LinuxDist] =
@@ -46,6 +47,7 @@ object LinuxDist {
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"
   val loginName = "ubuntu"
+  val blockDeviceName = "/dev/sda1"
   val provisioners = Seq(
     // bootstrap Ansible
     PackerProvisionerConfig.executeRemoteCommands(
@@ -72,6 +74,7 @@ case object Debian extends LinuxDist {
   val provisioners = Ubuntu.provisioners
   def savePackageListCommand(bakeId: BakeId) =
     Ubuntu.savePackageListCommand(bakeId)
+  val blockDeviceName = "/dev/nvme0n1p1"
 }
 
 case object RedHat extends LinuxDist {
@@ -90,6 +93,7 @@ case object RedHat extends LinuxDist {
   )
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
+  val blockDeviceName = "/dev/sda1"// NOTE: this may never have been tested as we don't use redhat at the moment
 
 }
 
@@ -109,6 +113,8 @@ case object AmazonLinux2 extends LinuxDist {
   )
   def savePackageListCommand(bakeId: BakeId) =
     s"yum list installed > ${LinuxDist.packageListTempPath(bakeId)}"
+
+  val blockDeviceName = "/dev/sda1" // NOTE: this may never have been tested as we don't use amazon linux at the moment
 }
 
 case class BaseImage(

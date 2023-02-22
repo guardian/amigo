@@ -30,7 +30,13 @@ object PackerBuildConfigGenerator {
     val region = "eu-west-1"
 
     val disk = bake.recipe.diskSize.map(size =>
-      List(BlockDeviceMapping(volume_size = size))
+      List(
+        BlockDeviceMapping(
+          volume_size = size,
+          device_name =
+            bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).blockDeviceName
+        )
+      )
     )
 
     val instanceType = sourceAmiMetadata.architecture match {
