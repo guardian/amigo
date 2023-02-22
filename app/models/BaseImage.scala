@@ -74,7 +74,7 @@ case object Debian extends LinuxDist {
   val provisioners = Ubuntu.provisioners
   def savePackageListCommand(bakeId: BakeId) =
     Ubuntu.savePackageListCommand(bakeId)
-  val blockDeviceName = "/dev/nvme0n1p1"
+  val blockDeviceName = "/dev/xvda"
 }
 
 case object RedHat extends LinuxDist {
