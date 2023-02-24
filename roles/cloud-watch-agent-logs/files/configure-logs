@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+id=$1
+stack=$2
+stage=$3
+app=$4
+file=$5
+#optional date format parameter
+date_format=${6:-%Y-%m-%d %H:%M:%S}
+conf_file=/opt/cloudwatch-logs/$app-$id.json
+
+cat > $conf_file <<__END__
+{
+  "agent": {
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "$file",
+            "log_group_name": "$stack-$app-$stage",
+            "log_stream_name": "$stack-$app-$stage-$id-{instance_id}",
+            "timezone": "UTC",
+            "timestamp_format": "$date_format"
+          }
+        ]
+      }
+    },
+    "log_stream_name": "$stack-$app-$stage-$id-{instance_id}"
+  }
+}
+__END__
+
+amazon-cloudwatch-agent-ctl -a fetch-config -c file:$conf_file
+amazon-cloudwatch-agent-ctl -a start
