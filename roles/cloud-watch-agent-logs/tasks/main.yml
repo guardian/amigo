@@ -1,0 +1,9 @@
+---
+- name: Create opt directory
+  file: path=/opt/cloudwatch-logs/ state=directory mode=0755
+
+- name: copy ec2 configuration script
+  copy:
+    src: configure-logs
+    dest: /opt/cloudwatch-logs/
+    mode: 0754

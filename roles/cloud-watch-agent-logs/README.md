@@ -1,15 +1,13 @@
-### Deprecated - use cloud-watch-agent-logs, which uses the newer "unified" agent.
-
-This role will install the [cloudwatch](http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html) agent.
+This role uses the [unified cloudwatch agent](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/UseCloudWatchUnifiedAgent.html) for logging.
 
 It also provide a utility script to configure your logs in `/opt/cloudwatch-logs/configure-logs`
 The arguments are:
- - an id, to distinguish between log file (for instance `application` and `gc`)
- - the stack
- - the stage
- - the app
- - the full path to the log
- - an optional date format, see "datetime_format" [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html)
+- an id, to distinguish between log file (for instance `application` and `gc`)
+- the stack
+- the stage
+- the app
+- the full path to the log
+- an optional date format, see "datetime_format" [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html)
 
 
 Here's an example user data that makes use of it:
