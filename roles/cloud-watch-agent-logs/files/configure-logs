@@ -11,8 +11,6 @@ conf_file=/opt/cloudwatch-logs/$app-$id.json
 
 cat > $conf_file <<__END__
 {
-  "agent": {
-  },
   "logs": {
     "logs_collected": {
       "files": {
