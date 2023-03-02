@@ -74,11 +74,11 @@ scalacOptions ++= Seq(
 )
 
 val jacksonVersion = "2.14.2"
-val circeVersion = "0.14.1"
+val circeVersion = "0.14.4"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.398"
-val awsV2SdkVersion = "2.19.13"
+val awsV1SdkVersion = "1.12.417"
+val awsV2SdkVersion = "2.20.9"
 
 libraryDependencies ++= Seq(
   ws,
@@ -103,7 +103,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "7.2",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
@@ -125,7 +125,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
-      "com.amazonaws" % "aws-lambda-java-core" % "1.2.1",
+      "com.amazonaws" % "aws-lambda-java-core" % "1.2.2",
       "com.amazonaws" % "aws-lambda-java-events" % "3.11.0",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion

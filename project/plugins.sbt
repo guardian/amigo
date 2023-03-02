@@ -2,7 +2,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.19")
 
 // sbt-native-packager cannot be updated to >1.9.9 until Play supports scala-xml 2
 addSbtPlugin(
-  "com.github.sbt" % "sbt-native-packager" % "1.9.13"
+  "com.github.sbt" % "sbt-native-packager" % "1.9.16"
 ) // scala-steward:off
 addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "1.1.18")
 libraryDependencies += "org.vafer" % "jdeb" % "1.10" artifacts Artifact(
