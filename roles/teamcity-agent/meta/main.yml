@@ -13,5 +13,9 @@ dependencies:
       - zip
   - role: pip-packages 
     packages: [boto3, botocore]
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 19
+  - role: pip3
+    packages: [boto3, botocore]
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 20
   - role: java8
   - role: java11corretto
