@@ -1,4 +1,8 @@
 ---
+- name: Fail when we attempt to install on a distro above 20.04 (no tested docker-ce version)
+  fail:
+    msg: No version of docker-ce specified for distros above 20.04 (please add one)!
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 20
 - name: set timezone to Europe/London
   timezone:
     name: Europe/London
