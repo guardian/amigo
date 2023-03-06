@@ -342,8 +342,10 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val debugAvailable = stage != "PROD"
 
-  val requiredGoogleGroups = Set(
-    configuration.get[String]("auth.google.departmentGroupId")
+  // Membership in at least one of these groups is required to pass authentication.
+  val googleGroupsToCheck = Set(
+    configuration.get[String]("auth.google.departmentGroupId"),
+    configuration.get[String]("auth.google.dataScientistsGroupId")
   )
 
   val groupChecker = {
@@ -410,7 +412,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     googleAuthConfig,
     wsClient,
     controllerComponents,
-    requiredGoogleGroups,
+    googleGroupsToCheck,
     groupChecker
   )
   lazy val router: Router = new Routes(
