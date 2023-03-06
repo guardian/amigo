@@ -74,11 +74,11 @@ scalacOptions ++= Seq(
 )
 
 val jacksonVersion = "2.14.2"
-val circeVersion = "0.14.5"
+val circeVersion = "0.14.4"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.419"
-val awsV2SdkVersion = "2.20.17"
+val awsV1SdkVersion = "1.12.417"
+val awsV2SdkVersion = "2.20.9"
 
 libraryDependencies ++= Seq(
   ws,
