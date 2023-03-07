@@ -34,6 +34,11 @@
     dest: /usr/local/bin/docker-compose
     mode: 0555
     checksum: sha256:f679a24b93f291c3bffaff340467494f388c0c251649d640e661d509db9d57e9
+- name: create docker directory
+  file:
+    path: /etc/docker
+    state: directory
+    owner: root
 - name: set docker to use nexus pull through proxy
   shell: echo '{"registry-mirrors":["https://nexus.gutools.co.uk:8082"]}' > /etc/docker/daemon.json
 - name: create etc gu
