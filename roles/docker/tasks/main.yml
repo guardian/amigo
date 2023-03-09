@@ -30,7 +30,7 @@
 
 - name: Install docker
   apt:
-    name: docker-ce={{ version }}~ubuntu
+    name: docker-ce={{ version }}~ubuntu*
     update_cache: yes
     state: present
 
