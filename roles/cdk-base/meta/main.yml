@@ -1,4 +1,12 @@
 ---
 dependencies:
   - aws-tools
-  - fluentbit
+  - role: fluentbit
+    ubuntu_version: bionic
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 18
+  - role: fluentbit
+    ubuntu_version: focal
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 20
+  - role: fluentbit
+    ubuntu_version: jammy
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 22
