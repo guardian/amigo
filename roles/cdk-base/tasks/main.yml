@@ -1,4 +1,9 @@
 ---
+- name: Fail when we attempt to install on a distro above 22.04 (no available fluentbit version)
+  fail:
+    msg: No version of fluentbit specified for distros above 22.04 (please add one)!
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 22
+
 - name: Setup target directory
   file:
     path: /var/lib/cloud/scripts/per-instance
