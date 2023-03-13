@@ -58,12 +58,6 @@ class PlaybookGeneratorSpec extends AnyFlatSpec with Matchers {
         |
         |- hosts: all
         |  become: yes
-        |  pre_tasks:
-        |    - name: Prevent apt from upgrading grub-efi-arm64-signed
-        |      ansible.builtin.dpkg_selections:
-        |        name: grub-efi-arm64-signed
-        |        selection: hold
-        |      when: ansible_facts['distribution_major_version'] == "18" and ansible_facts['architecture'] == "aarch64"
         |  vars:
         |    var1: value1
         |    var2: value2
