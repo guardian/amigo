@@ -3,7 +3,7 @@
   apt_key: url=https://debian.neo4j.com/neotechnology.gpg.key state=present
 
 - name: Add neo4j repository
-  apt_repository: repo='deb https://debian.neo4j.com stable latest' state=present
+  apt_repository: repo='deb https://debian.neo4j.com stable {{ neo4j_repo_version }}' state=present
 
 - name: Install neo4j
   apt:
