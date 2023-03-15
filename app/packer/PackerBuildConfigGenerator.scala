@@ -54,6 +54,7 @@ object PackerBuildConfigGenerator {
         bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu).loginName,
       ssh_interface = "session_manager",
       run_tags = Map(
+        "Name" -> "Packer Builder",
         "Stage" -> stage,
         "AmigoStage" -> amigoStage,
         "Stack" -> stack,

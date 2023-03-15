@@ -57,8 +57,10 @@ class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
   }
 
   def getRunningPackerInstances(): List[Instance] = {
+
     val request = new DescribeInstancesRequest()
       .withFilters(
+        // These filters correspond to the tags added in packer.PackerBuildConfigGenerator
         new Filter("tag:AmigoStage", List(amigoStage).asJava),
         new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
         new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
