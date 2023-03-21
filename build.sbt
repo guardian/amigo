@@ -78,7 +78,7 @@ val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.430"
-val awsV2SdkVersion = "2.20.27"
+val awsV2SdkVersion = "2.20.28"
 
 libraryDependencies ++= Seq(
   ws,
