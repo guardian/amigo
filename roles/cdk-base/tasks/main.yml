@@ -35,3 +35,11 @@
     chmod +x /var/lib/cloud/scripts/per-instance/02-$NAME
   when:
     - ansible_os_family == "Debian"
+
+- name: Remove syslog output
+  shell: |
+    NAME=remove-syslog-output
+    sudo sh -c 'echo ForwardToSyslog=no >> /etc/systemd/journald.conf'
+    sudo systemctl force-reload systemd-journald
+  when:
+    - ansible_os_family == "Debian"
