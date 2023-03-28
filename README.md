@@ -65,9 +65,6 @@ If the Multipass VM is timing out, try deleting and then re-running the script:
 
 You should also disconnect from the VPN too if using it.
 
-*Previously Vagrant was used but Virtualbox, which is used under the hood,
-doesn't support M1/arm64 macs unfortunately.*
-
 ### Running the full app
 
 Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
