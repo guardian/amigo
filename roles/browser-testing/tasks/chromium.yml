@@ -1,0 +1,8 @@
+---
+- name: Install Chromium
+  snap:
+    name: chromium
+
+- name: Install Chromium chromedriver
+  snap:
+    name: chromium-chromedriver
