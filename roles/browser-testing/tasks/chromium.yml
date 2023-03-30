@@ -1,7 +1,0 @@
----
-- name: Install Chromium
-  snap:
-    name: chromium
-
-- name: Install Chromium chromedriver
-  apt: name=chromium-chromedriver state=latest

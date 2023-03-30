@@ -2,13 +2,12 @@
 - name: Install Xvfb
   apt: name=xvfb state=latest
 
-- name: Install Chrome
-  include: "chrome.yml"
-  when: ansible_architecture != "aarch64"
-
 - name: Install Chromium
-  include: "chromium.yml"
-  when: ansible_architecture == "aarch64"
+  snap:
+    name: chromium
+
+- name: Install Chromium chromedriver
+  apt: name=chromium-chromedriver state=latest
 
 - name: Create Xvfb service
   copy: src=xvfb.service dest=/etc/systemd/system/xvfb.service owner=root group=root
