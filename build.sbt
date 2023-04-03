@@ -74,11 +74,11 @@ scalacOptions ++= Seq(
 )
 
 val jacksonVersion = "2.14.2"
-val circeVersion = "0.14.4"
+val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.417"
-val awsV2SdkVersion = "2.20.9"
+val awsV1SdkVersion = "1.12.440"
+val awsV2SdkVersion = "2.20.35"
 
 libraryDependencies ++= Seq(
   ws,
@@ -97,7 +97,7 @@ libraryDependencies ++= Seq(
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "2.3.3",
+  "com.lihaoyi" %% "fastparse" % "3.0.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
@@ -126,7 +126,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.2",
-      "com.amazonaws" % "aws-lambda-java-events" % "3.11.0",
+      "com.amazonaws" % "aws-lambda-java-events" % "3.11.1",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )
