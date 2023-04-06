@@ -14,4 +14,4 @@
   npm:
     name: puppeteer
     version: '1.9.0'
-    path: / # Hack based on https://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders - blame Alex
+    path: /usr/ # Hack based on https://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders - blame Alex
