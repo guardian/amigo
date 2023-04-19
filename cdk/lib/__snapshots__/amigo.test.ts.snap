@@ -312,7 +312,7 @@ Object {
         "ImageId": Object {
           "Ref": "AMIAmigo",
         },
-        "InstanceType": "t4g.small",
+        "InstanceType": "t4g.medium",
         "MetadataOptions": Object {
           "HttpTokens": "required",
         },
