@@ -222,7 +222,7 @@ export class AmigoStack extends GuStack {
 
     const guPlayApp = new GuPlayApp(this, {
       ...AmigoStack.app,
-      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
+      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.XLARGE),
       userData: [
         "#!/bin/bash -ev",
         `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
