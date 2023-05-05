@@ -5,7 +5,7 @@ practices rely on.
 
 At the moment this means the following:
 - fetch instance tags and store under `/etc/config` (via [`instance-tag-discovery`](https://github.com/guardian/instance-tag-discovery))
-- ship cloud-init logs to a Kinesis stream (via [`devx-logs`](https://github.com/guardian/devx-logs))
+- ship `cloud-init-output` and application logs to a Kinesis stream (via [`devx-logs`](https://github.com/guardian/devx-logs))
 
 ## Requirements
 ℹ If you are using [`@guardian/cdk`](http://github.com/guardian/cdk) version 41.1.0 or greater, these requirements are met automatically.
