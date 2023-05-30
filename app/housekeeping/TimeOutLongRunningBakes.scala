@@ -8,7 +8,7 @@ import services.Loggable
 
 // This house keeping job is to mitigate against Amigo bakes that have failed, but have not reported as such.
 // As a result of this, the EC2 instance used for the bake would not be terminated, incurring unnecessary costs.
-// The solution is to update the status (in the database) of running bakes that were launched over an hour ago to TimedOut
+// The solution is to update the status (in the database) of running bakes that were launched over 2 hours ago to TimedOut
 // and terminate the EC2 instance associated with them respectively.
 class TimeOutLongRunningBakes(
     bakesRepo: BakesRepo,
@@ -57,7 +57,7 @@ class TimeOutLongRunningBakes(
   }
 
   override def housekeep(): Unit =
-    runHouseKeeping(earliestStartedAt = DateTime.now.minusHours(1))
+    runHouseKeeping(earliestStartedAt = DateTime.now.minusHours(2))
 }
 
 object TimeOutLongRunningBakes {
