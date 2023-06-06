@@ -77,8 +77,8 @@ val jacksonVersion = "2.15.1"
 val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.468"
-val awsV2SdkVersion = "2.20.60"
+val awsV1SdkVersion = "1.12.480"
+val awsV2SdkVersion = "2.20.77"
 
 libraryDependencies ++= Seq(
   ws,
@@ -126,7 +126,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.2",
-      "com.amazonaws" % "aws-lambda-java-events" % "3.11.1",
+      "com.amazonaws" % "aws-lambda-java-events" % "3.11.2",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )
