@@ -30,7 +30,7 @@ Object {
       "Properties": Object {
         "Code": Object {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/imagecopier.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier.zip",
         },
         "Description": "Lambda for housekeeping AMIgo baked AMIs in other accounts",
         "Environment": Object {
@@ -52,7 +52,7 @@ Object {
             "Arn",
           ],
         },
-        "Runtime": "java8",
+        "Runtime": "java11",
         "Tags": Array [
           Object {
             "Key": "gu:cdk:version",
@@ -210,7 +210,7 @@ Object {
       "Properties": Object {
         "Code": Object {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/imagecopier.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier.zip",
         },
         "Description": "Lambda for copying and encrypting AMIgo baked AMIs",
         "Environment": Object {

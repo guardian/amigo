@@ -49,7 +49,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/imagecopier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
@@ -80,7 +80,7 @@ export class ImageCopierLambda extends GuStack {
 
     const housekeepingLambda = new Function(this, "HousekeepingLambda", {
       description: "Lambda for housekeeping AMIgo baked AMIs in other accounts",
-      runtime: Runtime.JAVA_8,
+      runtime: Runtime.JAVA_11,
       memorySize: 512,
       handler: "com.gu.imageCopier.LambdaEntrypoint::housekeeping",
       timeout: Duration.seconds(30),
@@ -89,7 +89,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/imagecopier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
