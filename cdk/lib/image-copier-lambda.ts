@@ -40,7 +40,7 @@ export class ImageCopierLambda extends GuStack {
 
     const copierLambda = new Function(this, "ImageCopierLambda", {
       description: "Lambda for copying and encrypting AMIgo baked AMIs",
-      runtime: Runtime.JAVA_8,
+      runtime: Runtime.JAVA_11,
       memorySize: 512,
       handler: "com.gu.imageCopier.LambdaEntrypoint::run",
       timeout: Duration.seconds(30),
