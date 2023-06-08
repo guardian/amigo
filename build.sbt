@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
     riffRaffManifestProjectName := s"tools::${name.value}",
     riffRaffPackageType := (Debian / packageBin).value,
     riffRaffArtifactResources ++= Seq(
-      (imageCopier / Universal / packageBin).value -> "imagecopier/imagecopier.zip",
+      (imageCopier / Universal / packageBin).value -> "imagecopier/image-copier.zip",
       baseDirectory.value / "cdk/cdk.out/AMIgo-CODE.template.json" -> "cloudformation/AMIgo-CODE.template.json",
       baseDirectory.value / "cdk/cdk.out/AMIgo-PROD.template.json" -> "cloudformation/AMIgo-PROD.template.json"
     ),

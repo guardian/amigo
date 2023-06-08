@@ -49,7 +49,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/imagecopier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
@@ -89,7 +89,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/imagecopier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
