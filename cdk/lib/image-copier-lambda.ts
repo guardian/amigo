@@ -80,7 +80,7 @@ export class ImageCopierLambda extends GuStack {
 
     const housekeepingLambda = new Function(this, "HousekeepingLambda", {
       description: "Lambda for housekeeping AMIgo baked AMIs in other accounts",
-      runtime: Runtime.JAVA_8,
+      runtime: Runtime.JAVA_11,
       memorySize: 512,
       handler: "com.gu.imageCopier.LambdaEntrypoint::housekeeping",
       timeout: Duration.seconds(30),

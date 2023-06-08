@@ -52,7 +52,7 @@ Object {
             "Arn",
           ],
         },
-        "Runtime": "java8",
+        "Runtime": "java11",
         "Tags": Array [
           Object {
             "Key": "gu:cdk:version",
