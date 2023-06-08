@@ -1,0 +1,4 @@
+---
+dependencies:
+  - apt
+  - { role: packages, s3_packages: [kong_{{ kong_version }}_{{ kong_arch }}.deb] }
