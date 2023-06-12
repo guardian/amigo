@@ -8,8 +8,12 @@ import { SnsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Topic } from "aws-cdk-lib/aws-sns";
 
+export interface ImageCopierLambdaProps extends GuStackProps {
+  version: string;
+}
+
 export class ImageCopierLambda extends GuStack {
-  constructor(scope: App, id: string, props: GuStackProps) {
+  constructor(scope: App, id: string, props: ImageCopierLambdaProps) {
     super(scope, id, props);
 
     const functionCodeBucket = Bucket.fromBucketName(this, "function-code-bucket", "deploy-tools-dist");
@@ -49,7 +53,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier-${props.version}.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
@@ -89,7 +93,7 @@ export class ImageCopierLambda extends GuStack {
         KMS_KEY_ARN: kmsKeyArn,
         ENCRYPTED_TAG_VALUE: "true",
       },
-      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier.zip`),
+      code: Code.fromBucket(functionCodeBucket, `${this.stack}/${this.stage}/imagecopier/image-copier-${props.version}.zip`),
       initialPolicy: [
         loggingPolicy,
         new PolicyStatement({
