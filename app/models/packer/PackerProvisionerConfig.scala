@@ -2,7 +2,7 @@ package models.packer
 
 import java.nio.file.{Files, Path}
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import scala.jdk.CollectionConverters._
 
@@ -19,7 +19,8 @@ case class PackerProvisionerConfig(
 )
 
 object PackerProvisionerConfig {
-  implicit val jsonWrites = Json.writes[PackerProvisionerConfig]
+  implicit val jsonWrites: Writes[PackerProvisionerConfig] =
+    Json.writes[PackerProvisionerConfig]
 
   def fileCopy(source: Path, destination: String) = PackerProvisionerConfig(
     `type` = "file",
