@@ -22,44 +22,43 @@ object BakeEvent {
 
   def unapply(event: BakeEvent): Option[BakeId] = Some(event.bakeId)
 
-  implicit val eventIdExtractor: EventIdExtractor[BakeEvent] =
+  implicit val eventIdExtractor =
     EventIdExtractor[BakeEvent](e => Some(e.eventId))
 
-  implicit val eventDataExtractor: EventDataExtractor[BakeEvent] =
-    EventDataExtractor[BakeEvent]({ event =>
-      val json = event match {
-        case Log(_, log) =>
-          JsObject(
-            Seq(
-              "eventType" -> JsString("log"),
-              "timestamp" -> JsString(
-                log.timestamp.toString("YYYY-MM-dd HH:mm:ss")
-              ),
-              "log" -> JsObject(
-                Seq(
-                  "level" -> JsString(log.logLevel),
-                  "number" -> JsNumber(log.logNumber),
-                  "messageHtml" -> JsString(log.messageHtml.toString)
-                )
+  implicit val eventDataExtractor = EventDataExtractor[BakeEvent]({ event =>
+    val json = event match {
+      case Log(_, log) =>
+        JsObject(
+          Seq(
+            "eventType" -> JsString("log"),
+            "timestamp" -> JsString(
+              log.timestamp.toString("YYYY-MM-dd HH:mm:ss")
+            ),
+            "log" -> JsObject(
+              Seq(
+                "level" -> JsString(log.logLevel),
+                "number" -> JsNumber(log.logNumber),
+                "messageHtml" -> JsString(log.messageHtml.toString)
               )
             )
           )
-        case AmiCreated(_, amiId) =>
-          JsObject(
-            Seq(
-              "eventType" -> JsString("ami-created"),
-              "amiId" -> JsString(amiId.value)
-            )
+        )
+      case AmiCreated(_, amiId) =>
+        JsObject(
+          Seq(
+            "eventType" -> JsString("ami-created"),
+            "amiId" -> JsString(amiId.value)
           )
-        case PackerProcessExited(_, exitCode) =>
-          JsObject(
-            Seq(
-              "eventType" -> JsString("packer-process-exited"),
-              "exitCode" -> JsNumber(exitCode)
-            )
+        )
+      case PackerProcessExited(_, exitCode) =>
+        JsObject(
+          Seq(
+            "eventType" -> JsString("packer-process-exited"),
+            "exitCode" -> JsNumber(exitCode)
           )
-      }
-      json.toString()
-    })
+        )
+    }
+    json.toString()
+  })
 
 }

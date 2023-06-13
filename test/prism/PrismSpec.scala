@@ -4,7 +4,7 @@ import models.AmiId
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.{Configuration, Environment}
-import play.api.http.{DefaultFileMimeTypes, DefaultFileMimeTypesProvider}
+import play.api.http.DefaultFileMimeTypesProvider
 import play.api.http.HttpConfiguration.HttpConfigurationProvider
 import play.api.mvc.{Action, Results}
 import play.api.test.WsTestClient
@@ -24,10 +24,9 @@ class PrismSpec extends AnyFlatSpec with Matchers {
     Configuration.load(environment),
     environment
   ).get
-  implicit val fileMimeTypes: DefaultFileMimeTypes =
-    new DefaultFileMimeTypesProvider(
-      httpConfiguration.fileMimeTypes
-    ).get
+  implicit val fileMimeTypes = new DefaultFileMimeTypesProvider(
+    httpConfiguration.fileMimeTypes
+  ).get
 
   val controllerComponents = stubControllerComponents()
 

@@ -2,7 +2,7 @@ package prism
 
 import data.{Bakes, Dynamo, PackageList, Recipes}
 import models.{AmiId, Bake, BakeId, Recipe, RecipeId}
-import play.api.libs.json._
+import play.api.libs.json.Json
 import prism.Prism.{Image, Instance, LaunchConfiguration}
 import services.PrismData
 
@@ -19,7 +19,7 @@ case class BakeUsage(
 case class SimpleBakeUsage(bakeId: BakeId, packageListS3Location: String)
 
 object SimpleBakeUsage {
-  implicit val writes: Writes[SimpleBakeUsage] = Json.writes[SimpleBakeUsage]
+  implicit val writes = Json.writes[SimpleBakeUsage]
 
   def fromBakeUsage(
       bakeUsage: BakeUsage,
