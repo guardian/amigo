@@ -2,7 +2,7 @@ package models.packer
 
 import models.Bake
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json._
+import play.api.libs.json.Json
 
 case class PackerVariablesConfig(
     recipe: String,
@@ -12,8 +12,7 @@ case class PackerVariablesConfig(
 )
 
 object PackerVariablesConfig {
-  implicit val jsonWrites: Writes[PackerVariablesConfig] =
-    Json.writes[PackerVariablesConfig]
+  implicit val jsonWrites = Json.writes[PackerVariablesConfig]
 
   val format = DateTimeFormat.forPattern("yyyy/MM/dd_HH-mm-ss")
   def apply(bake: Bake): PackerVariablesConfig = {
