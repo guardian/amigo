@@ -10,6 +10,18 @@
     - postgresql-client-{{postgres_version}}
     state: latest
 
+- name: Download Kong package
+  amazon.aws.aws_s3:
+    bucket: amigo-data
+    mode: get
+    object: "packages/kong_{{ kong_version }}_{{ kong_arch }}.deb"
+    dest: "/tmp/kong_{{ kong_version }}_{{ kong_arch }}.deb"
+  register: getresult
+
+- name: Install Kong package
+  apt:
+    deb: "/tmp/kong_{{ kong_version }}_{{ kong_arch }}.deb"
+
 - name: Create user for Kong
   user: name={{kong_user}} system=yes
 
