@@ -3,3 +3,4 @@ kong_version: 1.5.1
 kong_user: content-api
 postgres_version: 12
 kong_arch: amd64
+kong_repo: gateway-3.x-ubuntu-focal
