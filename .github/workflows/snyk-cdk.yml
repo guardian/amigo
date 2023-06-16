@@ -1,0 +1,20 @@
+name: Snyk IAC
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - nt/iac-scan
+  workflow_dispatch:
+
+jobs:
+  GuCdkScan:
+    uses: guardian/.github/.github/workflows/pr-gucdk-snyk.yml@nt/iac-scan
+    with:
+        PACKAGE_MANAGER: 'yarn'
+        SEVERITY_THRESHOLD: 'low'
+    secrets:
+       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
