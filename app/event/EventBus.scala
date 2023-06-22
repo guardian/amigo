@@ -1,6 +1,6 @@
 package event
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
 
 trait EventBus {
 

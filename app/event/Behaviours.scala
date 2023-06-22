@@ -1,8 +1,7 @@
 package event
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
-import akka.stream.Materializer
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import data.{BakeLogs, Bakes, Dynamo}
 import event.BakeEvent._
 import models.{AmiId, Bake, BakeStatus, NotificationConfig}

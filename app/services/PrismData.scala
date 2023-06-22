@@ -1,6 +1,6 @@
 package services
 
-import akka.actor.{Cancellable, Scheduler}
+import org.apache.pekko.actor.{Cancellable, Scheduler}
 import models.AmiId
 import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
