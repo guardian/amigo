@@ -103,7 +103,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.4",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
