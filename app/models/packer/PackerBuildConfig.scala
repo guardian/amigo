@@ -1,7 +1,6 @@
 package models.packer
 
 import play.api.libs.json.Json
-import play.api.libs.json.OWrites
 
 /** Case class representation of a Packer json file
   */
@@ -12,6 +11,5 @@ case class PackerBuildConfig(
 )
 
 object PackerBuildConfig {
-  implicit val jsonWrites: OWrites[PackerBuildConfig] =
-    Json.writes[PackerBuildConfig]
+  implicit val jsonWrites = Json.writes[PackerBuildConfig]
 }
