@@ -16,6 +16,7 @@ import prism.Prism.{AWSAccount, Instance, LaunchConfiguration}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.http.DefaultFileMimeTypes
 
 class PrismSpec extends AnyFlatSpec with Matchers {
 
@@ -24,9 +25,10 @@ class PrismSpec extends AnyFlatSpec with Matchers {
     Configuration.load(environment),
     environment
   ).get
-  implicit val fileMimeTypes = new DefaultFileMimeTypesProvider(
-    httpConfiguration.fileMimeTypes
-  ).get
+  implicit val fileMimeTypes: DefaultFileMimeTypes =
+    new DefaultFileMimeTypesProvider(
+      httpConfiguration.fileMimeTypes
+    ).get
 
   val controllerComponents = stubControllerComponents()
 
