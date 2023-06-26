@@ -39,18 +39,21 @@ object ListParamValue {
   def of(params: String*) = ListParamValue(params.map(SingleParamValue).toList)
 }
 object ParamValue {
-  implicit val format = DynamoFormat.xmap[ParamValue, String](
-    fastparse
-      .parse(_, CustomisedRole.paramValue(_))
-      .fold(
-        (_, _, _) =>
-          Left(
-            TypeCoercionError(new RuntimeException("Unable to read ParamValue"))
-          ),
-        (pv, _) => Right(pv)
-      ),
-    _.quoted
-  )
+  implicit val format: DynamoFormat[ParamValue] =
+    DynamoFormat.xmap[ParamValue, String](
+      fastparse
+        .parse(_, CustomisedRole.paramValue(_))
+        .fold(
+          (_, _, _) =>
+            Left(
+              TypeCoercionError(
+                new RuntimeException("Unable to read ParamValue")
+              )
+            ),
+          (pv, _) => Right(pv)
+        ),
+      _.quoted
+    )
 }
 
 object CustomisedRole {
@@ -93,7 +96,4 @@ object CustomisedRole {
       case f: Parsed.Failure        => Left(f.toString)
     }
   }
-
-  implicit val format = implicitly[DynamoFormat[CustomisedRole]]
-
 }

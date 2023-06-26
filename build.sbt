@@ -6,7 +6,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.11"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -77,8 +77,8 @@ val jacksonVersion = "2.15.2"
 val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.489"
-val awsV2SdkVersion = "2.20.86"
+val awsV1SdkVersion = "1.12.494"
+val awsV2SdkVersion = "2.20.91"
 
 libraryDependencies ++= Seq(
   ws,
@@ -103,7 +103,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.4",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
@@ -120,7 +120,7 @@ routesImport += "models._"
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(JavaAppPackaging)
   .settings(
-    scalaVersion := "2.13.10",
+    scalaVersion := "2.13.11",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(

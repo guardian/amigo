@@ -167,7 +167,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
   val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV2)
 
-  implicit val dynamo = {
+  implicit val dynamo: Dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient
       .builder()
       .credentialsProvider(awsCredsForV2)
@@ -261,7 +261,9 @@ class AppComponents(context: Context, identity: AppIdentity)
     ActorSystem[BakeEvent](Behaviours.guardian(eventListeners), "EventBus")
   }
 
-  implicit val eventBus = new ActorSystemWrapper(eventBusActorSystem)
+  implicit val eventBus: ActorSystemWrapper = new ActorSystemWrapper(
+    eventBusActorSystem
+  )
 
   val googleAuthConfig = GoogleAuthConfig(
     clientId = mandatoryConfig("google.clientId"),
@@ -273,7 +275,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
 
-  implicit val packerConfig = PackerConfig(
+  implicit val packerConfig: PackerConfig = PackerConfig(
     stage = stage,
     vpcId = configuration.get[Option[String]]("packer.vpcId"),
     subnetId = configuration.get[Option[String]]("packer.subnetId"),
