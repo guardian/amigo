@@ -17,7 +17,7 @@ object BakeStatus extends Enum[BakeStatus] {
   case object TimedOut extends BakeStatus
   case object DeletionScheduled extends BakeStatus
 
-  implicit val dynamoFormat: DynamoFormat[BakeStatus] = {
+  implicit val dynamoFormat = {
     def fromString(s: String): Either[DynamoReadError, BakeStatus] =
       Either.fromOption(
         withNameOption(s),

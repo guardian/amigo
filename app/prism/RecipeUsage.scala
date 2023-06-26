@@ -5,7 +5,6 @@ import models.{AmiId, Bake, BakeId, Recipe, RecipeId}
 import play.api.libs.json.Json
 import prism.Prism.{Image, Instance, LaunchConfiguration}
 import services.PrismData
-import play.api.libs.json.OWrites
 
 case class Ami(account: String, id: AmiId)
 
@@ -20,7 +19,7 @@ case class BakeUsage(
 case class SimpleBakeUsage(bakeId: BakeId, packageListS3Location: String)
 
 object SimpleBakeUsage {
-  implicit val writes: OWrites[SimpleBakeUsage] = Json.writes[SimpleBakeUsage]
+  implicit val writes = Json.writes[SimpleBakeUsage]
 
   def fromBakeUsage(
       bakeUsage: BakeUsage,
