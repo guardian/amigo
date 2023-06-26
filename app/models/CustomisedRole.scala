@@ -96,8 +96,4 @@ object CustomisedRole {
       case f: Parsed.Failure        => Left(f.toString)
     }
   }
-
-  implicit val format: DynamoFormat[CustomisedRole] =
-    implicitly[DynamoFormat[CustomisedRole]]
-
 }
