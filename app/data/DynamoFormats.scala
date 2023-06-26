@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 
 object DynamoFormats {
 
-  implicit val dateTimeFormat =
+  implicit val dateTimeFormat: DynamoFormat[DateTime] =
     DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
       DateTime.parse,
       _.toString
