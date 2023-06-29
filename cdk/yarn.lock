@@ -319,16 +319,16 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@guardian/cdk@47.3.0":
-  version "47.3.0"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-47.3.0.tgz#59003e54a56254f60cdbc8f4c7db8675c2be091c"
-  integrity sha512-s0/nByLK3q46jKEqK3Tpqj5TFNevtuUyikLqN1eP2VgpUQUuYncsPSehsh2+WyM5yt2B6seRZVpNOJ/g0dTDSA==
+"@guardian/cdk@47.3.3":
+  version "47.3.3"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-47.3.3.tgz#e2c892846e7086610ca5a49eb5599413828e8f63"
+  integrity sha512-weA6KgnIsw/AhhoS6yUIsycnnXCJYn5B3QQqAuCc5srXuVYitc1NjLysbLwufxLCRnVotlAydewrvsHlgRzgSA==
   dependencies:
     "@oclif/core" "1.16.0"
     aws-cdk-lib "2.39.1"
-    aws-sdk "^2.1206.0"
+    aws-sdk "^2.1209.0"
     chalk "^4.1.2"
-    codemaker "^1.66.0"
+    codemaker "^1.67.0"
     constructs "10.1.91"
     git-url-parse "^13.0.0"
     js-yaml "^4.1.0"
@@ -1091,10 +1091,10 @@ aws-cdk@2.39.1:
   optionalDependencies:
     fsevents "2.3.2"
 
-aws-sdk@^2.1206.0:
-  version "2.1207.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1207.0.tgz#dff2314e520dae88e98fe4bca15a354ec104eadc"
-  integrity sha512-UDNYNeWw9ATbz+pH4lI3AUQgnmK3RwowCrXmW+lVV0bZYo+efiB/LEWQKe0nZK9K2h1LxZYihIih9dOvaGme/w==
+aws-sdk@^2.1209.0:
+  version "2.1405.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1405.0.tgz#66a5e448f1f26e904b4a65ae880d40a7b42af3b1"
+  integrity sha512-NVVZpRmr+KoBq5xFbB+ivCMDPGx8g1XOZVcswXotZZZIQVdDdHixrkZDqOrZ/p1hJ0eylGc7VQ8mkR7DVryXlQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1105,7 +1105,7 @@ aws-sdk@^2.1206.0:
     url "0.10.3"
     util "^0.12.4"
     uuid "8.0.0"
-    xml2js "0.4.19"
+    xml2js "0.5.0"
 
 babel-jest@^27.5.1:
   version "27.5.1"
@@ -1345,10 +1345,10 @@ co@^4.6.0:
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
   integrity sha1-bqa989hTrlTMuOR7+gvz+QMfsYQ=
 
-codemaker@^1.66.0:
-  version "1.66.0"
-  resolved "https://registry.yarnpkg.com/codemaker/-/codemaker-1.66.0.tgz#834158b43beabfed15069e7b19a689f4390a8711"
-  integrity sha512-GSNazNdimFf5/hnY9dZUiAX67SM8erRkwcynQgw7v1yeoytrkenQ1253sbdY2XqOpwa2G3i/f9zzDr0kwVykuw==
+codemaker@^1.67.0:
+  version "1.84.0"
+  resolved "https://registry.yarnpkg.com/codemaker/-/codemaker-1.84.0.tgz#da95dc297fc4be657baa49fdc3127ce1f057c6f3"
+  integrity sha512-sOUH3y2q2DEO+gDiBCCoGgkDs8aMY0LTMH0FmHbKpqReZwWDAmWJ0Voc4Thp4Mn380bPku9/ncqyY1a3MZnfEQ==
   dependencies:
     camelcase "^6.3.0"
     decamelize "^5.0.1"
@@ -4488,18 +4488,18 @@ xml-name-validator@^3.0.0:
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-3.0.0.tgz#6ae73e06de4d8c6e47f9fb181f78d648ad457c6a"
   integrity sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==
 
-xml2js@0.4.19:
-  version "0.4.19"
-  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.19.tgz#686c20f213209e94abf0d1bcf1efaa291c7827a7"
-  integrity sha512-esZnJZJOiJR9wWKMyuvSE1y6Dq5LCuJanqhxslH2bxM6duahNZ+HMpCLhBQGZkbX6xRf8x1Y2eJlgt2q3qo49Q==
+xml2js@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.5.0.tgz#d9440631fbb2ed800203fad106f2724f62c493b7"
+  integrity sha512-drPFnkQJik/O+uPKpqSgr22mpuFHqKdbS835iAQrUC73L2F5WkboIRd63ai/2Yg6I1jzifPFKH2NTK+cfglkIA==
   dependencies:
     sax ">=0.6.0"
-    xmlbuilder "~9.0.1"
+    xmlbuilder "~11.0.0"
 
-xmlbuilder@~9.0.1:
-  version "9.0.7"
-  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-9.0.7.tgz#132ee63d2ec5565c557e20f4c22df9aca686b10d"
-  integrity sha1-Ey7mPS7FVlxVfiD0wi35rKaGsQ0=
+xmlbuilder@~11.0.0:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-11.0.1.tgz#be9bae1c8a046e76b31127726347d0ad7002beb3"
+  integrity sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==
 
 xmlchars@^2.2.0:
   version "2.2.0"
