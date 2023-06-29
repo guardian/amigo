@@ -4,7 +4,7 @@ exports[`The kms key stack matches the snapshot 1`] = `
 Object {
   "Metadata": Object {
     "gu:cdk:constructs": Array [],
-    "gu:cdk:version": "47.3.0",
+    "gu:cdk:version": "TEST",
   },
   "Outputs": Object {
     "AmigoImageCopierKey": Object {

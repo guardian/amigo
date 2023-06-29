@@ -32,7 +32,7 @@ Object {
       "GuHttpsEgressSecurityGroup",
       "GuStringParameter",
     ],
-    "gu:cdk:version": "47.3.0",
+    "gu:cdk:version": "TEST",
   },
   "Outputs": Object {
     "LoadBalancerAmigoDnsName": Object {
