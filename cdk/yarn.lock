@@ -338,19 +338,19 @@
     read-pkg-up "7.0.1"
     yargs "^17.5.1"
 
-"@guardian/eslint-config-typescript@^0.6.0":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@guardian/eslint-config-typescript/-/eslint-config-typescript-0.6.1.tgz#6a4183255c619c18c8ea0038da846cdc679304ce"
-  integrity sha512-0xJGIq7LzHL/iPL+gG6KoWhm2Wbpn96q3TTmpkguxVCRnMFsAliLKsGSP3qBAPk94TSiIXaCjCFqGyNpFGGmDQ==
+"@guardian/eslint-config-typescript@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@guardian/eslint-config-typescript/-/eslint-config-typescript-0.7.0.tgz#9b675639377bd71bc42f33741ea3bbbf20525c4a"
+  integrity sha512-Fi7cMQuD+oR3IiGfN1ubvgTMYpQRpytRSdwLt/9c1Eqjl1Lf0xzDLd0AORBQb4PIDHQtF3t7g25WUQTqF7sWtQ==
   dependencies:
-    "@guardian/eslint-config" "^0.6.1"
+    "@guardian/eslint-config" "^0.7.0"
     "@typescript-eslint/eslint-plugin" "4.29.2"
     "@typescript-eslint/parser" "4.29.2"
 
-"@guardian/eslint-config@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@guardian/eslint-config/-/eslint-config-0.6.1.tgz#943cd7227e4fde9487474afe97d56a7001c4ea0f"
-  integrity sha512-+smvJZl0vNldw9Q1cJNK2FZToMCOrQXxh+jfHd1kNq8oeBu4/fUjyWsrpA46pvu4r4BBTF0itSSbD2A1yZsryw==
+"@guardian/eslint-config@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@guardian/eslint-config/-/eslint-config-0.7.0.tgz#ae7b681886c80643d10239d317dedcd1aeaecb08"
+  integrity sha512-d6HgVLBvLn/XFZOW+X5ukHiCbnuNb5rZHd2XtP/UT7a0f8806YhnFOYqxQXsdQadppHNDvc1wF3/ebjH2O+eHg==
   dependencies:
     eslint-config-prettier "8.3.0"
     eslint-plugin-eslint-comments "3.2.0"

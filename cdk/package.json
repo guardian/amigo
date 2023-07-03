@@ -16,7 +16,7 @@
     "diff": "cdk diff --path-metadata false --version-reporting false"
   },
   "devDependencies": {
-    "@guardian/eslint-config-typescript": "^0.6.0",
+    "@guardian/eslint-config-typescript": "^0.7.0",
     "@types/jest": "^26.0.20",
     "@types/node": "20.3.1",
     "aws-cdk": "2.39.1",
