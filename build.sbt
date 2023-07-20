@@ -97,7 +97,7 @@ libraryDependencies ++= Seq(
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "3.0.1",
+  "com.lihaoyi" %% "fastparse" % "3.0.2",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
