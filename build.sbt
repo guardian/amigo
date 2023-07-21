@@ -87,7 +87,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "1.0.0-M26",
-  "com.beachape" %% "enumeratum" % "1.7.2",
+  "com.beachape" %% "enumeratum" % "1.7.3",
   // Pin akka version until Play updates its own akka dependency
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19", // scala-steward:off
   "com.gu" %% "simple-configuration-ssm" % "1.5.8",
