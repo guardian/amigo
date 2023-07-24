@@ -36,8 +36,9 @@ new ImageCopierKMSKey(app, "kms-key-stack", {
   description: "AMIgo kms key creator",
 });
 
-new ImageCopierLambda(app, "lambda-stack", {
+new ImageCopierLambda(app, "imagecopier-lambda-stack", {
   stack: "deploy",
   stage: "PROD",
   description: "AMIgo image copier lambda",
+  version: "v1", // Update this when the lambda is updated.
 });
