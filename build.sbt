@@ -77,7 +77,7 @@ val jacksonVersion = "2.15.2"
 val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.510"
+val awsV1SdkVersion = "1.12.511"
 val awsV2SdkVersion = "2.20.99"
 
 libraryDependencies ++= Seq(
@@ -87,7 +87,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "1.0.0-M26",
-  "com.beachape" %% "enumeratum" % "1.7.2",
+  "com.beachape" %% "enumeratum" % "1.7.3",
   // Pin akka version until Play updates its own akka dependency
   "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19", // scala-steward:off
   "com.gu" %% "simple-configuration-ssm" % "1.5.8",
