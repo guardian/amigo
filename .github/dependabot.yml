@@ -1,15 +1,18 @@
 version: 2
 updates:
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'monthly'
+      interval: "weekly"
     commit-message:
       prefix: "chore(deps): "
-  - package-ecosystem: 'npm'
-    directory: '/cdk'
+    groups:
+      all:
+        pattern: "*"
+  - package-ecosystem: "npm"
+    directory: "/cdk"
     schedule:
-      interval: 'monthly'
+      interval: "weekly"
     commit-message:
       prefix: "chore(deps): "
     # The version of AWS CDK libraries must match those from @guardian/cdk.
@@ -18,3 +21,6 @@ updates:
       - dependency-name: "aws-cdk"
       - dependency-name: "aws-cdk-lib"
       - dependency-name: "constructs"
+    groups:
+      all:
+        pattern: "*"
