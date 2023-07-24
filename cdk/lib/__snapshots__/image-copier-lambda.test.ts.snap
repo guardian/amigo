@@ -30,7 +30,7 @@ Object {
       "Properties": Object {
         "Code": Object {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/image-copier.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
         },
         "Description": "Lambda for housekeeping AMIgo baked AMIs in other accounts",
         "Environment": Object {
@@ -210,7 +210,7 @@ Object {
       "Properties": Object {
         "Code": Object {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/image-copier.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
         },
         "Description": "Lambda for copying and encrypting AMIgo baked AMIs",
         "Environment": Object {
