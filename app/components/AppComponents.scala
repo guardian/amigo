@@ -1,6 +1,7 @@
 package components
 
-import akka.actor.typed.ActorSystem
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
 import com.amazonaws.{
   AmazonClientException,
   AmazonWebServiceRequest,
@@ -198,10 +199,12 @@ class AppComponents(context: Context, identity: AppIdentity)
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
 
   val prism = new Prism(wsClient)
+  val pekkoActorSystem = UntypedActorSystem.create("pekko")
+
   val prismAgents = new PrismData(
     prism,
     applicationLifecycle,
-    actorSystem.scheduler,
+    pekkoActorSystem.scheduler,
     environment
   )
 
