@@ -1,4 +1,3 @@
-
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -9,9 +8,9 @@ updates:
       prefix: "chore(deps): "
     labels:
       - "dependencies"
-	groups:
-	  all:
-	    patterns: "*"
+    groups:
+      all:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/cdk"
@@ -27,20 +26,6 @@ updates:
       - dependency-name: "constructs"
     labels:
       - "dependencies"
-	groups:
-	  all:
-	    patterns: "*"
-
-
-  - package-ecosystem: "go"
-    directory: "/cdk/node_modules/aws-cdk/test/integ/cli/sam_cdk_integ_app/src/go/GoFunctionConstruct"
-	schedule:
-	  interval: "weekly"
-	commit-message:
-	  prefix: "chore(deps): "
-	labels:
-	  - "dependencies"
-	groups:
-	  all:
-	    patterns: "*"
-
+    groups:
+      all:
+        patterns: ["*"]
