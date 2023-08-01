@@ -1,0 +1,46 @@
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps): "
+    labels:
+      - "dependencies"
+	groups:
+	  all:
+	    patterns: "*"
+
+  - package-ecosystem: "npm"
+    directory: "/cdk"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps): "
+    # The version of AWS CDK libraries must match those from @guardian/cdk.
+    # We'd never be able to update them here independently, so just ignore them.
+    ignore:
+      - dependency-name: "aws-cdk"
+      - dependency-name: "aws-cdk-lib"
+      - dependency-name: "constructs"
+    labels:
+      - "dependencies"
+	groups:
+	  all:
+	    patterns: "*"
+
+
+  - package-ecosystem: "go"
+    directory: "/cdk/node_modules/aws-cdk/test/integ/cli/sam_cdk_integ_app/src/go/GoFunctionConstruct"
+	schedule:
+	  interval: "weekly"
+	commit-message:
+	  prefix: "chore(deps): "
+	labels:
+	  - "dependencies"
+	groups:
+	  all:
+	    patterns: "*"
+
