@@ -1,42 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`The kms key stack matches the snapshot 1`] = `
-Object {
-  "Metadata": Object {
-    "gu:cdk:constructs": Array [],
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
-  "Outputs": Object {
-    "AmigoImageCopierKey": Object {
+  "Outputs": {
+    "AmigoImageCopierKey": {
       "Description": "Amigo image copier key arn",
-      "Export": Object {
+      "Export": {
         "Name": "amigo-imagecopier-key",
       },
-      "Value": Object {
-        "Fn::GetAtt": Array [
+      "Value": {
+        "Fn::GetAtt": [
           "KmsKey",
           "Arn",
         ],
       },
     },
   },
-  "Resources": Object {
-    "KmsKey": Object {
+  "Resources": {
+    "KmsKey": {
       "DeletionPolicy": "Retain",
-      "Properties": Object {
+      "Properties": {
         "EnableKeyRotation": true,
-        "KeyPolicy": Object {
-          "Statement": Array [
-            Object {
+        "KeyPolicy": {
+          "Statement": [
+            {
               "Action": "kms:*",
               "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
                     "",
-                    Array [
+                    [
                       "arn:aws:iam::",
-                      Object {
+                      {
                         "Ref": "AWS::AccountId",
                       },
                       ":root",
@@ -47,8 +47,8 @@ Object {
               "Resource": "*",
               "Sid": "Enable IAM User Permissions",
             },
-            Object {
-              "Action": Array [
+            {
+              "Action": [
                 "kms:Encrypt",
                 "kms:Decrypt",
                 "kms:ReEncrypt*",
@@ -57,13 +57,13 @@ Object {
                 "kms:CreateGrant",
               ],
               "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
                     "",
-                    Array [
+                    [
                       "arn:aws:iam::",
-                      Object {
+                      {
                         "Ref": "AWS::AccountId",
                       },
                       ":role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
@@ -74,21 +74,21 @@ Object {
               "Resource": "*",
               "Sid": "Allow use of the key",
             },
-            Object {
+            {
               "Action": "kms:CreateGrant",
-              "Condition": Object {
-                "Bool": Object {
+              "Condition": {
+                "Bool": {
                   "kms:GrantIsForAWSResource": true,
                 },
               },
               "Effect": "Allow",
-              "Principal": Object {
-                "AWS": Object {
-                  "Fn::Join": Array [
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
                     "",
-                    Array [
+                    [
                       "arn:aws:iam::",
-                      Object {
+                      {
                         "Ref": "AWS::AccountId",
                       },
                       ":role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
@@ -102,20 +102,20 @@ Object {
           ],
           "Version": "2012-10-17",
         },
-        "Tags": Array [
-          Object {
+        "Tags": [
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
-          Object {
+          {
             "Key": "gu:repo",
             "Value": "guardian/amigo",
           },
-          Object {
+          {
             "Key": "Stack",
             "Value": "cdk",
           },
-          Object {
+          {
             "Key": "Stage",
             "Value": "TEST",
           },
