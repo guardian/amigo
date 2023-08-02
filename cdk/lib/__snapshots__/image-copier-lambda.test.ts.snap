@@ -1,72 +1,72 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`the lambda stack matches the snapshot 1`] = `
-Object {
-  "Metadata": Object {
-    "gu:cdk:constructs": Array [],
+{
+  "Metadata": {
+    "gu:cdk:constructs": [],
     "gu:cdk:version": "TEST",
   },
-  "Parameters": Object {
-    "AmigoHousekeepingTopicArn": Object {
+  "Parameters": {
+    "AmigoHousekeepingTopicArn": {
       "Description": "The housekeeping SNS topic to subscribe to",
       "Type": "String",
     },
-    "AmigoTopicArn": Object {
+    "AmigoTopicArn": {
       "Description": "The SNS topic to subscribe to",
       "Type": "String",
     },
-    "KmsKeyArn": Object {
+    "KmsKeyArn": {
       "Default": "",
       "Description": "Override the default KMS key if required",
       "Type": "String",
     },
   },
-  "Resources": Object {
-    "HousekeepingLambda": Object {
-      "DependsOn": Array [
+  "Resources": {
+    "HousekeepingLambda": {
+      "DependsOn": [
         "HousekeepingLambdaServiceRoleDefaultPolicy003C9832",
         "HousekeepingLambdaServiceRole70148A54",
       ],
-      "Properties": Object {
-        "Code": Object {
+      "Properties": {
+        "Code": {
           "S3Bucket": "deploy-tools-dist",
           "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
         },
         "Description": "Lambda for housekeeping AMIgo baked AMIs in other accounts",
-        "Environment": Object {
-          "Variables": Object {
-            "ACCOUNT_ID": Object {
+        "Environment": {
+          "Variables": {
+            "ACCOUNT_ID": {
               "Ref": "AWS::AccountId",
             },
             "ENCRYPTED_TAG_VALUE": "true",
-            "KMS_KEY_ARN": Object {
+            "KMS_KEY_ARN": {
               "Fn::ImportValue": "amigo-imagecopier-key",
             },
           },
         },
         "Handler": "com.gu.imageCopier.LambdaEntrypoint::housekeeping",
         "MemorySize": 512,
-        "Role": Object {
-          "Fn::GetAtt": Array [
+        "Role": {
+          "Fn::GetAtt": [
             "HousekeepingLambdaServiceRole70148A54",
             "Arn",
           ],
         },
         "Runtime": "java11",
-        "Tags": Array [
-          Object {
+        "Tags": [
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
-          Object {
+          {
             "Key": "gu:repo",
             "Value": "guardian/amigo",
           },
-          Object {
+          {
             "Key": "Stack",
             "Value": "cdk",
           },
-          Object {
+          {
             "Key": "Stage",
             "Value": "TEST",
           },
@@ -75,71 +75,71 @@ Object {
       },
       "Type": "AWS::Lambda::Function",
     },
-    "HousekeepingLambdaAllowInvokeIntegrationTestHousekeepingLambdaSnsExistingIncomingEventsTopic1B0CC4879A69C8A5": Object {
-      "Properties": Object {
+    "HousekeepingLambdaAllowInvokeIntegrationTestHousekeepingLambdaSnsExistingIncomingEventsTopic1B0CC4879A69C8A5": {
+      "Properties": {
         "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
-          "Fn::GetAtt": Array [
+        "FunctionName": {
+          "Fn::GetAtt": [
             "HousekeepingLambda",
             "Arn",
           ],
         },
         "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "SourceArn": {
           "Ref": "AmigoHousekeepingTopicArn",
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "HousekeepingLambdaHousekeepingLambdaSnsExistingIncomingEventsTopicDFF8A27F": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
+    "HousekeepingLambdaHousekeepingLambdaSnsExistingIncomingEventsTopicDFF8A27F": {
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
             "HousekeepingLambda",
             "Arn",
           ],
         },
         "Protocol": "lambda",
-        "Region": Object {
-          "Fn::Select": Array [
+        "Region": {
+          "Fn::Select": [
             3,
-            Object {
-              "Fn::Split": Array [
+            {
+              "Fn::Split": [
                 ":",
-                Object {
+                {
                   "Ref": "AmigoHousekeepingTopicArn",
                 },
               ],
             },
           ],
         },
-        "TopicArn": Object {
+        "TopicArn": {
           "Ref": "AmigoHousekeepingTopicArn",
         },
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "HousekeepingLambdaServiceRole70148A54": Object {
-      "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
+    "HousekeepingLambdaServiceRole70148A54": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Principal": Object {
+              "Principal": {
                 "Service": "lambda.amazonaws.com",
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": Array [
-          Object {
-            "Fn::Join": Array [
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
               "",
-              Array [
+              [
                 "arn:",
-                Object {
+                {
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
@@ -147,20 +147,20 @@ Object {
             ],
           },
         ],
-        "Tags": Array [
-          Object {
+        "Tags": [
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
-          Object {
+          {
             "Key": "gu:repo",
             "Value": "guardian/amigo",
           },
-          Object {
+          {
             "Key": "Stack",
             "Value": "cdk",
           },
-          Object {
+          {
             "Key": "Stage",
             "Value": "TEST",
           },
@@ -168,12 +168,12 @@ Object {
       },
       "Type": "AWS::IAM::Role",
     },
-    "HousekeepingLambdaServiceRoleDefaultPolicy003C9832": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
+    "HousekeepingLambdaServiceRoleDefaultPolicy003C9832": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
                 "logs:CreateLogGroup",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
@@ -181,8 +181,8 @@ Object {
               "Effect": "Allow",
               "Resource": "arn:aws:logs:*:*:*",
             },
-            Object {
-              "Action": Array [
+            {
+              "Action": [
                 "ec2:DescribeImages",
                 "ec2:DeregisterImage",
                 "ec2:DeleteSnapshot",
@@ -194,59 +194,59 @@ Object {
           "Version": "2012-10-17",
         },
         "PolicyName": "HousekeepingLambdaServiceRoleDefaultPolicy003C9832",
-        "Roles": Array [
-          Object {
+        "Roles": [
+          {
             "Ref": "HousekeepingLambdaServiceRole70148A54",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "ImageCopierLambda": Object {
-      "DependsOn": Array [
+    "ImageCopierLambda": {
+      "DependsOn": [
         "ImageCopierLambdaServiceRoleDefaultPolicy82F190E9",
         "ImageCopierLambdaServiceRole77B845A3",
       ],
-      "Properties": Object {
-        "Code": Object {
+      "Properties": {
+        "Code": {
           "S3Bucket": "deploy-tools-dist",
           "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
         },
         "Description": "Lambda for copying and encrypting AMIgo baked AMIs",
-        "Environment": Object {
-          "Variables": Object {
-            "ACCOUNT_ID": Object {
+        "Environment": {
+          "Variables": {
+            "ACCOUNT_ID": {
               "Ref": "AWS::AccountId",
             },
             "ENCRYPTED_TAG_VALUE": "true",
-            "KMS_KEY_ARN": Object {
+            "KMS_KEY_ARN": {
               "Fn::ImportValue": "amigo-imagecopier-key",
             },
           },
         },
         "Handler": "com.gu.imageCopier.LambdaEntrypoint::run",
         "MemorySize": 512,
-        "Role": Object {
-          "Fn::GetAtt": Array [
+        "Role": {
+          "Fn::GetAtt": [
             "ImageCopierLambdaServiceRole77B845A3",
             "Arn",
           ],
         },
         "Runtime": "java11",
-        "Tags": Array [
-          Object {
+        "Tags": [
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
-          Object {
+          {
             "Key": "gu:repo",
             "Value": "guardian/amigo",
           },
-          Object {
+          {
             "Key": "Stack",
             "Value": "cdk",
           },
-          Object {
+          {
             "Key": "Stage",
             "Value": "TEST",
           },
@@ -255,71 +255,71 @@ Object {
       },
       "Type": "AWS::Lambda::Function",
     },
-    "ImageCopierLambdaAllowInvokeIntegrationTestImageCopierLambdaSnsExistingIncomingEventsTopicD22ACB92E3D10371": Object {
-      "Properties": Object {
+    "ImageCopierLambdaAllowInvokeIntegrationTestImageCopierLambdaSnsExistingIncomingEventsTopicD22ACB92E3D10371": {
+      "Properties": {
         "Action": "lambda:InvokeFunction",
-        "FunctionName": Object {
-          "Fn::GetAtt": Array [
+        "FunctionName": {
+          "Fn::GetAtt": [
             "ImageCopierLambda",
             "Arn",
           ],
         },
         "Principal": "sns.amazonaws.com",
-        "SourceArn": Object {
+        "SourceArn": {
           "Ref": "AmigoTopicArn",
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "ImageCopierLambdaImageCopierLambdaSnsExistingIncomingEventsTopicB31F3C6C": Object {
-      "Properties": Object {
-        "Endpoint": Object {
-          "Fn::GetAtt": Array [
+    "ImageCopierLambdaImageCopierLambdaSnsExistingIncomingEventsTopicB31F3C6C": {
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
             "ImageCopierLambda",
             "Arn",
           ],
         },
         "Protocol": "lambda",
-        "Region": Object {
-          "Fn::Select": Array [
+        "Region": {
+          "Fn::Select": [
             3,
-            Object {
-              "Fn::Split": Array [
+            {
+              "Fn::Split": [
                 ":",
-                Object {
+                {
                   "Ref": "AmigoTopicArn",
                 },
               ],
             },
           ],
         },
-        "TopicArn": Object {
+        "TopicArn": {
           "Ref": "AmigoTopicArn",
         },
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "ImageCopierLambdaServiceRole77B845A3": Object {
-      "Properties": Object {
-        "AssumeRolePolicyDocument": Object {
-          "Statement": Array [
-            Object {
+    "ImageCopierLambdaServiceRole77B845A3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Principal": Object {
+              "Principal": {
                 "Service": "lambda.amazonaws.com",
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": Array [
-          Object {
-            "Fn::Join": Array [
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
               "",
-              Array [
+              [
                 "arn:",
-                Object {
+                {
                   "Ref": "AWS::Partition",
                 },
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
@@ -327,20 +327,20 @@ Object {
             ],
           },
         ],
-        "Tags": Array [
-          Object {
+        "Tags": [
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
-          Object {
+          {
             "Key": "gu:repo",
             "Value": "guardian/amigo",
           },
-          Object {
+          {
             "Key": "Stack",
             "Value": "cdk",
           },
-          Object {
+          {
             "Key": "Stage",
             "Value": "TEST",
           },
@@ -348,12 +348,12 @@ Object {
       },
       "Type": "AWS::IAM::Role",
     },
-    "ImageCopierLambdaServiceRoleDefaultPolicy82F190E9": Object {
-      "Properties": Object {
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
+    "ImageCopierLambdaServiceRoleDefaultPolicy82F190E9": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
                 "logs:CreateLogGroup",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
@@ -361,16 +361,16 @@ Object {
               "Effect": "Allow",
               "Resource": "arn:aws:logs:*:*:*",
             },
-            Object {
-              "Action": Array [
+            {
+              "Action": [
                 "ec2:CopyImage",
                 "ec2:CreateTags",
               ],
               "Effect": "Allow",
               "Resource": "*",
             },
-            Object {
-              "Action": Array [
+            {
+              "Action": [
                 "kms:Encrypt",
                 "kms:Decrypt",
                 "kms:CreateGrant",
@@ -378,7 +378,7 @@ Object {
                 "kms:DescribeKey",
               ],
               "Effect": "Allow",
-              "Resource": Object {
+              "Resource": {
                 "Fn::ImportValue": "amigo-imagecopier-key",
               },
             },
@@ -386,8 +386,8 @@ Object {
           "Version": "2012-10-17",
         },
         "PolicyName": "ImageCopierLambdaServiceRoleDefaultPolicy82F190E9",
-        "Roles": Array [
-          Object {
+        "Roles": [
+          {
             "Ref": "ImageCopierLambdaServiceRole77B845A3",
           },
         ],
