@@ -9,14 +9,13 @@ import {
   GuAnghammaradSenderPolicy,
   GuDescribeEC2Policy,
   GuLogShippingPolicy,
-  GuSSMRunCommandPolicy,
 } from "@guardian/cdk/lib/constructs/iam";
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 import { Duration, SecretValue } from "aws-cdk-lib";
 import type { App } from "aws-cdk-lib";
 import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
 import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { Effect, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Effect, ManagedPolicy, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
 import { ParameterDataType, ParameterTier, StringParameter } from "aws-cdk-lib/aws-ssm";
 
@@ -128,19 +127,36 @@ export class AmigoStack extends GuStack {
       reason: "To prevent orphaning of the YAML defined bucket",
     });
 
-    const ssmPolicy = GuSSMRunCommandPolicy.getInstance(this);
+    const ssmPolicy = new Policy(this, "SSMPolicy", {
+      statements: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          resources: ["*"],
+          actions: [
+            // Standard SSM permissions
+            "ec2messages:AcknowledgeMessage",
+            "ec2messages:DeleteMessage",
+            "ec2messages:FailMessage",
+            "ec2messages:GetEndpoint",
+            "ec2messages:GetMessages",
+            "ec2messages:SendReply",
+            "ssm:UpdateInstanceInformation",
+            "ssm:ListInstanceAssociations",
+            "ssm:DescribeInstanceProperties",
+            "ssm:DescribeDocumentParameters",
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel",
 
-    // TODO Can GuSSMRunCommandPolicy expose its default `PolicyStatement` to easily add actions to it?
-    ssmPolicy.addStatements(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        resources: ["*"],
-
-        // required to allow Packer to run SSM commands
-        // see https://github.com/guardian/amigo/pull/526 and https://github.com/guardian/amigo/pull/538
-        actions: ["ssm:StartSession", "ssm:TerminateSession"],
-      })
-    );
+            // required to allow Packer to run SSM commands
+            // see https://github.com/guardian/amigo/pull/526 and https://github.com/guardian/amigo/pull/538
+            "ssm:StartSession",
+            "ssm:TerminateSession",
+          ],
+        }),
+      ],
+    });
 
     const policiesToAttachToRootRole: Policy[] = [
       ssmPolicy,
