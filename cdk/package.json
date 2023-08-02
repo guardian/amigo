@@ -8,6 +8,7 @@
     "build": "tsc --noEmit",
     "watch": "tsc -w",
     "test": "jest",
+    "test-update": "jest -u",
     "test:dev": "jest --watch",
     "format": "prettier --write \"{lib,bin}/**/*.ts\"",
     "cdk": "cdk",
