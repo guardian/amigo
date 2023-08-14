@@ -77,8 +77,8 @@ val jacksonVersion = "2.15.2"
 val circeVersion = "0.14.5"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.515"
-val awsV2SdkVersion = "2.20.99"
+val awsV1SdkVersion = "1.12.522"
+val awsV2SdkVersion = "2.20.119"
 
 libraryDependencies ++= Seq(
   ws,
@@ -89,7 +89,7 @@ libraryDependencies ++= Seq(
   "org.scanamo" %% "scanamo" % "1.0.0-M26",
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.1",
-  "com.gu" %% "simple-configuration-ssm" % "1.5.8",
+  "com.gu" %% "simple-configuration-ssm" % "1.6.0",
   "com.gu.play-secret-rotation" %% "play-v28" % "0.37",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.37",
   "com.gu.play-googleauth" %% "play-v28" % "2.2.7",
