@@ -1199,6 +1199,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "deployPRODamigo77EB3561": {
+      "DependsOn": [
+        "InstanceRoleAmigo75944747",
+      ],
       "Properties": {
         "LaunchTemplateData": {
           "IamInstanceProfile": {
