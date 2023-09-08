@@ -547,16 +547,16 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.48.0.tgz#642633964e217905436033a2bd08bf322849b7fb"
   integrity sha512-ZSjtmelB7IJfWD2Fvb7+Z+ChTIKWq6kjda95fLcQKNS5aheVHn4IkfgRQE3sIIzTcSLwLcLZUD9UBt+V7+h+Pw==
 
-"@guardian/cdk@50.10.11":
-  version "50.10.11"
-  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-50.10.11.tgz#7c3950d6c30f8199448fe912ecda280927e6a654"
-  integrity sha512-DbiGwoZ6SNGaG2oeKuUFGRPLYgd7yN35M7iJlaUqf3ECYIDxMpQAC6xGfhhj+6tMlGngeqc70MrivEMdOhrklw==
+"@guardian/cdk@50.10.13":
+  version "50.10.13"
+  resolved "https://registry.yarnpkg.com/@guardian/cdk/-/cdk-50.10.13.tgz#7197adee5cf70bf5588ba01ce6ad6328aededbc4"
+  integrity sha512-vY5dwt/HJrH2uedjv5HxTLHPk7SGh66NKihtXYoHqtTFCouidO16JoCbCs2dcFDxm2ix1Jy1voAHz3G4nkTFYA==
   dependencies:
     "@oclif/core" "2.13.0"
     aws-cdk-lib "2.90.0"
-    aws-sdk "^2.1447.0"
+    aws-sdk "^2.1451.0"
     chalk "^4.1.2"
-    codemaker "^1.87.0"
+    codemaker "^1.88.0"
     constructs "10.2.69"
     git-url-parse "^13.1.0"
     js-yaml "^4.1.0"
@@ -1394,10 +1394,10 @@ aws-cdk@2.90.0:
   optionalDependencies:
     fsevents "2.3.2"
 
-aws-sdk@^2.1447.0:
-  version "2.1448.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1448.0.tgz#13d961afd7c4498d5b4af561118cd80eadee078d"
-  integrity sha512-15r8YKdAAXLgtPfQTAzD/qNxxgndF1SMEw6F+mXvLxZrLkG4BHnzOW2g2sQc3C2qG5yqCb3K6R+OrjbvGOAmdQ==
+aws-sdk@^2.1451.0:
+  version "2.1453.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1453.0.tgz#c6f92e8692a512d3370eb2f40e6d724a1b19fdab"
+  integrity sha512-pNkz4gAuR2nnOAvq6P2/0wvcyQDY112VYQS4w+vqWcxwEuptcWmTynd8BH3foUHnwPaU+Z/BR6DaTnBSjOzR+Q==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1676,10 +1676,10 @@ co@^4.6.0:
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
   integrity sha1-bqa989hTrlTMuOR7+gvz+QMfsYQ=
 
-codemaker@^1.87.0:
-  version "1.87.0"
-  resolved "https://registry.yarnpkg.com/codemaker/-/codemaker-1.87.0.tgz#87af3e2e338a14fcaf192f9e60dce1d6ff61414d"
-  integrity sha512-PxEtigxOiIWWQV95OQK18xYMSPpqQDj/z1jSlouNp+4y2muygO+fTc19kf9Z950ryprHCoasnO62dmyhMZvluQ==
+codemaker@^1.88.0:
+  version "1.88.0"
+  resolved "https://registry.yarnpkg.com/codemaker/-/codemaker-1.88.0.tgz#ef8f1a6b428ba36339147bfe7f3f4a65b1c7a562"
+  integrity sha512-/7+1mPQCEFmBm9zhf5blMiqirCcXNwulb8dozu2LVsDLgnafPt1h2eg/OwvyrqSMWUnsIFetAssKVP2gE66MPQ==
   dependencies:
     camelcase "^6.3.0"
     decamelize "^5.0.1"
