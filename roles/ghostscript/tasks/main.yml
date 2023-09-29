@@ -1,0 +1,22 @@
+---
+- name: Compile and install build essential
+  apt:
+    name:
+      - build-essential
+    state: present
+
+- name: Download & extract Ghostscript (from ghostscript.com)
+  unarchive:
+    src: "{{ghostscript_source_url}}"
+    dest: /tmp
+    remote_src: yes
+    list_files: yes
+    mode: u=rwx,g=rx,o=rx
+  register: archive_contents
+
+- name: Install Ghostscript
+  shell: |
+    set -e
+    cd /tmp/{{archive_contents.files[0]}}
+    ./configure
+    make install
