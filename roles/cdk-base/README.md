@@ -39,6 +39,7 @@ Resources:
 EC2 instances must have the following IAM permissions:
 - `kinesis:DescribeStream` scoped to the Kinesis stream above
 - `kinesis:PutRecord` scoped to the Kinesis stream above
+- `kinesis:PutRecords` scoped to the Kinesis stream above
 - `ec2:DescribeTags`
 - `ec2:DescribeInstances`
 
@@ -75,6 +76,7 @@ Resources:
           Action:
           - kinesis:DescribeStream
           - kinesis:PutRecord
+          - kinesis:PutRecords
           Resource: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${LoggingStreamName}'
         - Effect: Allow
           Resource: '*'
