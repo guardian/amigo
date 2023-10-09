@@ -111,7 +111,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.17" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
-  "com.gu" %% "anghammarad-client" % "1.7.5"
+  "com.gu" %% "anghammarad-client" % "1.8.0"
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
