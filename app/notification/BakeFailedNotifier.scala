@@ -48,7 +48,7 @@ object BakeFailedNotifier extends Loggable {
           s"""
              |Unfortunately a bake on ${bake.recipe.id} has $statusString. Sometimes failures happen due to AMIgo out of
              | memory errors and can be fixed simply by re-running the bake and changing the schedule to a less busy time.
-             | See below for links to the AMIgo dashboard (VPN required) where you can debug this issue or kick off another bake.
+             | See below for links to the AMIgo dashboard where you can debug this issue or kick off another bake.
              | For help, don't hesitate to contact the developer experience team: devx@theguardian.com.
              |""".stripMargin,
           actions,
