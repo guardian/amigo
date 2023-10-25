@@ -1,0 +1,3 @@
+---
+source_tarball: s3://amigo-data-prod/packages/whisper.cpp/whisper.cpp.tar.gz
+target_dir: /opt/whisper

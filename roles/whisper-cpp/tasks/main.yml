@@ -1,0 +1,15 @@
+---
+- name: Download and extract whispercpp
+  shell: |
+    set -e
+    mkdir -p {{ target_dir }}
+    cd {{ target_dir }}
+    aws --quiet s3 cp {{ source_tarball }} - | tar -xz
+    exit 0
+    
+- name: Install whisper.cpp
+  shell: |
+    ls -s /opt/whisper/whisper.cpp/main /user/bin/whisper
+
+  args:
+    executable: /bin/bash
