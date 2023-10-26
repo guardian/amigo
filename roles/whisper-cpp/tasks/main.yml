@@ -1,0 +1,27 @@
+---
+- name: install build-essential
+  apt:
+    name:
+    - build-essential
+    state: present
+
+- name: Clone and compile whisper.cpp
+  shell: |
+    set -e
+    mkdir -p {{ target_dir }}
+    cd {{ target_dir }}
+    echo "cloning"
+    git clone --depth 1 --branch v1.4.0 --quiet https://github.com/ggerganov/whisper.cpp.git
+    cd whisper.cpp
+    echo "downloading model"
+    bash models/download-ggml-model.sh large > /dev/null
+    echo "compiling"
+    make
+    exit 0
+
+- name: Install whisper.cpp
+  shell: |
+    ln -s /opt/whisper/whisper.cpp/main /usr/bin/whisper
+
+  args:
+    executable: /bin/bash
