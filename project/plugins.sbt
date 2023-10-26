@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.19")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.9.0")
 
 // sbt-native-packager cannot be updated to >1.9.9 until Play supports scala-xml 2
 addSbtPlugin(
