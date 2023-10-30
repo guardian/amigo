@@ -20,7 +20,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           aws-region: eu-west-1
-      - uses: actions/setup-node@v3 # This is required by cdk
+      - uses: actions/setup-node@v4 # This is required by cdk
         with:
           cache: 'yarn'
           cache-dependency-path: 'cdk/yarn.lock'
