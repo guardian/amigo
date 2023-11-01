@@ -20,6 +20,8 @@
     bash models/download-ggml-model.sh base > /dev/null
     echo "compiling"
     make
+    cd {{ target_dir }}
+    chown ubuntu ./ --recursive
     exit 0
 
 - name: Install whisper.cpp
