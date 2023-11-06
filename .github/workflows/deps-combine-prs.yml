@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: combine-prs
         id: combine-prs
-        uses: github/combine-prs@v4.0.0
+        uses: github/combine-prs@v4.1.0
         with:
           pr_title: "chore(deps): Weekly dependency updates"
           pr_body_header: Weekly dependency updates
