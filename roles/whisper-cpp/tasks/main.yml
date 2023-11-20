@@ -15,9 +15,9 @@
     cd whisper.cpp
     git reset --hard {{ whisper_cpp_commit_hash }}
     echo "downloading models"
-    bash models/download-ggml-model.sh medium >
-    bash models/download-ggml-model.sh small >
-    bash models/download-ggml-model.sh base >
+    bash models/download-ggml-model.sh medium
+    bash models/download-ggml-model.sh small
+    bash models/download-ggml-model.sh base
     echo "compiling"
     make
     cd {{ target_dir }}
