@@ -14,7 +14,6 @@
     git clone --depth 1 --branch v1.4.0 --quiet https://github.com/ggerganov/whisper.cpp.git
     cd whisper.cpp
     echo "downloading model"
-    bash models/download-ggml-model.sh large > /dev/null
     bash models/download-ggml-model.sh medium > /dev/null
     bash models/download-ggml-model.sh small > /dev/null
     bash models/download-ggml-model.sh base > /dev/null
