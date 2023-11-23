@@ -1,5 +1,5 @@
 <configuration>
-    
+
   <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
 
   <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -15,11 +15,16 @@
     </encoder>
   </appender>
 
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+  </appender>
+
   <logger name="play" level="INFO" />
   <logger name="application" level="DEBUG" />
 
   <root level="INFO">
     <appender-ref ref="LOGFILE" />
+    <appender-ref ref="STDOUT"/>
   </root>
 
 </configuration>
