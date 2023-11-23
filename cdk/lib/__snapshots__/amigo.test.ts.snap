@@ -278,6 +278,11 @@ exports[`The Amigo stack matches the snapshot 1`] = `
             "PropagateAtLaunch": true,
             "Value": "PROD",
           },
+          {
+            "Key": "SystemdUnit",
+            "PropagateAtLaunch": true,
+            "Value": "amigo.service",
+          },
         ],
         "TargetGroupARNs": [
           {

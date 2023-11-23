@@ -265,6 +265,9 @@ export class AmigoStack extends GuStack {
       roleConfiguration: {
         additionalPolicies: policiesToAttachToRootRole,
       },
+      applicationLogging: {
+        enabled: true,
+      },
     });
 
     // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
