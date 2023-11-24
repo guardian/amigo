@@ -73,7 +73,7 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.15.3"
+val jacksonVersion = "2.16.0"
 val circeVersion = "0.14.6"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
