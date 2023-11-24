@@ -36,6 +36,7 @@ import com.gu.play.secretrotation.{
   SnapshotProvider,
   TransitionTiming
 }
+import java.time.Duration
 import controllers._
 import data.{Dynamo, Recipes}
 import event.{ActorSystemWrapper, BakeEvent, Behaviours}
@@ -43,7 +44,6 @@ import housekeeping._
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.NotificationConfig
 import notification.{LambdaDistributionBucket, NotificationSender, SNS}
-import org.joda.time.Duration
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.{PackerConfig, PackerRunner}
@@ -273,7 +273,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     clientSecret = mandatoryConfig("google.clientSecret"),
     redirectUrl = mandatoryConfig("google.redirectUrl"),
     domains = List("guardian.co.uk"),
-    maxAuthAge = Some(Duration.standardDays(90)),
+    maxAuthAge = Some(Duration.ofDays(90)),
     enforceValidity = true,
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
