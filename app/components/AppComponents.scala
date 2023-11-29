@@ -58,7 +58,7 @@ import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
-import services.{AmiMetadataLookup, ElkLogging, Loggable, PrismData}
+import services.{AmiMetadataLookup, Loggable, PrismData}
 import software.amazon.awssdk.services.ssm.SsmClient
 import software.amazon.awssdk.auth.credentials.{
   StaticCredentialsProvider,
@@ -163,10 +163,6 @@ class AppComponents(context: Context, identity: AppIdentity)
       )
     )
   }
-
-  // initialise logging
-  val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV2)
 
   implicit val dynamo: Dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient
