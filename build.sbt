@@ -49,7 +49,7 @@ lazy val root = (project in file("."))
       lazy val buildInfo = BuildInfo(baseDirectory.value)
 
       // so this next one is constant to avoid it always recompiling on dev machines.
-      // we only really care about build time on teamcity, when a constant based on when
+      // we only really care about build time in CI, when a constant based on when
       // it was loaded is just fine
       lazy val buildTime: String = DateTimeFormatter.ISO_OFFSET_DATE_TIME
         .format(ZonedDateTime.now(ZoneId.of("UTC")))
