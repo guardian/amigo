@@ -78,7 +78,7 @@ val circeVersion = "0.14.6"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.596"
-val awsV2SdkVersion = "2.21.15"
+val awsV2SdkVersion = "2.21.33"
 
 libraryDependencies ++= Seq(
   ws,
@@ -106,7 +106,6 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
-  "com.gu" % "kinesis-logback-appender" % "2.1.2",
   "org.scalatest" %% "scalatest-flatspec" % "3.2.17" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.17" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
@@ -125,7 +124,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.3",
-      "com.amazonaws" % "aws-lambda-java-events" % "3.11.3",
+      "com.amazonaws" % "aws-lambda-java-events" % "3.11.4",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )
