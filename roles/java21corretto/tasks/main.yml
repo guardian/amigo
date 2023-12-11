@@ -20,7 +20,7 @@
 ## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
 - name: Change JVM DNS cache TTL
   replace:
-    path: /usr/lib/jvm/java21-amazon-corretto/conf/security/java.security
+    path: /usr/lib/jvm/java-21-amazon-corretto/conf/security/java.security
     regexp: "#networkaddress.cache.ttl=.*"
     replace: "networkaddress.cache.ttl=60"
     backup: yes
