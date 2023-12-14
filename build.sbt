@@ -77,7 +77,7 @@ val jacksonVersion = "2.16.0"
 val circeVersion = "0.14.6"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.596"
+val awsV1SdkVersion = "1.12.608"
 val awsV2SdkVersion = "2.21.33"
 
 libraryDependencies ++= Seq(
@@ -103,6 +103,8 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.4",
+  // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
+  "ch.qos.logback" % "logback-classic" % "1.4.14",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,

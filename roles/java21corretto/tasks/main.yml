@@ -1,0 +1,27 @@
+---
+- name: Add AWS Corretto signing key
+  apt_key:
+    url: "https://apt.corretto.aws/corretto.key"
+    state: present
+
+- name: Add AWS Corretto repo
+  apt_repository:
+    repo: "deb https://apt.corretto.aws stable main"
+    state: present
+
+- name: Install Java 21 Corretto JDK
+  apt:
+    name:
+      - java-21-amazon-corretto-jdk
+    state: latest
+  when: ansible_os_family == "Debian"
+
+## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
+## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
+- name: Change JVM DNS cache TTL
+  replace:
+    path: /usr/lib/jvm/java-21-amazon-corretto/conf/security/java.security
+    regexp: "#networkaddress.cache.ttl=.*"
+    replace: "networkaddress.cache.ttl=60"
+    backup: yes
+  when: ansible_os_family == "Debian"
