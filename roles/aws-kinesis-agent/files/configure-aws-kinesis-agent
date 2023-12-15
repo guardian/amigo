@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Fail fast. See https://explainshell.com/explain?cmd=set+-e.
+set -e
+
 region=$1
 kinesis_stream=$2
 file=$3
