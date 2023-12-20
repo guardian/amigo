@@ -16,13 +16,11 @@
     git reset --hard {{ whisper_cpp_commit_hash }}
     echo "compiling"
     make
-    cd {{ target_dir }}
     exit 0
 
 - name: Download models and set permissions
   shell: |
-    cd {{ target_dir }}
-    cd whisper.cpp
+    cd {{ target_dir }}/whisper.cpp
     bash models/download-ggml-model.sh {{ item }}
     chown ubuntu ./ --recursive
     exit 0
