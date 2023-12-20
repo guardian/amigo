@@ -5,12 +5,13 @@
     - build-essential
     state: present
 
-- name: Clone and compile whisper.cpp
+- name: Clone whisper, clone and compile whisper.cpp
   shell: |
     set -e
     mkdir -p {{ target_dir }}
     cd {{ target_dir }}
     echo "cloning"
+    git clone --quiet https://github.com/openai/whisper
     git clone --quiet https://github.com/ggerganov/whisper.cpp.git
     cd whisper.cpp
     git reset --hard {{ whisper_cpp_commit_hash }}
@@ -25,6 +26,13 @@
     chown ubuntu ./ --recursive
     exit 0
   loop: "{{ whisper_models }}"
+
+- name: Download and convert medium distilled model
+  shell: |
+    cd {{ target_dir }}/whisper.cpp/models
+    git clone https://huggingface.co/distil-whisper/distil-medium.en
+    python3 ./convert-h5-to-ggml.py ./distil-medium.en/ {{ target_dir }}/whisper .
+    mv ggml-model.bin ggml-medium.en-distil.bin
 
 - name: Install whisper.cpp
   shell: |
