@@ -29,8 +29,10 @@
 
 - name: Download and convert medium distilled model
   shell: |
+    set -e
     cd {{ target_dir }}/whisper.cpp/models
     git clone https://huggingface.co/distil-whisper/distil-medium.en
+    pip3 install torch numpy transformers
     python3 ./convert-h5-to-ggml.py ./distil-medium.en/ {{ target_dir }}/whisper .
     mv ggml-model.bin ggml-medium.en-distil.bin
 
