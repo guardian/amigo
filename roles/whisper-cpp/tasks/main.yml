@@ -11,7 +11,6 @@
     mkdir -p {{ target_dir }}
     cd {{ target_dir }}
     echo "cloning"
-    git clone --quiet https://github.com/openai/whisper
     git clone --quiet https://github.com/ggerganov/whisper.cpp.git
     cd whisper.cpp
     git reset --hard {{ whisper_cpp_commit_hash }}
@@ -27,14 +26,12 @@
     exit 0
   loop: "{{ whisper_models }}"
 
-- name: Download and convert medium distilled model
+- name: Download distilled models
   shell: |
     set -e
-    cd {{ target_dir }}/whisper.cpp/models
-    git clone https://huggingface.co/distil-whisper/distil-medium.en
-    pip3 install torch numpy transformers
-    python3 ./convert-h5-to-ggml.py ./distil-medium.en/ {{ target_dir }}/whisper .
-    mv ggml-model.bin ggml-medium.en-distil.bin
+    cd {{ target_dir }}/whisper.cpp
+    wget https://huggingface.co/distil-whisper/{{ item }} -P ./models
+  loop: "{{ whisper_distilled_model_paths }}"
 
 - name: Install whisper.cpp
   shell: |
