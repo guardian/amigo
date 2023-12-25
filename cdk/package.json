@@ -17,7 +17,7 @@
     "diff": "cdk diff --path-metadata false --version-reporting false"
   },
   "devDependencies": {
-    "@guardian/eslint-config-typescript": "^8.0.0",
+    "@guardian/eslint-config-typescript": "^8.0.1",
     "tslib": "2.6.2",
     "@types/jest": "^29.5.11",
     "@types/node": "20.10.5",
