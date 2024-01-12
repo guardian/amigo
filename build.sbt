@@ -90,9 +90,9 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.1",
   "com.gu" %% "simple-configuration-ssm" % "1.6.4",
-  "com.gu.play-secret-rotation" %% "play-v29" % "0.40",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "0.40",
-  "com.gu.play-googleauth" %% "play-v29" % "2.3.0",
+  "com.gu.play-secret-rotation" %% "play-v30" % "6.0.8",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "6.0.8",
+  "com.gu.play-googleauth" %% "play-v30" % "3.0.6",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",

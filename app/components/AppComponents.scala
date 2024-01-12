@@ -75,7 +75,6 @@ import scala.language.postfixOps
 import java.io.FileInputStream
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import scala.util.Try
-import com.gu.googleauth.GoogleServiceAccount
 import com.gu.googleauth.GoogleGroupChecker
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.api.client
