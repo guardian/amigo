@@ -8,9 +8,9 @@
 - name: Install required packages
   apt: 
     name:
-    - apt-transport-https
     - ca-certificates
-    - openssl
+    - curl
+    - gnupg
     update_cache: yes
     state: present
     force: yes
@@ -21,11 +21,11 @@
     state: present
 
 - name: Add docker.io repo
-  apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable' state=present
+  apt_repository: repo='deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable' state=present
   when: ansible_architecture == "x86_64"
 
 - name: Add docker.io repo
-  apt_repository: repo='deb [arch=arm64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable' state=present
+  apt_repository: repo='deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable' state=present
   when: ansible_architecture == "aarch64"
 
 - name: Install docker
