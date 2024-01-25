@@ -1,6 +1,15 @@
 # Docker
 
-Installs Docker, takes a parameter `version` for the full docker version number, formatted as `version: '[version_here]'`, eg: `version: '5:24.0.6-1'`.
+Installs Docker in line with documentation on here https://docs.docker.com/engine/install/ubuntu/. Including the following
+packges:
 
-NB: if you are using Amazon Linux, use the `docker-ecr` role instead, which also
-configures Docker to use AWS credentials if found.
+- docker-ce
+- docker-ce-cli
+- containerd.io
+- docker-buildx-plugin
+- docker-compose-plugin
+
+This role will install the latest version of Docker - currently not configurable.
+
+NB: if you are using Amazon Linux, use the `docker-ecr` role instead, which also configures Docker to use AWS credentials
+if found.
