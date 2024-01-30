@@ -203,6 +203,18 @@ export class AmigoStack extends GuStack {
       GuDescribeEC2Policy.getInstance(this),
       GuAnghammaradSenderPolicy.getInstance(this),
       this.appPolicy,
+      new GuAllowPolicy(this, "ECRPolicy", {
+        policyName: "ecrpull--required-permissions",
+        resources: ["*"],
+        actions: [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:DescribeImages",
+          "ecr:ListImages",
+          "ecr:GetDownloadUrlForLayer"
+          ]
+      })
     ];
 
     const sg = new GuSecurityGroup(this, "PackerSecurityGroup", {

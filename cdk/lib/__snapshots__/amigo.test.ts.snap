@@ -13,6 +13,7 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       "GuAnghammaradTopicParameter",
       "GuAnghammaradSenderPolicy",
       "GuDistributionBucketParameter",
+      "GuAllowPolicy",
       "GuVpcParameter",
       "GuSecurityGroup",
       "GuSubnetListParameter",
@@ -372,6 +373,33 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
+    },
+    "ECRPolicy62816915": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:DescribeImages",
+                "ecr:ListImages",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ecrpull--required-permissions",
+        "Roles": [
+          {
+            "Ref": "InstanceRoleAmigo75944747",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "GetDistributablePolicyAmigoB25A5D2B": {
       "Properties": {
