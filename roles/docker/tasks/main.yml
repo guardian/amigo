@@ -34,6 +34,14 @@
     update_cache: yes
     state: present
 
+# See https://docs.docker.com/engine/install/linux-postinstall/ for why we're doing these steps
 - name: Create docker group
   group:
     name: docker
+
+- name: Add ubuntu user to docker group
+  user:
+      name: ubuntu
+      groups: docker
+      append: yes
+  when: ansible_distribution == "Ubuntu"
