@@ -90,8 +90,8 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
   "com.gu" %% "simple-configuration-ssm" % "1.6.4",
-  "com.gu.play-secret-rotation" %% "play-v30" % "7.0.1",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "7.0.1",
+  "com.gu.play-secret-rotation" %% "play-v30" % "6.0.8",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "6.0.8",
   "com.gu.play-googleauth" %% "play-v30" % "3.0.7",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
@@ -109,7 +109,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
   "org.scalatest" %% "scalatest-flatspec" % "3.2.18" % Test,
-  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.17" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.18" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "1.8.1"
