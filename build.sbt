@@ -77,7 +77,7 @@ val jacksonVersion = "2.17.0"
 val circeVersion = "0.14.6"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.683"
+val awsV1SdkVersion = "1.12.693"
 val awsV2SdkVersion = "2.25.8"
 
 libraryDependencies ++= Seq(
@@ -86,13 +86,13 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
-  "org.scanamo" %% "scanamo" % "1.0.1",
+  "org.scanamo" %% "scanamo" % "1.1.1",
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
   "com.gu" %% "simple-configuration-ssm" % "1.7.0",
-  "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "7.1.1",
-  "com.gu.play-googleauth" %% "play-v30" % "4.0.0",
+  "com.gu.play-secret-rotation" %% "play-v30" % "8.2.0",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.2.0",
+  "com.gu.play-googleauth" %% "play-v30" % "6.1.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
