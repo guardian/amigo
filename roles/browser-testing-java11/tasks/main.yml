@@ -1,0 +1,16 @@
+---
+- name: Install Xvfb
+  apt: name=xvfb state=latest
+
+- name: Install Chromium
+  snap:
+    name: chromium
+
+- name: Install Chromium chromedriver
+  apt: name=chromium-chromedriver state=latest
+
+- name: Create Xvfb service
+  copy: src=xvfb.service dest=/etc/systemd/system/xvfb.service owner=root group=root
+
+- name: Enable Xvfb service
+  service: name=xvfb enabled=yes
