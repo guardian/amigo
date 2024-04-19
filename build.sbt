@@ -89,14 +89,14 @@ libraryDependencies ++= Seq(
   "org.scanamo" %% "scanamo" % "1.1.1",
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
-  "com.gu" %% "simple-configuration-ssm" % "1.7.0",
+  "com.gu" %% "simple-configuration-ssm" % "2.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % "8.2.1",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.2.1",
   "com.gu.play-googleauth" %% "play-v30" % "7.1.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "3.0.2",
+  "com.lihaoyi" %% "fastparse" % "3.1.0",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
@@ -104,7 +104,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.4",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.4",
+  "ch.qos.logback" % "logback-classic" % "1.5.5",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
@@ -112,7 +112,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.18" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
-  "com.gu" %% "anghammarad-client" % "1.8.1"
+  "com.gu" %% "anghammarad-client" % "2.0.0"
 )
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
