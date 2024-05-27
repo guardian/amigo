@@ -6,7 +6,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.13"
+scalaVersion := "2.13.14"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -73,12 +73,12 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.17.0"
+val jacksonVersion = "2.17.1"
 val circeVersion = "0.14.7"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.708"
-val awsV2SdkVersion = "2.25.26"
+val awsV1SdkVersion = "1.12.728"
+val awsV2SdkVersion = "2.25.47"
 
 libraryDependencies ++= Seq(
   ws,
@@ -90,9 +90,9 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.3",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
   "com.gu" %% "simple-configuration-ssm" % "2.0.0",
-  "com.gu.play-secret-rotation" %% "play-v30" % "8.2.1",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.2.1",
-  "com.gu.play-googleauth" %% "play-v30" % "7.1.0",
+  "com.gu.play-secret-rotation" %% "play-v30" % "8.3.1",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.3.1",
+  "com.gu.play-googleauth" %% "play-v30" % "7.3.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
@@ -120,7 +120,7 @@ routesImport += "models._"
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(JavaAppPackaging)
   .settings(
-    scalaVersion := "2.13.13",
+    scalaVersion := "2.13.14",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
