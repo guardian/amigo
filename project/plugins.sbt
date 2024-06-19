@@ -1,4 +1,4 @@
-addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.3")
+addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.4")
 
 // sbt-native-packager cannot be updated to >1.9.9 until Play supports scala-xml 2
 addSbtPlugin(
