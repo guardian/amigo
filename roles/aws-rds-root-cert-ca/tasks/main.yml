@@ -1,12 +1,20 @@
 ---
-- name: get aws RDS root CA certificate
+- name: get RDS CA certificate bundle
   get_url: url={{certificate_source}}{{certificate_name}}.pem dest=/tmp/{{certificate_name}}.pem
 
-- name: convert pem to der format
-  command: openssl x509 -outform der -in /tmp/{{certificate_name}}.pem -out /tmp/{{certificate_name}}.der
+- name: create directory for cert files
+  file:
+    path: /tmp/rds_certs/
+    state: directory
+- name: split bundle into individual files
+  command: csplit -sz /tmp/{{certificate_name}}.pem  -f /tmp/rds_certs/rds_cert_ '/-BEGIN CERTIFICATE-/' '{*}'
 
-- name: create new truststore
-  command: keytool -import -alias rds-root -keystore "{{truststore_dir}}{{truststore_name}}" -file /tmp/{{certificate_name}}.der -storepass "{{aws_rds_truststore_password | mandatory}}" -noprompt
+- name: add certificates to a new trust store
+  shell: |
+      for cert in /tmp/rds_certs/rds_cert_*; do
+          keytool -importcert -file $cert -alias $cert -keystore {{truststore_dir}}{{truststore_name}} -storepass "{{aws_rds_truststore_password | mandatory}}" -noprompt
+          rm $cert
+          done
 
-- name: import default truststore into new one
+- name: import default trust store into the new one
   command: keytool -importkeystore -srckeystore "{{truststore_dir}}cacerts" -srcstorepass "{{castore_password}}" -destkeystore "{{truststore_dir}}{{truststore_name}}" -deststorepass "{{aws_rds_truststore_password | mandatory}}"
