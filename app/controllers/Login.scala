@@ -3,7 +3,12 @@ package controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.applicativeError._
-import com.gu.googleauth.{GoogleAuthConfig, GoogleGroupChecker, LoginSupport, UserIdentity}
+import com.gu.googleauth.{
+  GoogleAuthConfig,
+  GoogleGroupChecker,
+  LoginSupport,
+  UserIdentity
+}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Loggable
