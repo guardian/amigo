@@ -178,6 +178,7 @@ class RecipeController(
                 bakeSchedule,
                 encryptedCopies
               ) =>
+            log.info(s"Creating recipe ${id} ${description} - requested by ${request.user.email}")
             Recipes.findById(id) match {
               case Some(existingRecipe) =>
                 val formWithError = Forms.createRecipe
