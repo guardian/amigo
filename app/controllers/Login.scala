@@ -3,14 +3,10 @@ package controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.applicativeError._
-import com.gu.googleauth.{
-  GoogleAuthConfig,
-  GoogleGroupChecker,
-  LoginSupport,
-  UserIdentity
-}
+import com.gu.googleauth.{GoogleAuthConfig, GoogleGroupChecker, LoginSupport, UserIdentity}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import services.Loggable
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,7 +18,8 @@ class Login(
     groupChecker: GoogleGroupChecker
 )(implicit executionContext: ExecutionContext)
     extends AbstractController(components)
-    with LoginSupport {
+    with LoginSupport
+    with Loggable {
 
   def loginAction = Action.async { implicit request =>
     startGoogleLogin()
@@ -39,6 +36,7 @@ class Login(
       identity <- checkIdentity()
       _ <- checkGoogleGroupMembership(identity)
     } yield {
+      log.info(s"User ${identity.email} successfully logged in")
       setupSessionWhenSuccessful(identity)
     }).merge
   }
