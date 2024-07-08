@@ -101,7 +101,7 @@ class RecipeController(
                 BaseImages.findById(baseImageId) match {
                   case Some(baseImage) =>
                     log.info(
-                      s"Updating recipe ${id} ${recipe.description} - requested by ${request.user.email}"
+                      s"Updating recipe ${id} - requested by ${request.user.email}"
                     )
                     val customisedRoles = controllers.ControllerHelpers
                       .parseEnabledRoles(request.body)
@@ -181,7 +181,7 @@ class RecipeController(
                 encryptedCopies
               ) =>
             log.info(
-              s"Creating recipe ${id} ${description} - requested by ${request.user.email}"
+              s"Creating recipe ${id} - requested by ${request.user.email}"
             )
             Recipes.findById(id) match {
               case Some(existingRecipe) =>
@@ -312,7 +312,7 @@ class RecipeController(
         )
       } else {
         log.info(
-          s"Deleting recipe ${id} ${recipe.description} - requested by ${request.user.email}"
+          s"Deleting recipe ${id} - requested by ${request.user.email}"
         )
         // stop any scheduled build
         bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
