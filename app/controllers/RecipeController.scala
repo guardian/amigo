@@ -10,7 +10,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import prism.RecipeUsage
 import schedule.BakeScheduler
-import services.PrismData
+import services.{Loggable, PrismData}
 
 import scala.util.Try
 
@@ -22,7 +22,8 @@ class RecipeController(
     debugAvailable: Boolean
 )(implicit dynamo: Dynamo)
     extends AbstractController(components)
-    with I18nSupport {
+    with I18nSupport
+    with Loggable {
   import RecipeController._
 
   def listRecipes = authAction {
@@ -99,6 +100,9 @@ class RecipeController(
                   ) =>
                 BaseImages.findById(baseImageId) match {
                   case Some(baseImage) =>
+                    log.info(
+                      s"Updating recipe ${id} - requested by ${request.user.email}"
+                    )
                     val customisedRoles = controllers.ControllerHelpers
                       .parseEnabledRoles(request.body)
                     customisedRoles.fold(
@@ -176,6 +180,9 @@ class RecipeController(
                 bakeSchedule,
                 encryptedCopies
               ) =>
+            log.info(
+              s"Creating recipe ${id} - requested by ${request.user.email}"
+            )
             Recipes.findById(id) match {
               case Some(existingRecipe) =>
                 val formWithError = Forms.createRecipe
@@ -304,6 +311,9 @@ class RecipeController(
           s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources."
         )
       } else {
+        log.info(
+          s"Deleting recipe ${id} - requested by ${request.user.email}"
+        )
         // stop any scheduled build
         bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
 
