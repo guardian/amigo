@@ -100,7 +100,7 @@ class RecipeController(
                   ) =>
                 BaseImages.findById(baseImageId) match {
                   case Some(baseImage) =>
-                    log.info(s"Updating recipe ${id} with name ${recipe.description} - requested by user ${request.user.email}")
+                    log.info(s"Updating recipe ${id} ${recipe.description} - requested by ${request.user.email}")
                     val customisedRoles = controllers.ControllerHelpers
                       .parseEnabledRoles(request.body)
                     customisedRoles.fold(
@@ -306,7 +306,7 @@ class RecipeController(
           s"Can't delete recipe $id as it is still used by ${recipeUsage.bakeUsage.size} resources."
         )
       } else {
-        log.info(s"Deleting recipe ${id} with name ${recipe.description} - requested by user ${request.user.email}")
+        log.info(s"Deleting recipe ${id} ${recipe.description} - requested by ${request.user.email}")
         // stop any scheduled build
         bakeScheduler.reschedule(recipe.copy(bakeSchedule = None))
 
