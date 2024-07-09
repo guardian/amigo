@@ -35,6 +35,7 @@
     chmod +x /var/lib/cloud/scripts/per-instance/02-$NAME
   when:
     - ansible_os_family == "Debian"
+    - start_fluentbit
 
 - name: Remove syslog output
   shell: |
