@@ -8,8 +8,11 @@ import services.Loggable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(
-    implicit ec: ExecutionContext
+class Prism(
+    ws: WSClient,
+    val baseUrl: String = "https://prism.gutools.co.uk"
+)(implicit
+    ec: ExecutionContext
 ) extends Loggable {
   import Prism._
 
@@ -22,6 +25,9 @@ class Prism(ws: WSClient, val baseUrl: String = "https://prism.gutools.co.uk")(
 
   def findAllLaunchConfigurations(): Future[Seq[LaunchConfiguration]] =
     findAll[LaunchConfiguration]("/launch-configurations")
+
+  def findAllLaunchTemplates(): Future[Seq[LaunchTemplate]] =
+    findAll[LaunchTemplate]("/launch-templates")
 
   def findCopiedImages(): Future[Seq[Image]] =
     findAll[Image]("/images?tags.CopiedFromAMI!=")
@@ -66,6 +72,11 @@ object Prism {
       imageId: AmiId,
       awsAccount: AWSAccount
   )
+  case class LaunchTemplate(
+      name: String,
+      imageId: AmiId,
+      awsAccount: AWSAccount
+  )
   case class Image(
       imageId: AmiId,
       ownerId: String,
@@ -90,6 +101,12 @@ object Prism {
     ((JsPath \ "name").read[String] and
       (JsPath \ "imageId").read[String].map(AmiId.apply) and
       (JsPath \ "meta").read[AWSAccount])(LaunchConfiguration.apply _)
+  implicit val launchTemplateReads: Reads[LaunchTemplate] =
+    ((JsPath \ "name").read[String] and
+      (JsPath \ "imageId").read[String].map(AmiId.apply) and
+      (JsPath \ "meta").read[AWSAccount])(LaunchTemplate.apply _)
+  implicit val launchTemplatesReads: Reads[Seq[LaunchTemplate]] =
+    dataReads[LaunchTemplate](dataPath = "data", "asg-launch-templates")
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] =
     dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
   implicit val imageReads: Reads[Image] =

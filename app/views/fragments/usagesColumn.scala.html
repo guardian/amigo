@@ -8,6 +8,6 @@
         <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instances" />
         <span>@usage.instances.size</span>
         <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
-        <span>@usage.launchConfigurations.size</span>
+        <span>@{usage.launchConfigurations.size + usage.launchTemplates.size}</span>
     </a>
 </td>

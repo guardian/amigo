@@ -3,7 +3,7 @@ package prism
 import data.{Bakes, Dynamo, PackageList, Recipes}
 import models.{AmiId, Bake, BakeId, Recipe, RecipeId}
 import play.api.libs.json.Json
-import prism.Prism.{Image, Instance, LaunchConfiguration}
+import prism.Prism.{Image, Instance, LaunchConfiguration, LaunchTemplate}
 import services.PrismData
 import play.api.libs.json.OWrites
 
@@ -14,7 +14,8 @@ case class BakeUsage(
     bake: Bake,
     viaCopy: Option[Image],
     instances: Seq[Instance],
-    launchConfigurations: Seq[LaunchConfiguration]
+    launchConfigurations: Seq[LaunchConfiguration],
+    launchTemplates: Seq[LaunchTemplate]
 )
 
 case class SimpleBakeUsage(bakeId: BakeId, packageListS3Location: String)
@@ -49,6 +50,7 @@ object SimpleBakeUsage {
 case class RecipeUsage(
     instances: Seq[Instance],
     launchConfigurations: Seq[LaunchConfiguration],
+    launchTemplates: Seq[LaunchTemplate],
     bakeUsage: Seq[BakeUsage]
 )
 
@@ -57,6 +59,7 @@ object RecipeUsage {
   def noUsage(): RecipeUsage = RecipeUsage(
     Seq.empty[Instance],
     Seq.empty[LaunchConfiguration],
+    Seq.empty[LaunchTemplate],
     Seq.empty[BakeUsage]
   )
 
@@ -87,8 +90,12 @@ object RecipeUsage {
     val launchConfigurations = prismAgents.allLaunchConfigurations.filter(lc =>
       amiIds.contains(lc.imageId)
     )
+    val launchTemplates =
+      prismAgents.allLaunchTemplates.filter(lt => amiIds.contains(lt.imageId))
     val amis =
-      (instances.map(_.imageId) ++ launchConfigurations.map(_.imageId)).distinct
+      (instances.map(_.imageId) ++ launchConfigurations.map(
+        _.imageId
+      ) ++ launchTemplates.map(_.imageId)).distinct
 
     val copiedAmiLookupMap = copiedAmis.map { image =>
       image.imageId -> image
@@ -107,10 +114,11 @@ object RecipeUsage {
       }
       val amiInstances = instances.filter(_.imageId == ami)
       val amiLc = launchConfigurations.filter(_.imageId == ami)
-      BakeUsage(ami, bake, maybeCopy, amiInstances, amiLc)
+      val amiLt = launchTemplates.filter(_.imageId == ami)
+      BakeUsage(ami, bake, maybeCopy, amiInstances, amiLc, amiLt)
     }
 
-    RecipeUsage(instances, launchConfigurations, bakeUsage)
+    RecipeUsage(instances, launchConfigurations, launchTemplates, bakeUsage)
   }
 
   def forAll(recipes: Iterable[Recipe], findBakes: RecipeId => Iterable[Bake])(

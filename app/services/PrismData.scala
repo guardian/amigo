@@ -6,7 +6,13 @@ import org.joda.time.DateTime
 import play.api.inject.ApplicationLifecycle
 import play.api.{Environment, Mode}
 import prism.Prism
-import prism.Prism.{AWSAccount, Image, Instance, LaunchConfiguration}
+import prism.Prism.{
+  AWSAccount,
+  Image,
+  Instance,
+  LaunchConfiguration,
+  LaunchTemplate
+}
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.{MapView, SeqLike, SeqOps}
@@ -53,6 +59,9 @@ class PrismData(
   private val launchConfigurationsAgent
       : AtomicReference[CacheData[Seq[LaunchConfiguration]]] =
     new AtomicReference(Left(NotInitialised))
+  private val launchTemplatesAgent
+      : AtomicReference[CacheData[Seq[LaunchTemplate]]] =
+    new AtomicReference(Left(NotInitialised))
   private val copiedImagesAgent
       : AtomicReference[CacheData[Map[AmiId, Seq[Image]]]] =
     new AtomicReference(Left(NotInitialised))
@@ -65,6 +74,9 @@ class PrismData(
     dataToResult(instancesAgent.get, DateTime.now)
   def allLaunchConfigurations: Seq[LaunchConfiguration] =
     dataToResult(launchConfigurationsAgent.get, DateTime.now)
+
+  def allLaunchTemplates: Seq[LaunchTemplate] =
+    dataToResult(launchTemplatesAgent.get, DateTime.now)
   def copiedImages(sourceAmiIds: Set[AmiId]): Map[AmiId, Seq[Image]] =
     dataToResult(copiedImagesAgent.get, DateTime.now).view
       .filterKeys(sourceAmiIds.contains)
@@ -84,6 +96,11 @@ class PrismData(
             prism.findAllLaunchConfigurations(),
             launchConfigurationsAgent,
             "launch configuration"
+          )(identity)
+          refresh(
+            prism.findAllLaunchTemplates(),
+            launchTemplatesAgent,
+            "launch template"
           )(identity)
           refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(
             _.groupBy(_.copiedFromAMI)
