@@ -3,7 +3,7 @@
     usage: prism.RecipeUsage
 )
 
-<td class="recipe-usage" title="Used in @usage.instances.size instance@if(usage.instances.size != 1) {s} and @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1) {s}">
+<td class="recipe-usage" title="Used in @usage.instances.size instance@if(usage.instances.size != 1) {s}, @usage.launchConfigurations.size launch configuration@if(usage.launchConfigurations.size != 1) {s}  and @usage.launchTemplates.size launch configuration@if(usage.launchTemplates.size != 1) {s}">
     <a href="@routes.RecipeController.showUsages(recipe.id)">
         <img src="@routes.Assets.versioned("images/computer.svg")" width="16" alt="Instances" />
         <span>@usage.instances.size</span>

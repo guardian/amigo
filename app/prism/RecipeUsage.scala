@@ -150,6 +150,7 @@ object RecipeUsage {
     recipeUsage.copy(
       launchConfigurations =
         recipeUsage.launchConfigurations.filter(_.imageId == amiId),
+      launchTemplates = recipeUsage.launchTemplates.filter(_.imageId == amiId),
       instances = recipeUsage.instances.filter(_.imageId == amiId),
       bakeUsage = recipeUsage.bakeUsage.filter(bu =>
         bu.amiId == amiId || bu.viaCopy.exists(i => i.imageId == amiId)
