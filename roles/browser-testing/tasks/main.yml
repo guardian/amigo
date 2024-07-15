@@ -14,3 +14,12 @@
 
 - name: Enable Xvfb service
   service: name=xvfb enabled=yes
+
+- name: Install required libxrender1 package
+  apt: name=libxrender1 state=latest
+
+- name: Install required libxtst6 package
+  apt: name=libxtst6 state=latest
+
+- name: Install required libxi6 package
+  apt: name=libxi6 state=latest
