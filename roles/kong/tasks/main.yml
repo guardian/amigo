@@ -12,7 +12,8 @@
 
 - name: Install Kong package
   apt:
-    deb: https://download.konghq.com/{{ kong_repo }}/pool/all/k/kong/kong_{{ kong_version }}_{{ kong_arch }}.deb
+    # https://packages.konghq.com/public/gateway-31/deb/ubuntu/pool/focal/main/k/ko/kong_3.1.1/kong_3.1.1_amd64.deb
+    deb: https://packages.konghq.com/public/{{ kong_repo }}/deb/ubuntu/pool/focal/main/k/ko/kong_{{ kong_version }}/kong_{{ kong_version }}_{{ kong_arch }}.deb
     state: present
 
 - name: Create user for Kong
