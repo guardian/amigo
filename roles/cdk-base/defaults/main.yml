@@ -1,2 +1,3 @@
 ---
 dist_bucket: amigo-data
+start_fluentbit: true
