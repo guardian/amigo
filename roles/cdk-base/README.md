@@ -106,3 +106,14 @@ Resources:
 _While not required, it is strongly recommended to [enable tag metadata on your
 instance](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-launchtemplate-launchtemplatedata-metadataoptions.html#cfn-ec2-launchtemplate-launchtemplatedata-metadataoptions-instancemetadatatags)
 as this allows tag lookup without requiring remote AWS API calls at runtime._
+
+## Options
+
+- `start_fluentbit`: boolean, default `true`
+
+    Set this to `false` if you do not want log shipping to start automatically.
+    This is useful if you will add or change the log shipping config supplied by
+    `devx-logs`. If you have set this to `false` you are now responsible for
+    starting `td-agent-bit.service` in your user data script
+    (by running `systemctl start td-agent-bit.service` after all config files
+    have been created), and if you fail to do so logs will not be shipped.
