@@ -106,7 +106,10 @@ object Prism {
       (JsPath \ "imageId").read[String].map(AmiId.apply) and
       (JsPath \ "meta").read[AWSAccount])(LaunchTemplate.apply _)
   implicit val launchTemplatesReads: Reads[Seq[LaunchTemplate]] =
-    dataReads[LaunchTemplate](dataPath = "data", "active-launch-template-versions")
+    dataReads[LaunchTemplate](
+      dataPath = "data",
+      "active-launch-template-versions"
+    )
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] =
     dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
   implicit val imageReads: Reads[Image] =
