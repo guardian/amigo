@@ -27,7 +27,7 @@ class Prism(
     findAll[LaunchConfiguration]("/launch-configurations")
 
   def findAllLaunchTemplates(): Future[Seq[LaunchTemplate]] =
-    findAll[LaunchTemplate]("/launch-templates")
+    findAll[LaunchTemplate]("/active-launch-template-versions")
 
   def findCopiedImages(): Future[Seq[Image]] =
     findAll[Image]("/images?tags.CopiedFromAMI!=")
@@ -106,7 +106,7 @@ object Prism {
       (JsPath \ "imageId").read[String].map(AmiId.apply) and
       (JsPath \ "meta").read[AWSAccount])(LaunchTemplate.apply _)
   implicit val launchTemplatesReads: Reads[Seq[LaunchTemplate]] =
-    dataReads[LaunchTemplate](dataPath = "data", "asg-launch-templates")
+    dataReads[LaunchTemplate](dataPath = "data", "active-launch-template-versions")
   implicit val launchConfigurationsReads: Reads[Seq[LaunchConfiguration]] =
     dataReads[LaunchConfiguration](dataPath = "data", "launch-configurations")
   implicit val imageReads: Reads[Image] =
