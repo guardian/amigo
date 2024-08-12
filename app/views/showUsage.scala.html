@@ -60,6 +60,13 @@
                                    (in @launchConfiguration.awsAccount.accountName)
                                </li>
                            }
+                            @usage.launchTemplates.map { launchTemplate =>
+                                <li class="list-unstyled">
+                                    <img src="@routes.Assets.versioned("images/spanner.svg")" width="14" alt="Launch Configurations" />
+                                    <a href="@prismBaseUrl/asg-launch-templates?name=@launchTemplate.name">@launchTemplate.name</a>
+                                    (in @launchTemplate.awsAccount.accountName)
+                                </li>
+                            }
                         </ul>
                     </td>
                     <td class="absolute-container">
