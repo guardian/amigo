@@ -90,7 +90,7 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.4",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
   "com.gu" %% "simple-configuration-ssm" % "2.0.0",
-  "com.gu.play-secret-rotation" %% "play-v30" % "8.4.5",
+  "com.gu.play-secret-rotation" %% "play-v30" % "11.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "11.0.0",
   "com.gu.play-googleauth" %% "play-v30" % "12.0.2",
   // Pin play-bootstrap because it is tied to the bootstrap version
