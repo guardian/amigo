@@ -73,12 +73,12 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.17.1"
-val circeVersion = "0.14.8"
+val jacksonVersion = "2.17.2"
+val circeVersion = "0.14.9"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.757"
-val awsV2SdkVersion = "2.25.70"
+val awsV1SdkVersion = "1.12.770"
+val awsV2SdkVersion = "2.26.31"
 
 libraryDependencies ++= Seq(
   ws,
@@ -87,16 +87,16 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "1.1.1",
-  "com.beachape" %% "enumeratum" % "1.7.3",
+  "com.beachape" %% "enumeratum" % "1.7.4",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.2",
   "com.gu" %% "simple-configuration-ssm" % "2.0.0",
-  "com.gu.play-secret-rotation" %% "play-v30" % "8.4.2",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.4.2",
-  "com.gu.play-googleauth" %% "play-v30" % "8.0.1",
+  "com.gu.play-secret-rotation" %% "play-v30" % "8.4.5",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "8.4.5",
+  "com.gu.play-googleauth" %% "play-v30" % "8.0.4",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.3.2",
-  "com.lihaoyi" %% "fastparse" % "3.1.0",
+  "com.lihaoyi" %% "fastparse" % "3.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
@@ -108,8 +108,8 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
-  "org.scalatest" %% "scalatest-flatspec" % "3.2.18" % Test,
-  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.18" % Test,
+  "org.scalatest" %% "scalatest-flatspec" % "3.2.19" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.19" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "2.0.0"
@@ -126,7 +126,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.2.3",
-      "com.amazonaws" % "aws-lambda-java-events" % "3.11.6",
+      "com.amazonaws" % "aws-lambda-java-events" % "3.13.0",
       "io.circe" %% "circe-parser" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion
     )

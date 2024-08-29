@@ -79,14 +79,14 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
   def getBakes(recipeId: RecipeId): Iterable[Bake] =
     Iterable(oldBake1, oldBake2, newBake1, newBake2)
   def getEmptyRecipeUsage(bakes: Iterable[Bake]): RecipeUsage =
-    RecipeUsage(Seq.empty, Seq.empty, Seq.empty)
+    RecipeUsage(Seq.empty, Seq.empty, Seq.empty, Seq.empty)
 
   def getRecipeUsage(bakes: Iterable[Bake]): RecipeUsage = {
     val bakeUsageA =
-      BakeUsage(AmiId("ami-2"), oldBake2, None, Seq.empty, Seq.empty)
+      BakeUsage(AmiId("ami-2"), oldBake2, None, Seq.empty, Seq.empty, Seq.empty)
     val bakeUsageB =
-      BakeUsage(AmiId("ami-4"), newBake2, None, Seq.empty, Seq.empty)
-    RecipeUsage(Seq.empty, Seq.empty, Seq(bakeUsageA, bakeUsageB))
+      BakeUsage(AmiId("ami-4"), newBake2, None, Seq.empty, Seq.empty, Seq.empty)
+    RecipeUsage(Seq.empty, Seq.empty, Seq.empty, Seq(bakeUsageA, bakeUsageB))
   }
 
   "getOldUnusedBakes" should "return empty when all bakes are recent" in {
