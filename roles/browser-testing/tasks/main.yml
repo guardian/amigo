@@ -14,3 +14,12 @@
 
 - name: Enable Xvfb service
   service: name=xvfb enabled=yes
+
+- name: Install libxrender1, required by Selenium
+  apt: name=libxrender1 state=latest
+
+- name: Install libxtst6, required by Selenium
+  apt: name=libxtst6 state=latest
+
+- name: Install libxi6, required by Selenium
+  apt: name=libxi6 state=latest
