@@ -19,7 +19,7 @@
   "devDependencies": {
     "@guardian/eslint-config-typescript": "^8.0.1",
     "tslib": "2.7.0",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.13",
     "@types/node": "22.5.5",
     "aws-cdk": "2.90.0",
     "aws-cdk-lib": "2.90.0",
