@@ -16,7 +16,7 @@ We recommend you set both vars explicitly in Amigo.
 
 To start the agent:
 
-    $ service td-agent-bit start
+    $ service fluent-bit start
 
-By default it loads config from `/etc/td-agent-bit/td-agent-bit.conf` so
+By default it loads config from `/etc/fluent-bit/fluent-bit.conf` so
 overwrite that with your own config in your userdata/startup scripts.
