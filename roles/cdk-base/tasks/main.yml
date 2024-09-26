@@ -31,7 +31,7 @@
 - name: Add start Fluentbit script
   shell: |
     NAME=start-fluentbit
-    printf '#!/bin/bash\nsystemctl start td-agent-bit.service' > /var/lib/cloud/scripts/per-instance/02-$NAME
+    printf '#!/bin/bash\nsystemctl start fluent-bit.service' > /var/lib/cloud/scripts/per-instance/02-$NAME
     chmod +x /var/lib/cloud/scripts/per-instance/02-$NAME
   when:
     - ansible_os_family == "Debian"
