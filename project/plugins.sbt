@@ -5,7 +5,7 @@ addSbtPlugin(
   "com.github.sbt" % "sbt-native-packager" % "1.10.4"
 ) // scala-steward:off
 addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "1.1.18")
-libraryDependencies += "org.vafer" % "jdeb" % "1.10" artifacts Artifact(
+libraryDependencies += "org.vafer" % "jdeb" % "1.11" artifacts Artifact(
   "jdeb",
   "jar",
   "jar"
