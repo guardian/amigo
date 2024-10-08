@@ -3,11 +3,28 @@
   set_fact:
     post_focal: "{{ 'post-focal' if ( ansible_distribution_major_version|int >= 20 ) else 'older' }}"
 
-- name: Install pip3
-  apt: name=python3-pip state=present
+- name: Install unzip
+  apt: name=unzip state=present
 
-- name: Install latest AWS CLI
-  command: pip3 install awscli
+- name: [AWS CLI v2] Create temporary directory
+  file: path=/tmp/awscliv2 state=directory
+
+- name: [AWS CLI v2] Download (aarch64)
+  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip dest=/tmp/awscliv2/awscliv2.zip
+  when: ansible_architecture == "aarch64"
+
+- name: [AWS CLI v2] Download (x86_64)
+  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2/awscliv2.zip
+  when: ansible_architecture == "x86_64"
+
+- name: [AWS CLI v2] Extract
+  command: unzip -o /tmp/awscliv2/awscliv2.zip -d /tmp/awscliv2
+
+- name: [AWS CLI v2] Install
+  command: /tmp/awscliv2/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+
+- name: [AWS CLI v2] Remove temporary directory
+  file: path=/tmp/awscliv2 state=absent
 
 - name: Install cloudformation tools
   include: "{{ item }}"
