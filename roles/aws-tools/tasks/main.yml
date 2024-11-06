@@ -1,12 +1,13 @@
 ---
 - name: See what Ubuntu version we're running
-  set_fact: 
+  set_fact:
     post_focal: "{{ 'post-focal' if ( ansible_distribution_major_version|int >= 20 ) else 'older' }}"
 
-- name: Install pip and the latest AWS CLI
-  include: "{{ item }}"
-  with_first_found:
-    - "install-pip-aws-cli-{{ ansible_os_family }}.yml"
+- name: Install pip3
+  apt: name=python3-pip state=present
+
+- name: Install latest AWS CLI
+  command: pip3 install awscli
 
 - name: Install cloudformation tools
   include: "{{ item }}"
@@ -14,4 +15,3 @@
     - "install-cfn-tools-{{ ansible_distribution }}-{{ post_focal }}.yml"
     - "install-cfn-tools-{{ ansible_os_family }}.yml"
     - "install-cfn-tools.yml"
-  
