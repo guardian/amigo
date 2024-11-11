@@ -87,7 +87,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "2.0.0",
-  "com.beachape" %% "enumeratum" % "1.7.4",
+  "com.beachape" %% "enumeratum" % "1.7.5",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.3",
   "com.gu" %% "simple-configuration-ssm" % "2.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % "11.2.0",
