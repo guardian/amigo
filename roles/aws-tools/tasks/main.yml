@@ -36,7 +36,7 @@
   command: gpg --verify /tmp/awscliv2/awscliv2.sig /tmp/awscliv2/awscliv2.zip
 
 - name: (AWS CLI v2) Extract
-  command: unzip -o /tmp/awscliv2/awscliv2.zip -d /tmp/awscliv2
+  ansible.builtin.unarchive: src=/tmp/awscliv2/awscliv2.zip dest=/tmp/awscliv2 remote_src=yes
 
 - name: (AWS CLI v2) Install
   command: /tmp/awscliv2/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
