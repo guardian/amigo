@@ -6,42 +6,42 @@
 - name: Install unzip
   apt: name=unzip state=present
 
-- name: [AWS CLI v2] Create temporary directory
+- name: (AWS CLI v2) Create temporary directory
   file: path=/tmp/awscliv2 state=directory
 
-- name: [AWS CLI v2] Download (aarch64)
+- name: (AWS CLI v2) Download (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip dest=/tmp/awscliv2/awscliv2.zip
   when: ansible_architecture == "aarch64"
 
-- name: [AWS CLI v2] Download (x86_64)
+- name: (AWS CLI v2) Download (x86_64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2/awscliv2.zip
   when: ansible_architecture == "x86_64"
 
 # The public key was obtained from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-- name: [AWS CLI v2] Copy AWS GPG key
+- name: (AWS CLI v2) Copy AWS GPG key
   copy: src=aws.pub dest=/tmp/awscliv2/aws.pub mode=0444
 
-- name: [AWS CLI v2] Import AWS GPG key
+- name: (AWS CLI v2) Import AWS GPG key
   command: gpg --import /tmp/awscliv2/aws.pub
 
-- name: [AWS CLI v2] Download signature (aarch64)
+- name: (AWS CLI v2) Download signature (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip.sig dest=/tmp/awscliv2/awscliv2.sig
   when: ansible_architecture == "aarch64"
 
-- name: [AWS CLI v2] Download signature (x86_64)
+- name: (AWS CLI v2) Download signature (x86_64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip.sig dest=/tmp/awscliv2/awscliv2.sig
   when: ansible_architecture == "x86_64"
 
-- name: [AWS CLI v2] Verify downloaded ZIP file
+- name: (AWS CLI v2) Verify downloaded ZIP file
   command: gpg --verify /tmp/awscliv2/awscliv2.sig /tmp/awscliv2/awscliv2.zip
 
-- name: [AWS CLI v2] Extract
+- name: (AWS CLI v2) Extract
   command: unzip -o /tmp/awscliv2/awscliv2.zip -d /tmp/awscliv2
 
-- name: [AWS CLI v2] Install
+- name: (AWS CLI v2) Install
   command: /tmp/awscliv2/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 
-- name: [AWS CLI v2] Remove temporary directory
+- name: (AWS CLI v2) Remove temporary directory
   file: path=/tmp/awscliv2 state=absent
 
 - name: Install cloudformation tools
