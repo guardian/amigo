@@ -25,15 +25,15 @@
   command: gpg --import /tmp/awscliv2/aws.pub
 
 - name: (AWS CLI v2) Download signature (aarch64)
-  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip.sig dest=/tmp/awscliv2/awscliv2.sig
+  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip.sig dest=/tmp/awscliv2/awscliv2.zip.sig
   when: ansible_architecture == "aarch64"
 
 - name: (AWS CLI v2) Download signature (x86_64)
-  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip.sig dest=/tmp/awscliv2/awscliv2.sig
+  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip.sig dest=/tmp/awscliv2/awscliv2.zip.sig
   when: ansible_architecture == "x86_64"
 
 - name: (AWS CLI v2) Verify downloaded ZIP file
-  command: gpg --verify /tmp/awscliv2/awscliv2.sig /tmp/awscliv2/awscliv2.zip
+  command: gpg --verify /tmp/awscliv2/awscliv2.zip.sig /tmp/awscliv2/awscliv2.zip
 
 - name: (AWS CLI v2) Extract
   ansible.builtin.unarchive: src=/tmp/awscliv2/awscliv2.zip dest=/tmp/awscliv2 remote_src=yes
