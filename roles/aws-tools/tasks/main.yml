@@ -6,8 +6,31 @@
 - name: Install unzip
   apt: name=unzip state=present
 
+- name: Install gpg
+  apt: name=gnupg state=present
+
 - name: (AWS CLI v2) Create temporary directory
   file: path=/tmp/awscliv2 state=directory
+
+- name: Generate default GPG key
+  command: gpg --batch --passphrase '' --quick-gen-key AMIgo default default
+
+# The public key was obtained from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html with the following detail:
+# Key ID:           A6310ACC4672475C
+# Type:             RSA
+# Size:             4096/4096
+# Created:          2019-09-18
+# Expires:          2025-07-24
+# User ID:          AWS CLI Team <aws-cli@amazon.com>
+# Key fingerprint:  FB5DB77FD5C118B80511ADA8A6310ACC4672475C
+- name: Copy AWS GPG key
+  copy: src=aws.pub dest=/tmp/awscliv2/aws.pub mode=0444
+
+- name: Import AWS GPG key
+  command: gpg --import /tmp/awscliv2/aws.pub
+
+- name: Trust AWS GPG key
+  command: gpg --quick-lsign-key FB5DB77FD5C118B80511ADA8A6310ACC4672475C
 
 - name: (AWS CLI v2) Download (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip dest=/tmp/awscliv2/awscliv2.zip
@@ -16,13 +39,6 @@
 - name: (AWS CLI v2) Download (x86_64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2/awscliv2.zip
   when: ansible_architecture == "x86_64"
-
-# The public key was obtained from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-- name: (AWS CLI v2) Copy AWS GPG key
-  copy: src=aws.pub dest=/tmp/awscliv2/aws.pub mode=0444
-
-- name: (AWS CLI v2) Import AWS GPG key
-  command: gpg --import /tmp/awscliv2/aws.pub
 
 - name: (AWS CLI v2) Download signature (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip.sig dest=/tmp/awscliv2/awscliv2.zip.sig
