@@ -9,11 +9,18 @@
 - name: Install gpg
   apt: name=gnupg state=present
 
+# It is not uncommon for this role to be run once in a base image, and again in a recipe.
+# There's no point installing the AWS CLI twice, so check if it's already installed.
+- shell: which aws 2>/dev/null || echo aws_cli_not_installed
+  register: aws_cli_installed
+
 - name: (AWS CLI v2) Create temporary directory
   file: path=/tmp/awscliv2 state=directory
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Generate default GPG key
   command: gpg --batch --passphrase '' --quick-gen-key AMIgo default default
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 # The public key was obtained from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html with the following detail:
 # Key ID:           A6310ACC4672475C
@@ -25,40 +32,55 @@
 # Key fingerprint:  FB5DB77FD5C118B80511ADA8A6310ACC4672475C
 - name: Copy AWS GPG key
   copy: src=aws.pub dest=/tmp/awscliv2/aws.pub mode=0444
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Import AWS GPG key
   command: gpg --import /tmp/awscliv2/aws.pub
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Trust AWS GPG key
   command: gpg --quick-lsign-key FB5DB77FD5C118B80511ADA8A6310ACC4672475C
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Download (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip dest=/tmp/awscliv2/awscliv2.zip
-  when: ansible_architecture == "aarch64"
+  when:
+    - ansible_architecture == "aarch64"
+    - aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Download (x86_64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip dest=/tmp/awscliv2/awscliv2.zip
-  when: ansible_architecture == "x86_64"
+  when:
+    - ansible_architecture == "x86_64"
+    - aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Download signature (aarch64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip.sig dest=/tmp/awscliv2/awscliv2.zip.sig
-  when: ansible_architecture == "aarch64"
+  when:
+    - ansible_architecture == "aarch64"
+    - aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Download signature (x86_64)
   get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip.sig dest=/tmp/awscliv2/awscliv2.zip.sig
-  when: ansible_architecture == "x86_64"
+  when:
+    - ansible_architecture == "x86_64"
+    - aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Verify downloaded ZIP file
   command: gpg --verify /tmp/awscliv2/awscliv2.zip.sig /tmp/awscliv2/awscliv2.zip
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Extract
   ansible.builtin.unarchive: src=/tmp/awscliv2/awscliv2.zip dest=/tmp/awscliv2 remote_src=yes
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Install
   command: /tmp/awscliv2/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: (AWS CLI v2) Remove temporary directory
   file: path=/tmp/awscliv2 state=absent
+  when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Install cloudformation tools
   include: "{{ item }}"
