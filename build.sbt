@@ -89,7 +89,7 @@ libraryDependencies ++= Seq(
   "org.scanamo" %% "scanamo" % "2.0.0",
   "com.beachape" %% "enumeratum" % "1.7.4",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.0.3",
-  "com.gu" %% "simple-configuration-ssm" % "3.0.0",
+  "com.gu" %% "simple-configuration-ssm" % "4.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % "11.2.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % "11.2.0",
   "com.gu.play-googleauth" %% "play-v30" % "13.2.0",
