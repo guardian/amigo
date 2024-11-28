@@ -1,10 +1,10 @@
 package models
 
-import com.amazonaws.services.sns.AmazonSNSAsync
+import software.amazon.awssdk.services.sns.SnsAsyncClient
 
 case class NotificationConfig(
     baseUrl: String,
     snsTopicArn: String,
-    snsClient: AmazonSNSAsync,
+    snsClient: SnsAsyncClient,
     amigoStage: String
 )
