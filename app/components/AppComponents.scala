@@ -36,6 +36,7 @@ import com.gu.play.secretrotation.{
   SnapshotProvider,
   TransitionTiming
 }
+
 import java.time.Duration
 import controllers._
 import data.{Dynamo, Recipes}
@@ -74,11 +75,13 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import java.io.FileInputStream
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+
 import scala.util.Try
 import com.gu.googleauth.GoogleGroupChecker
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.api.client
 import com.google.auth.oauth2.ServiceAccountCredentials
+import software.amazon.awssdk.services.sns.SnsAsyncClient
 
 class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
@@ -222,11 +225,11 @@ class AppComponents(context: Context, identity: AppIdentity)
     .withClientConfiguration(clientConfiguration)
     .build()
 
-  val anghammaradSNSClient: AmazonSNSAsync =
-    AmazonSNSAsyncClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCredsForV1)
-      .withClientConfiguration(clientConfiguration)
+  val anghammaradSNSClient: SnsAsyncClient =
+    SnsAsyncClient
+      .builder()
+      .region(Region.of(region.getName))
+      .credentialsProvider(awsCredsForV2)
       .build()
 
   val amigoUrl: String = configuration
