@@ -95,7 +95,7 @@ libraryDependencies ++= Seq(
   "com.gu.play-googleauth" %% "play-v30" % "16.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
-  "org.quartz-scheduler" % "quartz" % "2.3.2",
+  "org.quartz-scheduler" % "quartz" % "2.5.0",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
