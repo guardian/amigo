@@ -86,7 +86,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
-  "org.scanamo" %% "scanamo" % "2.0.0",
+  "org.scanamo" %% "scanamo" % "3.0.0",
   "com.beachape" %% "enumeratum" % "1.7.5",
   "org.apache.pekko" %% "pekko-actor-typed" % "1.1.2",
   "com.gu" %% "simple-configuration-ssm" % "4.0.0",
