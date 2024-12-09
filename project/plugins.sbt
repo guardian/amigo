@@ -1,16 +1,16 @@
-addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.5")
+addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.6")
 
 // sbt-native-packager cannot be updated to >1.9.9 until Play supports scala-xml 2
 addSbtPlugin(
   "com.github.sbt" % "sbt-native-packager" % "1.10.4"
 ) // scala-steward:off
 addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "1.1.18")
-libraryDependencies += "org.vafer" % "jdeb" % "1.11" artifacts Artifact(
+libraryDependencies += "org.vafer" % "jdeb" % "1.12" artifacts Artifact(
   "jdeb",
   "jar",
   "jar"
 )
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.12.0")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.13.1")
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.10.0-RC1")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
