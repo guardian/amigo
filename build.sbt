@@ -80,7 +80,6 @@ val circeVersion = "0.14.10"
 val awsV1SdkVersion = "1.12.778"
 val awsV2SdkVersion = "2.29.22"
 val playSecretRotationVersion = "13.1.0"
-val pekkoVersion = "1.1.2"
 
 libraryDependencies ++= Seq(
   ws,
@@ -90,10 +89,6 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "3.0.0",
   "com.beachape" %% "enumeratum" % "1.7.5",
-  "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion % Runtime,
-  "org.apache.pekko" %% "pekko-protobuf-v3" % pekkoVersion % Runtime,
-  "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion % Runtime,
-  "org.apache.pekko" %% "pekko-stream" % pekkoVersion % Runtime,
   "com.gu" %% "simple-configuration-ssm" % "4.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
