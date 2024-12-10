@@ -10,8 +10,8 @@ scalaVersion := "2.13.15"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
-  "-J-XX:MaxRAMFraction=2",
-  "-J-XX:InitialRAMFraction=2",
+  "-J-XX:InitialRAMPercentage=50",
+  "-J-XX:MaxRAMPercentage=50",
   "-J-XX:MaxMetaspaceSize=300m",
   "-J-DpackerHome=/opt/packer",
   "-J-Dlogger.resource=logback-PROD.xml",
