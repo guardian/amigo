@@ -30,7 +30,7 @@ exports[`the lambda stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier-v3.zip",
         },
         "Description": "Lambda for housekeeping AMIgo baked AMIs in other accounts",
         "Environment": {
@@ -210,7 +210,7 @@ exports[`the lambda stack matches the snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "deploy-tools-dist",
-          "S3Key": "cdk/TEST/imagecopier/image-copier-v1.zip",
+          "S3Key": "cdk/TEST/imagecopier/image-copier-v3.zip",
         },
         "Description": "Lambda for copying and encrypting AMIgo baked AMIs",
         "Environment": {
@@ -232,7 +232,7 @@ exports[`the lambda stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "java11",
+        "Runtime": "java21",
         "Tags": [
           {
             "Key": "gu:cdk:version",
