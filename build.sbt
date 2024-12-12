@@ -89,7 +89,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "3.0.0",
   "com.beachape" %% "enumeratum" % "1.7.5",
-  "com.gu" %% "simple-configuration-ssm" % "4.0.0",
+  "com.gu" %% "simple-configuration-ssm" % "4.0.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
   "com.gu.play-googleauth" %% "play-v30" % "17.0.0",
