@@ -74,4 +74,4 @@ This should generate the following file:
 the following CLI command to check out which accounts/Org Units have been
 targeted in the past so that you can target them again:
 
-    aws cloudformation --region eu-west-1 --profile root describe-stack-set --stack-set-name AmigoImageCopier
+    aws cloudformation list-stack-instances --stack-set-name AmigoImageCopier --profile root --region eu-west-1 | jq -r '.Summaries[].Account' | sort
