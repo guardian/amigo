@@ -1,15 +1,41 @@
 name: Update Dependency Graph for SBT
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch: 
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+
 jobs:
   dependency-graph:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - uses: guardian/setup-scala@v1
+
       - uses: scalacenter/sbt-dependency-submission@64084844d2b0a9b6c3765f33acde2fbe3f5ae7d3 # v3.1.0
+        id: submit
+
+      - name: Log snapshot for user validation
+        run: cat ${{ steps.submit.outputs.snapshot-json-path }} | jq
+
+#      - run: sbt deps/assembly
+#
+#      - name: Run Vulnerable Dependency Finder
+#        run: |
+#          java -jar deps/target/scala-2.13/deps-assembly-0.1.0-SNAPSHOT.jar > output.txt
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          REPO_OWNER: ${{ github.repository_owner }}
+#          REPO_NAME: ${{ github.event.repository.name }}
+#
+#      - name: Display Results in Summary
+#        run: |
+#          echo "## Vulnerability Paths" > summary.md
+#          echo '```' >> summary.md
+#          cat output.txt >> summary.md
+#          echo '```' >> summary.md
+#          cat summary.md
+#        shell: bash
+
     permissions:
       contents: write
