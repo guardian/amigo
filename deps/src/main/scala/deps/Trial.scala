@@ -25,23 +25,35 @@ object Trial {
       .flatMap(_.asObject.map(_.toMap).getOrElse(Map.empty))
       .toMap
 
-    // recursively find packages whose dependencies include packages whose dependencies include the specified dependency
-    // continue until arrive at direct dependencies
-    def go(depName: String, acc: List[String]): List[String] = {
-      val packages: Map[String, Json] = resolved.filter { case (_, value) =>
-        root.dependencies.each.string.getAll(value).toList.contains(depName)
+    def f(s: String): List[List[String]] = {
+
+      def reversePaths(
+          current: String,
+          path: List[String]
+      ): List[List[String]] = {
+        val parents = resolved.filter { case (_, children) =>
+          root.dependencies.each.string.getAll(children).contains(current)
+        }.keys
+
+        if (parents.isEmpty) {
+          // If there are no parents, we've reached the end of a reverse path
+          List(current :: path)
+        } else {
+          // Otherwise, continue finding reverse paths for each parent
+          parents.toList.flatMap(parent =>
+            reversePaths(parent, current :: path)
+          )
+        }
       }
-      if (packages.isEmpty) acc
-      else {
-        val next = packages.keys.toList.head
-        go(next, acc :+ next)
-//        for (n <- next) yield go(n, acc :+ n)
-      }
+
+      reversePaths(s, Nil)
     }
 
-//    val packages2: List[List[String]] = go(dep, Nil)
-    val packages2: List[String] = go(dep, List(dep))
+    val packages2: List[List[String]] = f(dep)
 
-    println(packages2.reverse.mkString(" > \n"))
+    for (p <- packages2) {
+      println(p.reverse.mkString(" > \n"))
+      println
+    }
   }
 }
