@@ -131,3 +131,19 @@ lazy val imageCopier = (project in file("imageCopier"))
       "io.circe" %% "circe-generic" % circeVersion
     )
   )
+
+lazy val deps = (project in file("deps"))
+  .enablePlugins(JavaAppPackaging)
+  .settings(
+    scalaVersion := "2.13.15",
+    compile / mainClass := Some("deps.Final"),
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.client3" %% "core" % "3.10.1",
+      "com.softwaremill.sttp.client3" %% "circe" % "3.10.1",
+      "io.circe" %% "circe-generic" % "0.14.10",
+      "io.circe" %% "circe-parser" % "0.14.10",
+      "io.circe" %% "circe-optics" % "0.15.0",
+      "org.typelevel" %% "cats-core" % "2.12.0",
+      "io.get-coursier" %% "coursier" % "2.1.21",
+    )
+  )
