@@ -16,12 +16,8 @@ object Final {
   private val githubToken = sys.env("GITHUB_TOKEN")
   private val owner = sys.env("REPO_OWNER")
   private val repo = sys.env("REPO_NAME")
-  // TODO: fetch from env
-  private val snapshot2 = parse(
-    scala.io.Source
-      .fromFile("deps/src/main/scala/deps/snapshot.json")
-      .mkString
-  ).getOrElse(Json.Null)
+  private val snapshot2 =
+    parse(sys.env("DEPENDENCY_GRAPH")).getOrElse(Json.Null)
 
   // Case classes for Dependabot alerts response
   private case class DependabotAlert(
@@ -154,15 +150,15 @@ object Final {
 
     val dependabotAlerts =
       fetchDependabotAlerts(githubToken, owner, repo).filter(x =>
-        x.dependency.`package`.ecosystem == "maven" && x.security_advisory.severity == "critical"
-//        x.dependency.`package`.ecosystem == "maven" //&& x.security_advisory.severity == "low"
+//        x.dependency.`package`.ecosystem == "maven" && x.security_advisory.severity == "critical"
+        x.dependency.`package`.ecosystem == "maven" && (x.security_advisory.severity == "critical" || x.security_advisory.severity == "high")
       )
 
     println(s"Dependabot alerts for $owner/$repo:")
     dependabotAlerts.foreach { alert =>
       println(
-//        s" - ${alert.dependency.`package`.name}: ${alert.security_advisory.description}"
-        s" - ${alert.dependency.`package`.name}"
+        s" - ${alert.dependency.`package`.name}: ${alert.security_advisory.description}"
+//        s" - ${alert.dependency.`package`.name}"
       )
       pathsToDependency(snapshot2, alert.dependency.`package`.name).foreach {
         path =>
