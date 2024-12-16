@@ -19,7 +19,8 @@ jobs:
         run: cat ${{ steps.submit.outputs.snapshot-json-path }} | jq
 
       - name: Run Vulnerable Dependency Finder
-        run: sbt "project deps" run > output.txt
+#        run: sbt "project deps" run > output.txt
+        run: sbt "project deps" run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_OWNER: ${{ github.repository_owner }}
