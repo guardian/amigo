@@ -1,0 +1,5 @@
+---
+# run ubuntu-drivers install
+- name: Install nvidia drivers
+  command: ubuntu-drivers autoinstall
+  warn: false
