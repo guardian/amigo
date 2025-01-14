@@ -34,7 +34,7 @@ object PackerBuildConfigGenerator {
     )
 
     val instanceType = sourceAmiMetadata.architecture match {
-      case "x86_64" => "t3.small"
+      case "x86_64" => "t3.medium"
       case "arm64"  => "t4g.small"
       case other =>
         throw new IllegalArgumentException(
