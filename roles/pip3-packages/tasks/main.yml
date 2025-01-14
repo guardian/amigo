@@ -4,3 +4,4 @@
     name: "{{ packages }}"
     state: "{{ package_state }}"
     executable: pip3
+    extra_args: "{{ pip_extra_args }}"
