@@ -1,5 +1,0 @@
----
-dependencies:
-  - role: aws-tools
-    when:
-      - ansible_os_family == "Debian"
