@@ -1,3 +1,6 @@
 ---
 dependencies:
   - pip3
+  - role: packages
+    packages:
+      - ffmpeg
