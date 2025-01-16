@@ -4,4 +4,4 @@ dependencies:
   - role: packages
     packages:
       - ffmpeg
-      - nvidia-cudnn
+
