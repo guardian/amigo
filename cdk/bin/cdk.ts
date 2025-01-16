@@ -2,7 +2,7 @@ import { App } from "aws-cdk-lib";
 import type { AmigoProps } from "../lib/amigo";
 import { AmigoStack } from "../lib/amigo";
 import { ImageCopierKMSKey } from "../lib/image-copier-kms";
-import { ImageCopierLambda } from "../libImageCopierLambdaProps/image-copier-lambda";
+import { ImageCopierLambda } from "../lib/image-copier-lambda";
 
 const app = new App();
 
