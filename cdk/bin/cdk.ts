@@ -2,7 +2,7 @@ import { App } from "aws-cdk-lib";
 import type { AmigoProps } from "../lib/amigo";
 import { AmigoStack } from "../lib/amigo";
 import { ImageCopierKMSKey } from "../lib/image-copier-kms";
-import { ImageCopierLambda } from "../lib/image-copier-lambda";
+import { ImageCopierLambda } from "../libImageCopierLambdaProps/image-copier-lambda";
 
 const app = new App();
 
@@ -40,5 +40,5 @@ new ImageCopierLambda(app, "imagecopier-lambda-stack", {
   stack: "deploy",
   stage: "PROD",
   description: "AMIgo image copier lambda",
-  version: "v3", // Update this when the lambda is updated.
+  version: "v4", // Update this when the lambda is updated.
 });
