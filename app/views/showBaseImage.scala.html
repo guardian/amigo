@@ -32,6 +32,7 @@
       <p>Created @fragments.timestamp(image.createdAt, image.createdBy)</p>
       <p>Modified @fragments.timestamp(image.modifiedAt, image.modifiedBy)</p>
       @image.eolDate.map{eolDate => <p class="@BaseImage.eolStatusClass(image)">End of Life @eolDate.toString("dd/MM/yyyy")</p>}
+      @if(image.requiresXLargeBuilder){<p><i class="fa fa-usd" aria-hidden="true"></i> Requires XLarge builder instance</p>}
       <p>@image.description</p>
     </div>
   </div>

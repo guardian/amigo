@@ -15,7 +15,7 @@ object BaseImages {
       createdBy: String,
       linuxDist: LinuxDist,
       eolDate: Option[DateTime],
-      requiresXlargeBuilder: Boolean
+      requiresXLargeBuilder: Boolean
   )(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
     val baseImage = BaseImage(
@@ -29,7 +29,7 @@ object BaseImages {
       modifiedAt = now,
       Some(linuxDist),
       eolDate,
-      requiresXlargeBuilder
+      requiresXLargeBuilder
     )
 
     table.put(baseImage).exec()
@@ -44,7 +44,7 @@ object BaseImages {
       builtinRoles: List[CustomisedRole],
       modifiedBy: String,
       eolDate: DateTime,
-      requiresXlargeBuilder: Boolean
+      requiresXLargeBuilder: Boolean
   )(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
       description = description,
@@ -54,7 +54,7 @@ object BaseImages {
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now(),
       eolDate = Some(eolDate),
-      requiresXlargeBuilder = requiresXlargeBuilder
+      requiresXLargeBuilder = requiresXLargeBuilder
     )
     table.put(updated).exec()
   }

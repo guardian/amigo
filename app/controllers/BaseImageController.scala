@@ -56,7 +56,7 @@ class BaseImageController(
           image.amiId,
           image.linuxDist.getOrElse(Ubuntu),
           image.eolDate.getOrElse(DateTime.now).toLocalDate.toDate,
-          image.requiresXlargeBuilder
+          image.requiresXLargeBuilder
         )
       )
       Ok(views.html.editBaseImage(image, form, Roles.listIds))
@@ -80,7 +80,7 @@ class BaseImageController(
                     amiId,
                     linuxDist,
                     eolDate,
-                    requiresXlargeBuilder
+                    requiresXLargeBuilder
                   ) =>
                 val customisedRoles = parseEnabledRoles(request.body)
                 customisedRoles.fold(
@@ -94,7 +94,7 @@ class BaseImageController(
                       roles,
                       modifiedBy = request.user.fullName,
                       new DateTime(eolDate),
-                      requiresXlargeBuilder
+                      requiresXLargeBuilder
                     )
                     Redirect(routes.BaseImageController.showBaseImage(id))
                       .flashing("info" -> "Successfully updated base image")
@@ -123,7 +123,7 @@ class BaseImageController(
                 amiId,
                 linuxDist,
                 eolDate,
-                requiresXlargeBuilder
+                requiresXLargeBuilder
               ) =>
             BaseImages.findById(id) match {
               case Some(existingImage) =>
@@ -135,7 +135,7 @@ class BaseImageController(
                       amiId,
                       linuxDist,
                       eolDate,
-                      requiresXlargeBuilder
+                      requiresXLargeBuilder
                     )
                   )
                   .withError("id", "This base image ID is already in use")
@@ -153,7 +153,7 @@ class BaseImageController(
                       createdBy = request.user.fullName,
                       linuxDist,
                       Some(new DateTime(eolDate)),
-                      requiresXlargeBuilder
+                      requiresXLargeBuilder
                     )
                     Redirect(routes.BaseImageController.showBaseImage(id))
                       .flashing("info" -> "Successfully created base image")
@@ -188,7 +188,7 @@ class BaseImageController(
                       createdBy = request.user.fullName,
                       linuxDist = linuxDist,
                       eolDate = baseImage.eolDate,
-                      requiresXlargeBuilder = baseImage.requiresXlargeBuilder
+                      requiresXLargeBuilder = baseImage.requiresXLargeBuilder
                     )
                     Redirect(routes.BaseImageController.showBaseImage(newId))
                       .flashing("info" -> "Successfully cloned base image")
@@ -248,7 +248,7 @@ object BaseImageController {
         "amiId" -> amiId,
         "linuxDist" -> linuxDist,
         "eolDate" -> date("yyyy-MM-dd"),
-        "requiresXlargeBuilder" -> boolean
+        "requiresXLargeBuilder" -> boolean
       )
     )
 
@@ -260,7 +260,7 @@ object BaseImageController {
         "amiId" -> amiId,
         "linuxDist" -> linuxDist,
         "eolDate" -> date("yyyy-MM-dd"),
-        "requiresXlargeBuilder" -> boolean
+        "requiresXLargeBuilder" -> boolean
       )
     )
 

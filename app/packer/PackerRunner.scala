@@ -73,7 +73,7 @@ class PackerRunner(maxInstances: Int) extends Loggable {
         awsAccountNumbers,
         amiMetadata,
         amigoDataBucket,
-        bake.recipe.baseImage.requiresXlargeBuilder
+        bake.recipe.baseImage.requiresXLargeBuilder
       )
     val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
     val packerConfigFile =
