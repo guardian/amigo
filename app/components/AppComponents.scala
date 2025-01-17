@@ -79,7 +79,9 @@ import scala.util.Try
 
 class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
-    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(e.getCause).map(e => exceptionInfo(e))}"
+    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(
+        e.getCause
+      ).map(e => exceptionInfo(e))}"
   }
 
   override def shouldRetry(

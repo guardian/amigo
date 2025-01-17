@@ -6,7 +6,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.15"
+scalaVersion := "2.13.16"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -79,7 +79,7 @@ val circeVersion = "0.14.10"
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.780"
 val awsV2SdkVersion = "2.29.41"
-val playSecretRotationVersion = "13.1.1"
+val playSecretRotationVersion = "13.1.2"
 
 libraryDependencies ++= Seq(
   ws,
@@ -92,7 +92,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "simple-configuration-ssm" % "4.0.2",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "17.1.0",
+  "com.gu.play-googleauth" %% "play-v30" % "19.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.0",
@@ -104,7 +104,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "8.0",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.15",
+  "ch.qos.logback" % "logback-classic" % "1.5.16",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
@@ -120,7 +120,7 @@ routesImport += "models._"
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(JavaAppPackaging)
   .settings(
-    scalaVersion := "2.13.15",
+    scalaVersion := "2.13.16",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
