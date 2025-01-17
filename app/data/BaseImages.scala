@@ -14,7 +14,8 @@ object BaseImages {
       builtinRoles: List[CustomisedRole],
       createdBy: String,
       linuxDist: LinuxDist,
-      eolDate: Option[DateTime]
+      eolDate: Option[DateTime],
+      requiresXlargeBuilder: Boolean
   )(implicit dynamo: Dynamo): BaseImage = {
     val now = DateTime.now()
     val baseImage = BaseImage(
@@ -27,7 +28,8 @@ object BaseImages {
       modifiedBy = createdBy,
       modifiedAt = now,
       Some(linuxDist),
-      eolDate
+      eolDate,
+      requiresXlargeBuilder
     )
 
     table.put(baseImage).exec()
@@ -41,7 +43,8 @@ object BaseImages {
       linuxDist: LinuxDist,
       builtinRoles: List[CustomisedRole],
       modifiedBy: String,
-      eolDate: DateTime
+      eolDate: DateTime,
+      requiresXlargeBuilder: Boolean
   )(implicit dynamo: Dynamo): Unit = {
     val updated = baseImage.copy(
       description = description,
@@ -50,7 +53,8 @@ object BaseImages {
       builtinRoles = builtinRoles,
       modifiedBy = modifiedBy,
       modifiedAt = DateTime.now(),
-      eolDate = Some(eolDate)
+      eolDate = Some(eolDate),
+      requiresXlargeBuilder = requiresXlargeBuilder
     )
     table.put(updated).exec()
   }

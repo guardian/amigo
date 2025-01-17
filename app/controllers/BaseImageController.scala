@@ -55,7 +55,8 @@ class BaseImageController(
           image.description,
           image.amiId,
           image.linuxDist.getOrElse(Ubuntu),
-          image.eolDate.getOrElse(DateTime.now).toLocalDate.toDate
+          image.eolDate.getOrElse(DateTime.now).toLocalDate.toDate,
+          image.requiresXlargeBuilder
         )
       )
       Ok(views.html.editBaseImage(image, form, Roles.listIds))
@@ -73,7 +74,7 @@ class BaseImageController(
                 views.html.editBaseImage(image, formWithErrors, Roles.listIds)
               )
             },
-            { case (description, amiId, linuxDist, eolDate) =>
+            { case (description, amiId, linuxDist, eolDate, requiresXlargeBuilder) =>
               val customisedRoles = parseEnabledRoles(request.body)
               customisedRoles.fold(
                 error => BadRequest(s"Problem parsing roles: $error"),
@@ -85,7 +86,8 @@ class BaseImageController(
                     linuxDist,
                     roles,
                     modifiedBy = request.user.fullName,
-                    new DateTime(eolDate)
+                    new DateTime(eolDate),
+                    requiresXlargeBuilder
                   )
                   Redirect(routes.BaseImageController.showBaseImage(id))
                     .flashing("info" -> "Successfully updated base image")
@@ -107,32 +109,41 @@ class BaseImageController(
         { formWithErrors =>
           BadRequest(views.html.newBaseImage(formWithErrors, Roles.listIds))
         },
-        { case (id, description, amiId, linuxDist, eolDate) =>
-          BaseImages.findById(id) match {
-            case Some(existingImage) =>
-              val formWithError = Forms.createBaseImage
-                .fill((id, description, amiId, linuxDist, eolDate))
-                .withError("id", "This base image ID is already in use")
-              Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
-            case None =>
-              val customisedRoles = parseEnabledRoles(request.body)
-              customisedRoles.fold(
-                error => BadRequest(s"Problem parsing roles: $error"),
-                roles => {
-                  BaseImages.create(
-                    id,
-                    description,
-                    amiId,
-                    roles,
-                    createdBy = request.user.fullName,
-                    linuxDist,
-                    Some(new DateTime(eolDate))
-                  )
-                  Redirect(routes.BaseImageController.showBaseImage(id))
-                    .flashing("info" -> "Successfully created base image")
-                }
-              )
-          }
+        {
+          case (
+                id,
+                description,
+                amiId,
+                linuxDist,
+                eolDate,
+                requiresXlargeBuilder
+              ) =>
+            BaseImages.findById(id) match {
+              case Some(existingImage) =>
+                val formWithError = Forms.createBaseImage
+                  .fill((id, description, amiId, linuxDist, eolDate, requiresXlargeBuilder))
+                  .withError("id", "This base image ID is already in use")
+                Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
+              case None =>
+                val customisedRoles = parseEnabledRoles(request.body)
+                customisedRoles.fold(
+                  error => BadRequest(s"Problem parsing roles: $error"),
+                  roles => {
+                    BaseImages.create(
+                      id,
+                      description,
+                      amiId,
+                      roles,
+                      createdBy = request.user.fullName,
+                      linuxDist,
+                      Some(new DateTime(eolDate)),
+                      requiresXlargeBuilder
+                    )
+                    Redirect(routes.BaseImageController.showBaseImage(id))
+                      .flashing("info" -> "Successfully created base image")
+                  }
+                )
+            }
         }
       )
   }
@@ -160,7 +171,8 @@ class BaseImageController(
                       builtinRoles = baseImage.builtinRoles,
                       createdBy = request.user.fullName,
                       linuxDist = linuxDist,
-                      eolDate = baseImage.eolDate
+                      eolDate = baseImage.eolDate,
+                      requiresXlargeBuilder = baseImage.requiresXlargeBuilder
                     )
                     Redirect(routes.BaseImageController.showBaseImage(newId))
                       .flashing("info" -> "Successfully cloned base image")
@@ -219,7 +231,8 @@ object BaseImageController {
         "description" -> text(maxLength = 10000),
         "amiId" -> amiId,
         "linuxDist" -> linuxDist,
-        "eolDate" -> date("yyyy-MM-dd")
+        "eolDate" -> date("yyyy-MM-dd"),
+        "requiresXlargeBuilder" -> boolean
       )
     )
 
@@ -230,7 +243,8 @@ object BaseImageController {
         "description" -> text(maxLength = 10000),
         "amiId" -> amiId,
         "linuxDist" -> linuxDist,
-        "eolDate" -> date("yyyy-MM-dd")
+        "eolDate" -> date("yyyy-MM-dd"),
+        "requiresXlargeBuilder" -> boolean
       )
     )
 

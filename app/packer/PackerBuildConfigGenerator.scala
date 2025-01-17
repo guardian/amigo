@@ -23,7 +23,8 @@ object PackerBuildConfigGenerator {
       variables: PackerVariablesConfig,
       awsAccountNumbers: Seq[String],
       sourceAmiMetadata: AmiMetadata,
-      amigoDataBucket: Option[String]
+      amigoDataBucket: Option[String],
+      requresXlargeBukder: Boolean
   )(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
@@ -33,9 +34,11 @@ object PackerBuildConfigGenerator {
       List(BlockDeviceMapping(volume_size = size))
     )
 
+    val instanceSize = if (requresXlargeBukder) "xlarge" else "small"
+
     val instanceType = sourceAmiMetadata.architecture match {
-      case "x86_64" => "t3.small"
-      case "arm64"  => "t4g.small"
+      case "x86_64" => s"t3.${instanceSize}"
+      case "arm64"  => s"t4g.${instanceSize}"
       case other =>
         throw new IllegalArgumentException(
           s"Don't know what instance type to use to bake an AMI for $other"
@@ -43,7 +46,7 @@ object PackerBuildConfigGenerator {
     }
 
     val builder = PackerBuilderConfig(
-      name = "{{user `recipe`}}",
+      name = "{{user `recipe``}}",
       `type` = "amazon-ebs",
       region = region,
       vpc_id = packerConfig.vpcId,
