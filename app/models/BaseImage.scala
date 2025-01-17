@@ -111,7 +111,7 @@ case class BaseImage(
     modifiedAt: DateTime,
     linuxDist: Option[LinuxDist] = None,
     eolDate: Option[DateTime] = None,
-    requiresXlargeBuilder: Boolean = false,
+    requiresXlargeBuilder: Boolean = false
 )
 
 sealed trait EolStatus

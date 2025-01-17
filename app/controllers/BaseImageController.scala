@@ -74,25 +74,32 @@ class BaseImageController(
                 views.html.editBaseImage(image, formWithErrors, Roles.listIds)
               )
             },
-            { case (description, amiId, linuxDist, eolDate, requiresXlargeBuilder) =>
-              val customisedRoles = parseEnabledRoles(request.body)
-              customisedRoles.fold(
-                error => BadRequest(s"Problem parsing roles: $error"),
-                roles => {
-                  BaseImages.update(
-                    image,
+            {
+              case (
                     description,
                     amiId,
                     linuxDist,
-                    roles,
-                    modifiedBy = request.user.fullName,
-                    new DateTime(eolDate),
+                    eolDate,
                     requiresXlargeBuilder
-                  )
-                  Redirect(routes.BaseImageController.showBaseImage(id))
-                    .flashing("info" -> "Successfully updated base image")
-                }
-              )
+                  ) =>
+                val customisedRoles = parseEnabledRoles(request.body)
+                customisedRoles.fold(
+                  error => BadRequest(s"Problem parsing roles: $error"),
+                  roles => {
+                    BaseImages.update(
+                      image,
+                      description,
+                      amiId,
+                      linuxDist,
+                      roles,
+                      modifiedBy = request.user.fullName,
+                      new DateTime(eolDate),
+                      requiresXlargeBuilder
+                    )
+                    Redirect(routes.BaseImageController.showBaseImage(id))
+                      .flashing("info" -> "Successfully updated base image")
+                  }
+                )
             }
           )
       }
@@ -121,7 +128,16 @@ class BaseImageController(
             BaseImages.findById(id) match {
               case Some(existingImage) =>
                 val formWithError = Forms.createBaseImage
-                  .fill((id, description, amiId, linuxDist, eolDate, requiresXlargeBuilder))
+                  .fill(
+                    (
+                      id,
+                      description,
+                      amiId,
+                      linuxDist,
+                      eolDate,
+                      requiresXlargeBuilder
+                    )
+                  )
                   .withError("id", "This base image ID is already in use")
                 Conflict(views.html.newBaseImage(formWithError, Roles.listIds))
               case None =>
