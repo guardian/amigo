@@ -46,7 +46,7 @@ object PackerBuildConfigGenerator {
     }
 
     val builder = PackerBuilderConfig(
-      name = "{{user `recipe``}}",
+      name = "{{user `recipe`}}",
       `type` = "amazon-ebs",
       region = region,
       vpc_id = packerConfig.vpcId,
