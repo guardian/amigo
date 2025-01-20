@@ -46,7 +46,7 @@ This is done as part of the main `tools::amigo` RiffRaff build.
 **YOU MUST RENAME THE ARTIFACT:** the lambda will not update (even if the file
 uploads to S3) unless the name is also changed. To do this bump the
 `ImageCopierLambdaProps.version`, which is set in `bin/cdk.ts`, and rename the 
-uploaded artifact in S3 to match.
+uploaded artifact in S3 to match. Also update the version in the test to match.
 
 **For PROD:** no action required; `tools::amigo` deploys to PROD automatically
 whenever changes are merged into `main`.
