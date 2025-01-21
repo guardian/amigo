@@ -40,5 +40,5 @@ new ImageCopierLambda(app, "imagecopier-lambda-stack", {
   stack: "deploy",
   stage: "PROD",
   description: "AMIgo image copier lambda",
-  version: "v3", // Update this when the lambda is updated.
+  version: "v4", // Update this when the lambda is updated.
 });
