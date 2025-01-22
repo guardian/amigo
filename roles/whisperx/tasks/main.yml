@@ -1,0 +1,21 @@
+---
+- name: Upgrade packaging
+  pip:
+    name: "packaging"
+    state: "latest"
+    executable: pip3
+
+- name: Install whisperx dependencies
+  pip:
+    name:
+     - torch==2.0.0
+     - torchvision==0.15.1
+     - torchaudio==2.0.1
+    executable: pip3
+    extra_args: "--index-url https://download.pytorch.org/whl/cu118"
+
+- name: Install whisperx
+  pip:
+    name: whisperx
+    executable: pip3
+

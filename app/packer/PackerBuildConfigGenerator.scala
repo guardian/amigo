@@ -37,8 +37,8 @@ object PackerBuildConfigGenerator {
     val instanceSize = if (requresXlargeBukder) "xlarge" else "small"
 
     val instanceType = sourceAmiMetadata.architecture match {
-      case "x86_64" => s"t3.${instanceSize}"
-      case "arm64"  => s"t4g.${instanceSize}"
+      case "x86_64" => s"t3.$instanceSize"
+      case "arm64"  => s"t4g.$instanceSize"
       case other =>
         throw new IllegalArgumentException(
           s"Don't know what instance type to use to bake an AMI for $other"
