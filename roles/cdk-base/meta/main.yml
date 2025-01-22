@@ -10,3 +10,6 @@ dependencies:
   - role: fluentbit
     ubuntu_version: jammy
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 22
+  - role: fluentbit
+    ubuntu_version: noble
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 24

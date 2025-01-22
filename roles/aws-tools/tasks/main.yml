@@ -83,7 +83,7 @@
   when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Install cloudformation tools
-  include: "{{ item }}"
+  include_tasks: "{{ item }}"
   with_first_found:
     - "install-cfn-tools-{{ ansible_distribution }}-{{ post_focal }}.yml"
     - "install-cfn-tools-{{ ansible_os_family }}.yml"
