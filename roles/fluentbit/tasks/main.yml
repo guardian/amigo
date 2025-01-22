@@ -7,7 +7,21 @@
   ansible.builtin.apt_repository:
     repo: deb https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
 
+
 - name: Install
   apt:
     name: td-agent-bit={{version}}
     update_cache: yes
+  when: ansible_distribution_major_version|int < 24
+
+- name: Install
+  apt:
+    name: fluent-bit
+    update_cache: yes
+  when: ansible_distribution_major_version|int >= 24 and version == 'newest'
+
+- name: Install
+  apt:
+    name: fluent-bit={{version}}
+    update_cache: yes
+  when: ansible_distribution_major_version|int >= 24 and version != 'newest'
