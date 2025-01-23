@@ -1,0 +1,7 @@
+---
+- name: Remove pip3 version of jinja2
+  pip:
+    name:
+      - jinja2
+    state: absent
+    executable: pip3
