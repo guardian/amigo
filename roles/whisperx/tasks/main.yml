@@ -27,3 +27,5 @@
 
 - name: Download whisperx models
   command: "python3 /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
+  become: yes
+  become_user: ubuntu
