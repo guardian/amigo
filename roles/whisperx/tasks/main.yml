@@ -19,13 +19,6 @@
     name: whisperx
     executable: pip3
 
-- name: Install dependencies needed for downloading models
-  pip:
-    name:
-     - huggingface_hub
-     - typer
-    executable: pip3
-
 - name: Download model fetch script
   get_url:
       url: "https://raw.githubusercontent.com/guardian/transcription-service/refs/heads/add-whisperx-support/scripts/download_whisperx_models.py"
@@ -34,11 +27,3 @@
 
 - name: Download whisperx models
   command: "python3 /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
-
-- name: Remove download script dependencies
-  pip:
-    name:
-     - huggingface_hub
-     - typer
-    state: absent
-    executable: pip3
