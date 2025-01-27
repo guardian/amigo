@@ -15,7 +15,7 @@
 
 - name: Install whisperx
   pip:
-    name: whisperx
+    name: "{{ whisperx_package | default('whisperx') }}"
     executable: pip3
 
 - name: Download model fetch script
