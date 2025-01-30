@@ -18,11 +18,12 @@
     name: "{{ whisperx_package | default('whisperx') }}"
     executable: pip3
 
-- name: Download model fetch script
-  get_url:
-      url: "https://raw.githubusercontent.com/guardian/transcription-service/refs/heads/add-whisperx-support/scripts/download_whisperx_models.py"
-      dest: "/tmp/download_whisperx_models.py"
-      mode: "0755"
+- name: Simple GET operation
+  amazon.aws.s3_object:
+    bucket: amigo-data-prod
+    object: /deploy/PROD/whisperx-model-fetch/download_whisperx_models.py
+    dest: /tmp/download_whisperx_models.py
+    mode: get
 
 - name: Download whisperx models
   command: "python3 /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
