@@ -1,6 +1,7 @@
 ---
 dependencies:
   - pip3
+  - aws-tools
   - role: packages
     packages:
       - ffmpeg

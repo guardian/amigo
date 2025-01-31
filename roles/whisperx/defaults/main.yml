@@ -1,0 +1,3 @@
+---
+amigo_data_bucket: amigo-data-prod
+model_script_stage: PROD

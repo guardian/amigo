@@ -18,12 +18,10 @@
     name: "{{ whisperx_package | default('whisperx') }}"
     executable: pip3
 
-- name: Simple GET operation
-  amazon.aws.s3_object:
-    bucket: amigo-data-prod
-    object: /deploy/PROD/whisperx-model-fetch/download_whisperx_models.py
-    dest: /tmp/download_whisperx_models.py
-    mode: get
+- name: Download models script
+  shell: |
+    aws --quiet s3 cp s3://{{ amigo_data_bucket }}/deploy/{{ model_script_stage }}/whisperx-model-fetch/download_whisperx_models.py /tmp/download_whisperx_models.py
+    exit 0
 
 - name: Download whisperx models
   command: "python3 /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
