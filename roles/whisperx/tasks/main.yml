@@ -23,7 +23,7 @@
 #  - https://github.com/guardian/transcription-service/pull/130
 - name: Download models script
   shell: |
-    aws --quiet s3 cp s3://{{ amigo_data_bucket }}/deploy/{{ model_script_stage }}/whisperx-model-fetch/download_whisperx_models.py /tmp/download_whisperx_models.py
+    aws --quiet s3 cp s3://amigo-data-{{ model_script_stage.lower() }}/deploy/{{ model_script_stage }}/whisperx-model-fetch/download_whisperx_models.py /tmp/download_whisperx_models.py
     exit 0
 
 # The script lives here https://github.com/guardian/transcription-service/blob/main/whisperx-model-fetch/download_whisperx_models.py
