@@ -1,6 +1,7 @@
 ---
 dependencies:
   - aws-tools
+  - role: deep-learning-ami
   - role: fluentbit
     ubuntu_version: bionic
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 18
