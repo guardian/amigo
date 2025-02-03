@@ -1,11 +1,31 @@
 ---
+# In testing, we found that the deep learning AMI had unattended-upgrades enabled, which caused problems with the packer
+# bake process, so let's remove it
+
+# Stop unattended-upgrades
+- name: Stop unattended-upgrades
+  service:
+    name: unattended-upgrades
+    state: stopped
+    enabled: no
+
+# Remove unattended-upgrades
+- name: Remove unattended-upgrades
+  apt:
+    name:
+      - unattended-upgrades
+    state: absent
+
+
+# The deep learning AMI appears to come with a version of jinja2 that's incompatible with ansible. Let's remove it and
+# ensure a compatible version is installed
+
 - name: Remove  jinja2
   pip:
     name:
       - jinja2
     state: absent
     executable: pip3
-
 
 - name: Install <3.1 version of jinja2
   pip:
