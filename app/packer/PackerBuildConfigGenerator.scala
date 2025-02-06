@@ -72,7 +72,8 @@ object PackerBuildConfigGenerator {
       tags = imageDetails.tags,
       ami_block_device_mappings = disk,
       launch_block_device_mappings = disk,
-      security_group_id = packerConfig.securityGroupId
+      security_group_id = packerConfig.securityGroupId,
+      aws_polling = AwsPolling(15, 200)
     )
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
