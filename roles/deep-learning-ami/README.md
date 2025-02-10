@@ -4,6 +4,6 @@ the base image base AMI. The aim is to mitigate any compatability issues between
 are expecting to be run on standard ubuntu.
 
 # Fixes
-## Removing pip3 jinja2
-Ansible only supports jinja2 <3.1, and the version installed on the deep learning AMI with pip3 is 3.1.5. Jinja2 should
-still be available, as it is installed via apt in the python3-jinja2 package.
+## Removing unattended-upgrades
+The DLAMI has unattended-upgrades enabled by default, which can cause issues during the bake, and during cloud-init.
+We don't need unaattended-upgrades because we always run on a freshly baked AMI!
