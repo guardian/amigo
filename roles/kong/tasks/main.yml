@@ -1,5 +1,13 @@
 ---
-- name: Install Kong's dependencies
+- name: Install initial postgres dependencies
+  apt:
+    name:
+      - postgresql-common
+
+- name: Configure postgres repository to enable download of latest postgres client
+  script: /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+
+- name: Install other Kong dependencies
   apt:
     name:
     - netcat
