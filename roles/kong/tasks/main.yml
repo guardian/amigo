@@ -5,6 +5,7 @@
       - postgresql-common
 
 - name: Configure postgres repository to enable download of latest postgres client
+  # Per https://wiki.postgresql.org/wiki/Apt
   script: /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
 
 - name: Install other Kong dependencies
