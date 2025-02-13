@@ -3,8 +3,8 @@ dependencies:
   - apt
   - role: packages
     packages:
-      - python3.12
-      - python3.12-venv
+      - python3.13
+      - python3.13-venv
     repositories:
       - python-deadsnakes: "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu jammy main"
     signing_keys:

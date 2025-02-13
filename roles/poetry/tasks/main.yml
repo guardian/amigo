@@ -3,6 +3,6 @@
     url: https://install.python-poetry.org
     dest: /tmp/poetry.py
 - name: Install poetry
-  command: "python3.12 /tmp/poetry.py"
+  command: "python3.13 /tmp/poetry.py"
   become: yes
   become_user: ubuntu
