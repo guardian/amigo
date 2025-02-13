@@ -3,4 +3,5 @@ kong_version: 3.1.1
 kong_user: content-api
 postgres_version: 12
 kong_arch: arm64
+kong_ubuntu_release: jammy
 kong_repo: gateway-31
