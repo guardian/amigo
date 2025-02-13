@@ -1,0 +1,8 @@
+- name: Download poetry for Ubuntu
+  get_url:
+    url: https://install.python-poetry.org
+    dest: /tmp/poetry.py
+- name: Install poetry
+  command: "python3.13 /tmp/poetry.py"
+  become: yes
+  become_user: ubuntu
