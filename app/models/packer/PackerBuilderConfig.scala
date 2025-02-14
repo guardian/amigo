@@ -9,6 +9,11 @@ case class BlockDeviceMapping(
     delete_on_termination: Boolean = true
 )
 
+case class AwsPolling(
+    delay_seconds: Int,
+    max_attempts: Int
+)
+
 case class PackerBuilderConfig(
     name: String,
     `type`: String,
@@ -28,10 +33,15 @@ case class PackerBuilderConfig(
     tags: Map[String, String],
     ami_block_device_mappings: Option[List[BlockDeviceMapping]],
     launch_block_device_mappings: Option[List[BlockDeviceMapping]],
-    security_group_id: Option[String]
+    security_group_id: Option[String],
+    //  Needed for long running bakes
+    //  See https://developer.hashicorp.com/packer/integrations/hashicorp/amazon#resourcenotready-error
+    aws_polling: Option[AwsPolling]
 )
 
 object PackerBuilderConfig {
+  implicit val jsonAwsPollingWrites: OWrites[AwsPolling] =
+    Json.writes[AwsPolling]
   implicit val jsonDiskWrites: OWrites[BlockDeviceMapping] =
     Json.writes[BlockDeviceMapping]
   implicit val jsonWrites: OWrites[PackerBuilderConfig] =

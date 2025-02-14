@@ -1,0 +1,17 @@
+---
+# In testing, we found that the deep learning AMI had unattended-upgrades enabled, which caused problems with the packer
+# bake process (and occasionally with cloud-init), so let's remove it
+
+# Stop unattended-upgrades
+- name: Stop unattended-upgrades
+  service:
+    name: unattended-upgrades
+    state: stopped
+    enabled: no
+
+# Remove unattended-upgrades
+- name: Remove unattended-upgrades
+  apt:
+    name:
+      - unattended-upgrades
+    state: absent
