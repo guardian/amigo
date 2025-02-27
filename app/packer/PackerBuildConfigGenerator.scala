@@ -24,7 +24,7 @@ object PackerBuildConfigGenerator {
       awsAccountNumbers: Seq[String],
       sourceAmiMetadata: AmiMetadata,
       amigoDataBucket: Option[String],
-      requresXlargeBukder: Boolean
+      requiresXlargeBuilder: Boolean
   )(implicit packerConfig: PackerConfig): PackerBuildConfig = {
     val awsAccounts = awsAccountNumbers.mkString(",")
     val imageDetails = ImageDetails.apply(variables, packerConfig.stage)
@@ -34,7 +34,7 @@ object PackerBuildConfigGenerator {
       List(BlockDeviceMapping(volume_size = size))
     )
 
-    val instanceSize = if (requresXlargeBukder) "xlarge" else "small"
+    val instanceSize = if (requiresXlargeBuilder) "xlarge" else "small"
 
     val instanceType = sourceAmiMetadata.architecture match {
       case "x86_64" => s"t3.$instanceSize"
@@ -44,6 +44,11 @@ object PackerBuildConfigGenerator {
           s"Don't know what instance type to use to bake an AMI for $other"
         )
     }
+
+    // here we are using requiresXlargeBuilder as an indicator that freezing the packer instance to an AMI will take longer
+    // 15, 240 = poll every 15 seconds, stop after 240 attempts (total 1 hour)
+    val awsPolling =
+      if (requiresXlargeBuilder) Some(AwsPolling(15, 240)) else None
 
     val builder = PackerBuilderConfig(
       name = "{{user `recipe`}}",
@@ -72,7 +77,8 @@ object PackerBuildConfigGenerator {
       tags = imageDetails.tags,
       ami_block_device_mappings = disk,
       launch_block_device_mappings = disk,
-      security_group_id = packerConfig.securityGroupId
+      security_group_id = packerConfig.securityGroupId,
+      aws_polling = awsPolling
     )
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)
