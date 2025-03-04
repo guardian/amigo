@@ -46,7 +46,7 @@
   copy: src=nginx.template dest=/usr/local/kong/nginx.template
 
 - name: Create error template directory
-  copy: path=/usr/local/kong/templates state=directory
+  file: path=/usr/local/kong/templates state=directory
 
 - name: Copy error html template
   copy: src=templates/error.html dest=/usr/local/kong/templates/error.html
