@@ -11,15 +11,8 @@
     @b3.text( form("amiId"), Symbol("_label") -> "AMI ID", Symbol("placeholder") -> "ami-a1b2c3d4" )
     @b3.select( form("linuxDist"), models.LinuxDist.all.toList.map{ case (k,v) => k -> v.name }, Symbol("_label") -> "Linux Distribution" )
     @b3.textarea( form("description"), Symbol("_label") -> "Description" )
-    <div class="row">
-      <div class="col-md-1"></div>
-    <div class="col-md-6">
-    @b3.date(form("eolDate"), Symbol("_label")-> "End of Life Date")
-    </div>
-      <div class="col-md-3">
-    <p>(Find Ubuntu support info <a href="https://wiki.ubuntu.com/Releases" target="_blank">here</a>)</p>
-      </div>
-    </div>
+    @b3.date(form("eolDate"), Symbol("_label")-> "End of Life Date", Symbol("_help") -> Html("""Find Ubuntu support info <a href="https://wiki.ubuntu.com/Releases" target="_blank">here</a>"""))
+    @b3.checkbox(form("requiresXLargeBuilder"), Symbol("_label") -> "Requires XLarge builder instance", Symbol("_help") -> "XLarge instances are 8x more expensive than normal AMIgo builders. Avoid where possible.")
     <div class="form-group">
       <label class="control-label col-md-2" for="builtin-roles">Builtin roles</label>
       <div class="col-md-10" id="builtin-roles">

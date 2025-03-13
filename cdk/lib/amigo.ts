@@ -13,7 +13,7 @@ import {
 import { GuS3Bucket } from "@guardian/cdk/lib/constructs/s3";
 import { Duration, SecretValue } from "aws-cdk-lib";
 import type { App } from "aws-cdk-lib";
-import { InstanceClass, InstanceSize, InstanceType, Peer, Port } from "aws-cdk-lib/aws-ec2";
+import {InstanceClass, InstanceSize, InstanceType, Peer, Port, UserData} from "aws-cdk-lib/aws-ec2";
 import { ListenerAction, UnauthenticatedAction } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { Effect, ManagedPolicy, Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import type { Bucket } from "aws-cdk-lib/aws-s3";
@@ -239,7 +239,7 @@ export class AmigoStack extends GuStack {
     const guPlayApp = new GuPlayApp(this, {
       ...AmigoStack.app,
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
-      userData: [
+      userData: UserData.custom([
         "#!/bin/bash -ev",
         `wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
         "mkdir /opt/packer",
@@ -253,7 +253,7 @@ export class AmigoStack extends GuStack {
 
         `aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
         "dpkg -i /tmp/amigo.deb",
-      ].join("\n"),
+      ].join("\n")),
       access: {
         scope: AccessScope.PUBLIC,
       },
@@ -264,6 +264,9 @@ export class AmigoStack extends GuStack {
       },
       roleConfiguration: {
         additionalPolicies: policiesToAttachToRootRole,
+      },
+      applicationLogging: {
+        enabled: true,
       },
     });
 

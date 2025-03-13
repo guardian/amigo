@@ -28,7 +28,7 @@ function install_cloudwatch_client() {
   local __resultvar=$1
   local CLOUDWATCH_CLIENT_VERSION="1.2.1"
   apt-get install -y libwww-perl libdatetime-perl unzip
-  wget http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-${CLOUDWATCH_CLIENT_VERSION}.zip
+  wget https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-${CLOUDWATCH_CLIENT_VERSION}.zip
   unzip CloudWatchMonitoringScripts-${CLOUDWATCH_CLIENT_VERSION}.zip
   mv aws-scripts-mon ${INSTALL_LOCATION}
   rm CloudWatchMonitoringScripts-${CLOUDWATCH_CLIENT_VERSION}.zip

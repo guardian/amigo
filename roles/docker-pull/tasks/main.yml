@@ -1,0 +1,6 @@
+---
+- name: Download containers specified in images parameter
+  shell: |
+    docker image pull {{ item }}
+    exit 0
+  loop: "{{ images }}"

@@ -8,7 +8,7 @@ describe("the lambda stack", () => {
     const stack = new ImageCopierLambda(app, "IntegrationTest", {
       stack: "cdk",
       stage: "TEST",
-      version: "v1",
+      version: "v4",
     });
     const template = Template.fromStack(stack);
     expect(template.toJSON()).toMatchSnapshot();

@@ -1,0 +1,41 @@
+---
+- name: install build-essential
+  apt:
+    name:
+    - build-essential
+    state: present
+
+- name: Clone whisper, clone and compile whisper.cpp
+  shell: |
+    set -e
+    mkdir -p {{ target_dir }}
+    cd {{ target_dir }}
+    echo "cloning"
+    git clone --quiet https://github.com/ggerganov/whisper.cpp.git
+    cd whisper.cpp
+    git reset --hard {{ whisper_cpp_commit_hash }}
+    echo "compiling"
+    make
+    exit 0
+
+- name: Download models and set permissions
+  shell: |
+    cd {{ target_dir }}/whisper.cpp
+    bash models/download-ggml-model.sh {{ item }}
+    chown ubuntu ./ --recursive
+    exit 0
+  loop: "{{ whisper_models }}"
+
+- name: Download distilled models
+  shell: |
+    set -e
+    cd {{ target_dir }}/whisper.cpp
+    wget https://huggingface.co/distil-whisper/{{ item }} -P ./models
+  loop: "{{ whisper_distilled_model_paths }}"
+
+- name: Install whisper.cpp
+  shell: |
+    ln -s /opt/whisper/whisper.cpp/main /usr/bin/whisper
+
+  args:
+    executable: /bin/bash

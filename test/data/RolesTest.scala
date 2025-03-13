@@ -18,10 +18,13 @@ class RolesTest extends AnyFlatSpec with Matchers {
     val roles = List(r0, r1, r2, r3)
     Roles
       .transitiveDependencies(roles, r0.roleId)
-      .dependencies should contain only (Dependency(
-      RoleId("id1"),
-      Set(Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set()))))
-    ), Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set()))))
+      .dependencies should contain only (
+      Dependency(
+        RoleId("id1"),
+        Set(Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set()))))
+      ),
+      Dependency(RoleId("id2"), Set(Dependency(RoleId("id3"), Set())))
+    )
   }
 
   it should "return direct dependencies if there are no transitive" in {
@@ -34,10 +37,13 @@ class RolesTest extends AnyFlatSpec with Matchers {
     val roles = List(r0, r1, r2, r3)
     Roles
       .transitiveDependencies(roles, r0.roleId)
-      .dependencies should contain only (Dependency(
-      RoleId("id1"),
-      Set(Dependency(RoleId("id2"), Set()))
-    ), Dependency(RoleId("id2"), Set()))
+      .dependencies should contain only (
+      Dependency(
+        RoleId("id1"),
+        Set(Dependency(RoleId("id2"), Set()))
+      ),
+      Dependency(RoleId("id2"), Set())
+    )
   }
 
   it should "return empty if there are no dependencies" in {

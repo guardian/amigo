@@ -4,4 +4,9 @@ dependencies:
     packages: 
       - git
       - binutils
+      - rustc
+      - cargo
+      - pkg-config
+      - openssl
+      - libssl-dev
 

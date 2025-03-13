@@ -1,41 +1,40 @@
 package components
 
-import org.apache.pekko.actor.typed.ActorSystem
-import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.auth.{
+  AWSCredentialsProviderChain,
+  InstanceProfileCredentialsProvider
+}
+import com.amazonaws.regions.Regions
+import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
+import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
+import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
+import com.amazonaws.services.securitytoken.{
+  AWSSecurityTokenService,
+  AWSSecurityTokenServiceClientBuilder
+}
+import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.amazonaws.{
   AmazonClientException,
   AmazonWebServiceRequest,
   ClientConfiguration
 }
-import com.amazonaws.auth.{
-  AWSCredentialsProviderChain,
-  InstanceProfileCredentialsProvider
+import com.google.auth.oauth2.ServiceAccountCredentials
+import com.gu.googleauth.{
+  AntiForgeryChecker,
+  AuthAction,
+  GoogleAuthConfig,
+  GoogleGroupChecker
 }
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.regions.Regions
-import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
-import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.{
-  AWSSecurityTokenService,
-  AWSSecurityTokenServiceClientBuilder
-}
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.sns.{
-  AmazonSNSAsync,
-  AmazonSNSAsyncClientBuilder,
-  AmazonSNSClientBuilder
-}
-import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
-import com.gu.googleauth.{AntiForgeryChecker, AuthAction, GoogleAuthConfig}
 import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV2, SecretSupplier}
 import com.gu.play.secretrotation.{
   RotatingSecretComponents,
   SnapshotProvider,
   TransitionTiming
 }
+import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
 import controllers._
 import data.{Dynamo, Recipes}
 import event.{ActorSystemWrapper, BakeEvent, Behaviours}
@@ -43,12 +42,13 @@ import housekeeping._
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.NotificationConfig
 import notification.{LambdaDistributionBucket, NotificationSender, SNS}
-import org.joda.time.Duration
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.{PackerConfig, PackerRunner}
-import play.api.BuiltInComponentsFromContext
 import play.api.ApplicationLoader.Context
+import play.api.BuiltInComponentsFromContext
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{AnyContent, EssentialFilter}
@@ -58,32 +58,30 @@ import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
-import services.{AmiMetadataLookup, ElkLogging, Loggable, PrismData}
-import software.amazon.awssdk.services.ssm.SsmClient
+import services.{AmiMetadataLookup, Loggable, PrismData}
 import software.amazon.awssdk.auth.credentials.{
-  StaticCredentialsProvider,
   AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
   InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
   ProfileCredentialsProvider => ProfileCredentialsProviderV2
 }
 import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.ssm.SsmClient
 
+import java.io.FileInputStream
+import java.time.Duration
 import java.time.Duration.{ofHours, ofMinutes}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import java.io.FileInputStream
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import scala.util.Try
-import com.gu.googleauth.GoogleServiceAccount
-import com.gu.googleauth.GoogleGroupChecker
-import com.google.auth.oauth2.ServiceAccountCredentials
-import com.google.api.client
-import com.google.auth.oauth2.ServiceAccountCredentials
 
 class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
-    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(e.getCause).map(e => exceptionInfo(e))}"
+    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(
+        e.getCause
+      ).map(e => exceptionInfo(e))}"
   }
 
   override def shouldRetry(
@@ -164,10 +162,6 @@ class AppComponents(context: Context, identity: AppIdentity)
     )
   }
 
-  // initialise logging
-  val elkLoggingStream = configuration.get[Option[String]]("elk.loggingStream")
-  val elkLogging = new ElkLogging(identity, elkLoggingStream, awsCredsForV2)
-
   implicit val dynamo: Dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient
       .builder()
@@ -227,11 +221,11 @@ class AppComponents(context: Context, identity: AppIdentity)
     .withClientConfiguration(clientConfiguration)
     .build()
 
-  val anghammaradSNSClient: AmazonSNSAsync =
-    AmazonSNSAsyncClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCredsForV1)
-      .withClientConfiguration(clientConfiguration)
+  val anghammaradSNSClient: SnsAsyncClient =
+    SnsAsyncClient
+      .builder()
+      .region(Region.of(region.getName))
+      .credentialsProvider(awsCredsForV2)
       .build()
 
   val amigoUrl: String = configuration
@@ -273,7 +267,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     clientSecret = mandatoryConfig("google.clientSecret"),
     redirectUrl = mandatoryConfig("google.redirectUrl"),
     domains = List("guardian.co.uk"),
-    maxAuthAge = Some(Duration.standardDays(90)),
+    maxAuthAge = Some(Duration.ofDays(90)),
     enforceValidity = true,
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
