@@ -143,7 +143,9 @@ object RecipeUsage {
   def hasUsage(recipe: Recipe, usages: Map[Recipe, RecipeUsage]): Boolean = {
     usages
       .get(recipe)
-      .exists(u => u.launchConfigurations.nonEmpty || u.instances.nonEmpty)
+      .exists(u =>
+        u.launchTemplates.nonEmpty || u.launchConfigurations.nonEmpty || u.instances.nonEmpty
+      )
   }
 
   def amiUsages(recipeUsage: RecipeUsage, amiId: AmiId): RecipeUsage = {
