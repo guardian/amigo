@@ -65,12 +65,36 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
   )
 
   val emptyUsage: RecipeUsage = RecipeUsage(Seq(), Seq(), Seq(), Seq())
-  val nonEmptyusage: RecipeUsage = RecipeUsage(
+  val instanceUsage: RecipeUsage = RecipeUsage(
     Seq(
       Instance("weatherwax", AmiId("a-tuin"), AWSAccount("Gaspode", "carrot"))
     ),
     Seq(),
     Seq(),
+    Seq()
+  )
+  val launchConfigurationUsage = RecipeUsage(
+    Seq(),
+    Seq(
+      LaunchConfiguration(
+        "launch-configuration-1",
+        AmiId("a-tuin"),
+        AWSAccount("Gaspode", "carrot")
+      )
+    ),
+    Seq(),
+    Seq()
+  )
+  val launchTemplateUsage: RecipeUsage = RecipeUsage(
+    Seq(),
+    Seq(),
+    Seq(
+      LaunchTemplate(
+        "lt-1",
+        AmiId("a-tuin"),
+        AWSAccount("Gaspode", "carrot")
+      )
+    ),
     Seq()
   )
 
@@ -175,14 +199,30 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     recipe3Usages.bakeUsage shouldBe Seq.empty
   }
 
-  "hasUsage" should "return true if a recipe is used" in {
+  "hasUsage" should "return true if a recipe is used by an instance" in {
     val recipe1 = fixtureRecipe("recipe1")
     val recipe2 = fixtureRecipe("recipe2")
-    val usages = Map(recipe1 -> emptyUsage, recipe2 -> nonEmptyusage)
+    val usages = Map(recipe1 -> emptyUsage, recipe2 -> instanceUsage)
 
     RecipeUsage.hasUsage(recipe1, usages) shouldBe false
     RecipeUsage.hasUsage(recipe2, usages) shouldBe true
-
   }
 
+  "hasUsage" should "return true if a recipe is used by a launch configuration" in {
+    val recipe1 = fixtureRecipe("recipe1")
+    val recipe2 = fixtureRecipe("recipe2")
+    val usages = Map(recipe1 -> emptyUsage, recipe2 -> launchConfigurationUsage)
+
+    RecipeUsage.hasUsage(recipe1, usages) shouldBe false
+    RecipeUsage.hasUsage(recipe2, usages) shouldBe true
+  }
+
+  "hasUsage" should "return true if a recipe is used by a launch template" in {
+    val recipe1 = fixtureRecipe("recipe1")
+    val recipe2 = fixtureRecipe("recipe2")
+    val usages = Map(recipe1 -> launchTemplateUsage, recipe2 -> emptyUsage)
+
+    RecipeUsage.hasUsage(recipe1, usages) shouldBe true
+    RecipeUsage.hasUsage(recipe2, usages) shouldBe false
+  }
 }
