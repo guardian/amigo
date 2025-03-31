@@ -45,7 +45,8 @@ This is done as part of the main `tools::amigo` RiffRaff build.
 
 **YOU MUST RENAME THE ARTIFACT:** the lambda will not update (even if the file
 uploads to S3) unless the name is also changed. To do this bump the
-`ImageCopierLambdaProps.version`, which is set in `bin/cdk.ts`.
+`ImageCopierLambdaProps.version`, which is set in `bin/cdk.ts`, and rename the 
+uploaded artifact in S3 to match. Also update the version in the test to match.
 
 **For PROD:** no action required; `tools::amigo` deploys to PROD automatically
 whenever changes are merged into `main`.
@@ -74,4 +75,4 @@ This should generate the following file:
 the following CLI command to check out which accounts/Org Units have been
 targeted in the past so that you can target them again:
 
-    aws cloudformation --region eu-west-1 --profile root describe-stack-set --stack-set-name AmigoImageCopier
+    aws cloudformation list-stack-instances --stack-set-name AmigoImageCopier --profile root --region eu-west-1 | jq -r '.Summaries[].Account' | sort

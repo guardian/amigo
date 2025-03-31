@@ -2,7 +2,7 @@ package com.gu.imageCopier
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.SNSEvent
-import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
+import software.amazon.awssdk.services.ec2.Ec2Client
 import com.gu.imageCopier.attempt.{
   Attempt,
   ConfigurationFailure,
@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 
 object LambdaEntrypoint {
   val configuration: Configuration = Configuration.fromEnvironment
-  implicit val ec2Client: AmazonEC2 = AmazonEC2ClientBuilder.defaultClient()
+  implicit val ec2Client: Ec2Client = Ec2Client.builder.build()
 }
 
 class LambdaEntrypoint {

@@ -1,5 +1,14 @@
 ---
-- name: Install Kong's dependencies
+- name: Install initial postgres dependencies
+  apt:
+    name:
+      - postgresql-common
+
+- name: Configure postgres repository to enable download of latest postgres client
+  # Per https://wiki.postgresql.org/wiki/Apt
+  script: /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+
+- name: Install other Kong dependencies
   apt:
     name:
     - netcat
@@ -12,7 +21,7 @@
 
 - name: Install Kong package
   apt:
-    deb: https://packages.konghq.com/public/{{ kong_repo }}/deb/ubuntu/pool/focal/main/k/ko/kong_{{ kong_version }}/kong_{{ kong_version }}_{{ kong_arch }}.deb
+    deb: https://packages.konghq.com/public/{{ kong_repo }}/deb/ubuntu/pool/{{ kong_ubuntu_release }}/main/k/ko/kong_{{ kong_version }}/kong_{{ kong_version }}_{{ kong_arch }}.deb
     state: present
 
 - name: Create user for Kong
@@ -35,6 +44,21 @@
 
 - name: Copy nginx.template file
   copy: src=nginx.template dest=/usr/local/kong/nginx.template
+
+- name: Create error template directory
+  file: path=/usr/local/kong/templates state=directory
+
+- name: Copy error html template
+  copy: src=templates/error.html dest=/usr/local/kong/templates/error.html
+
+- name: Copy error json template
+  copy: src=templates/error.json dest=/usr/local/kong/templates/error.json
+
+- name: Copy error xml template
+  copy: src=templates/error.xml dest=/usr/local/kong/templates/error.xml
+
+- name: Copy error plain text template
+  copy: src=templates/error.txt dest=/usr/local/kong/templates/error.txt
 
 - name: Create shims directory
   file: path=/usr/local/kong/shims state=directory
