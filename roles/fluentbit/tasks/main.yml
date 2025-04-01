@@ -9,5 +9,5 @@
 
 - name: Install
   apt:
-    name: td-agent-bit={{version}}
+    name: fluent-bit={{version}}
     update_cache: yes
