@@ -1,7 +1,7 @@
 ---
 - name: See what Ubuntu version we're running
   set_fact:
-    post_focal: "{{ 'post-focal' if ( ansible_distribution_major_version|int >= 20 ) else 'older' }}"
+    post_focal: "{{ 'post-focal' if ( ansible_distribution_major_version|int <= 22 ) else 'newer' }}"
 
 - name: Install unzip
   apt: name=unzip state=present
@@ -83,7 +83,7 @@
   when: aws_cli_installed.stdout == "aws_cli_not_installed"
 
 - name: Install cloudformation tools
-  include: "{{ item }}"
+  include_tasks: "{{ item }}"
   with_first_found:
     - "install-cfn-tools-{{ ansible_distribution }}-{{ post_focal }}.yml"
     - "install-cfn-tools-{{ ansible_os_family }}.yml"
