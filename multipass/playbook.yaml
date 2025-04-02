@@ -9,4 +9,4 @@
   #  foo: bar
 
   roles:
-    - ROLE_GOES_HERE
+    - aws-tools
