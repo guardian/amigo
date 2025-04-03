@@ -1,11 +1,10 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -xe
 
 script_dir=$(dirname "$0")
 target_dir=/home/ubuntu
 custom_playbook="playbook-custom.yaml"
 vm_name=amigo-test
+ubuntu_version=22.04
 
 if ! command -v multipass &> /dev/null
 then
@@ -24,9 +23,10 @@ fi
 if ! multipass list | grep $vm_name | grep Running > /dev/null
 then
     echo 'Creating and provisioning multipass VM...'
-    multipass launch --name $vm_name 20.04
-    multipass mount $script_dir/../roles $vm_name:$target_dir/.ansible/roles
-    multipass mount $script_dir $vm_name:$target_dir/test
+    multipass launch --name $vm_name $ubuntu_version
+    multipass stop $vm_name
+    multipass mount --type native $script_dir/../roles $vm_name:$target_dir/.ansible/roles
+    multipass mount --type native $script_dir $vm_name:$target_dir/test
     multipass exec $vm_name -- $target_dir/test/bootstrap-vm.sh
 fi
 

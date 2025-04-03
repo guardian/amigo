@@ -47,7 +47,7 @@ itself. This is often a lot easier than running Amigo itself.
 
 To test roles locally, run:
 
-    $ multipass/run.sh
+    multipass/run.sh
 
 This will install [Multipass](https://multipass.run/), a Canonical tool to
 manage Ubuntu VMs, and execute Ansible roles within it.
@@ -55,13 +55,13 @@ manage Ubuntu VMs, and execute Ansible roles within it.
 If you want to run commands/debug directly in the VM then (post installing
 things via run.sh), run:
 
-    $ multipass shell amigo-test
+    multipass shell amigo-test
 
 If the Multipass VM is timing out, try deleting and then re-running the script:
 
-    $ multipass stop amigo-test
-    $ multipass delete amigo-test
-    $ multipass purge amigo-test
+    multipass stop amigo-test
+    multipass delete amigo-test
+    multipass purge
 
 You should also disconnect from the VPN too if using it.
 
