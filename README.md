@@ -61,7 +61,7 @@ If the Multipass VM is timing out, try deleting and then re-running the script:
 
     multipass stop amigo-test
     multipass delete amigo-test
-    multipass purge amigo-test
+    multipass purge
 
 You should also disconnect from the VPN too if using it.
 
