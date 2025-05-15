@@ -1,0 +1,12 @@
+---
+- name: Clone the eotk repo
+  git:
+    repo: 'https://github.com/guardian/eotk.git'
+    dest: /usr/local/eotk
+    version: 'ubuntu-jammy'
+    force: yes
+
+- name: Move into eotk directory and run the set up script
+  shell: |
+    cd /usr/local/eotk
+    ./opt.d/build-ubuntu-22.04.sh
