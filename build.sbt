@@ -73,13 +73,13 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.18.2"
-val circeVersion = "0.14.10"
+val jacksonVersion = "2.18.4"
+val circeVersion = "0.14.13"
 
 // These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
 val awsV1SdkVersion = "1.12.783"
 val awsV2SdkVersion = "2.31.40"
-val playSecretRotationVersion = "13.2.0"
+val playSecretRotationVersion = "14.3.1"
 
 libraryDependencies ++= Seq(
   ws,
@@ -88,11 +88,11 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "3.0.0",
-  "com.beachape" %% "enumeratum" % "1.7.5",
+  "com.beachape" %% "enumeratum" % "1.7.6",
   "com.gu" %% "simple-configuration-ssm" % "5.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "20.1.0",
+  "com.gu.play-googleauth" %% "play-v30" % "20.3.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.0",
@@ -102,9 +102,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
-  "net.logstash.logback" % "logstash-logback-encoder" % "8.0",
+  "net.logstash.logback" % "logstash-logback-encoder" % "8.1",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.16",
+  "ch.qos.logback" % "logback-classic" % "1.5.18",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
