@@ -3,7 +3,7 @@
   git:
     repo: 'https://github.com/guardian/eotk.git'
     dest: /usr/local/eotk
-    version: 'ubuntu-jammy'
+    version: 'master'
     force: yes
 
 - name: Move into eotk directory and run the set up script
