@@ -14,10 +14,10 @@
   "devDependencies": {
     "@guardian/cdk": "61.8.1",
     "@guardian/eslint-config": "^11.0.0",
-    "@guardian/prettier": "5.0.0",
+    "@guardian/prettier": "8.0.1",
     "@guardian/tsconfig": "^1.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "22.15.21",
+    "@types/node": "22.15.30",
     "aws-cdk": "2.1014.0",
     "aws-cdk-lib": "2.195.0",
     "constructs": "10.4.2",
@@ -28,7 +28,7 @@
     "source-map-support": "^0.5.20",
     "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
-    "typescript": "5.1.6"
+    "typescript": "5.8.3"
   },
   "prettier": "@guardian/prettier",
   "jest": {
