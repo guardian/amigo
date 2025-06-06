@@ -16,6 +16,7 @@ const amigoCodeProps: AmigoProps = {
 	stage: 'CODE',
 	domainName: 'amigo.code.dev-gutools.co.uk',
 	instanceMetricGranularity: '5Minute',
+	cloudFormationStackName: 'amigo-CODE',
 };
 
 new AmigoStack(app, 'AMIgo-CODE', amigoCodeProps);
@@ -25,6 +26,7 @@ export const amigoProdProps: AmigoProps = {
 	stage: 'PROD',
 	domainName: 'amigo.gutools.co.uk',
 	instanceMetricGranularity: '1Minute',
+	cloudFormationStackName: 'amigo-PROD',
 };
 
 new AmigoStack(app, 'AMIgo-PROD', amigoProdProps);
