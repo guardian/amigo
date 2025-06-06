@@ -22,8 +22,8 @@ jobs:
           aws-region: eu-west-1
       - uses: actions/setup-node@v4 # This is required by cdk
         with:
-          cache: 'yarn'
-          cache-dependency-path: 'cdk/yarn.lock'
+          cache: 'npm'
+          cache-dependency-path: 'cdk/package-lock.json'
           node-version-file: '.nvmrc'
       - uses: guardian/setup-scala@v1
       - name: CI

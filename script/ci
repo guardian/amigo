@@ -5,7 +5,10 @@ set -e
 # must be done first as sbt uses the CFN template that is generated
 (
  cd cdk
- ./script/ci
+ npm ci
+ npm run lint
+ npm test
+ npm run synth
 )
 
 sbt clean scalafmtSbtCheck scalafmtCheckAll compile test riffRaffUpload
