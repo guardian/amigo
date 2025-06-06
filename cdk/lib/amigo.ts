@@ -23,6 +23,8 @@ const packerVersion = "1.8.5";
 
 export interface AmigoProps extends GuStackProps {
   domainName: string;
+
+  instanceMetricGranularity: "1Minute" | "5Minute"
 }
 
 export class AmigoStack extends GuStack {
@@ -110,7 +112,7 @@ export class AmigoStack extends GuStack {
   constructor(scope: App, id: string, props: AmigoProps) {
     super(scope, id, props);
 
-    const { domainName } = props;
+    const { domainName, instanceMetricGranularity } = props;
 
     this.packerInstanceProfile = new GuStringParameter(this, "PackerInstanceProfile", {
       description:
@@ -268,6 +270,7 @@ export class AmigoStack extends GuStack {
       applicationLogging: {
         enabled: true,
       },
+      instanceMetricGranularity,
     });
 
     // Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
