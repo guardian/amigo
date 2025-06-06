@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-yarn lint
-yarn test
-yarn synth
