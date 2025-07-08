@@ -44,7 +44,7 @@ import {
 	StringParameter,
 } from 'aws-cdk-lib/aws-ssm';
 
-const packerVersion = '1.8.5';
+const packerVersion = '1.13.1';
 
 export interface AmigoProps extends GuStackProps {
 	domainName: string;
