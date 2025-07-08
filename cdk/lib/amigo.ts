@@ -286,6 +286,18 @@ export class AmigoStack extends GuStack {
 					'mkdir /opt/packer',
 					'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
 					"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
+
+					/*
+					By default, Packer installs plugins in the user's home directory using $HOME.
+					The value of $HOME is not yet known in the UserData script, so set PACKER_PLUGIN_PATH to a custom directory.
+					See https://developer.hashicorp.com/packer/docs/plugins/install#installation-directory.
+					 */
+					'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
+					'/opt/packer/packer plugins install github.com/hashicorp/amazon',
+					'/opt/packer/packer plugins install github.com/hashicorp/ansible',
+					// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
+					'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
+
 					'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
 					'dpkg -i /tmp/session-manager-plugin.deb',
 

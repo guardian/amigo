@@ -1215,6 +1215,10 @@ wget -P /tmp https://releases.hashicorp.com/packer/1.13.1/packer_1.13.1_linux_ar
 mkdir /opt/packer
 unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
 echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
+export PACKER_PLUGIN_PATH=/opt/packer/.plugins
+/opt/packer/packer plugins install github.com/hashicorp/amazon
+/opt/packer/packer plugins install github.com/hashicorp/ansible
+echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment
 wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
 dpkg -i /tmp/session-manager-plugin.deb
 mkdir /amigo
