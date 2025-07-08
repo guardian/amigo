@@ -14,7 +14,7 @@ class AppLoader extends ApplicationLoader with Loggable {
   override def load(context: Context): Application = {
     new LogbackLoggerConfigurator().configure(context.environment)
 
-    val credentialsProvider = DefaultCredentialsProvider.create()
+    val credentialsProvider = DefaultCredentialsProvider.builder().build()
     val isDev = context.environment.mode == Mode.Dev
 
     val configAndIdentity = for {
