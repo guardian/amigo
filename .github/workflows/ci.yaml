@@ -12,22 +12,36 @@ jobs:
   CI:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
+
+      # These permissions are required by guardian/actions-riff-raff...
+      id-token: write # ...to exchange an OIDC JWT ID token for AWS credentials
+      pull-requests: write #...to comment on PRs
     steps:
       - uses: actions/checkout@v4
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          aws-region: eu-west-1
       - uses: actions/setup-node@v4 # This is required by cdk
         with:
           cache: 'npm'
           cache-dependency-path: 'cdk/package-lock.json'
           node-version-file: '.nvmrc'
       - uses: guardian/setup-scala@v1
-      - name: CI
+      - name: Seed build number from TeamCity
         run: |
           LAST_TEAMCITY_BUILD=3006
-          export GITHUB_RUN_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD ))
-          ./script/ci
+          echo BUILD_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD )) >> $GITHUB_ENV
+      - run: ./script/ci
+      - uses: guardian/actions-riff-raff@v4
+        with:
+          projectName: tools::amigo
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
+          buildNumber: ${{ env.BUILD_NUMBER }}
+          configPath: riff-raff.yaml
+          contentDirectories: |
+            cloudformation:
+              - cdk/cdk.out/AMIgo-CODE.template.json
+              - cdk/cdk.out/AMIgo-PROD.template.json
+            amigo:
+              - target/amigo_1.0-latest_all.deb
+            imagecopier:
+              - imageCopier/target/universal/image-copier.zip

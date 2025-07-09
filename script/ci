@@ -2,7 +2,6 @@
 
 set -e
 
-# must be done first as sbt uses the CFN template that is generated
 (
  cd cdk
  npm ci
@@ -11,4 +10,11 @@ set -e
  npm run synth
 )
 
-sbt clean scalafmtSbtCheck scalafmtCheckAll compile test riffRaffUpload
+sbt clean scalafmtSbtCheck scalafmtCheckAll compile test
+
+# Create debian package of AMIgo Play app
+sbt "Debian / packageBin"
+
+# Create zip file of imageCopier lambda
+sbt "project imageCopier" "dist"
+mv imageCopier/target/universal/imagecopier.zip imageCopier/target/universal/image-copier.zip

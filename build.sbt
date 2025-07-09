@@ -1,4 +1,3 @@
-import com.gu.riffraff.artifact.BuildInfo
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
 
 import java.time.format.DateTimeFormatter
@@ -20,11 +19,13 @@ Universal / javaOptions ++= Seq(
   s"-J-Xlog:gc:/var/log/${packageName.value}/gc.log"
 )
 
+def env(propName: String): String =
+  sys.env.get(propName).filter(_.trim.nonEmpty).getOrElse("DEV")
+
 lazy val root = (project in file("."))
   .aggregate(imageCopier)
   .enablePlugins(
     PlayScala,
-    RiffRaffArtifact,
     JDebPackaging,
     BuildInfoPlugin,
     SystemdPlugin
@@ -33,21 +34,12 @@ lazy val root = (project in file("."))
     Universal / packageName := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
     Debian / serverLoading := Some(Systemd),
-    riffRaffManifestProjectName := s"tools::${name.value}",
-    riffRaffPackageType := (Debian / packageBin).value,
-    riffRaffArtifactResources ++= Seq(
-      (imageCopier / Universal / packageBin).value -> "imagecopier/image-copier.zip",
-      baseDirectory.value / "cdk/cdk.out/AMIgo-CODE.template.json" -> "cloudformation/AMIgo-CODE.template.json",
-      baseDirectory.value / "cdk/cdk.out/AMIgo-PROD.template.json" -> "cloudformation/AMIgo-PROD.template.json"
-    ),
     // Include the roles dir in the tarball for now
     Universal / mappings ++= (file("roles") ** "*").get.map { f =>
       f.getAbsoluteFile -> f.toString
     },
     buildInfoPackage := "amigo",
     buildInfoKeys := {
-      lazy val buildInfo = BuildInfo(baseDirectory.value)
-
       // so this next one is constant to avoid it always recompiling on dev machines.
       // we only really care about build time in CI, when a constant based on when
       // it was loaded is just fine
@@ -55,9 +47,9 @@ lazy val root = (project in file("."))
         .format(ZonedDateTime.now(ZoneId.of("UTC")))
 
       Seq[BuildInfoKey](
-        BuildInfoKey("buildNumber" -> buildInfo.buildIdentifier),
+        BuildInfoKey("buildNumber" -> env("BUILD_NUMBER")),
         BuildInfoKey("buildTime" -> buildTime),
-        BuildInfoKey("gitCommitId" -> buildInfo.revision)
+        BuildInfoKey("gitCommitId" -> env("GITHUB_SHA"))
       )
     },
     buildInfoOptions := Seq(
@@ -118,7 +110,12 @@ routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
 lazy val imageCopier = (project in file("imageCopier"))
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(
+    JavaAppPackaging,
+
+    // Though this project doesn't use JDebPackaging, it is used in the root project and needed here to prevent the error: java.io.IOException: Cannot run program "fakeroot"
+    JDebPackaging
+  )
   .settings(
     scalaVersion := "2.13.16",
     Universal / topLevelDirectory := None,
