@@ -15,6 +15,7 @@ import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.jdk.CollectionConverters._
 import scala.jdk.StreamConverters._
 import scala.util.Try
 
@@ -111,7 +112,12 @@ class PackerRunner(maxInstances: Int) extends Loggable {
       .directory(new File(System.getProperty("java.io.tmpdir")))
     packerBuilder
       .environment()
-      .put("PACKER_CACHE_DIR", packerCacheDir.toAbsolutePath.toString)
+      .putAll(
+        Map(
+          "PACKER_CACHE_DIR" -> packerCacheDir.toAbsolutePath.toString,
+          "PACKER_PLUGIN_PATH" -> "/opt/packer/.plugins"
+        ).asJava
+      )
     val packerProcess = packerBuilder.start()
 
     val exitValuePromise = Promise[Int]()
