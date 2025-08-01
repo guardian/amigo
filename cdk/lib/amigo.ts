@@ -22,8 +22,8 @@ import {
 	GuLogShippingPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
-import { Duration, SecretValue } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
+import { Duration, SecretValue } from 'aws-cdk-lib';
 import {
 	InstanceClass,
 	InstanceSize,
@@ -38,6 +38,7 @@ import {
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import {
 	ParameterDataType,
 	ParameterTier,
@@ -323,6 +324,19 @@ export class AmigoStack extends GuStack {
 				enabled: true,
 			},
 			instanceMetricGranularity,
+		});
+
+		const bakeQueue = new Queue(this, 'BakeQueue', { enforceSSL: true });
+		bakeQueue.grantSendMessages(guPlayApp.autoScalingGroup);
+		bakeQueue.grantConsumeMessages(guPlayApp.autoScalingGroup);
+
+		new StringParameter(this, 'BakeQueueParam', {
+			parameterName: `/${this.stage}/${this.stack}/${AmigoStack.app.app}/bake-queue-url`,
+			description: "The URL of amigo's bake queue",
+			simpleName: false,
+			stringValue: bakeQueue.queueUrl,
+			tier: ParameterTier.STANDARD,
+			dataType: ParameterDataType.TEXT,
 		});
 
 		// Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.

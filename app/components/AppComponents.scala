@@ -1,7 +1,5 @@
 package components
 
-import software.amazon.awssdk.services.sts.StsClient
-import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.gu.googleauth.{
   AntiForgeryChecker,
@@ -38,27 +36,36 @@ import play.filters.HttpFiltersComponents
 import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
-import schedule.{BakeScheduler, ScheduledBakeRunner}
+import schedule.{
+  BakeQueueProcessor,
+  BakeQueueScheduler,
+  BakeScheduler,
+  ScheduledBakeRunner
+}
 import services.{AmiMetadataLookup, Loggable, PrismData}
 import software.amazon.awssdk.auth.credentials.{
   AwsCredentialsProviderChain,
   InstanceProfileCredentialsProvider,
   ProfileCredentialsProvider
 }
-import software.amazon.awssdk.awscore.retry.AwsRetryStrategy
-import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
+import software.amazon.awssdk.http.apache.ApacheHttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.sns.{SnsAsyncClient, SnsClient}
+import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.ssm.SsmClient
+import software.amazon.awssdk.services.sts.StsClient
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
 
 import java.io.FileInputStream
 import java.time.Duration
 import java.time.Duration.{ofHours, ofMinutes}
-import scala.concurrent.Await
+import java.util.concurrent.Executors
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.jdk.DurationConverters._
 import scala.language.postfixOps
 import scala.util.Try
 
@@ -181,6 +188,16 @@ class AppComponents(context: Context, identity: AppIdentity)
       NotificationConfig(amigoUrl, t, anghammaradSNSClient, stage)
     }
 
+  val bakeQueueUrl: String = configuration.get[String]("bake-queue-url")
+  val sqsClient = SqsClient
+    .builder()
+    .region(region)
+    .credentialsProvider(awsCredentials)
+    .httpClient(
+      ApacheHttpClient.builder().socketTimeout(35.seconds.toJava).build()
+    )
+    .build()
+
   configuration.get[Option[String]]("aws.distributionBucket").foreach {
     bucketName =>
       LambdaDistributionBucket
@@ -259,6 +276,24 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
+
+  // don't run scheduled bakes on dev machines
+//  if (stage == "PROD") {
+  // TODO re-enable PROD-only check
+  BakeQueueScheduler.schedule(
+    pekkoActorSystem.scheduler,
+    sqsClient,
+    bakeQueueUrl
+  )
+  val bakeQueueProcessor = new BakeQueueProcessor(
+    sqs = sqsClient,
+    bakeQueueUrl = bakeQueueUrl,
+    runner = scheduledBakeRunner
+  )
+  Future(bakeQueueProcessor.run())(
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
+  )
+//  }
 
   val bakesRepo = new BakesRepo(notificationConfig)
   val packerEC2Client = new PackerEC2Client(ec2Client, stage)

@@ -48,6 +48,7 @@ class PlaybookGeneratorSpec extends AnyFlatSpec with Matchers {
       modifiedBy = "Testy McTest",
       modifiedAt = DateTime.now(),
       bakeSchedule = None,
+      bakeDay = None,
       encryptFor = Nil
     )
 
