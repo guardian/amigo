@@ -47,17 +47,18 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
   }
   def fixtureRecipe(id: String, createdDate: DateTime): Recipe = {
     Recipe(
-      RecipeId(id),
-      None,
-      fixtureBaseImage(s"base-image-$id", createdDate),
-      None,
-      List(),
-      "Test",
-      createdDate,
-      "Test",
-      createdDate,
-      None,
-      Nil
+      id = RecipeId(id),
+      description = None,
+      baseImage = fixtureBaseImage(s"base-image-$id", createdDate),
+      diskSize = None,
+      roles = List(),
+      createdBy = "Test",
+      createdAt = createdDate,
+      modifiedBy = "Test",
+      modifiedAt = createdDate,
+      bakeSchedule = None,
+      bakeDay = None,
+      encryptFor = Nil
     )
   }
   def fixtureBake(

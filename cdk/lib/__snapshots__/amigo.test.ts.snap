@@ -300,6 +300,83 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
     },
+    "BakeQueueDA0E0C57": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BakeQueueParamAB237CC4": {
+      "Properties": {
+        "DataType": "text",
+        "Description": "The URL of amigo's bake queue",
+        "Name": "/PROD/deploy/amigo/bake-queue-url",
+        "Tags": {
+          "Stack": "deploy",
+          "Stage": "PROD",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/amigo",
+        },
+        "Tier": "Standard",
+        "Type": "String",
+        "Value": {
+          "Ref": "BakeQueueDA0E0C57",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "BakeQueuePolicy5A9F032F": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BakeQueueDA0E0C57",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "BakeQueueDA0E0C57",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "CertificateAmigoE1AF5E0C": {
       "DeletionPolicy": "Retain",
       "Properties": {
@@ -657,6 +734,52 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
+    },
+    "InstanceRoleAmigoDefaultPolicyE9234A40": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BakeQueueDA0E0C57",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BakeQueueDA0E0C57",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "InstanceRoleAmigoDefaultPolicyE9234A40",
+        "Roles": [
+          {
+            "Ref": "InstanceRoleAmigo75944747",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "ListenerAmigo0180B42C": {
       "Properties": {
@@ -1114,6 +1237,7 @@ exports[`The Amigo stack matches the snapshot 1`] = `
     },
     "deployPRODamigo77EB3561": {
       "DependsOn": [
+        "InstanceRoleAmigoDefaultPolicyE9234A40",
         "InstanceRoleAmigo75944747",
       ],
       "Properties": {

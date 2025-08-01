@@ -57,25 +57,35 @@ import play.filters.HttpFiltersComponents
 import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
-import schedule.{BakeScheduler, ScheduledBakeRunner}
+import schedule.{
+  BakeQueueProcessor,
+  BakeQueueScheduler,
+  BakeScheduler,
+  ScheduledBakeRunner
+}
 import services.{AmiMetadataLookup, Loggable, PrismData}
 import software.amazon.awssdk.auth.credentials.{
   AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
   InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
   ProfileCredentialsProvider => ProfileCredentialsProviderV2
 }
+import software.amazon.awssdk.http.apache.ApacheHttpClient
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sqs.{SqsAsyncClient, SqsClient}
 import software.amazon.awssdk.services.ssm.SsmClient
 
 import java.io.FileInputStream
-import java.time.Duration
+import java.time.{Duration, Instant, LocalDate, ZoneId, ZonedDateTime}
 import java.time.Duration.{ofHours, ofMinutes}
-import scala.concurrent.Await
+import java.util.concurrent.Executors
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
+import scala.jdk.DurationConverters._
 
 class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
   private def exceptionInfo(e: Throwable): String = {
@@ -238,6 +248,16 @@ class AppComponents(context: Context, identity: AppIdentity)
       NotificationConfig(amigoUrl, t, anghammaradSNSClient, stage)
     }
 
+  val bakeQueueUrl: String = configuration.get[String]("bake-queue-url")
+  val sqsClient = SqsClient
+    .builder()
+    .region(Region.of(region.getName))
+    .credentialsProvider(awsCredsForV2)
+    .httpClient(
+      ApacheHttpClient.builder().socketTimeout(35.seconds.toJava).build()
+    )
+    .build()
+
   configuration.get[Option[String]]("aws.distributionBucket").foreach {
     bucketName =>
       LambdaDistributionBucket
@@ -316,6 +336,24 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   log.info("Registering all scheduled bakes with the scheduler")
   bakeScheduler.initialise(Recipes.list())
+
+  // don't run scheduled bakes on dev machines
+//  if (stage == "PROD") {
+  // TODO re-enable PROD-only check
+  BakeQueueScheduler.schedule(
+    pekkoActorSystem.scheduler,
+    sqsClient,
+    bakeQueueUrl
+  )
+  val bakeQueueProcessor = new BakeQueueProcessor(
+    sqs = sqsClient,
+    bakeQueueUrl = bakeQueueUrl,
+    runner = scheduledBakeRunner
+  )
+  Future(bakeQueueProcessor.run())(
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
+  )
+//  }
 
   val bakesRepo = new BakesRepo(notificationConfig)
   val packerEC2Client = new PackerEC2Client(ec2Client, stage)

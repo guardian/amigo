@@ -25,7 +25,7 @@ class ScheduledBakeRunner(
       Recipes.findById(recipeId) match {
         case Some(recipe) =>
           // sanity check: is the recipe actually scheduled?
-          if (recipe.bakeSchedule.isEmpty) {
+          if (recipe.bakeSchedule.isEmpty && recipe.bakeDay.isEmpty) {
             log.warn(
               s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined"
             )

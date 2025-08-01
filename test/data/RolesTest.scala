@@ -62,46 +62,49 @@ class RolesTest extends AnyFlatSpec with Matchers {
 
   it should "find recipes that use this role" in {
     val rec1 = Recipe(
-      RecipeId("r1"),
-      None,
-      null,
-      None,
-      List(
+      id = RecipeId("r1"),
+      description = None,
+      baseImage = null,
+      diskSize = None,
+      roles = List(
         CustomisedRole(RoleId("apt"), Map.empty),
         CustomisedRole(RoleId("java8"), Map.empty)
       ),
-      "creator",
-      DateTime.now(),
-      "modifiedBy",
-      DateTime.now(),
-      None,
-      Nil
+      createdBy = "creator",
+      createdAt = DateTime.now(),
+      modifiedBy = "modifiedBy",
+      modifiedAt = DateTime.now(),
+      bakeSchedule = None,
+      bakeDay = None,
+      encryptFor = Nil
     )
     val rec2 = Recipe(
-      RecipeId("r2"),
-      None,
-      null,
-      None,
-      List(CustomisedRole(RoleId("apt"), Map.empty)),
-      "creator",
-      DateTime.now(),
-      "modifiedBy",
-      DateTime.now(),
-      None,
-      Nil
+      id = RecipeId("r2"),
+      description = None,
+      baseImage = null,
+      diskSize = None,
+      roles = List(CustomisedRole(RoleId("apt"), Map.empty)),
+      createdBy = "creator",
+      createdAt = DateTime.now(),
+      modifiedBy = "modifiedBy",
+      modifiedAt = DateTime.now(),
+      bakeSchedule = None,
+      bakeDay = None,
+      encryptFor = Nil
     )
     val rec3 = Recipe(
-      RecipeId("r3"),
-      None,
-      null,
-      None,
-      List(CustomisedRole(RoleId("java8"), Map.empty)),
-      "creator",
-      DateTime.now(),
-      "modifiedBy",
-      DateTime.now(),
-      None,
-      Nil
+      id = RecipeId("r3"),
+      description = None,
+      baseImage = null,
+      diskSize = None,
+      roles = List(CustomisedRole(RoleId("java8"), Map.empty)),
+      createdBy = "creator",
+      createdAt = DateTime.now(),
+      modifiedBy = "modifiedBy",
+      modifiedAt = DateTime.now(),
+      bakeSchedule = None,
+      bakeDay = None,
+      encryptFor = Nil
     )
     val allRecipes = List(rec1, rec2, rec3)
     val usedByRecipes = Roles.usedByRecipes(
