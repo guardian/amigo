@@ -13,6 +13,7 @@ case class Recipe(
     modifiedBy: String,
     modifiedAt: DateTime,
     bakeSchedule: Option[BakeSchedule],
+    bakeDay: Option[String],
     encryptFor: List[AccountNumber]
 )
 
@@ -30,6 +31,7 @@ object Recipe {
       modifiedBy: String,
       modifiedAt: DateTime,
       bakeSchedule: Option[BakeSchedule],
+      bakeDay: Option[String],
       encryptFor: Option[List[AccountNumber]]
   )
 
@@ -44,6 +46,7 @@ object Recipe {
     modifiedBy = dbModel.modifiedBy,
     modifiedAt = dbModel.modifiedAt,
     bakeSchedule = dbModel.bakeSchedule,
+    bakeDay = dbModel.bakeDay,
     encryptFor = dbModel.encryptFor.getOrElse(Nil)
   )
 
@@ -59,6 +62,7 @@ object Recipe {
     modifiedBy = recipe.modifiedBy,
     modifiedAt = recipe.modifiedAt,
     bakeSchedule = recipe.bakeSchedule,
+    bakeDay = recipe.bakeDay,
     encryptFor = Some(recipe.encryptFor)
   )
 
