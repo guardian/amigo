@@ -26,7 +26,7 @@ class BakeQueueProcessor(
         val rmr = ReceiveMessageRequest
           .builder()
           .queueUrl(bakeQueueUrl)
-          .waitTimeSeconds(30)
+          .waitTimeSeconds(20)
           .maxNumberOfMessages(1)
           .build()
         val resp = sqs.receiveMessage(rmr)
