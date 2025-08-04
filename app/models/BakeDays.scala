@@ -6,5 +6,5 @@ object BakeDays {
     Seq("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
   // above days zipped with itself to make a list suitable for constructing a <select> input
-  val select: Seq[(String, String)] = days.zip(days)
+  val select: Seq[(String, String)] = ("" -> "") +: days.zip(days)
 }
