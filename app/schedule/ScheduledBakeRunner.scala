@@ -18,7 +18,7 @@ class ScheduledBakeRunner(
 )(implicit dynamo: Dynamo, packerConfig: PackerConfig)
     extends Loggable {
 
-  def bake(recipeId: RecipeId): Unit = {
+  def bake(recipeId: RecipeId, bakeNumber: Option[Int]): Unit = {
     if (!enabled) {
       log.info("Skipping scheduled bake because I am disabled")
     } else {
@@ -30,7 +30,9 @@ class ScheduledBakeRunner(
               s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined"
             )
           } else {
-            Recipes.incrementAndGetBuildNumber(recipe.id) match {
+            bakeNumber.orElse(
+              Recipes.incrementAndGetBuildNumber(recipe.id)
+            ) match {
               case Some(buildNumber) =>
                 val theBake =
                   Bakes.create(recipe, buildNumber, startedBy = "scheduler")
