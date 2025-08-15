@@ -29,30 +29,32 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     DateTime.now
   )
   def fixtureRecipe(id: String): Recipe = Recipe(
-    RecipeId(id),
-    None,
-    fixtureBaseImage(s"base-image-$id"),
-    None,
-    List(),
-    "Test",
-    DateTime.now,
-    "Test",
-    DateTime.now,
-    None,
-    Nil
+    id = RecipeId(id),
+    description = None,
+    baseImage = fixtureBaseImage(s"base-image-$id"),
+    diskSize = None,
+    roles = List(),
+    createdBy = "Test",
+    createdAt = DateTime.now,
+    modifiedBy = "Test",
+    modifiedAt = DateTime.now,
+    bakeSchedule = None,
+    bakeDay = None,
+    encryptFor = Nil
   )
   def fixtureRecipeWithSize(id: String, size: Int): Recipe = Recipe(
-    RecipeId(id),
-    None,
-    fixtureBaseImage(s"base-image-$id"),
-    Some(100),
-    List(),
-    "Test",
-    DateTime.now,
-    "Test",
-    DateTime.now,
-    None,
-    Nil
+    id = RecipeId(id),
+    description = None,
+    baseImage = fixtureBaseImage(s"base-image-$id"),
+    diskSize = Some(100),
+    roles = List(),
+    createdBy = "Test",
+    createdAt = DateTime.now,
+    modifiedBy = "Test",
+    modifiedAt = DateTime.now,
+    bakeSchedule = None,
+    bakeDay = None,
+    encryptFor = Nil
   )
   def fixtureBake(recipe: Recipe, amiId: Option[AmiId]): Bake = Bake(
     recipe,

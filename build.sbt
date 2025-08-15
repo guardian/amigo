@@ -98,6 +98,7 @@ libraryDependencies ++= Seq(
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
   "ch.qos.logback" % "logback-classic" % "1.5.18",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "sqs" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
   "org.scalatest" %% "scalatest-flatspec" % "3.2.19" % Test,

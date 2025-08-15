@@ -55,6 +55,7 @@ object Recipes {
       roles: List[CustomisedRole],
       createdBy: String,
       bakeSchedule: Option[BakeSchedule],
+      bakeDay: Option[String],
       encryptedCopies: List[AccountNumber]
   )(implicit dynamo: Dynamo): Recipe = {
     val now = DateTime.now()
@@ -69,6 +70,7 @@ object Recipes {
       modifiedBy = createdBy,
       modifiedAt = now,
       bakeSchedule,
+      bakeDay,
       encryptedCopies
     )
     table.put(Recipe.domain2db(recipe, nextBuildNumber = 0)).exec()
@@ -84,6 +86,7 @@ object Recipes {
       roles: List[CustomisedRole],
       modifiedBy: String,
       bakeSchedule: Option[BakeSchedule],
+      bakeDay: Option[String],
       encryptFor: List[AccountNumber]
   )(implicit dynamo: Dynamo): Either[DynamoReadError, Recipe] = {
 
@@ -94,6 +97,8 @@ object Recipes {
         set("modifiedAt", DateTime.now()) and
         (if (bakeSchedule.isDefined) set("bakeSchedule", bakeSchedule)
          else remove("bakeSchedule")) and
+        (if (bakeDay.isDefined) set("bakeDay", bakeDay)
+         else remove("bakeDay")) and
         (if (encryptFor.nonEmpty) set("encryptFor", encryptFor)
          else remove("encryptFor")) and
         (if (diskSize.isDefined) set("diskSize", diskSize)
