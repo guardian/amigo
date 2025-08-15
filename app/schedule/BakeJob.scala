@@ -16,7 +16,10 @@ class BakeJob extends Job {
     val recipeId = getAs[RecipeId](JobDataKeys.RecipeId)
     val runner = getAs[ScheduledBakeRunner](JobDataKeys.Runner)
 
-    runner.bake(recipeId)
+    runner.bake(
+      recipeId,
+      bakeNumber = None
+    ) // we'll calculate the bake number later
   }
 
 }

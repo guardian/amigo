@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
-case class BakeQueueJob(recipe: RecipeId)
+case class BakeQueueJob(recipe: RecipeId, buildNumber: Int)
 object BakeQueueJob {
   implicit val format: OFormat[BakeQueueJob] = Json.format[BakeQueueJob]
 }
@@ -32,8 +32,8 @@ class BakeQueueProcessor(
         val resp = sqs.receiveMessage(rmr)
 
         for (message <- resp.messages().asScala) {
-          val job = Json.toJson(message.body()).as[BakeQueueJob]
-          runner.bake(job.recipe)
+          val job = Json.parse(message.body()).as[BakeQueueJob]
+          runner.bake(job.recipe, Some(job.buildNumber))
         }
       } catch {
         case NonFatal(e) =>
