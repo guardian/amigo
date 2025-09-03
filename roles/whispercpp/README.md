@@ -1,0 +1,1 @@
+# Whisper.cpp Role

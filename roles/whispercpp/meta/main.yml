@@ -1,0 +1,9 @@
+---
+dependencies:
+  - aws-tools
+  - role: packages
+    packages:
+      - ffmpeg
+      - cmake
+      - build-essential
+      - wget
