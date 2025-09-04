@@ -18,8 +18,8 @@ jobs:
       id-token: write # ...to exchange an OIDC JWT ID token for AWS credentials
       pull-requests: write #...to comment on PRs
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4 # This is required by cdk
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5 # This is required by cdk
         with:
           cache: 'npm'
           cache-dependency-path: 'cdk/package-lock.json'
