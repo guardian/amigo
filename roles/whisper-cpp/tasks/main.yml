@@ -15,7 +15,8 @@
     cd whisper.cpp
     git reset --hard {{ whisper_cpp_commit_hash }}
     echo "compiling"
-    make
+    cmake -B build
+    cmake --build build -j --config Release
     exit 0
 
 - name: Download models and set permissions
