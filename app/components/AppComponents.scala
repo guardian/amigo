@@ -344,7 +344,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   // Membership in at least one of these groups is required to pass authentication.
   val googleGroupsToCheck = Set(
     configuration.get[String]("auth.google.departmentGroupId"),
-    configuration.get[String]("auth.google.dataScientistsGroupId")
+    configuration.get[String]("auth.google.dataScientistsGroupId"),
     configuration.get[String]("auth.google.multimediaGroupId")
   )
 
