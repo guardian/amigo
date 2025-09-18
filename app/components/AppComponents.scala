@@ -345,6 +345,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   val googleGroupsToCheck = Set(
     configuration.get[String]("auth.google.departmentGroupId"),
     configuration.get[String]("auth.google.dataScientistsGroupId")
+    configuration.get[String]("auth.google.multimediaGroupId")
   )
 
   val groupChecker = {
