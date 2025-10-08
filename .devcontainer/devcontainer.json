@@ -1,0 +1,44 @@
+{
+  "name": "amigo-dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/mise:1": {}
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  "forwardPorts": [9000],
+  "portsAttributes": {
+    "9000": {
+      "label": "AMIgo (sbt)"
+    }
+  },
+
+  "containerEnv": {
+    "MISE_DATA_DIR": "/mnt/mise-data"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/mnt/mise-data/shims"
+  },
+
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+    {
+      "source": "docker-mise-data-volume",
+      "target": "/mnt/mise-data",
+      "type": "volume"
+    }
+  ],
+
+  "postCreateCommand": "sudo chown -R vscode:vscode /mnt/mise-data && bash -lc '[ -x .devcontainer/bootstrap.sh ] || (echo \".devcontainer/bootstrap.sh missing or not executable\" && exit 1); .devcontainer/bootstrap.sh'",
+  "postStartCommand": "bash -lc 'mise doctor || true'",
+
+  "customizations": {
+    "jetbrains": {
+      "plugins": ["org.intellij.scala", "com.github.l34130.mise", "com.github.copilot"]
+    },
+    "vscode": {
+      "extensions": ["scala-lang.scala", "hverlin.mise-vscode", "GitHub.copilot"]
+    }
+  }
+}
