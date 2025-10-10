@@ -41,7 +41,9 @@ object PackageList extends Loggable {
       b =>
         val packageListKey = s3Path(bakeId)
         try {
-          val response = s3Client.getObjectAsBytes(builder => builder.bucket(b).key(packageListKey))
+          val response = s3Client.getObjectAsBytes(builder =>
+            builder.bucket(b).key(packageListKey)
+          )
           val list = new String(response.asByteArray())
           Right(removeNonPackageLines(list.split("\n").toList))
         } catch {

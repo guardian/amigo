@@ -16,13 +16,17 @@ class AmiMetadataLookup(ec2Client: Ec2Client) {
       result <- Either
         .catchNonFatal {
           ec2Client.describeImages(
-            DescribeImagesRequest.builder()
+            DescribeImagesRequest
+              .builder()
               .imageIds(ami)
               .build()
           )
         }
         .leftMap[String](_ => "Call to describe images failed")
-      imageDescription <- result.images().asScala.headOption
+      imageDescription <- result
+        .images()
+        .asScala
+        .headOption
         .fold[Either[String, Image]](Left(s"No ami with ID $ami found"))(i =>
           Right(i)
         )

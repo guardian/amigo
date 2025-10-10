@@ -10,12 +10,17 @@ object LambdaDistributionBucket {
       stage: String,
       accountNumbers: Seq[String]
   ): Unit = {
-    val policyText = try {
-      Option(s3Client.getBucketPolicy(builder => builder.bucket(bucketName)).policy())
-        .filter(_.nonEmpty)
-    } catch {
-      case _: Exception => None
-    }
+    val policyText =
+      try {
+        Option(
+          s3Client
+            .getBucketPolicy(builder => builder.bucket(bucketName))
+            .policy()
+        )
+          .filter(_.nonEmpty)
+      } catch {
+        case _: Exception => None
+      }
     val copierStatement = LambdaDistributionBucket.createCopierStatement(
       bucketName,
       stage,
@@ -26,7 +31,9 @@ object LambdaDistributionBucket {
       policyText,
       copierStatement
     )
-    s3Client.putBucketPolicy(builder => builder.bucket(bucketName).policy(newPolicy))
+    s3Client.putBucketPolicy(builder =>
+      builder.bucket(bucketName).policy(newPolicy)
+    )
   }
 
   /*

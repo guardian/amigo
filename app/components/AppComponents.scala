@@ -1,6 +1,10 @@
 package components
 
-import software.amazon.awssdk.auth.credentials.{ProfileCredentialsProvider, AwsCredentialsProviderChain, InstanceProfileCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{
+  ProfileCredentialsProvider,
+  AwsCredentialsProviderChain,
+  InstanceProfileCredentialsProvider
+}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.s3.S3Client
@@ -57,7 +61,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
-
 
 class AppComponents(context: Context, identity: AppIdentity)
     extends BuiltInComponentsFromContext(context)
@@ -118,7 +121,8 @@ class AppComponents(context: Context, identity: AppIdentity)
       .credentialsProvider(awsCreds)
       .region(region)
       .build()
-    val result = stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build())
+    val result =
+      stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build())
     val amigoAwsAccount = result.account()
     amigoAwsAccount
   }

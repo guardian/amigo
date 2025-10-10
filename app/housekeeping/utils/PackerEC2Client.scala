@@ -16,19 +16,33 @@ import scala.jdk.CollectionConverters._
 class PackerEC2Client(underlying: Ec2Client, amigoStage: String) {
 
   private def hasTag(instance: Instance, key: String, value: String): Boolean =
-    instance.tags().asScala.exists(tag =>
-      tag.key() == key && tag.value() == value
-    )
+    instance
+      .tags()
+      .asScala
+      .exists(tag => tag.key() == key && tag.value() == value)
 
   def getBakeInstance(bakeId: BakeId): Option[Instance] = {
     // Filters here are base on the instance tags that are set in PackerBuildConfigGenerator.
-    val request = DescribeInstancesRequest.builder()
+    val request = DescribeInstancesRequest
+      .builder()
       .filters(
         Filter.builder().name("tag:AmigoStage").values(amigoStage).build(),
-        Filter.builder().name("tag:Stage").values(PackerBuildConfigGenerator.stage).build(),
-        Filter.builder().name("tag:Stack").values(PackerBuildConfigGenerator.stack).build(),
+        Filter
+          .builder()
+          .name("tag:Stage")
+          .values(PackerBuildConfigGenerator.stage)
+          .build(),
+        Filter
+          .builder()
+          .name("tag:Stack")
+          .values(PackerBuildConfigGenerator.stack)
+          .build(),
         Filter.builder().name("tag:BakeId").values(bakeId.toString).build(),
-        Filter.builder().name("instance-state-name").values("running", "stopped").build()
+        Filter
+          .builder()
+          .name("instance-state-name")
+          .values("running", "stopped")
+          .build()
       )
       .build()
 
@@ -53,7 +67,8 @@ class PackerEC2Client(underlying: Ec2Client, amigoStage: String) {
   }
 
   def terminateEC2Instance(instanceId: String): Unit = {
-    val request = TerminateInstancesRequest.builder()
+    val request = TerminateInstancesRequest
+      .builder()
       .instanceIds(instanceId)
       .build()
     underlying.terminateInstances(request)
@@ -61,14 +76,27 @@ class PackerEC2Client(underlying: Ec2Client, amigoStage: String) {
 
   def getRunningPackerInstances(): List[Instance] = {
 
-    val request = DescribeInstancesRequest.builder()
+    val request = DescribeInstancesRequest
+      .builder()
       .filters(
         // These filters correspond to the tags added in packer.PackerBuildConfigGenerator
         Filter.builder().name("tag:AmigoStage").values(amigoStage).build(),
-        Filter.builder().name("tag:Stage").values(PackerBuildConfigGenerator.stage).build(),
-        Filter.builder().name("tag:Stack").values(PackerBuildConfigGenerator.stack).build(),
+        Filter
+          .builder()
+          .name("tag:Stage")
+          .values(PackerBuildConfigGenerator.stage)
+          .build(),
+        Filter
+          .builder()
+          .name("tag:Stack")
+          .values(PackerBuildConfigGenerator.stack)
+          .build(),
         Filter.builder().name("tag:Name").values("Packer Builder").build(),
-        Filter.builder().name("instance-state-name").values("running", "stopped").build()
+        Filter
+          .builder()
+          .name("instance-state-name")
+          .values("running", "stopped")
+          .build()
       )
       .build()
 

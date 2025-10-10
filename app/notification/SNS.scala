@@ -43,7 +43,8 @@ object SNS extends Loggable {
   def listTopicArns(implicit client: SnsClient): List[String] = SNS
     .listAwsResource[Topic] { nextToken =>
       val result = client.listTopics(
-        ListTopicsRequest.builder()
+        ListTopicsRequest
+          .builder()
           .nextToken(nextToken.orNull)
           .build()
       )
@@ -53,7 +54,8 @@ object SNS extends Loggable {
 
   def createTopic(topicName: String)(implicit client: SnsClient): String = {
     val result = client.createTopic(
-      CreateTopicRequest.builder()
+      CreateTopicRequest
+        .builder()
         .name(topicName)
         .build()
     )
@@ -65,12 +67,14 @@ object SNS extends Loggable {
   def updatePermissions(topicArn: String, accounts: Seq[String])(implicit
       client: SnsClient
   ): Unit = {
-    val removeRequest = RemovePermissionRequest.builder()
+    val removeRequest = RemovePermissionRequest
+      .builder()
       .topicArn(topicArn)
       .label("amigo_lambda_subs")
       .build()
     client.removePermission(removeRequest)
-    val addRequest = AddPermissionRequest.builder()
+    val addRequest = AddPermissionRequest
+      .builder()
       .topicArn(topicArn)
       .awsAccountIds(accounts.asJava)
       .actionNames("Subscribe", "ListSubscriptionsByTopic", "Receive")

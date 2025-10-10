@@ -53,7 +53,8 @@ class DeleteLongRunningEC2InstancesSpec
     when(longRunningInstance2.instanceId()).thenReturn("2")
 
     val instance = mock[Instance]
-    when(instance.launchTime()).thenReturn(now.minusMinutes(24).toDate.toInstant)
+    when(instance.launchTime())
+      .thenReturn(now.minusMinutes(24).toDate.toInstant)
     when(instance.instanceId()).thenReturn("3")
 
     when(packerEC2Client.getRunningPackerInstances())
