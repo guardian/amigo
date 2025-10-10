@@ -1,17 +1,21 @@
 package notification
 
-import com.amazonaws.services.s3.AmazonS3
+import software.amazon.awssdk.services.s3.S3Client
 import play.api.libs.json._
 
 object LambdaDistributionBucket {
   def updateBucketPolicy(
-      s3Client: AmazonS3,
+      s3Client: S3Client,
       bucketName: String,
       stage: String,
       accountNumbers: Seq[String]
   ): Unit = {
-    val policyText = Option(s3Client.getBucketPolicy(bucketName).getPolicyText)
-      .filter(_.nonEmpty)
+    val policyText = try {
+      Option(s3Client.getBucketPolicy(builder => builder.bucket(bucketName)).policy())
+        .filter(_.nonEmpty)
+    } catch {
+      case _: Exception => None
+    }
     val copierStatement = LambdaDistributionBucket.createCopierStatement(
       bucketName,
       stage,
@@ -22,7 +26,7 @@ object LambdaDistributionBucket {
       policyText,
       copierStatement
     )
-    s3Client.setBucketPolicy(bucketName, newPolicy)
+    s3Client.putBucketPolicy(builder => builder.bucket(bucketName).policy(newPolicy))
   }
 
   /*

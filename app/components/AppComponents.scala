@@ -1,26 +1,13 @@
 package components
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{
-  AWSCredentialsProviderChain,
-  InstanceProfileCredentialsProvider
-}
-import com.amazonaws.regions.Regions
-import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
-import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
-import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.securitytoken.{
-  AWSSecurityTokenService,
-  AWSSecurityTokenServiceClientBuilder
-}
-import com.amazonaws.services.sns.AmazonSNSClientBuilder
-import com.amazonaws.{
-  AmazonClientException,
-  AmazonWebServiceRequest,
-  ClientConfiguration
-}
+import software.amazon.awssdk.auth.credentials.{ProfileCredentialsProvider, AwsCredentialsProviderChain, InstanceProfileCredentialsProvider}
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.ec2.Ec2Client
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.sts.StsClient
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
+import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.core.exception.SdkClientException
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.gu.googleauth.{
   AntiForgeryChecker,
@@ -59,12 +46,6 @@ import prism.Prism
 import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
 import services.{AmiMetadataLookup, Loggable, PrismData}
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
-  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
-  ProfileCredentialsProvider => ProfileCredentialsProviderV2
-}
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.ssm.SsmClient
@@ -77,32 +58,6 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
-  private def exceptionInfo(e: Throwable): String = {
-    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(
-        e.getCause
-      ).map(e => exceptionInfo(e))}"
-  }
-
-  override def shouldRetry(
-      originalRequest: AmazonWebServiceRequest,
-      exception: AmazonClientException,
-      retriesAttempted: Int
-  ): Boolean = {
-    val willRetry =
-      super.shouldRetry(originalRequest, exception, retriesAttempted)
-    if (willRetry) {
-      log.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest)
-          .map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
-    } else {
-      log.warn(s"Encountered fatal exception during AWS API call", exception)
-      Option(exception.getCause).foreach(t =>
-        log.warn(s"Cause of fatal exception", t)
-      )
-    }
-    willRetry
-  }
-}
 
 class AppComponents(context: Context, identity: AppIdentity)
     extends BuiltInComponentsFromContext(context)
@@ -123,31 +78,16 @@ class AppComponents(context: Context, identity: AppIdentity)
     .get[Option[String]](key)
     .getOrElse(sys.error(s"Missing config key: $key"))
 
-  val awsCredsForV1 = new AWSCredentialsProviderChain(
-    new ProfileCredentialsProvider("deployTools"),
-    new ProfileCredentialsProvider(),
-    InstanceProfileCredentialsProvider.getInstance()
-  )
-
-  val awsCredsForV2 = AwsCredentialsProviderChainV2
+  val awsCreds = AwsCredentialsProviderChain
     .builder()
     .credentialsProviders(
-      ProfileCredentialsProviderV2.create("deployTools"),
-      ProfileCredentialsProviderV2.create(),
-      InstanceProfileCredentialsProviderV2.create()
+      ProfileCredentialsProvider.create("deployTools"),
+      ProfileCredentialsProvider.create(),
+      InstanceProfileCredentialsProvider.create()
     )
     .build()
 
-  val region = Regions.EU_WEST_1
-
-  val clientConfiguration = new ClientConfiguration().withRetryPolicy(
-    new RetryPolicy(
-      new LoggingRetryCondition(),
-      PredefinedRetryPolicies.DEFAULT_BACKOFF_STRATEGY,
-      20,
-      false
-    )
-  )
+  val region = Region.EU_WEST_1
 
   val secretStateSupplier: SnapshotProvider = {
     new SecretSupplier(
@@ -155,8 +95,8 @@ class AppComponents(context: Context, identity: AppIdentity)
       s"/$stage/deploy/amigo/play.http.secret.key",
       AwsSdkV2(
         SsmClient.builder
-          .credentialsProvider(awsCredsForV2)
-          .region(Region.of(region.getName))
+          .credentialsProvider(awsCreds)
+          .region(region)
           .build()
       )
     )
@@ -165,29 +105,28 @@ class AppComponents(context: Context, identity: AppIdentity)
   implicit val dynamo: Dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient
       .builder()
-      .credentialsProvider(awsCredsForV2)
-      .region(Region.of(region.getName))
+      .credentialsProvider(awsCreds)
+      .region(region)
       .build()
     new Dynamo(dynamoClient, stage)
   }
   dynamo.initTables()
 
   val awsAccount = {
-    val stsClient: AWSSecurityTokenService =
-      AWSSecurityTokenServiceClientBuilder.standard
-        .withCredentials(awsCredsForV1)
-        .withRegion(region)
-        .withClientConfiguration(clientConfiguration)
-        .build()
-    val result = stsClient.getCallerIdentity(new GetCallerIdentityRequest())
-    val amigoAwsAccount = result.getAccount
+    val stsClient: StsClient = StsClient
+      .builder()
+      .credentialsProvider(awsCreds)
+      .region(region)
+      .build()
+    val result = stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build())
+    val amigoAwsAccount = result.account()
     amigoAwsAccount
   }
 
-  val ec2Client: AmazonEC2 = AmazonEC2ClientBuilder.standard
-    .withCredentials(awsCredsForV1)
-    .withRegion(region)
-    .withClientConfiguration(clientConfiguration)
+  val ec2Client: Ec2Client = Ec2Client
+    .builder()
+    .credentialsProvider(awsCreds)
+    .region(region)
     .build()
 
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
@@ -207,25 +146,25 @@ class AppComponents(context: Context, identity: AppIdentity)
     Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
 
   val sns: SNS = {
-    val snsClient = AmazonSNSClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCredsForV1)
-      .withClientConfiguration(clientConfiguration)
+    val snsClient = SnsClient
+      .builder()
+      .region(region)
+      .credentialsProvider(awsCreds)
       .build()
     new SNS(snsClient, stage, accountNumbers)
   }
 
-  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
-    .withRegion(region)
-    .withCredentials(awsCredsForV1)
-    .withClientConfiguration(clientConfiguration)
+  val s3Client: S3Client = S3Client
+    .builder()
+    .region(region)
+    .credentialsProvider(awsCreds)
     .build()
 
   val anghammaradSNSClient: SnsAsyncClient =
     SnsAsyncClient
       .builder()
-      .region(Region.of(region.getName))
-      .credentialsProvider(awsCredsForV2)
+      .region(region)
+      .credentialsProvider(awsCreds)
       .build()
 
   val amigoUrl: String = configuration
@@ -245,7 +184,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   }
 
   val sender: NotificationSender =
-    new NotificationSender(sns, region.getName, stage)
+    new NotificationSender(sns, region.id(), stage)
 
   val eventBusActorSystem: ActorSystem[BakeEvent] = {
     val eventListeners = Map(

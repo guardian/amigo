@@ -1,7 +1,7 @@
 package housekeeping.utils
 
-import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.{
+import software.amazon.awssdk.services.ec2.Ec2Client
+import software.amazon.awssdk.services.ec2.model.{
   DescribeInstancesRequest,
   Filter,
   Instance,
@@ -13,29 +13,30 @@ import packer.PackerBuildConfigGenerator
 import scala.jdk.CollectionConverters._
 
 // EC2 methods, specifically related to Packer instances.
-class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
+class PackerEC2Client(underlying: Ec2Client, amigoStage: String) {
 
   private def hasTag(instance: Instance, key: String, value: String): Boolean =
-    instance.getTags.asScala.exists(tag =>
-      tag.getKey == key && tag.getValue == value
+    instance.tags().asScala.exists(tag =>
+      tag.key() == key && tag.value() == value
     )
 
   def getBakeInstance(bakeId: BakeId): Option[Instance] = {
     // Filters here are base on the instance tags that are set in PackerBuildConfigGenerator.
-    val request = new DescribeInstancesRequest()
-      .withFilters(
-        new Filter("tag:AmigoStage", List(amigoStage).asJava),
-        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
-        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
-        new Filter("tag:BakeId", List(bakeId.toString).asJava),
-        new Filter("instance-state-name", List("running", "stopped").asJava)
+    val request = DescribeInstancesRequest.builder()
+      .filters(
+        Filter.builder().name("tag:AmigoStage").values(amigoStage).build(),
+        Filter.builder().name("tag:Stage").values(PackerBuildConfigGenerator.stage).build(),
+        Filter.builder().name("tag:Stack").values(PackerBuildConfigGenerator.stack).build(),
+        Filter.builder().name("tag:BakeId").values(bakeId.toString).build(),
+        Filter.builder().name("instance-state-name").values("running", "stopped").build()
       )
+      .build()
 
     underlying
       .describeInstances(request)
-      .getReservations
+      .reservations()
       .asScala
-      .flatMap(_.getInstances.asScala)
+      .flatMap(_.instances().asScala)
       .find { instance =>
         hasTag(
           instance,
@@ -52,27 +53,30 @@ class PackerEC2Client(underlying: AmazonEC2, amigoStage: String) {
   }
 
   def terminateEC2Instance(instanceId: String): Unit = {
-    val request = new TerminateInstancesRequest().withInstanceIds(instanceId)
+    val request = TerminateInstancesRequest.builder()
+      .instanceIds(instanceId)
+      .build()
     underlying.terminateInstances(request)
   }
 
   def getRunningPackerInstances(): List[Instance] = {
 
-    val request = new DescribeInstancesRequest()
-      .withFilters(
+    val request = DescribeInstancesRequest.builder()
+      .filters(
         // These filters correspond to the tags added in packer.PackerBuildConfigGenerator
-        new Filter("tag:AmigoStage", List(amigoStage).asJava),
-        new Filter("tag:Stage", List(PackerBuildConfigGenerator.stage).asJava),
-        new Filter("tag:Stack", List(PackerBuildConfigGenerator.stack).asJava),
-        new Filter("tag:Name", List("Packer Builder").asJava),
-        new Filter("instance-state-name", List("running", "stopped").asJava)
+        Filter.builder().name("tag:AmigoStage").values(amigoStage).build(),
+        Filter.builder().name("tag:Stage").values(PackerBuildConfigGenerator.stage).build(),
+        Filter.builder().name("tag:Stack").values(PackerBuildConfigGenerator.stack).build(),
+        Filter.builder().name("tag:Name").values("Packer Builder").build(),
+        Filter.builder().name("instance-state-name").values("running", "stopped").build()
       )
+      .build()
 
     underlying
       .describeInstances(request)
-      .getReservations
+      .reservations()
       .asScala
-      .flatMap(_.getInstances.asScala)
+      .flatMap(_.instances().asScala)
       .toList
   }
 }

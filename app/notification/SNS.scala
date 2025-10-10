@@ -1,7 +1,7 @@
 package notification
 
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sns.model._
+import software.amazon.awssdk.services.sns.SnsClient
+import software.amazon.awssdk.services.sns.model._
 import services.Loggable
 
 import scala.annotation.tailrec
@@ -32,7 +32,7 @@ object SNS extends Loggable {
   @tailrec
   private def waitForTopicToBecomeAvailable(
       arn: String
-  )(implicit client: AmazonSNS): Unit = {
+  )(implicit client: SnsClient): Unit = {
     if (!listTopicArns.exists(arn ==)) {
       log.info(s"Waiting for topic $arn to become available ...")
       Thread.sleep(500L)
@@ -40,40 +40,47 @@ object SNS extends Loggable {
     }
   }
 
-  def listTopicArns(implicit client: AmazonSNS): List[String] = SNS
+  def listTopicArns(implicit client: SnsClient): List[String] = SNS
     .listAwsResource[Topic] { nextToken =>
       val result = client.listTopics(
-        new ListTopicsRequest().withNextToken(nextToken.orNull)
+        ListTopicsRequest.builder()
+          .nextToken(nextToken.orNull)
+          .build()
       )
-      result.getTopics.asScala.toList -> Option(result.getNextToken)
+      result.topics().asScala.toList -> Option(result.nextToken())
     }
-    .map(_.getTopicArn)
+    .map(_.topicArn())
 
-  def createTopic(topicName: String)(implicit client: AmazonSNS): String = {
-    val result =
-      client.createTopic(new CreateTopicRequest().withName(topicName))
-    val topicArn = result.getTopicArn
+  def createTopic(topicName: String)(implicit client: SnsClient): String = {
+    val result = client.createTopic(
+      CreateTopicRequest.builder()
+        .name(topicName)
+        .build()
+    )
+    val topicArn = result.topicArn()
     SNS.waitForTopicToBecomeAvailable(topicArn)
     topicArn
   }
 
   def updatePermissions(topicArn: String, accounts: Seq[String])(implicit
-      client: AmazonSNS
+      client: SnsClient
   ): Unit = {
-    val removeRequest = new RemovePermissionRequest()
-      .withTopicArn(topicArn)
-      .withLabel("amigo_lambda_subs")
+    val removeRequest = RemovePermissionRequest.builder()
+      .topicArn(topicArn)
+      .label("amigo_lambda_subs")
+      .build()
     client.removePermission(removeRequest)
-    val addRequest = new AddPermissionRequest()
-      .withTopicArn(topicArn)
-      .withAWSAccountIds(accounts.asJava)
-      .withActionNames("Subscribe", "ListSubscriptionsByTopic", "Receive")
-      .withLabel("amigo_lambda_subs")
+    val addRequest = AddPermissionRequest.builder()
+      .topicArn(topicArn)
+      .awsAccountIds(accounts.asJava)
+      .actionNames("Subscribe", "ListSubscriptionsByTopic", "Receive")
+      .label("amigo_lambda_subs")
+      .build()
     client.addPermission(addRequest)
   }
 
   def findOrCreateTopic(topicName: String, accountNumbers: Seq[String])(implicit
-      client: AmazonSNS
+      client: SnsClient
   ): String = {
     val topicArn = listTopicArns.find(_.endsWith(s":$topicName")) match {
       case None      => createTopic(topicName)
@@ -84,10 +91,10 @@ object SNS extends Loggable {
   }
 }
 
-class SNS(sns: AmazonSNS, stage: String, accountNumbers: Seq[String])(implicit
+class SNS(sns: SnsClient, stage: String, accountNumbers: Seq[String])(implicit
     exec: ExecutionContext
 ) {
-  implicit val client: AmazonSNS = sns
+  implicit val client: SnsClient = sns
   val topicName: String = s"amigo-$stage-notify"
   val topicArn: String = SNS.findOrCreateTopic(topicName, accountNumbers)
 
