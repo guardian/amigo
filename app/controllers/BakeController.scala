@@ -1,6 +1,6 @@
 package controllers
 
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
+import software.amazon.awssdk.services.s3.S3Client
 import com.gu.googleauth.{AuthAction, GoogleAuthConfig}
 import data._
 import event._
@@ -22,7 +22,7 @@ class BakeController(
     debugAvailable: Boolean,
     amiMetadataLookup: AmiMetadataLookup,
     amigoDataBucket: Option[String],
-    s3Client: AmazonS3,
+    s3Client: S3Client,
     packerRunner: PackerRunner,
     bakeDeletionFrequencyMinutes: Int
 )(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)

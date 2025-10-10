@@ -1,6 +1,6 @@
 package housekeeping
 
-import com.amazonaws.services.ec2.model.Instance
+import software.amazon.awssdk.services.ec2.model.Instance
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.BakeId
 import org.joda.time.DateTime
@@ -30,7 +30,7 @@ class DeleteLongRunningEC2Instances(
       dateTime: DateTime
   ): List[Instance] =
     packerEC2Client.getRunningPackerInstances().filter { instance =>
-      val launchTime = new DateTime(instance.getLaunchTime)
+      val launchTime = new DateTime(instance.launchTime().toEpochMilli)
       launchTime.isBefore(dateTime)
     }
 
@@ -45,17 +45,17 @@ class DeleteLongRunningEC2Instances(
     } else {
       log.warn(
         s"instances found to terminate that were launched before $earliestStartedAt: " +
-          s"${instancesToTerminate.map(_.getInstanceId).mkString(",")}"
+          s"${instancesToTerminate.map(_.instanceId()).mkString(",")}"
       )
 
       instancesToTerminate.foreach { instance =>
-        log.info(s"terminating instance ${instance.getInstanceId}")
-        packerEC2Client.terminateEC2Instance(instance.getInstanceId)
+        log.info(s"terminating instance ${instance.instanceId()}")
+        packerEC2Client.terminateEC2Instance(instance.instanceId())
 
         getBakeIdFromInstance(instance) match {
           case None =>
             log.warn(
-              s"unable to get bake id for instance ${instance.getInstanceId}"
+              s"unable to get bake id for instance ${instance.instanceId()}"
             )
           case Some(id) =>
             log.info(s"updating status of $id to timed out")
@@ -72,8 +72,8 @@ object DeleteLongRunningEC2Instances {
 
   def getBakeIdFromInstance(instance: Instance): Option[BakeId] = {
     for {
-      raw <- instance.getTags.asScala.find(_.getKey == "BakeId")
-      id <- BakeId.fromString(raw.getValue).toOption
+      raw <- instance.tags().asScala.find(_.key() == "BakeId")
+      id <- BakeId.fromString(raw.value()).toOption
     } yield id
   }
 }

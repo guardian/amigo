@@ -1,6 +1,6 @@
 package data
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
 import org.scanamo.syntax._
 import models._

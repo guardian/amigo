@@ -42,7 +42,7 @@ class TimeOutLongRunningBakes(
           )
 
         case Some(instance) =>
-          val instanceId = instance.getInstanceId
+          val instanceId = instance.instanceId()
           log.info(
             s"terminating instance $instanceId associated with long running bake ${bake.bakeId}"
           )

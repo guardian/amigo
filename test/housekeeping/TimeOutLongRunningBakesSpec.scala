@@ -1,6 +1,6 @@
 package housekeeping
 
-import com.amazonaws.services.ec2.model.Instance
+import software.amazon.awssdk.services.ec2.model.Instance
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.{Bake, BakeId, BakeStatus, RecipeId}
 import org.joda.time.DateTime
@@ -124,7 +124,7 @@ class TimeOutLongRunningBakesSpec
     val overrunningBakeId: BakeId =
       BakeId(RecipeId("identity"), buildNumber = 1)
     val overrunningInstance: Instance = mock[Instance]
-    when(overrunningInstance.getInstanceId).thenReturn(
+    when(overrunningInstance.instanceId()).thenReturn(
       "overrunning-instance-id"
     )
 
