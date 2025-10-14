@@ -10,11 +10,8 @@ import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
 import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.securitytoken.{
-  AWSSecurityTokenService,
-  AWSSecurityTokenServiceClientBuilder
-}
+import software.amazon.awssdk.services.sts.StsClient
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.amazonaws.{
   AmazonClientException,
@@ -173,14 +170,14 @@ class AppComponents(context: Context, identity: AppIdentity)
   dynamo.initTables()
 
   val awsAccount = {
-    val stsClient: AWSSecurityTokenService =
-      AWSSecurityTokenServiceClientBuilder.standard
-        .withCredentials(awsCredsForV1)
-        .withRegion(region)
-        .withClientConfiguration(clientConfiguration)
-        .build()
-    val result = stsClient.getCallerIdentity(new GetCallerIdentityRequest())
-    val amigoAwsAccount = result.getAccount
+    val stsClient: StsClient = StsClient
+      .builder()
+      .credentialsProvider(awsCredsForV2)
+      .region(Region.of(region.getName))
+      .build()
+    val result = stsClient
+      .getCallerIdentity(GetCallerIdentityRequest.builder().build())
+    val amigoAwsAccount = result.account()
     amigoAwsAccount
   }
 
