@@ -1,6 +1,5 @@
 package controllers
 
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
 import com.gu.googleauth.{AuthAction, GoogleAuthConfig}
 import data._
 import event._
@@ -12,6 +11,7 @@ import play.api.mvc._
 import services.{AmiMetadataLookup, Loggable, PrismData}
 import play.api.libs.json._
 import prism.{RecipeUsage, SimpleBakeUsage}
+import software.amazon.awssdk.services.s3.S3Client
 
 class BakeController(
     val authAction: AuthAction[AnyContent],
@@ -22,7 +22,7 @@ class BakeController(
     debugAvailable: Boolean,
     amiMetadataLookup: AmiMetadataLookup,
     amigoDataBucket: Option[String],
-    s3Client: AmazonS3,
+    s3Client: S3Client,
     packerRunner: PackerRunner,
     bakeDeletionFrequencyMinutes: Int
 )(implicit dynamo: Dynamo, packerConfig: PackerConfig, eventBus: EventBus)
