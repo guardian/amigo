@@ -11,7 +11,6 @@ import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
-import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.amazonaws.{
   AmazonClientException,
   AmazonWebServiceRequest,
@@ -63,7 +62,7 @@ import software.amazon.awssdk.auth.credentials.{
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sns.{SnsAsyncClient, SnsClient}
 import software.amazon.awssdk.services.ssm.SsmClient
 
 import java.io.FileInputStream
@@ -204,10 +203,10 @@ class AppComponents(context: Context, identity: AppIdentity)
     Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
 
   val sns: SNS = {
-    val snsClient = AmazonSNSClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCredsForV1)
-      .withClientConfiguration(clientConfiguration)
+    val snsClient = SnsClient
+      .builder()
+      .region(Region.of(region.getName))
+      .credentialsProvider(awsCredsForV2)
       .build()
     new SNS(snsClient, stage, accountNumbers)
   }
