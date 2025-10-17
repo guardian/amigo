@@ -9,7 +9,6 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
 import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
@@ -63,6 +62,7 @@ import software.amazon.awssdk.auth.credentials.{
 }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.sns.SnsAsyncClient
 import software.amazon.awssdk.services.ssm.SsmClient
 
@@ -212,10 +212,10 @@ class AppComponents(context: Context, identity: AppIdentity)
     new SNS(snsClient, stage, accountNumbers)
   }
 
-  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
-    .withRegion(region)
-    .withCredentials(awsCredsForV1)
-    .withClientConfiguration(clientConfiguration)
+  val s3Client: S3Client = S3Client
+    .builder()
+    .region(Region.of(region.getName))
+    .credentialsProvider(awsCredsForV2)
     .build()
 
   val anghammaradSNSClient: SnsAsyncClient =

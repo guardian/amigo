@@ -1,14 +1,10 @@
 package data
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
-import org.scanamo.syntax._
 import models._
 import org.scanamo.DynamoObject
+import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
+import org.scanamo.syntax._
 import services.Loggable
-
-import scala.annotation.tailrec
-import scala.jdk.CollectionConverters._
 
 object BakeLogs extends Loggable {
 
