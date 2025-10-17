@@ -92,7 +92,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
-  "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
+  "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "8.1",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
   "ch.qos.logback" % "logback-classic" % "1.5.18",
