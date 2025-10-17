@@ -1,14 +1,14 @@
 package data
 
-import com.amazonaws.services.s3.AmazonS3
 import models.BakeId
 import models.BakeId.toFilename
-import models.{Bake, BakeId}
 import services.Loggable
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
+
 import fun.mike.dmp.{Diff, DiffMatchPatch}
 
 import scala.jdk.CollectionConverters._
-import scala.collection.{immutable, mutable}
 import scala.util.control.NonFatal
 
 case class PackageListDiff(
@@ -33,7 +33,7 @@ object PackageList extends Loggable {
   }
 
   def getPackageList(
-      s3Client: AmazonS3,
+      s3Client: S3Client,
       bakeId: BakeId,
       bucket: Option[String]
   ): Either[String, List[String]] = {
@@ -41,7 +41,10 @@ object PackageList extends Loggable {
       b =>
         val packageListKey = s3Path(bakeId)
         try {
-          val list = s3Client.getObjectAsString(b, packageListKey)
+          val request =
+            GetObjectRequest.builder().bucket(b).key(packageListKey).build()
+          val response = s3Client.getObjectAsBytes(request)
+          val list = new String(response.asByteArray())
           Right(removeNonPackageLines(list.split("\n").toList))
         } catch {
           case NonFatal(e) =>
@@ -78,7 +81,7 @@ object PackageList extends Loggable {
   }
 
   def getPackageListDiff(
-      s3Client: AmazonS3,
+      s3Client: S3Client,
       newPackageList: List[String],
       previousBakeId: Option[BakeId],
       bucket: Option[String]
