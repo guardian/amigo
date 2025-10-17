@@ -1,9 +1,9 @@
 package data
 
-import models._
-import org.scanamo.DynamoObject
 import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
 import org.scanamo.syntax._
+import models._
+import org.scanamo.DynamoObject
 import services.Loggable
 
 object BakeLogs extends Loggable {
