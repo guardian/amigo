@@ -1,6 +1,5 @@
 package housekeeping
 
-import com.amazonaws.services.ec2.model.{Instance, Tag}
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.{BakeId, RecipeId}
 import org.joda.time.DateTime
@@ -10,7 +9,7 @@ import org.scalatest.OptionValues
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
+import software.amazon.awssdk.services.ec2.model.{Instance, Tag}
 import scala.jdk.CollectionConverters._
 
 class DeleteLongRunningEC2InstancesSpec
@@ -28,8 +27,8 @@ class DeleteLongRunningEC2InstancesSpec
 
   "getBakeIdFromInstance" should "successfully parse a bake id from a tag" in {
     val instance = mock[Instance]
-    when(instance.getTags).thenReturn(
-      List(new Tag("BakeId", "recipe #2")).asJava
+    when(instance.tags()).thenReturn(
+      List(Tag.builder().key("BakeId").value("recipe #2").build()).asJava
     )
     DeleteLongRunningEC2Instances
       .getBakeIdFromInstance(instance)
@@ -41,20 +40,21 @@ class DeleteLongRunningEC2InstancesSpec
     val now = DateTime.now()
 
     val longRunningInstance1 = mock[Instance]
-    when(longRunningInstance1.getLaunchTime).thenReturn(
-      now.minusHours(2).toDate
+    when(longRunningInstance1.launchTime()).thenReturn(
+      now.minusHours(2).toDate.toInstant
     )
-    when(longRunningInstance1.getInstanceId).thenReturn("1")
+    when(longRunningInstance1.instanceId()).thenReturn("1")
 
     val longRunningInstance2 = mock[Instance]
-    when(longRunningInstance2.getLaunchTime).thenReturn(
-      now.minusMinutes(61).toDate
+    when(longRunningInstance2.launchTime()).thenReturn(
+      now.minusMinutes(61).toDate.toInstant
     )
-    when(longRunningInstance2.getInstanceId).thenReturn("2")
+    when(longRunningInstance2.instanceId()).thenReturn("2")
 
     val instance = mock[Instance]
-    when(instance.getLaunchTime).thenReturn(now.minusMinutes(24).toDate)
-    when(instance.getInstanceId).thenReturn("3")
+    when(instance.launchTime())
+      .thenReturn(now.minusMinutes(24).toDate.toInstant)
+    when(instance.instanceId()).thenReturn("3")
 
     when(packerEC2Client.getRunningPackerInstances())
       .thenReturn(List(longRunningInstance1, longRunningInstance2, instance))
