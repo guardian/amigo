@@ -41,10 +41,12 @@ import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
 import services.{AmiMetadataLookup, Loggable, PrismData}
 import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain => AwsCredentialsProviderChainV2,
-  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
-  ProfileCredentialsProvider => ProfileCredentialsProviderV2
+  AwsCredentialsProviderChain,
+  InstanceProfileCredentialsProvider,
+  ProfileCredentialsProvider
 }
+import software.amazon.awssdk.awscore.retry.AwsRetryStrategy
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.ec2.Ec2Client
@@ -59,33 +61,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
-
-//class LoggingRetryCondition extends SDKDefaultRetryCondition with Loggable {
-//  private def exceptionInfo(e: Throwable): String = {
-//    s"${e.getClass.getName} ${e.getMessage} Cause: ${Option(
-//        e.getCause
-//      ).map(e => exceptionInfo(e))}"
-//  }
-//
-//  override def shouldRetry(
-//      originalRequest: AmazonWebServiceRequest,
-//      exception: AmazonClientException,
-//      retriesAttempted: Int
-//  ): Boolean = {
-//    val willRetry =
-//      super.shouldRetry(originalRequest, exception, retriesAttempted)
-//    if (willRetry) {
-//      log.warn(s"AWS SDK retry $retriesAttempted: ${Option(originalRequest)
-//          .map(_.getClass.getName)} threw ${exceptionInfo(exception)}")
-//    } else {
-//      log.warn(s"Encountered fatal exception during AWS API call", exception)
-//      Option(exception.getCause).foreach(t =>
-//        log.warn(s"Cause of fatal exception", t)
-//      )
-//    }
-//    willRetry
-//  }
-//}
 
 class AppComponents(context: Context, identity: AppIdentity)
     extends BuiltInComponentsFromContext(context)
@@ -106,25 +81,16 @@ class AppComponents(context: Context, identity: AppIdentity)
     .get[Option[String]](key)
     .getOrElse(sys.error(s"Missing config key: $key"))
 
-  val awsCredsForV2 = AwsCredentialsProviderChainV2
+  val awsCredentials = AwsCredentialsProviderChain
     .builder()
     .credentialsProviders(
-      ProfileCredentialsProviderV2.create("deployTools"),
-      ProfileCredentialsProviderV2.create(),
-      InstanceProfileCredentialsProviderV2.create()
+      ProfileCredentialsProvider.create("deployTools"),
+      ProfileCredentialsProvider.create(),
+      InstanceProfileCredentialsProvider.create()
     )
     .build()
 
   val region = Region.EU_WEST_1
-
-//  val clientConfiguration = new ClientConfiguration().withRetryPolicy(
-//    new RetryPolicy(
-//      new LoggingRetryCondition(),
-//      PredefinedRetryPolicies.DEFAULT_BACKOFF_STRATEGY,
-//      20,
-//      false
-//    )
-//  )
 
   val secretStateSupplier: SnapshotProvider = {
     new SecretSupplier(
@@ -132,7 +98,7 @@ class AppComponents(context: Context, identity: AppIdentity)
       s"/$stage/deploy/amigo/play.http.secret.key",
       AwsSdkV2(
         SsmClient.builder
-          .credentialsProvider(awsCredsForV2)
+          .credentialsProvider(awsCredentials)
           .region(region)
           .build()
       )
@@ -142,7 +108,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   implicit val dynamo: Dynamo = {
     val dynamoClient: DynamoDbClient = DynamoDbClient
       .builder()
-      .credentialsProvider(awsCredsForV2)
+      .credentialsProvider(awsCredentials)
       .region(region)
       .build()
     new Dynamo(dynamoClient, stage)
@@ -152,7 +118,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   val awsAccount = {
     val stsClient: StsClient = StsClient
       .builder()
-      .credentialsProvider(awsCredsForV2)
+      .credentialsProvider(awsCredentials)
       .region(region)
       .build()
     val result = stsClient
@@ -161,11 +127,10 @@ class AppComponents(context: Context, identity: AppIdentity)
     amigoAwsAccount
   }
 
-  // TODO: pass in rery 80 here how
   val ec2Client: Ec2Client = Ec2Client
     .builder()
     .region(region)
-    .credentialsProvider(awsCredsForV2)
+    .credentialsProvider(awsCredentials)
     .build()
 
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
@@ -188,7 +153,7 @@ class AppComponents(context: Context, identity: AppIdentity)
     val snsClient = SnsClient
       .builder()
       .region(region)
-      .credentialsProvider(awsCredsForV2)
+      .credentialsProvider(awsCredentials)
       .build()
     new SNS(snsClient, stage, accountNumbers)
   }
@@ -196,14 +161,14 @@ class AppComponents(context: Context, identity: AppIdentity)
   val s3Client: S3Client = S3Client
     .builder()
     .region(region)
-    .credentialsProvider(awsCredsForV2)
+    .credentialsProvider(awsCredentials)
     .build()
 
   val anghammaradSNSClient: SnsAsyncClient =
     SnsAsyncClient
       .builder()
       .region(region)
-      .credentialsProvider(awsCredsForV2)
+      .credentialsProvider(awsCredentials)
       .build()
 
   val amigoUrl: String = configuration
