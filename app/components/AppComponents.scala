@@ -9,13 +9,8 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.retry.PredefinedRetryPolicies.SDKDefaultRetryCondition
 import com.amazonaws.retry.{PredefinedRetryPolicies, RetryPolicy}
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2ClientBuilder}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest
-import com.amazonaws.services.securitytoken.{
-  AWSSecurityTokenService,
-  AWSSecurityTokenServiceClientBuilder
-}
-import com.amazonaws.services.sns.AmazonSNSClientBuilder
+import software.amazon.awssdk.services.sts.StsClient
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
 import com.amazonaws.{
   AmazonClientException,
   AmazonWebServiceRequest,
@@ -66,7 +61,8 @@ import software.amazon.awssdk.auth.credentials.{
 }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.sns.{SnsAsyncClient, SnsClient}
 import software.amazon.awssdk.services.ssm.SsmClient
 
 import java.io.FileInputStream
@@ -173,14 +169,14 @@ class AppComponents(context: Context, identity: AppIdentity)
   dynamo.initTables()
 
   val awsAccount = {
-    val stsClient: AWSSecurityTokenService =
-      AWSSecurityTokenServiceClientBuilder.standard
-        .withCredentials(awsCredsForV1)
-        .withRegion(region)
-        .withClientConfiguration(clientConfiguration)
-        .build()
-    val result = stsClient.getCallerIdentity(new GetCallerIdentityRequest())
-    val amigoAwsAccount = result.getAccount
+    val stsClient: StsClient = StsClient
+      .builder()
+      .credentialsProvider(awsCredsForV2)
+      .region(Region.of(region.getName))
+      .build()
+    val result = stsClient
+      .getCallerIdentity(GetCallerIdentityRequest.builder().build())
+    val amigoAwsAccount = result.account()
     amigoAwsAccount
   }
 
@@ -207,18 +203,18 @@ class AppComponents(context: Context, identity: AppIdentity)
     Await.result(prism.findAllAWSAccounts(), 30 seconds).map(_.accountNumber)
 
   val sns: SNS = {
-    val snsClient = AmazonSNSClientBuilder.standard
-      .withRegion(region)
-      .withCredentials(awsCredsForV1)
-      .withClientConfiguration(clientConfiguration)
+    val snsClient = SnsClient
+      .builder()
+      .region(Region.of(region.getName))
+      .credentialsProvider(awsCredsForV2)
       .build()
     new SNS(snsClient, stage, accountNumbers)
   }
 
-  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard
-    .withRegion(region)
-    .withCredentials(awsCredsForV1)
-    .withClientConfiguration(clientConfiguration)
+  val s3Client: S3Client = S3Client
+    .builder()
+    .region(Region.of(region.getName))
+    .credentialsProvider(awsCredsForV2)
     .build()
 
   val anghammaradSNSClient: SnsAsyncClient =
