@@ -1,12 +1,12 @@
 package notification
 
-import com.amazonaws.services.sns.model.PublishRequest
 import models.{AmiId, Bake}
 import models.packer.PackerVariablesConfig
 import _root_.packer.ImageDetails
-import play.api.libs.json.{Json, JsString, JsValue, Writes}
+import play.api.libs.json.{Json, JsString, Writes}
 import prism.Ami
 import services.Loggable
+import software.amazon.awssdk.services.sns.model.PublishRequest
 
 class NotificationSender(sns: SNS, region: String, stage: String)
     extends Loggable {
@@ -26,7 +26,11 @@ class NotificationSender(sns: SNS, region: String, stage: String)
     val messageStr = Json.stringify(message)
     log.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
     sns.client.publish(
-      new PublishRequest().withTopicArn(sns.topicArn).withMessage(messageStr)
+      PublishRequest
+        .builder()
+        .topicArn(sns.topicArn)
+        .message(messageStr)
+        .build()
     )
   }
 
@@ -43,9 +47,11 @@ class NotificationSender(sns: SNS, region: String, stage: String)
         s"Sending message to topic ${sns.housekeepingTopicArn}: $messageStr"
       )
       sns.client.publish(
-        new PublishRequest()
-          .withTopicArn(sns.housekeepingTopicArn)
-          .withMessage(messageStr)
+        PublishRequest
+          .builder()
+          .topicArn(sns.housekeepingTopicArn)
+          .message(messageStr)
+          .build()
       )
     }
   }

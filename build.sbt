@@ -90,10 +90,9 @@ libraryDependencies ++= Seq(
   "org.quartz-scheduler" % "quartz" % "2.5.0",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
-  "com.amazonaws" % "aws-java-sdk-sns" % awsV1SdkVersion,
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsV1SdkVersion,
-  "com.amazonaws" % "aws-java-sdk-sts" % awsV1SdkVersion,
-  "com.amazonaws" % "aws-java-sdk-kinesis" % awsV1SdkVersion,
+  "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "8.1",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
   "ch.qos.logback" % "logback-classic" % "1.5.18",
