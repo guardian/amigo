@@ -17,6 +17,7 @@
   pip:
     name: "{{ whisperx_package | default('whisperx') }}"
     executable: pip3
+    version: "{{ whisperx_version | default(omit) }}"
 
 # We use a python script to fetch the models which is owned by the transcription service. See the below PRs for details:
 #  -  https://github.com/guardian/amigo/pull/1607
