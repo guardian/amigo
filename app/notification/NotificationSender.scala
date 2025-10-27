@@ -3,19 +3,20 @@ package notification
 import models.{AmiId, Bake}
 import models.packer.PackerVariablesConfig
 import _root_.packer.ImageDetails
-import play.api.libs.json.{Json, JsString, Writes}
+import play.api.libs.json.{JsString, Json, Writes}
 import prism.Ami
 import services.Loggable
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sns.model.PublishRequest
 
-class NotificationSender(sns: SNS, region: String, stage: String)
+class NotificationSender(sns: SNS, region: Region, stage: String)
     extends Loggable {
   def sendTopicMessage(bake: Bake, amiId: AmiId): Unit = {
     val vars = PackerVariablesConfig(bake)
     val imageDetails = ImageDetails.apply(vars, stage)
     val message = Json.obj(
       "sourceAmi" -> amiId.value,
-      "sourceRegion" -> region,
+      "sourceRegion" -> region.toString,
       "targetAccounts" -> Json.toJson(
         bake.recipe.encryptFor.map(_.accountNumber)
       ),

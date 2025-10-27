@@ -188,7 +188,7 @@ class AppComponents(context: Context, identity: AppIdentity)
   }
 
   val sender: NotificationSender =
-    new NotificationSender(sns, region.id(), stage)
+    new NotificationSender(sns, region, stage)
 
   val eventBusActorSystem: ActorSystem[BakeEvent] = {
     val eventListeners = Map(
