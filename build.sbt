@@ -68,8 +68,6 @@ scalacOptions ++= Seq(
 val jacksonVersion = "2.19.2"
 val circeVersion = "0.14.14"
 
-// These can live in the same codebase, see: https://aws.amazon.com/blogs/developer/aws-sdk-for-java-2-x-released/
-val awsV1SdkVersion = "1.12.792"
 val awsV2SdkVersion = "2.34.9"
 val playSecretRotationVersion = "15.1.0"
 
@@ -89,7 +87,8 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.0",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
-  "com.amazonaws" % "aws-java-sdk-ec2" % awsV1SdkVersion,
+  "joda-time" % "joda-time" % "2.12.7",
+  "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
@@ -102,6 +101,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-flatspec" % "3.2.19" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.19" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
+  "org.mockito" % "mockito-inline" % "4.11.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "6.0.0"
 )
