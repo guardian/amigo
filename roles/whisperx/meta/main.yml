@@ -3,8 +3,14 @@ dependencies:
   - pip3
   - aws-tools
   - role: pip3-packages
+    # These packages are needed by the download_whisperx_models script. They should already be installed as a result of
+    # installing whisperx, but I've seen one case where typer wasn't available, so let's make them explicit dependencies
+    # https://github.com/guardian/transcription-service/blob/b0dc1a15f8d1a5beff76572b408679b70d495e26/whisperx-model-fetch/download_whisperx_models.py#L4
     packages:
       - typer
+      - torchaudio
+      - huggingface_hub
+      - pyannote.audio
   - role: packages
     packages:
       - ffmpeg
