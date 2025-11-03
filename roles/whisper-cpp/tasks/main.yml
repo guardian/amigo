@@ -27,13 +27,6 @@
     exit 0
   loop: "{{ whisper_models }}"
 
-- name: Download distilled models
-  shell: |
-    set -e
-    cd {{ target_dir }}/whisper.cpp
-    wget https://huggingface.co/distil-whisper/{{ item }} -P ./models
-  loop: "{{ whisper_distilled_model_paths }}"
-
 - name: Install whisper.cpp
   shell: |
     ln -s /opt/whisper/whisper.cpp/main /usr/bin/whisper
