@@ -1,8 +1,7 @@
 ---
 target_dir: /opt/whisper
-whisper_cpp_commit_hash: 9f8bbd3feee603f9ada479fa9c39c03acf2cc6e1
+whisper_cpp_commit_hash: a8d002cfd879315632a579e73f0148d06959de36
 whisper_models:
   - medium
   - small
-whisper_distilled_model_paths:
-  - 'distil-medium.en/resolve/main/ggml-medium-32-2.en.bin'
+  - tiny
