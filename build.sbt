@@ -5,7 +5,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.16"
+scalaVersion := "2.13.17"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
