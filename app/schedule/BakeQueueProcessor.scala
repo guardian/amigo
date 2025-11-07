@@ -28,6 +28,7 @@ class BakeQueueProcessor(
           .queueUrl(bakeQueueUrl)
           .waitTimeSeconds(20)
           .maxNumberOfMessages(1)
+          .visibilityTimeout(60 * 60) // 1 hour
           .build()
         val resp = sqs.receiveMessage(rmr)
 
