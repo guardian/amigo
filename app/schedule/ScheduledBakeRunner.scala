@@ -19,7 +19,7 @@ class ScheduledBakeRunner(
     extends Loggable {
 
   def bake(recipeId: RecipeId, bakeNumber: Option[Int]): Unit = {
-    if (!enabled) {
+    if (!enabled && recipeId.value != "anowak-testing") { // FIXME remove this!
       log.info("Skipping scheduled bake because I am disabled")
     } else {
       Recipes.findById(recipeId) match {
