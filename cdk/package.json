@@ -1,45 +1,45 @@
 {
-  "name": "cdk",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "test-update": "jest -u",
-    "format": "prettier --write \"{lib,bin}/**/*.ts\"",
-    "lint": "eslint lib/** bin/** --no-error-on-unmatched-pattern",
-    "synth": "cdk synth --path-metadata false --version-reporting false",
-    "diff": "cdk diff --path-metadata false --version-reporting false"
-  },
-  "devDependencies": {
-    "@guardian/cdk": "62.0.0",
-    "@guardian/eslint-config": "^11.0.0",
-    "@guardian/prettier": "8.0.1",
-    "@guardian/tsconfig": "^1.0.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "24.6.1",
-    "aws-cdk": "2.1029.1",
-    "aws-cdk-lib": "2.214.0",
-    "constructs": "10.4.2",
-    "eslint": "^9.36.0",
-    "eslint-plugin-prettier": "5.5.4",
-    "jest": "^30.2.0",
-    "prettier": "^3.6.2",
-    "source-map-support": "^0.5.20",
-    "ts-jest": "^29.4.4",
-    "ts-node": "^10.9.2",
-    "typescript": "5.9.3"
-  },
-  "prettier": "@guardian/prettier",
-  "jest": {
-    "testMatch": [
-      "<rootDir>/lib/**/*.test.ts"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "setupFilesAfterEnv": [
-      "./jest.setup.js"
-    ]
-  }
+	"name": "cdk",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"build": "tsc",
+		"test": "jest",
+		"test-update": "jest -u",
+		"format": "prettier --write \"{lib,bin}/**/*.ts\"",
+		"lint": "eslint lib/** bin/** --no-error-on-unmatched-pattern",
+		"synth": "cdk synth --path-metadata false --version-reporting false",
+		"diff": "cdk diff --path-metadata false --version-reporting false"
+	},
+	"devDependencies": {
+		"@guardian/cdk": "62.1.2",
+		"@guardian/eslint-config": "^12.0.1",
+		"@guardian/prettier": "8.0.2",
+		"@guardian/tsconfig": "^1.0.1",
+		"@types/jest": "^30.0.0",
+		"@types/node": "24.10.0",
+		"aws-cdk": "2.1030.0",
+		"aws-cdk-lib": "2.219.0",
+		"constructs": "10.4.2",
+		"eslint": "^9.39.1",
+		"eslint-plugin-prettier": "5.5.4",
+		"jest": "^30.2.0",
+		"prettier": "^3.6.2",
+		"source-map-support": "^0.5.20",
+		"ts-jest": "^29.4.5",
+		"ts-node": "^10.9.2",
+		"typescript": "5.9.3"
+	},
+	"prettier": "@guardian/prettier",
+	"jest": {
+		"testMatch": [
+			"<rootDir>/lib/**/*.test.ts"
+		],
+		"transform": {
+			"^.+\\.tsx?$": "ts-jest"
+		},
+		"setupFilesAfterEnv": [
+			"./jest.setup.js"
+		]
+	}
 }
