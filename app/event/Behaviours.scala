@@ -45,7 +45,7 @@ object Behaviours extends Loggable {
   val writeToLog: Behavior[BakeEvent] = Behaviors.receiveMessage[BakeEvent] {
     message =>
       message match {
-        case Log(_, line) => log.info(s"PACKER: $line")
+        case Log(_, line)         => log.info(s"PACKER: $line")
         case AmiCreated(_, amiId) =>
           log.info(s"Packer created an AMI! AMI id = ${amiId.value}")
         case PackerProcessExited(_, exitCode) =>

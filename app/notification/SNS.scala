@@ -19,7 +19,7 @@ object SNS extends Loggable {
         nextToken: Option[String]
     ): List[T] = {
       nextToken match {
-        case None => soFar
+        case None       => soFar
         case Some(next) =>
           val (more, nextNext) = request(Some(next))
           listAwsResourceRec(soFar ::: more, nextNext)
