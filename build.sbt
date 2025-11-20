@@ -101,7 +101,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-flatspec" % "3.2.19" % Test,
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.19" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
-  "org.mockito" % "mockito-inline" % "4.11.0" % Test,
+  "org.mockito" % "mockito-inline" % "5.2.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "6.0.0"
 )
