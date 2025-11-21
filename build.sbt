@@ -65,8 +65,8 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.19.2"
-val circeVersion = "0.14.14"
+val jacksonVersion = "2.19.4"
+val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.37.5"
 val playSecretRotationVersion = "15.2.5"
@@ -94,7 +94,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "8.1",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.18",
+  "ch.qos.logback" % "logback-classic" % "1.5.21",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
