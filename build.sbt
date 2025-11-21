@@ -87,7 +87,7 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.0",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
-  "joda-time" % "joda-time" % "2.12.7",
+  "joda-time" % "joda-time" % "2.14.0",
   "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
