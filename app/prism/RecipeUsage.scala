@@ -107,7 +107,7 @@ object RecipeUsage {
       val bake = (maybeDirectBake, maybeCopy) match {
         case (Some(directBake), None) => directBake
         case (None, Some(copy))       => bakedAmiLookupMap(copy.copiedFromAMI)
-        case _ =>
+        case _                        =>
           throw new IllegalArgumentException(
             "AMI ID provided neither direct nor copied"
           )
