@@ -4,8 +4,13 @@ import models.RecipeId
 import play.api.libs.json.{Json, OFormat}
 import services.Loggable
 import software.amazon.awssdk.services.sqs.SqsClient
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import software.amazon.awssdk.services.sqs.model.{
+  DeleteMessageRequest,
+  ReceiveMessageRequest
+}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
@@ -19,6 +24,8 @@ class BakeQueueProcessor(
     bakeQueueUrl: String,
     runner: ScheduledBakeRunner
 ) extends Loggable {
+  private val bakeTimeout = 60.minutes
+
   def run(): Unit = {
 
     while (true) {
@@ -26,15 +33,35 @@ class BakeQueueProcessor(
         val rmr = ReceiveMessageRequest
           .builder()
           .queueUrl(bakeQueueUrl)
-          .waitTimeSeconds(20)
+          .waitTimeSeconds(20) // max wait time
           .maxNumberOfMessages(1)
-          .visibilityTimeout(60 * 60) // 1 hour
+          .visibilityTimeout(bakeTimeout.toSeconds.toInt)
           .build()
         val resp = sqs.receiveMessage(rmr)
 
         for (message <- resp.messages().asScala) {
           val job = Json.parse(message.body()).as[BakeQueueJob]
-          runner.bake(job.recipe, Some(job.buildNumber))
+          val completion = Await.result(
+            runner.bake(job.recipe, Some(job.buildNumber)),
+            bakeTimeout
+          )
+          completion match {
+            case Some(0) =>
+              val dmr = DeleteMessageRequest
+                .builder()
+                .queueUrl(bakeQueueUrl)
+                .receiptHandle(message.receiptHandle())
+                .build()
+              sqs.deleteMessage(dmr)
+            case Some(n) =>
+              log.warn(
+                s"Bake for ${job.recipe.value} ${job.buildNumber} failed with exit code $n, leaving message ${message.messageId()} on the queue."
+              )
+            case None =>
+              log.warn(
+                s"Bake for ${job.recipe.value} ${job.buildNumber} did not run, leaving message ${message.messageId()} on the queue."
+              )
+          }
         }
       } catch {
         case NonFatal(e) =>
