@@ -9,4 +9,6 @@ dependencies:
       - pkg-config
       - openssl
       - libssl-dev
+      - golang
+      - cmake3
 
