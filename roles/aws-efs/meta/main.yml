@@ -10,5 +10,12 @@ dependencies:
       - openssl
       - libssl-dev
       - golang
-      - cmake3
+      - gcc
+      - g++
+      - build-essential
+      - gettext
+      - make
+      - cmake
+      - wget
+      - perl
 
