@@ -6,6 +6,9 @@ import models.RecipeId
 import packer.{PackerConfig, PackerRunner}
 import services.{AmiMetadataLookup, Loggable, PrismData}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 class ScheduledBakeRunner(
     stage: String,
     enabled: Boolean,
@@ -18,44 +21,53 @@ class ScheduledBakeRunner(
 )(implicit dynamo: Dynamo, packerConfig: PackerConfig)
     extends Loggable {
 
-  def bake(recipeId: RecipeId): Unit = {
-    if (!enabled) {
+  def bake(recipeId: RecipeId, bakeNumber: Option[Int]): Future[Option[Int]] = {
+    lazy val didNotRun = Future.successful(None)
+    if (!enabled && recipeId.value != "anowak-testing") { // FIXME remove this!
       log.info("Skipping scheduled bake because I am disabled")
+      didNotRun
     } else {
       Recipes.findById(recipeId) match {
         case Some(recipe) =>
           // sanity check: is the recipe actually scheduled?
-          if (recipe.bakeSchedule.isEmpty) {
+          if (recipe.bakeSchedule.isEmpty && recipe.bakeDay.isEmpty) {
             log.warn(
               s"Skipping scheduled bake of recipe $recipeId because it does not have a bake schedule defined"
             )
+            didNotRun
           } else {
-            Recipes.incrementAndGetBuildNumber(recipe.id) match {
+            bakeNumber.orElse(
+              Recipes.incrementAndGetBuildNumber(recipe.id)
+            ) match {
               case Some(buildNumber) =>
                 val theBake =
                   Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
                 log.info(s"Starting scheduled bake: ${theBake.bakeId}")
-                packerRunner.createImage(
-                  stage,
-                  theBake,
-                  prism,
-                  eventBus,
-                  ansibleVars,
-                  false,
-                  amiMetadataLookup,
-                  amigoDataBucket
-                )
+                packerRunner
+                  .createImage(
+                    stage,
+                    theBake,
+                    prism,
+                    eventBus,
+                    ansibleVars,
+                    debug = false,
+                    amiMetadataLookup,
+                    amigoDataBucket
+                  )
+                  .map(Some.apply)
               case None =>
                 log.warn(
                   s"Failed to get the next build number for recipe $recipeId"
                 )
+                didNotRun
             }
           }
         case None =>
           log.warn(
             s"Skipping scheduled bake of recipe $recipeId because the recipe does not exist"
           )
+          didNotRun
       }
     }
   }

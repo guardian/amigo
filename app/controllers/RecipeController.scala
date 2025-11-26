@@ -64,6 +64,7 @@ class RecipeController(
           recipe.baseImage.id,
           recipe.diskSize,
           recipe.bakeSchedule,
+          recipe.bakeDay,
           recipe.encryptFor
         )
       )
@@ -96,6 +97,7 @@ class RecipeController(
                     baseImageId,
                     diskSize,
                     bakeSchedule,
+                    bakeDay,
                     encryptFor
                   ) =>
                 BaseImages.findById(baseImageId) match {
@@ -116,6 +118,7 @@ class RecipeController(
                           roles,
                           modifiedBy = request.user.fullName,
                           bakeSchedule,
+                          bakeDay,
                           encryptFor
                         )
                         updatedRecipe.fold(
@@ -136,6 +139,7 @@ class RecipeController(
                           baseImageId,
                           diskSize,
                           bakeSchedule,
+                          bakeDay,
                           encryptFor
                         )
                       )
@@ -178,6 +182,7 @@ class RecipeController(
                 baseImageId,
                 diskSize,
                 bakeSchedule,
+                bakeDay,
                 encryptedCopies
               ) =>
             log.info(
@@ -193,6 +198,7 @@ class RecipeController(
                       baseImageId,
                       diskSize,
                       bakeSchedule,
+                      bakeDay,
                       encryptedCopies
                     )
                   )
@@ -214,6 +220,7 @@ class RecipeController(
                           roles,
                           createdBy = request.user.fullName,
                           bakeSchedule,
+                          bakeDay,
                           encryptedCopies
                         ) // TODO: FIX THIS
                         bakeScheduler.reschedule(recipe)
@@ -230,6 +237,7 @@ class RecipeController(
                           baseImageId,
                           diskSize,
                           bakeSchedule,
+                          bakeDay,
                           encryptedCopies
                         )
                       )
@@ -284,6 +292,7 @@ class RecipeController(
                   roles = recipe.roles,
                   createdBy = request.user.fullName,
                   bakeSchedule = recipe.bakeSchedule,
+                  bakeDay = recipe.bakeDay,
                   encryptedCopies = recipe.encryptFor
                 )
                 Redirect(routes.RecipeController.showRecipe(newId))
@@ -344,6 +353,16 @@ object RecipeController {
         .verifying("Invalid Quartz cron expression", validQuartzCronExpression)
         .transform[BakeSchedule](BakeSchedule.apply, _.quartzCronExpression)
     )
+    private val isDayOfWeek = Set(
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ).contains _
+    private val bakeDayMapping = optional(text().verifying(isDayOfWeek))
     private val accountNumbersMapping = text()
       .verifying(_.forall(c => c.isDigit || c.isWhitespace || c == ','))
       .transform[List[AccountNumber]](
@@ -360,6 +379,7 @@ object RecipeController {
         "baseImageId" -> baseImageIdMapping,
         "diskSize" -> optional(number),
         "bakeSchedule" -> bakeScheduleMapping,
+        "bakeDay" -> bakeDayMapping,
         "encryptFor" -> accountNumbersMapping
       )
     )
@@ -372,6 +392,7 @@ object RecipeController {
         "baseImageId" -> baseImageIdMapping,
         "diskSize" -> optional(number),
         "bakeSchedule" -> bakeScheduleMapping,
+        "bakeDay" -> bakeDayMapping,
         "encryptFor" -> accountNumbersMapping
       )
     )
