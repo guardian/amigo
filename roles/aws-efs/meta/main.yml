@@ -9,4 +9,13 @@ dependencies:
       - pkg-config
       - openssl
       - libssl-dev
+      - golang
+      - gcc
+      - g++
+      - build-essential
+      - gettext
+      - make
+      - cmake
+      - wget
+      - perl
 
