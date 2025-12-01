@@ -20,6 +20,6 @@ Using this approach, node binaries (node, npm, npx) will be accessible at `/usr/
 
 * `node_full_version` - which version of Node.js (major.minor.patch format) to be downloaded from nodejs.org. No default value. NOTE: this uses the `linux-x64` version from https://nodejs.org/dist/
 
-* `node_version` which version of Node.js to install (from nodesource.com - unofficial). Default value is `4.x`. Consult https://github.com/nodesource/distributions for valid values.
+* `node_version` which version of Node.js to install (from nodesource.com - unofficial). Default value is `24.x`. Consult https://github.com/nodesource/distributions for valid values.
 
 
