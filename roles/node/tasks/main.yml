@@ -12,6 +12,11 @@
   register: latest_version
   when: node_major_version is defined and node_full_version is undefined
 
+- name: Validate latest version was found
+  fail:
+    msg: "Could not find Node.js version for major version {{ node_major_version }}. Check if v{{ node_major_version }}.x exists at nodejs.org"
+  when: node_major_version is defined and node_full_version is undefined and (latest_version.stdout is undefined or latest_version.stdout == '')
+
 - name: Set node_full_version from major version
   set_fact:
     node_full_version: "{{ latest_version.stdout }}"
