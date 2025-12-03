@@ -4,7 +4,7 @@ Installs Node.js.
 
 ## Role variables
 
-### node_major_version (default: 24)
+### node_major_version
 
 The major version of Node.js to install. This is the **recommended approach**. The role will automatically fetch and install the latest version within that major release from nodejs.org.
 
@@ -12,7 +12,7 @@ The major version of Node.js to install. This is the **recommended approach**. T
 node_major_version: 24  # Installs latest v24.x.x
 ```
 
-If not specified, defaults to `24` (current LTS version).
+If not specified, defaults to value in `defaults/main.yml`.
 
 ### architecture (default: x64)
 
