@@ -27,14 +27,14 @@
     latest_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | default([''], true))[0] }}"
   when: node_major_version is defined and node_full_version is undefined and node_version is undefined
 
-- name: Validate latest version was found
+- name: Fail if latest version was not found
   fail:
     msg: "Could not find Node.js version for major version {{ node_major_version }}. Check if v{{ node_major_version }}.x exists at nodejs.org"
-  when: node_major_version is defined and node_full_version is undefined and node_version is undefined and (latest_version.stdout is undefined or latest_version.stdout == '')
+  when: node_major_version is defined and node_full_version is undefined and node_version is undefined and (latest_version is undefined or latest_version == '')
 
 - name: Set node_full_version from major version
   set_fact:
-    node_full_version: "{{ latest_version.stdout }}"
+    node_full_version: "{{ latest_version }}"
   when: node_major_version is defined and node_full_version is undefined and node_version is undefined
 
 - name: Download & extract Node.js (from nodejs.org)
