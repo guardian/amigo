@@ -57,6 +57,7 @@
     src: "{{ node_location }}/node"
     dest: /usr/bin/node
     state: link
+    force: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined and node_version is undefined
 
@@ -65,6 +66,7 @@
     src: "{{ node_location }}"
     dest: /usr/local/node
     state: link
+    force: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined and node_version is undefined
 
