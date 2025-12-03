@@ -14,9 +14,17 @@
   apt: name=nodejs state=latest
   when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined  
 
-- name: Get latest full version from major version (from nodejs.org)
-  shell: curl -s https://nodejs.org/dist/latest-v{{node_major_version}}.x/SHASUMS256.txt | head -1 | sed -n 's/.*node-v\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p'
-  register: latest_version
+- name: Get SHASUMS256.txt for latest major version (from nodejs.org)
+  uri:
+    url: "https://nodejs.org/dist/latest-v{{node_major_version}}.x/SHASUMS256.txt"
+    return_content: yes
+    status_code: 200
+  register: shasums_file
+  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
+
+- name: Extract latest full version from SHASUMS256.txt
+  set_fact:
+    latest_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | default([''], true))[0] }}"
   when: node_major_version is defined and node_full_version is undefined and node_version is undefined
 
 - name: Validate latest version was found
