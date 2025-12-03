@@ -1,26 +1,26 @@
 ---
 - name: Add node source repository
   shell: curl -sL https://deb.nodesource.com/setup_{{node_version}} | bash -
-  when: node_full_version is undefined and nodejs_dist_relative_path is undefined and node_major_version is undefined
+  when: node_version is defined and node_major_version is undefined and node_full_version is undefined and nodejs_dist_relative_path is undefined
 
 - name: Install Node.js (from nodesource.com)
   apt: name=nodejs state=latest
-  when: node_full_version is undefined and nodejs_dist_relative_path is undefined and node_major_version is undefined
+  when: node_version is defined and node_major_version is undefined and node_full_version is undefined and nodejs_dist_relative_path is undefined  
 
 - name: Get latest full version from major version (from nodejs.org)
   shell: curl -s https://nodejs.org/dist/latest-v{{node_major_version}}.x/SHASUMS256.txt | head -1 | sed -n 's/.*node-v\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p'
   register: latest_version
-  when: node_major_version is defined and node_full_version is undefined
+  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
 
 - name: Validate latest version was found
   fail:
     msg: "Could not find Node.js version for major version {{ node_major_version }}. Check if v{{ node_major_version }}.x exists at nodejs.org"
-  when: node_major_version is defined and node_full_version is undefined and (latest_version.stdout is undefined or latest_version.stdout == '')
+  when: node_major_version is defined and node_full_version is undefined and node_version is undefined and (latest_version.stdout is undefined or latest_version.stdout == '')
 
 - name: Set node_full_version from major version
   set_fact:
     node_full_version: "{{ latest_version.stdout }}"
-  when: node_major_version is defined and node_full_version is undefined
+  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
 
 - name: Download & extract Node.js (from nodejs.org)
   unarchive:
@@ -29,13 +29,13 @@
     remote_src: yes
     list_files: yes
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined
+  when: node_full_version is defined and node_version is undefined
   register: archive_contents
 
 - name: Store node path
   set_fact:
     node_location: /usr/local/{{archive_contents.files[0]}}bin
-  when: node_full_version is defined
+  when: node_full_version is defined and node_version is undefined
 
 - name: Add node symlink in /usr/bin
   file:
@@ -43,7 +43,7 @@
     dest: /usr/bin/node
     state: link
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined
+  when: node_full_version is defined and node_version is undefined
 
 - name: Add consistent symlink to node binaries
   file:
@@ -51,7 +51,7 @@
     dest: /usr/local/node
     state: link
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined
+  when: node_full_version is defined and node_version is undefined
 
 - name: Install npm packages
   npm:
@@ -60,4 +60,4 @@
   with_items: "{{ packages|default([]) }}"
   environment:
     PATH: "/usr/local/node:{{ lookup('env', 'PATH') }}"
-  when: packages is defined and node_full_version is defined
+  when: packages is defined and node_full_version is defined and node_version is undefined
