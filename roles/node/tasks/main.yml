@@ -1,11 +1,18 @@
 ---
-- name: Add node source repository
-  shell: curl -sL https://deb.nodesource.com/setup_{{node_version}} | bash -
-  when: node_version is defined and node_major_version is undefined and node_full_version is undefined and nodejs_dist_relative_path is undefined
+- name: Download nodesource setup script
+  get_url:
+    url: "https://deb.nodesource.com/setup_{{node_version}}"
+    dest: /tmp/nodesource_setup.sh
+    mode: '0755'
+  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined
+
+- name: Run nodesource setup script
+  command: /tmp/nodesource_setup.sh
+  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined
 
 - name: Install Node.js (from nodesource.com)
   apt: name=nodejs state=latest
-  when: node_version is defined and node_major_version is undefined and node_full_version is undefined and nodejs_dist_relative_path is undefined  
+  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined  
 
 - name: Get latest full version from major version (from nodejs.org)
   shell: curl -s https://nodejs.org/dist/latest-v{{node_major_version}}.x/SHASUMS256.txt | head -1 | sed -n 's/.*node-v\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p'
