@@ -12,7 +12,7 @@ The major version of Node.js to install. The role will automatically fetch and i
 node_major_version: 24  # Installs latest v24.x.x
 ```
 
-If not specified, defaults to value in `defaults/main.yml`.
+- This variable (or node_full_version) is required; the role will fail early with a clear message if no version variable is provided.
 
 ### architecture (default: x64)
 
@@ -31,12 +31,10 @@ A list of npm packages to install globally after Node.js is installed.
 ```yaml
 packages: [pm2, reqwest, typescript]
 ```
-**Note**: Package installation is only supported when using `node_major_version` or `node_full_version`. It does not work with the deprecated `node_version` (nodesource) installation method.
-
 
 ## Installation
 
-If no variables are specified, the role defaults to installing the latest Node.js v24.x for x64 architecture (as defined in `defaults/main.yml`).
+If the architecture variable is not specified, the role defaults to installing x64 architecture (as defined in `defaults/main.yml`).
 
 The binary will be unpacked to `/usr/local/node-v{version}-linux-{architecture}/` and symlinks are created:
 - `/usr/bin/node` → points to the node binary
@@ -57,14 +55,6 @@ If you need a specific full version of Node.js (e.g., for reproducible builds), 
 node_full_version: 20.11.0
 ```
 
-### node_version 
+### node_version
 
-**DEPRECATED**: Use `node_major_version` instead.
-
-The version of node to be made available by [nodesource](https://github.com/nodesource/distributions/blob/master/README.md). This method installs Node.js via apt package manager instead of downloading from nodejs.org.
-
-```yaml
-node_version: 20.x
-```
-
-**Note**: This installation method does not support the `packages` variable for installing global npm packages.
+Removed: the old nodesource-based `node_version` variable and installation path have been removed from this role. Use `node_major_version` (or `node_full_version`) instead.
