@@ -1,18 +1,8 @@
 ---
-- name: Download nodesource setup script
-  get_url:
-    url: "https://deb.nodesource.com/setup_{{node_version}}"
-    dest: /tmp/nodesource_setup.sh
-    mode: '0755'
-  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined
-
-- name: Run nodesource setup script
-  command: /tmp/nodesource_setup.sh
-  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined
-
-- name: Install Node.js (from nodesource.com)
-  apt: name=nodejs state=latest
-  when: node_version is defined and node_full_version is undefined and nodejs_dist_relative_path is undefined  
+- name: Ensure a Node version variable is provided
+  fail: 
+    msg: "node_major_version (or node_full_version) must be set"
+  when: node_major_version is undefined and node_full_version is undefined
 
 - name: Get SHASUMS256.txt for latest major version (from nodejs.org)
   uri:
@@ -20,37 +10,59 @@
     return_content: yes
     status_code: 200
   register: shasums_file
-  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
+  when: node_major_version is defined and node_full_version is undefined
 
 - name: Extract latest full version from SHASUMS256.txt
   set_fact:
     latest_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | default([''], true))[0] }}"
-  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
+  when: node_major_version is defined and node_full_version is undefined
 
 - name: Fail if latest version was not found
   fail:
     msg: "Could not find Node.js version for major version {{ node_major_version }}. Check if v{{ node_major_version }}.x exists at nodejs.org"
-  when: node_major_version is defined and node_full_version is undefined and node_version is undefined and (latest_version is undefined or latest_version == '')
+  when: node_major_version is defined and node_full_version is undefined and (latest_version is undefined or latest_version == '')
 
 - name: Set node_full_version from major version
   set_fact:
     node_full_version: "{{ latest_version }}"
-  when: node_major_version is defined and node_full_version is undefined and node_version is undefined
+  when: node_major_version is defined and node_full_version is undefined
 
-- name: Download & extract Node.js (from nodejs.org)
+- name: Check Node.js tarball exists on nodejs.org
+  uri:
+    url: "https://nodejs.org/dist/v{{ node_full_version }}/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
+    method: HEAD
+    return_content: no
+    status_code: 200
+  register: tarball_check
+  failed_when: false
+  when: node_full_version is defined
+
+- name: Fail early if requested node_full_version is not published
+  fail:
+    msg: "Node.js v{{ node_full_version }} for architecture '{{ architecture }}' not found on nodejs.org. Use a valid version or set node_major_version to pick the latest patch release."
+  when: node_full_version is defined and (tarball_check is not defined or tarball_check.status != 200)
+
+- name: Download Node.js tarball
+  get_url:
+    url: "https://nodejs.org/dist/v{{ node_full_version }}/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
+    dest: "/tmp/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
+    mode: '0644'
+  when: node_full_version is defined
+
+- name: Extract Node.js tarball
   unarchive:
-    src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-{{architecture}}.tar.gz
+    src: "/tmp/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
     dest: /usr/local
-    remote_src: yes
+    remote_src: no
     list_files: yes
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined and node_version is undefined
+  when: node_full_version is defined
   register: archive_contents
 
 - name: Store node path
   set_fact:
-    node_location: /usr/local/{{archive_contents.files[0]}}bin
-  when: node_full_version is defined and node_version is undefined
+    node_location: "/usr/local/node-v{{ node_full_version }}-linux-{{ architecture }}/bin"
+  when: node_full_version is defined
 
 - name: Add node symlink in /usr/bin
   file:
@@ -59,7 +71,7 @@
     state: link
     force: yes
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined and node_version is undefined
+  when: node_full_version is defined
 
 - name: Add consistent symlink to node binaries
   file:
@@ -68,7 +80,7 @@
     state: link
     force: yes
     mode: u=rwx,g=rx,o=rx
-  when: node_full_version is defined and node_version is undefined
+  when: node_full_version is defined
 
 - name: Install npm packages
   npm:
@@ -77,4 +89,4 @@
   with_items: "{{ packages|default([]) }}"
   environment:
     PATH: "/usr/local/node:{{ lookup('env', 'PATH') }}"
-  when: packages is defined and node_full_version is defined and node_version is undefined
+  when: packages is defined and node_full_version is defined
