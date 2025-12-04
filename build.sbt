@@ -78,7 +78,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "5.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.0",
+  "com.beachape" %% "enumeratum" % "1.9.1",
   "com.gu" %% "simple-configuration-ssm" % "8.0.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
