@@ -65,7 +65,7 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.20"
+val jacksonVersion = "2.20.0"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.39.6"
