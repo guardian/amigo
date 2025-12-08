@@ -53,7 +53,7 @@
   unarchive:
     src: "/tmp/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
     dest: /usr/local
-    remote_src: no
+    remote_src: yes
     list_files: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
