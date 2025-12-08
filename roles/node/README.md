@@ -45,16 +45,16 @@ Node binaries (node, npm, npx) are accessible at `/usr/local/node/`. The `node` 
 
 ## DEPRECATED variables
 
-### node_full_version
+### node_full_version (not recommended)
 
-**DEPRECATED**: Use `node_major_version` instead to automatically receive security patches within a major version.
+Not recommended: Use `node_major_version` instead to automatically receive security patches within a major version.
 
-If you need a specific full version of Node.js (e.g., for reproducible builds), you can specify the exact version. This uses the same installation method as `node_major_version` but skips the automatic version lookup.
+If you need a specific full version of Node.js (e.g., for reproducible builds), you can specify the exact version using this variable. This uses the same installation method as `node_major_version` but skips the automatic version lookup.
 
 ```yaml
 node_full_version: 20.11.0
 ```
 
-### node_version
+### node_version (removed)
 
 Removed: the old nodesource-based `node_version` variable and installation path have been removed from this role. Use `node_major_version` (or `node_full_version`) instead.
