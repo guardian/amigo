@@ -5,7 +5,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.17"
+scalaVersion := "2.13.18"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -68,7 +68,7 @@ scalacOptions ++= Seq(
 val jacksonVersion = "2.19.4"
 val circeVersion = "0.14.15"
 
-val awsV2SdkVersion = "2.37.5"
+val awsV2SdkVersion = "2.39.6"
 val playSecretRotationVersion = "15.2.5"
 
 libraryDependencies ++= Seq(
