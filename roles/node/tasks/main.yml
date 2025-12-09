@@ -8,6 +8,7 @@
   uri:
     url: "https://nodejs.org/dist/latest-v{{ node_major_version }}.x/SHASUMS256.txt"
     return_content: yes
+    status_code: 200
   register: shasums_file
   when: node_major_version is defined and node_full_version is undefined
 
