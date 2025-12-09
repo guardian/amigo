@@ -4,7 +4,7 @@ Installs Node.js.
 
 ## Role variables
 
-### node_major_version (recommended)
+### `node_major_version` (recommended)
 
 The major version of Node.js to install. The role will automatically fetch and install the latest version within that major release from nodejs.org.
 
@@ -12,7 +12,7 @@ The major version of Node.js to install. The role will automatically fetch and i
 node_major_version: 24  # Installs latest v24.x.x
 ```
 
-- This variable (or node_full_version) is required; the role will fail early with a clear message if no version variable is provided.
+- This variable (or `node_full_version`) is required; the role will fail early with a clear message if no version variable is provided.
 
 ### architecture (default: x64)
 
@@ -45,7 +45,7 @@ Node binaries (node, npm, npx) are accessible at `/usr/local/node/`. The `node` 
 
 ## DEPRECATED variables
 
-### node_full_version (not recommended)
+### `node_full_version` (not recommended)
 
 Not recommended: Use `node_major_version` instead to automatically receive security patches within a major version.
 
@@ -55,6 +55,6 @@ If you need a specific full version of Node.js (e.g., for reproducible builds), 
 node_full_version: 20.11.0
 ```
 
-### node_version (removed)
+### `node_version` (removed)
 
 Removed: the old nodesource-based `node_version` variable and installation path have been removed from this role. Use `node_major_version` (or `node_full_version`) instead.
