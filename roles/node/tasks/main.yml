@@ -8,14 +8,29 @@
   uri:
     url: "https://nodejs.org/dist/latest-v{{ node_major_version }}.x/SHASUMS256.txt"
     return_content: yes
-    status_code: 200
+  failed_when: false
   register: shasums_file
   when: node_major_version is defined and node_full_version is undefined
 
+- name: Fail if SHASUMS256.txt could not be fetched
+  fail:
+    msg: |
+      Could not fetch SHASUMS256.txt for major version {{ node_major_version }}.
+      The file may not exist on nodejs.org.
+  when: node_major_version is defined and node_full_version is undefined and (shasums_file.status is not defined or shasums_file.status != 200)
+
 - name: Extract full version from SHASUMS256.txt
   set_fact:
-    node_full_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1'))[0] }}"
+    node_full_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1'))[0] | default('') }}"
   when: node_major_version is defined and node_full_version is undefined
+
+- name: Fail if node full version could not be extracted
+  fail:
+    msg: |
+      Could not extract node_full_version from SHASUMS256.txt for major version {{ node_major_version }}.
+      File content (first 5 lines):
+      {{ shasums_file.content.split('\n')[:5] }}
+  when: node_major_version is defined and (node_full_version is undefined or node_full_version == '')
 
 - name: Download & extract Node.js (from nodejs.org)
   unarchive:
