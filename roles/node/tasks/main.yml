@@ -1,15 +1,40 @@
 ---
-- name: Add node source repository
-  shell: curl -sL https://deb.nodesource.com/setup_{{node_version}} | bash -
-  when: node_full_version is undefined and nodejs_dist_relative_path is undefined
+- name: Ensure a Node version variable is provided
+  fail: 
+    msg: "node_major_version (or node_full_version) must be set"
+  when: node_major_version is undefined and node_full_version is undefined
 
-- name: Install Node.js (from nodesource.com)
-  apt: name=nodejs state=latest
-  when: node_full_version is undefined and nodejs_dist_relative_path is undefined
+- name: Get latest patch version for major version
+  uri:
+    url: "https://nodejs.org/dist/latest-v{{ node_major_version }}.x/SHASUMS256.txt"
+    return_content: yes
+  failed_when: false
+  register: shasums_file
+  when: node_major_version is defined and node_full_version is undefined
+
+- name: Fail if SHASUMS256.txt could not be fetched
+  fail:
+    msg: |
+      Could not fetch SHASUMS256.txt for major version {{ node_major_version }}.
+      The file may not exist on nodejs.org.
+  when: node_major_version is defined and node_full_version is undefined and (shasums_file.status is not defined or shasums_file.status != 200)
+
+- name: Extract full version from SHASUMS256.txt
+  set_fact:
+    node_full_version: "{{ (shasums_file.content | regex_search('node-v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1'))[0] | default('') }}"
+  when: node_major_version is defined and node_full_version is undefined
+
+- name: Fail if node full version could not be extracted
+  fail:
+    msg: |
+      Could not extract node_full_version from SHASUMS256.txt for major version {{ node_major_version }}.
+      File content (first 5 lines):
+      {{ shasums_file.content.split('\n')[:5] }}
+  when: node_major_version is defined and (node_full_version is undefined or node_full_version == '')
 
 - name: Download & extract Node.js (from nodejs.org)
   unarchive:
-    src: https://nodejs.org/dist/v{{node_full_version}}/node-v{{node_full_version}}-linux-{{architecture}}.tar.gz
+    src: "https://nodejs.org/dist/v{{ node_full_version }}/node-v{{ node_full_version }}-linux-{{ architecture }}.tar.gz"
     dest: /usr/local
     remote_src: yes
     list_files: yes
@@ -19,7 +44,7 @@
 
 - name: Store node path
   set_fact:
-    node_location: /usr/local/{{archive_contents.files[0]}}bin
+    node_location: "/usr/local/{{ archive_contents.files[0] }}bin"
   when: node_full_version is defined
 
 - name: Add node symlink in /usr/bin
@@ -27,6 +52,7 @@
     src: "{{ node_location }}/node"
     dest: /usr/bin/node
     state: link
+    force: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
 
@@ -35,6 +61,7 @@
     src: "{{ node_location }}"
     dest: /usr/local/node
     state: link
+    force: yes
     mode: u=rwx,g=rx,o=rx
   when: node_full_version is defined
 
@@ -44,5 +71,5 @@
     global: yes
   with_items: "{{ packages|default([]) }}"
   environment:
-    PATH: "/usr/local/node:{{ lookup('env', 'PATH') }}"
+    PATH: "/usr/local/node:{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin') }}"
   when: packages is defined and node_full_version is defined
