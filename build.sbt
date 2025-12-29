@@ -74,8 +74,9 @@ val playSecretRotationVersion = "15.2.7"
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
-  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+  // If we don't explicitly include this dependency at the correct version then we hit the following exception
+  // when running unit tests: com.fasterxml.jackson.databind.JsonMappingException.
+  // This seems to be because Play Framework is pulling in a different Jackson version.
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "6.0.0",
   "com.beachape" %% "enumeratum" % "1.9.1",
