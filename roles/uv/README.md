@@ -4,9 +4,16 @@ Installs `uv`, which is:
 
 ["An extremely fast Python package and project manager, written in Rust"](https://docs.astral.sh/uv/)
 
-Despite managing Python packages, it doesn't require Python because it's written in Rust.
-
 For the applications whose dependencies it manages, it will automatically download and install the appropriate Python version, if not present in the environment. So if using `uv`, you don't necessarily need to bake in the right Python version.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `uv_major_version` | `0` | The major version of uv to install |
+| `uv_minor_version` | `9` | The minor version of uv to install |
+
+The role will install a version matching `>={major}.{minor}.0,<{major}.{minor+1}.0`.
 
 ## WARNING: Use with caution!
 In general it is **not recommended** to install your dependencies at instance launch time. It has the following downsides:
