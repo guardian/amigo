@@ -1,8 +1,6 @@
-- name: Download uv installer
-  get_url:
-    url: https://astral.sh/uv/install.sh
-    dest: /tmp/uv-install.sh
-- name: Install uv
-  command: "sh /tmp/uv-install.sh"
-  become: yes
-  become_user: ubuntu
+---
+- name: Install uv with pip
+  pip:
+    name: "uv=={{ uv_major_version }}.{{ uv_minor_version }}.*"
+    extra_args: "--only-binary :all:"
+    executable: pip3
