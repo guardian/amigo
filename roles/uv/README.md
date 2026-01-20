@@ -13,7 +13,10 @@ For the applications whose dependencies it manages, it will automatically downlo
 | `uv_major_version` | `0` | The major version of uv to install |
 | `uv_minor_version` | `9` | The minor version of uv to install |
 
-The role will install a version matching `>={major}.{minor}.0,<{major}.{minor+1}.0`.
+The role will install the latest version matching `=={major}.{minor}.*`, to allow for auto-updating to the latest patch version.
+
+As stated in https://docs.astral.sh/uv/reference/policies/versioning/, "uv uses a custom versioning scheme in which the minor version number is bumped for breaking changes, and the patch version number is bumped for bug fixes, enhancements, and other non-breaking changes."
+
 
 ## WARNING: Use with caution!
 In general it is **not recommended** to install your dependencies at instance launch time. It has the following downsides:
