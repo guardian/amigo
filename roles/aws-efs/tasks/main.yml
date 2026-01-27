@@ -10,6 +10,7 @@
     cd "{{ checkout_directory }}"
     git clone {{ git_repo }}
     cd efs-utils
+    git checkout {{ efs_utils_version }}
     export RUSTFLAGS="--cfg no_fips"
     ./build-deb.sh
     apt-get -y install ./build/amazon-efs-utils*deb
@@ -20,6 +21,7 @@
     cd "{{ checkout_directory }}"
     git clone {{ git_repo }}
     cd efs-utils
+    git checkout {{ efs_utils_version }}
     yum -y install rpm-build
     make rpm
     yum -y install ./build/amazon-efs-utils*rpm
