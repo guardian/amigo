@@ -2,3 +2,5 @@
 
 git_repo: https://github.com/aws/efs-utils
 checkout_directory: /tmp/efs
+# Pick a tag from here https://github.com/aws/efs-utils/tags - the below is the most recently tested version (jan 2026)
+efs_utils_version: v2.4.1
