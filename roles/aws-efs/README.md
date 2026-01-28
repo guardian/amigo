@@ -11,6 +11,9 @@ with the 'Requires XLarge builder instance' option selected.
 
 # Usage
 
+You need to set `efs_utils_version` in your recipe parameters - the last tested version is in the defaults/main.yml file 
+but you should at least try to use the latest - you can see releases here https://github.com/aws/efs-utils/tags
+
 Add to `roles/<MY_ROLE>/meta/main.yaml`:
 
 ```yaml
