@@ -69,7 +69,7 @@ val jacksonVersion = "2.19.4"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.40.15"
-val playSecretRotationVersion = "16.0.0"
+val playSecretRotationVersion = "16.0.2"
 
 libraryDependencies ++= Seq(
   ws,
