@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
   // This seems to be because Play Framework is pulling in a different Jackson version.
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "6.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.2",
+  "com.beachape" %% "enumeratum" % "1.9.4",
   "com.gu" %% "simple-configuration-ssm" % "9.1.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
