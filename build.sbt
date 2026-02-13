@@ -69,7 +69,7 @@ val jacksonVersion = "2.19.4"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.40.17"
-val playSecretRotationVersion = "16.0.0"
+val playSecretRotationVersion = "16.0.2"
 
 libraryDependencies ++= Seq(
   ws,
@@ -83,7 +83,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "simple-configuration-ssm" % "9.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "31.0.0",
+  "com.gu.play-googleauth" %% "play-v30" % "33.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
@@ -95,7 +95,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "9.0",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.27",
+  "ch.qos.logback" % "logback-classic" % "1.5.29",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
