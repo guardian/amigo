@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
   // This seems to be because Play Framework is pulling in a different Jackson version.
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "6.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.4",
+  "com.beachape" %% "enumeratum" % "1.9.5",
   "com.gu" %% "simple-configuration-ssm" % "9.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
@@ -95,7 +95,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "9.0",
   // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.29",
+  "ch.qos.logback" % "logback-classic" % "1.5.32",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
