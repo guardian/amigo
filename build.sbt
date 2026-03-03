@@ -68,7 +68,7 @@ scalacOptions ++= Seq(
 val jacksonVersion = "2.21.0"
 val circeVersion = "0.14.15"
 
-val awsV2SdkVersion = "2.40.17"
+val awsV2SdkVersion = "2.42.1"
 val playSecretRotationVersion = "16.0.2"
 
 libraryDependencies ++= Seq(
@@ -80,7 +80,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "6.0.0",
   "com.beachape" %% "enumeratum" % "1.9.5",
-  "com.gu" %% "simple-configuration-ssm" % "9.1.1",
+  "com.gu" %% "simple-configuration-ssm" % "9.2.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
   "com.gu.play-googleauth" %% "play-v30" % "33.0.0",
