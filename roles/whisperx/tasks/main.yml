@@ -1,10 +1,4 @@
 ---
-- name: Upgrade packaging
-  pip:
-    name: "packaging"
-    state: "latest"
-    executable: pip3
-
 - name: Install whisperx dependencies
   pip:
     name:
