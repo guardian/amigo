@@ -28,7 +28,10 @@ export class ImageCopierLambda extends GuStack {
 			default: '',
 		});
 
-		const kmsKeyArn = kmsKeyArnParameter.valueAsString.length > 0 ? kmsKeyArnParameter.valueAsString : Fn.importValue('amigo-imagecopier-key');
+		const kmsKeyArn =
+			kmsKeyArnParameter.valueAsString.length > 0
+				? kmsKeyArnParameter.valueAsString
+				: Fn.importValue('amigo-imagecopier-key');
 
 		const housekeepingTopicParam = new CfnParameter(
 			this,
