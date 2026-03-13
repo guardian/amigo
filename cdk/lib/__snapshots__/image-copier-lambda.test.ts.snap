@@ -40,7 +40,7 @@ exports[`the lambda stack matches the snapshot 1`] = `
             },
             "ENCRYPTED_TAG_VALUE": "true",
             "KMS_KEY_ARN": {
-              "Fn::ImportValue": "amigo-imagecopier-key",
+              "Ref": "KmsKeyArn",
             },
           },
         },
@@ -220,7 +220,7 @@ exports[`the lambda stack matches the snapshot 1`] = `
             },
             "ENCRYPTED_TAG_VALUE": "true",
             "KMS_KEY_ARN": {
-              "Fn::ImportValue": "amigo-imagecopier-key",
+              "Ref": "KmsKeyArn",
             },
           },
         },

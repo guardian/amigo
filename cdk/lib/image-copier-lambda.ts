@@ -22,13 +22,13 @@ export class ImageCopierLambda extends GuStack {
 			'deploy-tools-dist',
 		);
 
-		new CfnParameter(this, 'KmsKeyArn', {
+		const kmsKeyArnParameter = new CfnParameter(this, 'KmsKeyArn', {
 			description: 'Override the default KMS key if required',
 			type: 'String',
 			default: '',
 		});
 
-		const kmsKeyArn = Fn.importValue('amigo-imagecopier-key');
+		const kmsKeyArn = kmsKeyArnParameter.valueAsString.length > 0 ? kmsKeyArnParameter.valueAsString : Fn.importValue('amigo-imagecopier-key');
 
 		const housekeepingTopicParam = new CfnParameter(
 			this,
