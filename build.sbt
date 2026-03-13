@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
   // This seems to be because Play Framework is pulling in a different Jackson version.
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   "org.scanamo" %% "scanamo" % "6.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.5",
+  "com.beachape" %% "enumeratum" % "1.9.6",
   "com.gu" %% "simple-configuration-ssm" % "9.2.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
@@ -88,7 +88,7 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
-  "joda-time" % "joda-time" % "2.14.0",
+  "joda-time" % "joda-time" % "2.14.1",
   "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
