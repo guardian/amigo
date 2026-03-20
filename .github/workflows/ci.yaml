@@ -30,7 +30,7 @@ jobs:
           LAST_TEAMCITY_BUILD=3006
           echo BUILD_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD )) >> $GITHUB_ENV
       - run: ./script/ci
-      - uses: guardian/actions-riff-raff@v4
+      - uses: guardian/actions-riff-raff@ja-validate-deployment-contentdirs
         with:
           projectName: tools::amigo
           githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
           buildNumber: ${{ env.BUILD_NUMBER }}
           configPath: riff-raff.yaml
           contentDirectories: |
-            cloudformation:
+            cloudformation2:
               - cdk/cdk.out/AMIgo-CODE.template.json
               - cdk/cdk.out/AMIgo-PROD.template.json
             amigo:
