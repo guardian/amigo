@@ -35,7 +35,9 @@ object BakeQueueScheduler extends Loggable {
       bakeQueueUrl: String
   )(implicit ec: ExecutionContext, dynamo: Dynamo): Unit = {
     val nextMidnight =
-      LocalDateTime.of(LocalDate.now(London), LocalTime.MIDNIGHT).atZone(London)
+      LocalDateTime
+        .of(LocalDate.now(London).plusDays(1), LocalTime.MIDNIGHT)
+        .atZone(London)
     val timeToNextMidnight = Duration
       .between(ZonedDateTime.now(London), nextMidnight)
       .toScala
