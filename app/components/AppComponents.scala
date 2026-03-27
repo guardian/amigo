@@ -187,7 +187,8 @@ class AppComponents(context: Context, identity: AppIdentity)
       NotificationConfig(amigoUrl, t, anghammaradSNSClient, stage)
     }
 
-  val bakeQueueUrl: String = configuration.get[String]("bake-queue-url")
+  val bakeQueueUrl: Option[String] =
+    configuration.get[Option[String]]("bake-queue-url")
   val sqsClient = SqsClient
     .builder()
     .region(region)
@@ -277,35 +278,41 @@ class AppComponents(context: Context, identity: AppIdentity)
   bakeScheduler.initialise(Recipes.list())
 
   // don't run scheduled bakes on dev machines
-//  if (stage == "PROD") {
   // TODO re-enable PROD-only check
-  BakeQueueScheduler.schedule(
-    pekkoActorSystem.scheduler,
-    sqsClient,
-    bakeQueueUrl
-  )
+  // if (stage == "PROD") {
+  bakeQueueUrl match {
+    case None =>
+      log.warn(
+        "No bake queue URL configured, scheduled bakes will not be queued"
+      )
+    case Some(url) =>
+      BakeQueueScheduler.schedule(
+        pekkoActorSystem.scheduler,
+        sqsClient,
+        url
+      )
 
-  // Spawn the BakeQueueProcessor actor
-  val bakeQueueProcessorRef = pekkoActorSystem.actorOf(
-    BakeQueueProcessor.props(
-      sqs = sqsClient,
-      bakeQueueUrl = bakeQueueUrl,
-      runner = scheduledBakeRunner
-    ),
-    "bake-queue-processor"
-  )
+      // Spawn the BakeQueueProcessor actor
+      val bakeQueueProcessorRef = pekkoActorSystem.actorOf(
+        BakeQueueProcessor.props(
+          sqs = sqsClient,
+          bakeQueueUrl = url,
+          runner = scheduledBakeRunner
+        ),
+        "bake-queue-processor"
+      )
+      // Register shutdown hook to gracefully stop the actor
+      applicationLifecycle.addStopHook { () =>
+        import org.apache.pekko.pattern.gracefulStop
 
-  // Register shutdown hook to gracefully stop the actor
-  applicationLifecycle.addStopHook { () =>
-    import org.apache.pekko.pattern.gracefulStop
-
-    gracefulStop(
-      bakeQueueProcessorRef,
-      30.seconds,
-      BakeQueueProcessor.Shutdown
-    )
+        gracefulStop(
+          bakeQueueProcessorRef,
+          30.seconds,
+          BakeQueueProcessor.Shutdown
+        )
+      }
   }
-//  }
+  // }
 
   val bakesRepo = new BakesRepo(notificationConfig)
   val packerEC2Client = new PackerEC2Client(ec2Client, stage)
