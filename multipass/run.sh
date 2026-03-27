@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+  #!/bin/bash -xe
 
 script_dir=$(dirname "$0")
 target_dir=/home/ubuntu

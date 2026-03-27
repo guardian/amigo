@@ -1,0 +1,6 @@
+---
+target_dir: /opt/llama
+llama_cpp_models:
+  - repo: Qwen/Qwen3-8B-GGUF
+    file: Qwen3-8B-Q4_K_M.gguf
+

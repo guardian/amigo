@@ -1,0 +1,47 @@
+---
+- name: Download Nix installer
+  get_url:
+    url: https://nixos.org/nix/install
+    dest: /tmp/nix-install.sh
+    mode: '0755'
+
+- name: Install Nix package manager
+  shell: /tmp/nix-install.sh --daemon --yes
+  args:
+    creates: /nix
+
+- name: Install llama.cpp via Nix and symlink binaries
+  shell: |
+    set -e
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix-env --file '<nixpkgs>' --install --attr llama-cpp
+    ln -sf "$(readlink -f $(which llama-server))" /usr/local/bin/llama-server
+    ln -sf "$(readlink -f $(which llama-cli))" /usr/local/bin/llama-cli
+  args:
+    executable: /bin/bash
+
+- name: Create models directory
+  file:
+    path: "{{ target_dir }}/models"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    recurse: yes
+
+- name: Download models from Hugging Face
+  shell: |
+    set -e
+    cd {{ target_dir }}/models
+    echo "Downloading {{ item.file }} from {{ item.repo }}"
+    curl -L -o "{{ item.file }}" \
+      "https://huggingface.co/{{ item.repo }}/resolve/main/{{ item.file }}"
+  loop: "{{ llama_cpp_models }}"
+
+- name: Set ownership of models
+  file:
+    path: "{{ target_dir }}"
+    owner: ubuntu
+    group: ubuntu
+    recurse: yes
+
+
