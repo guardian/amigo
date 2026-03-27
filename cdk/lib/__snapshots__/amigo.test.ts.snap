@@ -309,6 +309,43 @@ exports[`The Amigo stack matches the snapshot 1`] = `
     "BakeQueueDA0E0C57": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "MessageRetentionPeriod": 345600,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "BakeQueueDLQ3F278D0B",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 2,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 3600,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "BakeQueueDLQ3F278D0B": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -330,6 +367,39 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "BakeQueueDLQPolicy0DCB4C33": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "BakeQueueDLQ3F278D0B",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "BakeQueueDLQ3F278D0B",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
     "BakeQueueParamAB237CC4": {
       "Properties": {

@@ -326,7 +326,21 @@ export class AmigoStack extends GuStack {
 			instanceMetricGranularity,
 		});
 
-		const bakeQueue = new Queue(this, 'BakeQueue', { enforceSSL: true });
+		const bakeQueueDlq = new Queue(this, 'BakeQueueDLQ', {
+			enforceSSL: true,
+			retentionPeriod: Duration.days(14),
+		});
+
+		const bakeQueue = new Queue(this, 'BakeQueue', {
+			enforceSSL: true,
+			visibilityTimeout: Duration.minutes(60),
+			retentionPeriod: Duration.days(4),
+			deadLetterQueue: {
+				queue: bakeQueueDlq,
+				maxReceiveCount: 2,
+			},
+		});
+
 		bakeQueue.grantSendMessages(guPlayApp.autoScalingGroup);
 		bakeQueue.grantConsumeMessages(guPlayApp.autoScalingGroup);
 
