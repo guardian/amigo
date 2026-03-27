@@ -23,7 +23,7 @@ class ScheduledBakeRunner(
 
   def bake(recipeId: RecipeId): Future[Option[Int]] = {
     lazy val didNotRun = Future.successful(None)
-    if (!enabled && recipeId.value != "anowak-testing") { // FIXME remove this!
+    if (!enabled) {
       log.info("Skipping scheduled bake because I am disabled")
       didNotRun
     } else {
