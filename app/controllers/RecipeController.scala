@@ -117,7 +117,9 @@ class RecipeController(
                           diskSize,
                           roles,
                           modifiedBy = request.user.fullName,
-                          bakeSchedule,
+                          bakeSchedule =
+                            if (bakeDay.isDefined) None
+                            else bakeSchedule, // if a bake day is specified, ignore and unset any bake schedule
                           bakeDay,
                           encryptFor
                         )
