@@ -24,11 +24,10 @@ import scala.jdk.DurationConverters._
 object BakeQueueScheduler extends Loggable {
   private val London = ZoneId.of("Europe/London")
 
-  // FIXME currently relies on there usually only being one instance of Amigo to avoid duplicating bakes unnecessarily...
-  // Needs improving. Lambda on a schedule makes some sense, but then that's another service to deploy, with a dependency
-  // chain to keep up-to-date, configuring an AWS SDK to scan the table and write to the queue, etc. It is much easier to
-  // have an extra ≤20 lines of Scala running on the instance we already have...
-  // Maybe we have the actual bake runner skip a scheduled bake if one has run in the past 24h?
+  // TODO currently relies on there usually only being one instance of Amigo to avoid duplicating bakes unnecessarily...
+  // Might be worth improving. Lambda on a schedule makes some sense, but then that's another service to deploy, with a dependency
+  // chain to keep up-to-date, configuring an AWS SDK to scan the table and write to the queue, etc. Isn't it easier to
+  // do it with the existing service, and revisit if we start running multiple instances and see it causing problems?
   def schedule(
       scheduler: Scheduler,
       sqsClient: SqsClient,
