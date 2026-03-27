@@ -358,9 +358,7 @@ object RecipeController {
       "Tuesday",
       "Wednesday",
       "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
+      "Friday"
     ).contains _
     private val bakeDayMapping = optional(text().verifying(isDayOfWeek))
     private val accountNumbersMapping = text()
