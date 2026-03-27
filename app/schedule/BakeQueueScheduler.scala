@@ -43,12 +43,12 @@ object BakeQueueScheduler extends Loggable {
       .toScala
       .plus(5.minutes)
 
-    // FIXME for testing, running immediately every 15 mins
+    // Schedule a job to run every day at 5 minutes past midnight, which will queue bake jobs for any recipes that are due to be baked that day.
+    // The initial run will be scheduled for the next midnight, to prevent duplicate bake jobs being queued if the service is restarted during the day.
     scheduler.scheduleAtFixedRate(
-      initialDelay = 0.seconds,
-      interval = 15.minutes
+      initialDelay = timeToNextMidnight,
+      interval = 1.day
     ) { () =>
-      // scheduler.scheduleAtFixedRate(initialDelay = timeToNextMidnight, interval = 1.day) { () =>
       val allRecipes = Recipes.list()
       val today = ZonedDateTime
         .now(London)
