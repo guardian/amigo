@@ -62,9 +62,8 @@ import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
 import java.io.FileInputStream
 import java.time.Duration
 import java.time.Duration.{ofHours, ofMinutes}
-import java.util.concurrent.Executors
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Await
 import scala.jdk.DurationConverters._
 import scala.language.postfixOps
 import scala.util.Try
@@ -285,14 +284,27 @@ class AppComponents(context: Context, identity: AppIdentity)
     sqsClient,
     bakeQueueUrl
   )
-  val bakeQueueProcessor = new BakeQueueProcessor(
-    sqs = sqsClient,
-    bakeQueueUrl = bakeQueueUrl,
-    runner = scheduledBakeRunner
+
+  // Spawn the BakeQueueProcessor actor
+  val bakeQueueProcessorRef = pekkoActorSystem.actorOf(
+    BakeQueueProcessor.props(
+      sqs = sqsClient,
+      bakeQueueUrl = bakeQueueUrl,
+      runner = scheduledBakeRunner
+    ),
+    "bake-queue-processor"
   )
-  Future(bakeQueueProcessor.run())(
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
-  )
+
+  // Register shutdown hook to gracefully stop the actor
+  applicationLifecycle.addStopHook { () =>
+    import org.apache.pekko.pattern.gracefulStop
+
+    gracefulStop(
+      bakeQueueProcessorRef,
+      30.seconds,
+      BakeQueueProcessor.Shutdown
+    )
+  }
 //  }
 
   val bakesRepo = new BakesRepo(notificationConfig)
