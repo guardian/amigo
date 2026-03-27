@@ -2,7 +2,6 @@ package schedule
 
 import models.RecipeId
 import org.apache.pekko.actor.{Actor, Props}
-import org.joda.time.DateTime
 import play.api.libs.json.{Json, OFormat}
 import services.Loggable
 import software.amazon.awssdk.services.sqs.SqsClient
@@ -16,13 +15,13 @@ import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
-case class BakeQueueJob(recipe: RecipeId, buildNumber: Int)
+case class BakeQueueJob(recipe: RecipeId)
 object BakeQueueJob {
   implicit val format: OFormat[BakeQueueJob] = Json.format[BakeQueueJob]
 }
 
 object BakeQueueProcessor extends Loggable {
-  case object ProcessQueue
+  private case object ProcessQueue
   case object Shutdown
 
   def props(
@@ -74,7 +73,7 @@ class BakeQueueProcessor(
       for (message <- resp.messages().asScala) {
         val job = Json.parse(message.body()).as[BakeQueueJob]
         val completion = Await.result(
-          runner.bake(job.recipe, Some(job.buildNumber)),
+          runner.bake(job.recipe),
           bakeTimeout
         )
         completion match {
@@ -87,11 +86,11 @@ class BakeQueueProcessor(
             sqs.deleteMessage(dmr)
           case Some(n) =>
             log.warn(
-              s"Bake for ${job.recipe.value} ${job.buildNumber} failed with exit code $n, leaving message ${message.messageId()} on the queue."
+              s"Bake for ${job.recipe.value} failed with exit code $n, leaving message ${message.messageId()} on the queue."
             )
           case None =>
             log.warn(
-              s"Bake for ${job.recipe.value} ${job.buildNumber} did not run, leaving message ${message.messageId()} on the queue."
+              s"Bake for ${job.recipe.value} did not run, leaving message ${message.messageId()} on the queue."
             )
         }
       }

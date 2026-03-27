@@ -59,20 +59,13 @@ object BakeQueueScheduler extends Loggable {
       for {
         recipe <- todaysRecipes
       } {
-        Recipes.incrementAndGetBuildNumber(recipe) match {
-          case Some(buildNo) =>
-            val bakeJob = BakeQueueJob(recipe, buildNo)
-            val smr = SendMessageRequest
-              .builder()
-              .queueUrl(bakeQueueUrl)
-              .messageBody(Json.toJson(bakeJob).toString())
-              .build()
-            sqsClient.sendMessage(smr)
-          case None =>
-            log.warn(
-              s"Failed to queue bake job for recipe $recipe - could not determine build number"
-            )
-        }
+        val bakeJob = BakeQueueJob(recipe)
+        val smr = SendMessageRequest
+          .builder()
+          .queueUrl(bakeQueueUrl)
+          .messageBody(Json.toJson(bakeJob).toString())
+          .build()
+        sqsClient.sendMessage(smr)
       }
     }
   }

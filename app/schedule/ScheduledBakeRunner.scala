@@ -21,7 +21,7 @@ class ScheduledBakeRunner(
 )(implicit dynamo: Dynamo, packerConfig: PackerConfig)
     extends Loggable {
 
-  def bake(recipeId: RecipeId, bakeNumber: Option[Int]): Future[Option[Int]] = {
+  def bake(recipeId: RecipeId): Future[Option[Int]] = {
     lazy val didNotRun = Future.successful(None)
     if (!enabled && recipeId.value != "anowak-testing") { // FIXME remove this!
       log.info("Skipping scheduled bake because I am disabled")
@@ -36,9 +36,7 @@ class ScheduledBakeRunner(
             )
             didNotRun
           } else {
-            bakeNumber.orElse(
-              Recipes.incrementAndGetBuildNumber(recipe.id)
-            ) match {
+            Recipes.incrementAndGetBuildNumber(recipe.id) match {
               case Some(buildNumber) =>
                 val theBake =
                   Bakes.create(recipe, buildNumber, startedBy = "scheduler")
