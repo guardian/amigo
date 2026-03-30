@@ -1,6 +1,6 @@
 ---
 dependencies:
-  - deep-learning-ami
+  - aws-tools
   - role: packages
     packages:
       - curl
