@@ -33,7 +33,8 @@
     set -e
     cd {{ target_dir }}/models
     echo "Downloading {{ item.file }} from {{ item.repo }}"
-    curl -L -o "{{ item.file }}" \
+    curl -L --fail -o "{{ item.file }}" \
+      -H "Authorization: Bearer {{ huggingface_token }}" \
       "https://huggingface.co/{{ item.repo }}/resolve/main/{{ item.file }}"
   loop: "{{ llama_cpp_models }}"
 
