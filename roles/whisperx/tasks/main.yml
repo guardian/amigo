@@ -4,14 +4,6 @@
   args:
     creates: "{{ whisperx_venv }}/bin/python"
 
-- name: Install whisperx dependencies
-  pip:
-    name:
-     - torch==2.8.0
-     - torchaudio==2.8.0
-    virtualenv: "{{ whisperx_venv }}"
-    extra_args: "--index-url https://download.pytorch.org/whl/cu118"
-
 - name: Install whisperx
   pip:
     name: "{{ whisperx_package | default('whisperx') }}"
