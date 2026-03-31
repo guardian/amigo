@@ -5,3 +5,4 @@ dependencies:
   - role: packages
     packages:
       - ffmpeg
+      - python3-venv
