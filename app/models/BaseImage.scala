@@ -53,8 +53,9 @@ case object Ubuntu extends LinuxDist {
         "DEBIAN_FRONTEND=noninteractive  apt-get --yes install software-properties-common",
         "version=$(. /etc/os-release; echo $VERSION_ID | cut -d'.' -f1)",
         "if (($version < 20)); then apt-add-repository --yes ppa:ansible/ansible; fi",
-        // disable unattended upgrades as this can break bakes that are trying to use apt
+        // disable and remove unattended upgrades as this can break bakes that are trying to use apt
         "systemctl stop unattended-upgrades || true",
+        "apt-get remove unattended-upgrades -y || true",
         // ansible ppa broken in ubuntu: https://github.com/ansible/ansible/issues/69203
         // and available in https://packages.ubuntu.com/focal/ansible
         "apt-get --yes update",
