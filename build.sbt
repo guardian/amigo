@@ -106,6 +106,13 @@ libraryDependencies ++= Seq(
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "6.0.0"
 )
+
+// Override jackson-core 3.x pulled transitively by logstash-logback-encoder to fix GHSA-6v53-7c9g-w56r
+val jacksonCore3Version = "3.1.1"
+dependencyOverrides ++= Seq(
+  "tools.jackson.core" % "jackson-core" % jacksonCore3Version,
+  "tools.jackson.core" % "jackson-databind" % jacksonCore3Version
+)
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
