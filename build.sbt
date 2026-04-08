@@ -88,7 +88,7 @@ val safeTransitiveDependencies = {
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonV2Version,
     "tools.jackson.core" % "jackson-core" % jacksonV3Version,
     "tools.jackson.core" % "jackson-databind" % jacksonV3Version,
-    "ch.qos.logback" % "logback-classic" % "1.5.32",
+    "ch.qos.logback" % "logback-classic" % "1.5.32"
   )
 }
 
