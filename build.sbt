@@ -65,19 +65,36 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonVersion = "2.21.1"
+val jacksonV2Version = "2.21.2"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.42.17"
 val playSecretRotationVersion = "17.0.2"
 
+/*
+ * To test whether any of these entries are redundant:
+ * 1. Comment it out
+ * 2. Run `sbt dependencyList`
+ * 3. If no earlier version appears in the dependency list, the entry can be removed.
+ */
+val safeTransitiveDependencies = {
+  val jacksonV3Version = "3.1.1"
+  Seq(
+    "com.fasterxml.jackson.core" % "jackson-core" % jacksonV2Version,
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonV2Version,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonV2Version,
+    "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonV2Version,
+    "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonV2Version,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonV2Version,
+    "tools.jackson.core" % "jackson-core" % jacksonV3Version,
+    "tools.jackson.core" % "jackson-databind" % jacksonV3Version,
+    "ch.qos.logback" % "logback-classic" % "1.5.32"
+  )
+}
+
 libraryDependencies ++= Seq(
   ws,
-  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
-  // If we don't explicitly include this dependency at the correct version then we hit the following exception
-  // when running unit tests: com.fasterxml.jackson.databind.JsonMappingException.
-  // This seems to be because Play Framework is pulling in a different Jackson version.
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
   "org.scanamo" %% "scanamo" % "6.0.0",
   "com.beachape" %% "enumeratum" % "1.9.6",
   "com.gu" %% "simple-configuration-ssm" % "9.2.1",
@@ -94,8 +111,6 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "9.0",
-  // Transient dependency of Play. No newer version of Play with this vulnerability fixed.
-  "ch.qos.logback" % "logback-classic" % "1.5.32",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
@@ -105,7 +120,7 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-inline" % "5.2.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "6.0.0"
-)
+) ++ safeTransitiveDependencies
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
