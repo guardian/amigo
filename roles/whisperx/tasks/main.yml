@@ -1,23 +1,20 @@
 ---
-- name: Upgrade packaging
-  pip:
-    name: "packaging"
-    state: "latest"
-    executable: pip3
-
-- name: Install whisperx dependencies
-  pip:
-    name:
-     - torch==2.0.0
-     - torchaudio==2.0.1
-    executable: pip3
-    extra_args: "--index-url https://download.pytorch.org/whl/cu118"
+- name: Create whisperx virtual environment
+  command: "python3 -m venv {{ whisperx_venv }}"
+  args:
+    creates: "{{ whisperx_venv }}/bin/python"
 
 - name: Install whisperx
   pip:
     name: "{{ whisperx_package | default('whisperx') }}"
-    executable: pip3
+    virtualenv: "{{ whisperx_venv }}"
     version: "{{ whisperx_version | default(omit) }}"
+
+- name: Symlink whisperx onto the PATH
+  file:
+    src: "{{ whisperx_venv }}/bin/whisperx"
+    dest: /usr/local/bin/whisperx
+    state: link
 
 # We use a python script to fetch the models which is owned by the transcription service. See the below PRs for details:
 #  -  https://github.com/guardian/amigo/pull/1607
@@ -30,6 +27,6 @@
 # The script lives here https://github.com/guardian/transcription-service/blob/main/whisperx-model-fetch/download_whisperx_models.py
 # If you are changing these parameters it may be helpful to run it locally to test the changes.
 - name: Download whisperx models
-  command: "python3 /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
+  command: "{{ whisperx_venv }}/bin/python /tmp/download_whisperx_models.py --whisper-models --diarization-models --torch-align-models --huggingface-token {{ huggingface_token }}"
   become: yes
   become_user: ubuntu
