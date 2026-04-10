@@ -68,7 +68,7 @@ scalacOptions ++= Seq(
 val jacksonV2Version = "2.21.2"
 val circeVersion = "0.14.15"
 
-val awsV2SdkVersion = "2.42.17"
+val awsV2SdkVersion = "2.42.23"
 val playSecretRotationVersion = "17.0.2"
 
 /*
