@@ -15,11 +15,6 @@ exports[`the lambda stack matches the snapshot 1`] = `
       "Description": "The SNS topic to subscribe to",
       "Type": "String",
     },
-    "KmsKeyArn": {
-      "Default": "",
-      "Description": "Override the default KMS key if required",
-      "Type": "String",
-    },
   },
   "Resources": {
     "HousekeepingLambda": {
