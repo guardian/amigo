@@ -95,7 +95,7 @@ val safeTransitiveDependencies = {
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
-  "org.scanamo" %% "scanamo" % "6.0.0",
+  "org.scanamo" %% "scanamo" % "7.0.0",
   "com.beachape" %% "enumeratum" % "1.9.6",
   "com.gu" %% "simple-configuration-ssm" % "10.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
