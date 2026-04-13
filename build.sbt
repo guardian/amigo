@@ -68,8 +68,8 @@ scalacOptions ++= Seq(
 val jacksonV2Version = "2.21.2"
 val circeVersion = "0.14.15"
 
-val awsV2SdkVersion = "2.42.23"
-val playSecretRotationVersion = "17.0.2"
+val awsV2SdkVersion = "2.42.31"
+val playSecretRotationVersion = "17.0.4"
 
 /*
  * To test whether any of these entries are redundant:
@@ -95,9 +95,9 @@ val safeTransitiveDependencies = {
 libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
-  "org.scanamo" %% "scanamo" % "6.0.0",
+  "org.scanamo" %% "scanamo" % "7.0.0",
   "com.beachape" %% "enumeratum" % "1.9.6",
-  "com.gu" %% "simple-configuration-ssm" % "9.2.2",
+  "com.gu" %% "simple-configuration-ssm" % "10.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
   "com.gu.play-googleauth" %% "play-v30" % "35.0.0",
@@ -119,7 +119,7 @@ libraryDependencies ++= Seq(
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "org.mockito" % "mockito-inline" % "5.2.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
-  "com.gu" %% "anghammarad-client" % "6.0.0"
+  "com.gu" %% "anghammarad-client" % "7.0.0"
 ) ++ safeTransitiveDependencies
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
