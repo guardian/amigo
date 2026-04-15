@@ -1,7 +1,3 @@
 ---
 dependencies:
   - aws-tools
-  - role: packages
-    packages:
-      - curl
-

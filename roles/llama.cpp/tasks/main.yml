@@ -1,7 +1,7 @@
 ---
 - name: Create target and models directory
   file:
-    path: "{{ target_dir }}/models"
+    path: "{{ target_dir }}"
     state: directory
     owner: ubuntu
     group: ubuntu
@@ -9,18 +9,8 @@
 
 - name: Download compiled llama.cpp project
   shell: |
-    aws s3 cp s3://amigo-data-{{ model_script_stage.lower() }}/deploy/{{ model_script_stage }}/llama-cpp/llama-cpp-cuda.zip /tmp/llama-cpp-cuda.zip
+    aws s3 cp s3://amigo-data-{{ model_script_stage.lower() }}/deploy/{{ llama_cpp_build_stage }}/llama-cpp/llama-cpp-cuda.zip /tmp/llama-cpp-cuda.zip
     unzip -o /tmp/llama-cpp-cuda.zip -d {{ target_dir }}
-
-- name: Download models from Hugging Face
-  shell: |
-    set -e
-    cd {{ target_dir }}/models
-    echo "Downloading {{ item.file }} from {{ item.repo }}"
-    curl -L --fail -o "{{ item.file }}" \
-      -H "Authorization: Bearer {{ huggingface_token }}" \
-      "https://huggingface.co/{{ item.repo }}/resolve/main/{{ item.file }}"
-  loop: "{{ llama_cpp_models }}"
 
 - name: Set ownership of llama directory
   file:
