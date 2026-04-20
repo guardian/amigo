@@ -69,7 +69,7 @@ val jacksonV2Version = "2.21.2"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.42.31"
-val playSecretRotationVersion = "17.0.4"
+val playSecretRotationVersion = "17.0.5"
 
 /*
  * To test whether any of these entries are redundant:
