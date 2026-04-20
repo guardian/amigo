@@ -18,14 +18,14 @@
 		"@guardian/tsconfig": "^1.0.1",
 		"@types/jest": "^30.0.0",
 		"@types/node": "25.6.0",
-		"eslint": "^10.2.0",
+		"eslint": "^9.39.2",
 		"eslint-plugin-prettier": "5.5.5",
 		"jest": "^30.3.0",
 		"prettier": "^3.8.2",
 		"source-map-support": "^0.5.20",
 		"ts-jest": "^29.4.9",
 		"ts-node": "^10.9.2",
-		"typescript": "6.0.2"
+		"typescript": "5.9.3"
 	},
 	"prettier": "@guardian/prettier",
 	"jest": {
