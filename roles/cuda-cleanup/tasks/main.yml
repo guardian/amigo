@@ -1,0 +1,14 @@
+---
+- name: Find all CUDA installations in /usr/local
+  find:
+    paths: /usr/local
+    patterns: "cuda-*"
+    file_type: directory
+  register: cuda_installations
+
+- name: Remove CUDA versions other than {{ desired_cuda_version }}
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ cuda_installations.files }}"
+  when: item.path != "/usr/local/cuda-" + desired_cuda_version
