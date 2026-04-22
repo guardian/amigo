@@ -23,7 +23,7 @@ fi
 if ! multipass list | grep $vm_name | grep Running > /dev/null
 then
     echo 'Creating and provisioning multipass VM...'
-    multipass launch --name $vm_name $ubuntu_version
+    multipass launch --name $vm_name $ubuntu_version --disk 15G
     multipass stop $vm_name
     multipass mount --type native $script_dir/../roles $vm_name:$target_dir/.ansible/roles
     multipass mount --type native $script_dir $vm_name:$target_dir/test
