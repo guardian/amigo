@@ -11,4 +11,4 @@
     path: "{{ item.path }}"
     state: absent
   loop: "{{ cuda_installations.files }}"
-  when: item.path != "/usr/local/cuda-" + desired_cuda_version
+  when: item.path != "/usr/local/cuda-" + desired_cuda_version | string
