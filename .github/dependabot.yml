@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     commit-message:
       prefix: "chore(deps): "
     labels:
@@ -15,7 +15,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/cdk"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     commit-message:
       prefix: "chore(deps): "
     # The version of AWS CDK libraries must match those from @guardian/cdk.
