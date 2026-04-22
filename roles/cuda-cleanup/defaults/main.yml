@@ -1,2 +1,2 @@
 ---
-desired_cuda_version: 12.8
+desired_cuda_version: "12.8"
