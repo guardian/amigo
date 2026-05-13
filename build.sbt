@@ -78,7 +78,7 @@ val playSecretRotationVersion = "17.0.5"
  * 3. If no earlier version appears in the dependency list, the entry can be removed.
  */
 val safeTransitiveDependencies = {
-  val jacksonV3Version = "3.1.2"
+  val jacksonV3Version = "3.1.3"
   Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonV2Version,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonV2Version,
@@ -105,7 +105,7 @@ libraryDependencies ++= Seq(
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
-  "joda-time" % "joda-time" % "2.14.1",
+  "joda-time" % "joda-time" % "2.14.2",
   "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
