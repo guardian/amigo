@@ -78,7 +78,7 @@ val playSecretRotationVersion = "17.0.5"
  * 3. If no earlier version appears in the dependency list, the entry can be removed.
  */
 val safeTransitiveDependencies = {
-  val jacksonV3Version = "3.1.2"
+  val jacksonV3Version = "3.1.3"
   Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonV2Version,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonV2Version,
