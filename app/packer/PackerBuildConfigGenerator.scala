@@ -78,7 +78,12 @@ object PackerBuildConfigGenerator {
       ami_block_device_mappings = disk,
       launch_block_device_mappings = disk,
       security_group_id = packerConfig.securityGroupId,
-      aws_polling = awsPolling
+      aws_polling = awsPolling,
+      metadata_options = Map(
+        "http_endpoint" -> "enabled",
+        "http_tokens" -> "required",
+        "http_put_response_hop_limit" -> "1"
+      )
     )
 
     val baseImage = bake.recipe.baseImage.linuxDist.getOrElse(Ubuntu)

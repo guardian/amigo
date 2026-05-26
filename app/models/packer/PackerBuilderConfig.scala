@@ -36,7 +36,8 @@ case class PackerBuilderConfig(
     security_group_id: Option[String],
     //  Needed for long running bakes
     //  See https://developer.hashicorp.com/packer/integrations/hashicorp/amazon#resourcenotready-error
-    aws_polling: Option[AwsPolling]
+    aws_polling: Option[AwsPolling],
+    metadata_options: Map[String, String]
 )
 
 object PackerBuilderConfig {
