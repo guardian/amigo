@@ -243,7 +243,15 @@ class AppComponents(context: Context, identity: AppIdentity)
   val quartzScheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
-    val enabled = stage == "PROD" // don't run scheduled bakes on dev machines
+    // allow scheduled bakes to be disabled via config
+    val enabled = configuration
+      .get[Option[String]]("amigo.scheduledBakes.enabled")
+      .flatMap(_.trim.toLowerCase match {
+        case "true"  => Some(true)
+        case "false" => Some(false)
+        case _       => None
+      })
+      .getOrElse(false)
     new ScheduledBakeRunner(
       stage,
       enabled,
