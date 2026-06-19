@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Disable/Enable scheduled bakes for a given stage
+
+Usage:
+  script/toggleScheduledBakesEnabled -p <STAGE> [-r <REGION>] [-a <AWS_PROFILE>]
+  script/toggleScheduledBakesEnabled --help
+
+Required:
+  -p <STAGE>         Stage name (e.g. PROD, CODE)
+
+Optional:
+  -r <REGION>        AWS region (default: eu-west-1)
+  -a <AWS_PROFILE>   AWS profile (default: deployTools)
+  -h, --help         Show this help
+
+Examples:
+  script/toggleScheduledBakesEnabled -p PROD
+  script/toggleScheduledBakesEnabled -p CODE -r eu-west-1 -a deployTools
+EOF
+}
+
+STAGE=""
+REGION="eu-west-1"
+AWS_PROFILE="deployTools"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: -p requires a value." >&2
+        usage
+        exit 1
+      fi
+      STAGE="$2"
+      shift 2
+      ;;
+    -r)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: -r requires a value." >&2
+        usage
+        exit 1
+      fi
+      REGION="$2"
+      shift 2
+      ;;
+    -a)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: -a requires a value." >&2
+        usage
+        exit 1
+      fi
+      AWS_PROFILE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Error: Unknown argument '$1'" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$STAGE" ]]; then
+  echo "Error: -p <STAGE> is required." >&2
+  usage
+  exit 1
+fi
+
+PARAM="/${STAGE}/deploy/amigo/amigo.scheduledBakes.enabled"
+
+echo "Current value of $PARAM"
+aws ssm get-parameter \
+  --profile "$AWS_PROFILE" \
+  --region "$REGION" \
+  --name "$PARAM" \
+  --query 'Parameter.Value' \
+  --output text
+
+echo "Disabling scheduled bakes for stage '$STAGE'..."
+aws ssm put-parameter \
+  --profile "$AWS_PROFILE" \
+  --region "$REGION" \
+  --name "$PARAM" \
+  --type String \
+  --value "false" \
+  --overwrite
+
+echo "New value of $PARAM"
+aws ssm get-parameter \
+  --profile "$AWS_PROFILE" \
+  --region "$REGION" \
+  --name "$PARAM" \
+  --query 'Parameter.Value' \
+  --output text
