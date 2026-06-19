@@ -38,7 +38,9 @@ it possible to SSH onto the instance that is being used to build the AMI.
 ## Troubleshooting problems with scheduled bakes
 
 If we detect an issue in a component that would affect all new bakes, we can temporarily disable scheduled bakes.
-Just set the Parameter Store switch `amigo.scheduledBakes.enabled` to false.
+Just set the Parameter Store switch `amigo.scheduledBakes.enabled` to false, you can do this via the AWS console or using the following script [`./script/enableScheduledBakes`](./script/enableScheduledBakes) (help with option -h or --help).
+
+`setScheduledBakesEnabled -s PROD -d` will disable scheduled bakes in PROD, and `setScheduledBakesEnabled -s PROD -e` will enhable scheduled bakes in PROD.
 
 ## How to run locally
 

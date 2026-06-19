@@ -3,35 +3,36 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Disable/Enable scheduled bakes for a given stage
+Enable/disable scheduled bakes for a given stage.
 
 Usage:
-  script/toggleScheduledBakesEnabled -p <STAGE> [-r <REGION>] [-a <AWS_PROFILE>]
-  script/toggleScheduledBakesEnabled --help
+  script/setScheduledBakesEnabled -p <STAGE> [-d|-e] [-r <REGION>]
+  script/setScheduledBakesEnabled --help
 
 Required:
-  -p <STAGE>         Stage name (e.g. PROD, CODE)
+  -s <STAGE>         Stage name (e.g. PROD, CODE)
+
+Action (optional):
+  -d                 Disable scheduled bakes
+  -e                 Enable scheduled bakes
+                     If neither -d nor -e is provided, only current state is printed.
 
 Optional:
   -r <REGION>        AWS region (default: eu-west-1)
-  -a <AWS_PROFILE>   AWS profile (default: deployTools)
   -h, --help         Show this help
-
-Examples:
-  script/toggleScheduledBakesEnabled -p PROD
-  script/toggleScheduledBakesEnabled -p CODE -r eu-west-1 -a deployTools
 EOF
 }
 
 STAGE=""
 REGION="eu-west-1"
 AWS_PROFILE="deployTools"
+ACTION=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -p)
+    -s)
       if [[ $# -lt 2 ]]; then
-        echo "Error: -p requires a value." >&2
+        echo "Error: stage (-p) requires a value (CODE/PROD)." >&2
         usage
         exit 1
       fi
@@ -47,14 +48,23 @@ while [[ $# -gt 0 ]]; do
       REGION="$2"
       shift 2
       ;;
-    -a)
-      if [[ $# -lt 2 ]]; then
-        echo "Error: -a requires a value." >&2
+    -d)
+      if [[ -n "$ACTION" && "$ACTION" != "disable" ]]; then
+        echo "Error: -d and -e are mutually exclusive." >&2
         usage
         exit 1
       fi
-      AWS_PROFILE="$2"
-      shift 2
+      ACTION="disable"
+      shift
+      ;;
+    -e)
+      if [[ -n "$ACTION" && "$ACTION" != "enable" ]]; then
+        echo "Error: -d and -e are mutually exclusive." >&2
+        usage
+        exit 1
+      fi
+      ACTION="enable"
+      shift
       ;;
     -h|--help)
       usage
@@ -76,27 +86,41 @@ fi
 
 PARAM="/${STAGE}/deploy/amigo/amigo.scheduledBakes.enabled"
 
-echo "Current value of $PARAM"
-aws ssm get-parameter \
-  --profile "$AWS_PROFILE" \
-  --region "$REGION" \
-  --name "$PARAM" \
-  --query 'Parameter.Value' \
-  --output text
+get_current_value() {
+  aws ssm get-parameter \
+    --profile "$AWS_PROFILE" \
+    --region "$REGION" \
+    --name "$PARAM" \
+    --query 'Parameter.Value' \
+    --output text
+}
 
-echo "Disabling scheduled bakes for stage '$STAGE'..."
-aws ssm put-parameter \
-  --profile "$AWS_PROFILE" \
-  --region "$REGION" \
-  --name "$PARAM" \
-  --type String \
-  --value "false" \
-  --overwrite
+echo "Current value of $PARAM: "
+CURRENT_VALUE="$(get_current_value)"
+echo "$CURRENT_VALUE"
+
+if [[ "$ACTION" == "disable" ]]; then
+  echo "Disabling scheduled bakes for stage '$STAGE'..."
+  aws ssm put-parameter \
+    --profile "$AWS_PROFILE" \
+    --region "$REGION" \
+    --name "$PARAM" \
+    --type String \
+    --value "false" \
+    --overwrite
+elif [[ "$ACTION" == "enable" ]]; then
+  echo "Enabling scheduled bakes for stage '$STAGE'..."
+  aws ssm put-parameter \
+    --profile "$AWS_PROFILE" \
+    --region "$REGION" \
+    --name "$PARAM" \
+    --type String \
+    --value "true" \
+    --overwrite
+else
+  echo "No action provided (-d or -e). Printed current state only."
+  exit 0
+fi
 
 echo "New value of $PARAM"
-aws ssm get-parameter \
-  --profile "$AWS_PROFILE" \
-  --region "$REGION" \
-  --name "$PARAM" \
-  --query 'Parameter.Value' \
-  --output text
+get_current_value
