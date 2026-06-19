@@ -244,14 +244,10 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
     // allow scheduled bakes to be disabled via config
-    val enabled = configuration
-      .get[Option[String]]("amigo.scheduledBakes.enabled")
-      .flatMap(_.trim.toLowerCase match {
-        case "true"  => Some(true)
-        case "false" => Some(false)
-        case _       => None
-      })
-      .getOrElse(false)
+    val enabled: Boolean = configuration
+      .getOptional[String]("amigo.scheduledBakes.enabled")
+      .getOrElse("false")
+      .equalsIgnoreCase("true")
     new ScheduledBakeRunner(
       stage,
       enabled,
