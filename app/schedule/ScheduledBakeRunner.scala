@@ -19,6 +19,7 @@ class ScheduledBakeRunner(
     extends Loggable {
 
   def bake(recipeId: RecipeId): Unit = {
+    // allow scheduled bakes to be disabled via config
     if (!enabled) {
       log.info("Skipping scheduled bake because I am disabled")
     } else {

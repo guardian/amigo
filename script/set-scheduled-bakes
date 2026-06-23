@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -e
+
+STAGE="${1:-CODE}"
+STATE="${2:-true}"
+
+if [[ "$STAGE" != "CODE" && "$STAGE" != "PROD" ]]; then
+  echo "Unknown stage: $STAGE. Supported values: CODE or PROD."
+  echo "Usage: $0 [CODE|PROD] [true|false]"
+  exit 1
+fi
+
+if [[ "$STATE" != "true" && "$STATE" != "false" ]]; then
+  echo "Unknown state: $STATE. Supported values: true or false."
+  echo "Usage: $0 [CODE|PROD] [true|false]"
+  exit 1
+fi
+
+PARAM="/${STAGE}/deploy/amigo/amigo.scheduledBakes.enabled"
+
+CURRENT_VALUE=$(
+  aws ssm get-parameter \
+    --profile deployTools \
+    --region eu-west-1 \
+    --name "$PARAM" \
+    --query 'Parameter.Value' \
+    --output text
+)
+
+echo "Setting scheduled bakes to $STATE for stage $STAGE (currently $CURRENT_VALUE)"
+
+aws ssm put-parameter \
+  --profile deployTools \
+  --region eu-west-1 \
+  --name "$PARAM" \
+  --type String \
+  --value "$STATE" \
+  --overwrite
+
+echo "Done. Please redeploy AMIgo to apply the change: https://riffraff.gutools.co.uk/deployment/history?projectName=tools%3A%3Aamigo&stage=${STAGE}&pageSize=1&page=1"

@@ -45,8 +45,6 @@ import software.amazon.awssdk.auth.credentials.{
   InstanceProfileCredentialsProvider,
   ProfileCredentialsProvider
 }
-import software.amazon.awssdk.awscore.retry.AwsRetryStrategy
-import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.ec2.Ec2Client
@@ -242,11 +240,16 @@ class AppComponents(context: Context, identity: AppIdentity)
 
   val quartzScheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
+  val scheduledBakesEnabled: Boolean = Try(
+    configuration
+      .getOptional[Boolean]("amigo.scheduledBakes.enabled")
+      .getOrElse(false)
+  ).getOrElse(false)
+
   val scheduledBakeRunner: ScheduledBakeRunner = {
-    val enabled = stage == "PROD" // don't run scheduled bakes on dev machines
     new ScheduledBakeRunner(
       stage,
-      enabled,
+      scheduledBakesEnabled,
       prismAgents,
       eventBus,
       ansibleVariables,

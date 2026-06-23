@@ -35,6 +35,17 @@ When running in an environment that is not `PROD` there is an option to `Bake wi
 This passes the `-debug` flag through to packer which saves a copy of the SSH key in AMIgos working directory. This makes 
 it possible to SSH onto the instance that is being used to build the AMI. 
 
+## Troubleshooting problems with scheduled bakes
+
+If we detect an issue in a component that would affect all new bakes, we can temporarily disable scheduled bakes by setting the Parameter Store switch `amigo.scheduledBakes.enabled` to `false` using:
+
+```bash
+./script/set-scheduled-bakes <CODE|PROD> <true|false>
+```
+
+> [!NOTE]
+> You'll need to redeploy AMIgo for the changes to take effect.
+
 ## How to run locally
 
 ### Testing ansible scripts without running amigo/packer
