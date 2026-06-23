@@ -241,10 +241,11 @@ class AppComponents(context: Context, identity: AppIdentity)
   val quartzScheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   val scheduledBakesEnabled: () => Boolean = () =>
-    configuration
-      .getOptional[String]("amigo.scheduledBakes.enabled")
-      .getOrElse("false")
-      .equalsIgnoreCase("true")
+    Try(
+      configuration
+        .getOptional[Boolean]("amigo.scheduledBakes.enabled")
+        .getOrElse(false)
+    ).getOrElse(false)
 
   val scheduledBakeRunner: ScheduledBakeRunner = {
     new ScheduledBakeRunner(
