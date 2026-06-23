@@ -38,4 +38,4 @@ aws ssm put-parameter \
   --value "$STATE" \
   --overwrite
 
-echo "Done!"
+echo "Done. Please redeploy AMIgo to apply the change: https://riffraff.gutools.co.uk/deployment/history?projectName=tools%3A%3Aamigo&stage=${STAGE}&pageSize=1&page=1"

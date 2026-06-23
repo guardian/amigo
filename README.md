@@ -43,6 +43,9 @@ If we detect an issue in a component that would affect all new bakes, we can tem
 ./script/set-scheduled-bakes <CODE|PROD> <true|false>
 ```
 
+> [!NOTE]
+> You'll need to redeploy AMIgo for the changes to take effect.
+
 ## How to run locally
 
 ### Testing ansible scripts without running amigo/packer

@@ -8,7 +8,7 @@ import services.{AmiMetadataLookup, Loggable, PrismData}
 
 class ScheduledBakeRunner(
     stage: String,
-    scheduledBakesEnabled: () => Boolean,
+    enabled: Boolean,
     prism: PrismData,
     eventBus: EventBus,
     ansibleVars: Map[String, String],
@@ -20,7 +20,7 @@ class ScheduledBakeRunner(
 
   def bake(recipeId: RecipeId): Unit = {
     // allow scheduled bakes to be disabled via config
-    if (!scheduledBakesEnabled()) {
+    if (!enabled) {
       log.info("Skipping scheduled bake because I am disabled")
     } else {
       Recipes.findById(recipeId) match {
