@@ -96,7 +96,7 @@ libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
   "org.scanamo" %% "scanamo" % "7.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.7",
+  "com.beachape" %% "enumeratum" % "1.9.8",
   "com.gu" %% "simple-configuration-ssm" % "12.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
