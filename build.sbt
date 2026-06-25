@@ -65,7 +65,7 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings"
 )
 
-val jacksonV2Version = "2.21.4"
+val jacksonV2Version = "2.22.0"
 val circeVersion = "0.14.15"
 
 val awsV2SdkVersion = "2.44.14"
@@ -78,7 +78,7 @@ val playSecretRotationVersion = "18.0.0"
  * 3. If no earlier version appears in the dependency list, the entry can be removed.
  */
 val safeTransitiveDependencies = {
-  val jacksonV3Version = "3.1.4"
+  val jacksonV3Version = "3.2.0"
   Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonV2Version,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonV2Version,
