@@ -66,7 +66,7 @@ scalacOptions ++= Seq(
 )
 
 val jacksonV2Version = "2.22.0"
-val circeVersion = "0.14.15"
+val circeVersion = "0.14.16"
 
 val awsV2SdkVersion = "2.46.17"
 val playSecretRotationVersion = "18.0.0"
@@ -132,7 +132,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     JDebPackaging
   )
   .settings(
-    scalaVersion := "2.13.16",
+    scalaVersion := "2.13.18",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
