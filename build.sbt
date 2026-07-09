@@ -66,9 +66,9 @@ scalacOptions ++= Seq(
 )
 
 val jacksonV2Version = "2.22.0"
-val circeVersion = "0.14.15"
+val circeVersion = "0.14.16"
 
-val awsV2SdkVersion = "2.46.14"
+val awsV2SdkVersion = "2.46.17"
 val playSecretRotationVersion = "19.0.1"
 
 /*
@@ -88,7 +88,7 @@ val safeTransitiveDependencies = {
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonV2Version,
     "tools.jackson.core" % "jackson-core" % jacksonV3Version,
     "tools.jackson.core" % "jackson-databind" % jacksonV3Version,
-    "ch.qos.logback" % "logback-classic" % "1.5.34"
+    "ch.qos.logback" % "logback-classic" % "1.5.36"
   )
 }
 
@@ -96,7 +96,7 @@ libraryDependencies ++= Seq(
   ws,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
   "org.scanamo" %% "scanamo" % "7.0.0",
-  "com.beachape" %% "enumeratum" % "1.9.7",
+  "com.beachape" %% "enumeratum" % "1.9.8",
   "com.gu" %% "simple-configuration-ssm" % "12.0.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
@@ -132,7 +132,7 @@ lazy val imageCopier = (project in file("imageCopier"))
     JDebPackaging
   )
   .settings(
-    scalaVersion := "2.13.16",
+    scalaVersion := "2.13.18",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(
