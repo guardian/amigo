@@ -5,7 +5,13 @@ import play.api.{Application, ApplicationLoader, Configuration, Mode}
 import components.AppComponents
 import play.api.ApplicationLoader.Context
 import services.Loggable
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProvider,
+  AwsCredentialsProviderChain,
+  DefaultCredentialsProvider,
+  InstanceProfileCredentialsProvider,
+  ProfileCredentialsProvider
+}
 
 import scala.concurrent.Future
 import scala.util.{Success, Try}
@@ -14,16 +20,37 @@ class AppLoader extends ApplicationLoader with Loggable {
   override def load(context: Context): Application = {
     new LogbackLoggerConfigurator().configure(context.environment)
 
+    // TODO: use this for both cases
     val credentialsProvider = DefaultCredentialsProvider.builder().build()
     val isDev = context.environment.mode == Mode.Dev
 
     val configAndIdentity = for {
       identity <-
-        if (isDev) Success(DevIdentity("amigo"))
+        if (isDev)
+          Success(
+            AwsIdentity(
+              app = "amigo",
+              stack = "deploy",
+              stage = "DEV",
+              region = "eu-west-1"
+            )
+          )
         else AppIdentity.whoAmI(defaultAppName = "amigo", credentialsProvider)
-      config <- Try(ConfigurationLoader.load(identity) {
-        case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
-      })
+      config <- Try(
+        ConfigurationLoader.load(
+          identity,
+          AwsCredentialsProviderChain
+            .builder()
+            .addCredentialsProvider(InstanceProfileCredentialsProvider.create())
+            .addCredentialsProvider(
+              ProfileCredentialsProvider.create("deployTools")
+            )
+            .build()
+        ) { case identity: AwsIdentity =>
+          println(s"***/${identity.stage}/${identity.stack}/${identity.app}")
+          SSMConfigurationLocation.default(identity)
+        }
+      )
     } yield (config, identity)
 
     configAndIdentity.fold(
