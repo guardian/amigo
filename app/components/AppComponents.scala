@@ -60,8 +60,11 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class AppComponents(context: Context, identity: AppIdentity)
-    extends BuiltInComponentsFromContext(context)
+class AppComponents(
+    context: Context,
+    identity: AppIdentity,
+    awsCredentials: AwsCredentialsProviderChain
+) extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with I18nComponents
     with Loggable
@@ -78,15 +81,6 @@ class AppComponents(context: Context, identity: AppIdentity)
   def mandatoryConfig(key: String): String = configuration
     .get[Option[String]](key)
     .getOrElse(sys.error(s"Missing config key: $key"))
-
-  val awsCredentials = AwsCredentialsProviderChain
-    .builder()
-    .credentialsProviders(
-      ProfileCredentialsProvider.create("deployTools"),
-      ProfileCredentialsProvider.create(),
-      InstanceProfileCredentialsProvider.create()
-    )
-    .build()
 
   val region = Region.EU_WEST_1
 

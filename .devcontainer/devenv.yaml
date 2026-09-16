@@ -1,0 +1,17 @@
+# Devenv project configuration
+# Edit this file to configure your project's devcontainer
+# and then run `devenv generate` to create the devcontainer.json files
+
+name: "amigo"
+
+modules:
+  - mise
+  - scala
+  - node
+  - github-copilot
+
+forwardPorts:
+  - 9000
+
+mounts:
+  - "source=${localEnv:HOME}/.gu/amigo,target=/home/vscode/.gu/amigo,readonly,type=bind,consistency=cached"

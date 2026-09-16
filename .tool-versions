@@ -1,1 +1,5 @@
 java corretto-21
+sbt 1
+node 24
+aqua:aws/aws-cli latest
+github:guardian/devenv 20260721-123412

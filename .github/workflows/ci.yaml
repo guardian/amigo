@@ -23,7 +23,7 @@ jobs:
         with:
           cache: 'npm'
           cache-dependency-path: 'cdk/package-lock.json'
-          node-version-file: '.nvmrc'
+          node-version-file: '.tool-versions'
       - uses: guardian/setup-scala@v1
       - name: Seed build number from TeamCity
         run: |
