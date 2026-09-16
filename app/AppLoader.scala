@@ -1,17 +1,16 @@
-import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
 import com.gu.conf.{ConfigurationLoader, SSMConfigurationLocation}
-import play.api.libs.logback.LogbackLoggerConfigurator
-import play.api.{Application, ApplicationLoader, Configuration, Mode}
+import com.gu.{AppIdentity, AwsIdentity}
 import components.AppComponents
 import play.api.ApplicationLoader.Context
+import play.api.libs.logback.LogbackLoggerConfigurator
+import play.api.{Application, ApplicationLoader, Configuration, Mode}
 import services.Loggable
 import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProvider,
   AwsCredentialsProviderChain,
-  DefaultCredentialsProvider,
   InstanceProfileCredentialsProvider,
   ProfileCredentialsProvider
 }
+import software.amazon.awssdk.regions.Region.EU_WEST_1
 
 import scala.concurrent.Future
 import scala.util.{Success, Try}
@@ -20,8 +19,13 @@ class AppLoader extends ApplicationLoader with Loggable {
   override def load(context: Context): Application = {
     new LogbackLoggerConfigurator().configure(context.environment)
 
-    // TODO: use this for both cases
-    val credentialsProvider = DefaultCredentialsProvider.builder().build()
+    val appName = "amigo"
+
+    val credentialsProvider = AwsCredentialsProviderChain.of(
+      ProfileCredentialsProvider.create("deployTools"),
+      ProfileCredentialsProvider.create(),
+      InstanceProfileCredentialsProvider.create()
+    )
     val isDev = context.environment.mode == Mode.Dev
 
     val configAndIdentity = for {
@@ -29,28 +33,16 @@ class AppLoader extends ApplicationLoader with Loggable {
         if (isDev)
           Success(
             AwsIdentity(
-              app = "amigo",
+              app = appName,
               stack = "deploy",
               stage = "DEV",
-              region = "eu-west-1"
+              region = EU_WEST_1.id
             )
           )
-        else AppIdentity.whoAmI(defaultAppName = "amigo", credentialsProvider)
-      config <- Try(
-        ConfigurationLoader.load(
-          identity,
-          AwsCredentialsProviderChain
-            .builder()
-            .addCredentialsProvider(InstanceProfileCredentialsProvider.create())
-            .addCredentialsProvider(
-              ProfileCredentialsProvider.create("deployTools")
-            )
-            .build()
-        ) { case identity: AwsIdentity =>
-          println(s"***/${identity.stage}/${identity.stack}/${identity.app}")
-          SSMConfigurationLocation.default(identity)
-        }
-      )
+        else AppIdentity.whoAmI(defaultAppName = appName, credentialsProvider)
+      config <- Try(ConfigurationLoader.load(identity, credentialsProvider) {
+        case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
+      })
     } yield (config, identity)
 
     configAndIdentity.fold(
@@ -63,7 +55,8 @@ class AppLoader extends ApplicationLoader with Loggable {
         val newContext = context.copy(initialConfiguration =
           Configuration(config).withFallback(context.initialConfiguration)
         )
-        val components = new AppComponents(newContext, identity)
+        val components =
+          new AppComponents(newContext, identity, credentialsProvider)
         log.info("Starting the scheduler")
         components.quartzScheduler.start()
         components.applicationLifecycle.addStopHook { () =>
