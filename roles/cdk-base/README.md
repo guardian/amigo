@@ -7,7 +7,20 @@ At the moment this means the following:
 - fetch instance tags and store under `/etc/config` (via [`instance-tag-discovery`](https://github.com/guardian/instance-tag-discovery))
 - ship `cloud-init-output` and application logs to a Kinesis stream (via [`devx-logs`](https://github.com/guardian/devx-logs))
 
+## Ubuntu support
+
+Ubuntu 26.04 uses the official `resolute` repository and the `fluent-bit`
+package (5.1.2 was available for amd64 and arm64 when support was added).
+The role keeps `/etc/td-agent-bit/td-agent-bit.conf` and
+`td-agent-bit.service` working through compatibility links, so `devx-logs`
+and existing startup scripts continue to use the same paths. The service is
+still started after `devx-logs` has written its configuration.
+
+Ubuntu 18.04, 20.04 and 22.04 retain the `td-agent-bit` package. Other Ubuntu
+releases above 22.04 remain rejected until a repository is configured for them.
+
 ## Requirements
+
 ℹ If you are using [`@guardian/cdk`](http://github.com/guardian/cdk) version 41.1.0 or greater, these requirements are met automatically.
 
 ### Kinesis

@@ -1,0 +1,26 @@
+---
+# devx-logs writes the legacy configuration paths, and existing user data may
+# start td-agent-bit.service. Keep both working with the fluent-bit package.
+- name: Link the legacy Fluent Bit configuration directory
+  file:
+    src: /etc/fluent-bit
+    dest: /etc/td-agent-bit
+    state: link
+
+- name: Link the legacy Fluent Bit configuration filename
+  file:
+    src: fluent-bit.conf
+    dest: /etc/fluent-bit/td-agent-bit.conf
+    state: link
+
+- name: Alias the legacy Fluent Bit service
+  file:
+    src: /lib/systemd/system/fluent-bit.service
+    dest: /etc/systemd/system/td-agent-bit.service
+    state: link
+  register: fluentbit_service_alias
+
+- name: Reload systemd after adding the Fluent Bit alias
+  systemd:
+    daemon_reload: yes
+  when: fluentbit_service_alias.changed
