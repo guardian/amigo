@@ -19,8 +19,3 @@
     dest: /etc/systemd/system/td-agent-bit.service
     state: link
   register: fluentbit_service_alias
-
-- name: Reload systemd after adding the Fluent Bit alias
-  systemd:
-    daemon_reload: yes
-  when: fluentbit_service_alias.changed
