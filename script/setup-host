@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# To set up required resources on host before creating a dev container.
+
+set -e
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR=${DIR}/..
+
+brew bundle --file=${ROOT_DIR}/Brewfile
+
+${ROOT_DIR}/script/cp_roles

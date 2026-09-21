@@ -1,0 +1,7 @@
+{
+	"extends": "@guardian/tsconfig/tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true
+	},
+	"include": ["playwright.config.ts", "seed.spec.ts", "tests/e2e/**/*.ts"]
+}

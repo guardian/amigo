@@ -19,3 +19,10 @@ roles/.vagrant
 project/metals.sbt
 project/project
 .bsp
+
+/node_modules/
+
+/playwright-report/
+/test-results/
+/playwright/.auth/
+/.playwright-cli/

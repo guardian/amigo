@@ -91,7 +91,7 @@ time of writing:
 <details>
 <summary>Previous run locally advice</summary>
 
-Install dependencies with [`./script/setup`](./script/setup)
+Install host dependencies with [`./script/setup-host`](./script/setup-host)
 
 (For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without runing amigo/packer' below.)
 
@@ -137,6 +137,90 @@ $ sbt run
 ```shell
 $ sbt test
 ```
+
+### Playwright setup
+
+With [mise](https://mise.jdx.dev/) activated and the tools in `.tool-versions`
+already installed via `mise install`, run:
+
+```shell
+./script/setup
+```
+
+This installs the locked Playwright Test dependencies, Chromium and its system
+dependencies using Node managed by mise. The script can be run from
+any working directory. Installing system dependencies on Linux may require sudo.
+
+### Running Playwright
+
+CI checks the Playwright configuration and tests with ESLint and Prettier,
+alongside the existing CDK lint and Scala formatting checks. To run the
+Playwright tooling checks locally:
+
+```shell
+npm run lint
+npm run format:check
+```
+
+Use `npm run format` to apply formatting. These checks do not start the app or
+require AWS credentials or installed browsers.
+
+Run the complete Node CI pipeline from the repository root with:
+
+```shell
+npm run ci:node
+```
+
+This installs the root and CDK dependencies from their separate lockfiles, runs
+the Playwright tooling checks, then runs CDK linting (including formatting), tests
+and synthesis. `script/ci` uses this command before the Scala checks and packaging.
+It does not run browser tests or start the application.
+
+The [significant-functionality test plan](docs/playwright-test-plan.md) describes
+the proposed coverage, test data and isolation requirements. Only the healthcheck
+and authenticated-home seed are implemented so far.
+
+By default, Playwright starts `./script/server`, waits up to three minutes for
+`http://localhost:9000/healthcheck`, and stops the process after testing. Outside
+CI it reuses an already-running local server and leaves that server running;
+in CI an existing server is an error. Managed servers receive SIGTERM on shutdown,
+with a ten-second grace period before being forcibly stopped.
+
+The startup script uses the `deployTools` AWS profile. Configure credentials and
+an explicitly isolated test environment before running tests: app startup connects
+to AWS and registers housekeeping jobs. Do not use production or shared data.
+Turning off scheduled bakes does not turn off housekeeping.
+
+The default base URL is `http://localhost:9000`. For an authorised test session,
+start the isolated app with `./script/server` in another terminal, then capture
+storage state locally using the app's normal login flow (codegen does not start
+the configured webServer):
+
+```shell
+mkdir -p playwright/.auth
+npx playwright codegen --save-storage=playwright/.auth/user.json http://localhost:9000
+# Complete login, then close the browser to save the state.
+PLAYWRIGHT_STORAGE_STATE=playwright/.auth/user.json npm run test:e2e
+```
+
+Set `PLAYWRIGHT_BASE_URL` to use an externally managed isolated instance instead
+of starting a local server, and capture login state against that same origin.
+Without a valid session the authenticated-home planner seed fails;
+there is no authentication bypass. State files, reports and traces can contain
+sensitive data: keep them local and do not commit or upload them.
+
+```shell
+npm run test:e2e -- --list
+npm run test:e2e -- tests/e2e/healthcheck.spec.ts
+PLAYWRIGHT_STORAGE_STATE=playwright/.auth/user.json npm run test:e2e:ui
+npm run test:e2e:report
+```
+
+`playwright.config.ts` discovers tests in `tests/e2e`, uses Chromium with full
+parallelism, and disables retries to avoid repeated mutations. The root
+`seed.spec.ts` is a separate authenticated-home planner seed, outside normal test
+discovery. Traces are recorded for every test and screenshots on failure. Future
+tests must create and clean up independent fixtures as specified in the plan.
 
 ## Required AWS permissions for Packer
 

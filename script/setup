@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+# To set up required resources in a newly-created dev container.
 
-set -e
+set -euo pipefail
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR=${DIR}/..
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
 
-brew bundle --file=${ROOT_DIR}/Brewfile
-
-${ROOT_DIR}/script/cp_roles
+npm install
+npx playwright install --with-deps chromium
