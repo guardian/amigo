@@ -26,6 +26,6 @@ By default it loads config from `/etc/td-agent-bit/td-agent-bit.conf` so
 overwrite that with your own config in your userdata/startup scripts.
 
 With `fluentbit_package: fluent-bit`, the service is `fluent-bit` and its
-configuration is `/etc/fluent-bit/fluent-bit.conf`. The `cdk-base` role provides
-compatibility links for the old service and configuration paths on Ubuntu 24.04
-and 26.04.
+configuration is `/etc/fluent-bit/fluent-bit.conf`. `devx-logs` and `cdk-base`
+detect this layout; custom configuration and startup scripts should use these
+native paths and service names.

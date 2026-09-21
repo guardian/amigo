@@ -12,10 +12,13 @@ At the moment this means the following:
 Ubuntu 24.04 and 26.04 use the official `noble` and `resolute` repositories,
 respectively, and the `fluent-bit` package (5.1.2 was available for amd64 and
 arm64 when support was added).
-The role keeps `/etc/td-agent-bit/td-agent-bit.conf` and
-`td-agent-bit.service` working through compatibility links, so `devx-logs`
-and existing startup scripts continue to use the same paths. The service is
-still started after `devx-logs` has written its configuration.
+`devx-logs` detects the installed configuration layout, and the startup script
+starts `fluent-bit.service` or `td-agent-bit.service` accordingly, after
+`devx-logs` has written its configuration. No compatibility links are required.
+
+Deploy the version of `devx-logs` that detects both layouts before baking images
+with this role. Custom startup scripts on Ubuntu 24.04 and 26.04 must use
+`fluent-bit.service` and `/etc/fluent-bit/fluent-bit.conf`.
 
 Ubuntu 18.04, 20.04 and 22.04 retain the `td-agent-bit` package. Other Ubuntu
 releases above 22.04 remain rejected until a repository is configured for them.
@@ -128,6 +131,7 @@ as this allows tag lookup without requiring remote AWS API calls at runtime._
     Set this to `false` if you do not want log shipping to start automatically.
     This is useful if you will add or change the log shipping config supplied by
     `devx-logs`. If you have set this to `false` you are now responsible for
-    starting `td-agent-bit.service` in your user data script
-    (by running `systemctl start td-agent-bit.service` after all config files
-    have been created), and if you fail to do so logs will not be shipped.
+    starting the installed service in your user data script after all config
+    files have been created: `systemctl start fluent-bit.service` on Ubuntu
+    24.04/26.04, or `systemctl start td-agent-bit.service` on older supported
+    releases. If you fail to do so logs will not be shipped.
