@@ -13,12 +13,6 @@
     dest: /usr/share/keyrings/fluentbit-keyring.asc
     mode: '0644'
 
-- name: Remove the repository entry that used the global apt keyring
-  ansible.builtin.apt_repository:
-    repo: deb https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
-    state: absent
-    update_cache: no
-
 - name: Add repository
   ansible.builtin.apt_repository:
     repo: deb [signed-by=/usr/share/keyrings/fluentbit-keyring.asc] https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
