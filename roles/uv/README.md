@@ -35,33 +35,12 @@ quoted string here, which Ansible evaluates into the list of tool objects.
 The UI does not accept a list of objects directly. Additional tools can be
 added inside the same expression, each with its own `python` value.
 
-When replacing the `whisperx` role, deselect it and ensure `ffmpeg` is installed
-by the base image or the `packages` role. For the latter, enter
-`packages: [ffmpeg]` in that role's Custom variables box (or add `ffmpeg` to its
-existing list). After baking the image, `whisperx` is available on the command
-line without activating an environment.
-
-### Installation details
-
-Run this role as root (for example, with `become: true`), as with the other
-system installation roles. Each tool is installed using `uv tool install` into
-its own persistent environment under `/opt/uv/tools`, with commands installed
-into `/usr/local/bin` and managed Python versions under `/opt/uv/python`.
-These locations make its commands
-available to all users without activating a virtual environment or changing
-shell startup files. Managed Python installations are also stored outside the
-installing user's home directory so other users can access them.
-
 Optional `extra_args` are individual arguments passed to `uv tool install`, for
 example `extra_args: ["--with", "some-dependency==1.2.3"]`. When migrating an
 existing machine with `/usr/local/bin/whisperx` already owned by the old role,
 use `extra_args: ["--force"]` for the migration to replace that executable.
 Remove that flag afterwards to retain normal repeat-run behavior. Fresh image
 builds do not need it.
-
-For manual tool maintenance, use the same `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR`, and
-`UV_PYTHON_INSTALL_DIR` environment variables as the role. The commands installed
-by the role do not need those variables to run.
 
 See the [uv tools documentation](https://docs.astral.sh/uv/concepts/tools/) for
 Python selection, environment isolation, and tool version behavior.
