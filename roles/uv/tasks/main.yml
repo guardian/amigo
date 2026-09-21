@@ -1,9 +1,25 @@
 ---
-- name: Install uv with pip
+- name: Install Python virtual environment support
+  apt:
+    name: python3-venv
+    state: present
+
+- name: Install uv in a dedicated virtual environment
   pip:
     name: "uv=={{ uv_major_version }}.{{ uv_minor_version }}.*"
     extra_args: "--only-binary :all:"
-    executable: pip3
+    virtualenv: /opt/uv/venv
+    virtualenv_command: /usr/bin/python3 -m venv
+
+- name: Make uv commands available on the PATH
+  file:
+    src: "/opt/uv/venv/bin/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+    force: true
+  loop:
+    - uv
+    - uvx
 
 # needed so that uv tools can be run by ubuntu user when uv is executed as root
 - name: Create shared uv directories

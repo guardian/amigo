@@ -6,6 +6,12 @@ Installs `uv`, which is:
 
 For the applications whose dependencies it manages, it will automatically download and install the appropriate Python version, if not present in the environment. So if using `uv`, you don't necessarily need to bake in the right Python version.
 
+The role installs uv into a dedicated virtual environment at `/opt/uv/venv`
+and links `uv` and `uvx` into `/usr/local/bin`. This supports Ubuntu's
+externally managed system Python (including Ubuntu 26.04) without requiring
+`--break-system-packages`. Tool environments remain separate from uv's own
+installation.
+
 ## Variables
 
 | Variable | Default | Description |
