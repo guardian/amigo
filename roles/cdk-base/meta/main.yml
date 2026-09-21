@@ -11,6 +11,10 @@ dependencies:
     ubuntu_version: jammy
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 22
   - role: fluentbit
+    ubuntu_version: noble
+    fluentbit_package: fluent-bit
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+  - role: fluentbit
     ubuntu_version: resolute
     fluentbit_package: fluent-bit
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'

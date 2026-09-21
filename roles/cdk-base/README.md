@@ -9,8 +9,9 @@ At the moment this means the following:
 
 ## Ubuntu support
 
-Ubuntu 26.04 uses the official `resolute` repository and the `fluent-bit`
-package (5.1.2 was available for amd64 and arm64 when support was added).
+Ubuntu 24.04 and 26.04 use the official `noble` and `resolute` repositories,
+respectively, and the `fluent-bit` package (5.1.2 was available for amd64 and
+arm64 when support was added).
 The role keeps `/etc/td-agent-bit/td-agent-bit.conf` and
 `td-agent-bit.service` working through compatibility links, so `devx-logs`
 and existing startup scripts continue to use the same paths. The service is
