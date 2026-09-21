@@ -20,6 +20,29 @@ As stated in https://docs.astral.sh/uv/reference/policies/versioning/, "uv uses 
 
 ## Installing command-line tools
 
+### Configuring a recipe in the AMIgo UI
+
+On the recipe edit page (for example, `/recipes/cuda-ami-test/edit`), select the
+`uv` role and paste this single line into its **Custom variables** box to install
+WhisperX 3.8.5 with Python 3.10:
+
+```text
+uv_tools: '{{ [{"package": "whisperx==3.8.5", "python": "3.10"}] }}'
+```
+
+Keep the outer single quotes and the `{{ ... }}` expression: the UI accepts a
+quoted string here, which Ansible evaluates into the list of tool objects.
+The UI does not accept a list of objects directly. Additional tools can be
+added inside the same expression, each with its own `python` value.
+
+When replacing the `whisperx` role, deselect it and ensure `ffmpeg` is installed
+by the base image or the `packages` role. For the latter, enter
+`packages: [ffmpeg]` in that role's Custom variables box (or add `ffmpeg` to its
+existing list). After baking the image, `whisperx` is available on the command
+line without activating an environment.
+
+### Installation details
+
 Run this role as root (for example, with `become: true`), as with the other
 system installation roles. Each tool is installed using `uv tool install` into
 its own persistent environment under `/opt/uv/tools`, with commands installed
