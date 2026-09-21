@@ -8,8 +8,8 @@ manual](https://docs.fluentbit.io/manual/) provides a good overview.
 ## Configure role
 
     version: newest # latest available package, or an exact version such as '5.1.2'
-    ubuntu_version: bionic # use resolute for Ubuntu 26.04
-    fluentbit_package: td-agent-bit # use fluent-bit for Ubuntu 26.04
+    ubuntu_version: bionic # use noble for Ubuntu 24.04, resolute for 26.04
+    fluentbit_package: td-agent-bit # use fluent-bit for Ubuntu 24.04 and 26.04
 
 Set the repository and package explicitly in Amigo when using this role directly.
 `cdk-base` selects these automatically. `newest` (the default) and `latest`
@@ -27,4 +27,5 @@ overwrite that with your own config in your userdata/startup scripts.
 
 With `fluentbit_package: fluent-bit`, the service is `fluent-bit` and its
 configuration is `/etc/fluent-bit/fluent-bit.conf`. The `cdk-base` role provides
-compatibility links for the old service and configuration paths on Ubuntu 26.04.
+compatibility links for the old service and configuration paths on Ubuntu 24.04
+and 26.04.
