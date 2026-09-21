@@ -35,6 +35,26 @@ quoted string here, which Ansible evaluates into the list of tool objects.
 The UI does not accept a list of objects directly. Additional tools can be
 added inside the same expression, each with its own `python` value.
 
+For example, to install WhisperX alongside OCRmyPDF with the RapidOCR plugin,
+use this line in the same **Custom variables** box:
+
+```text
+uv_tools: '{{ [{"package": "whisperx==3.8.5", "python": "3.10"}, {"package": "ocrmypdf", "python": "3.12", "extra_args": ["--with", "ocrmypdf-rapidocr==v.v.v"]}] }}'
+```
+
+Replace `v.v.v` with the plugin version you want to install. The `extra_args`
+belong only to the OCRmyPDF entry, so the role runs the equivalent of:
+
+```sh
+uv tool install whisperx==3.8.5 --python 3.10
+uv tool install ocrmypdf --python 3.12 --with ocrmypdf-rapidocr==v.v.v
+```
+
+RapidOCR is installed into OCRmyPDF's environment; WhisperX keeps its own
+environment without that plugin. Keep `"--with"` and the package requirement
+as separate list elements. Choose OCRmyPDF and plugin versions compatible
+with each other and the selected Python version.
+
 Optional `extra_args` are individual arguments passed to `uv tool install`, for
 example `extra_args: ["--with", "some-dependency==1.2.3"]`. When migrating an
 existing machine with `/usr/local/bin/whisperx` already owned by the old role,
