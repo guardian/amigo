@@ -61,13 +61,6 @@ environment without that plugin. Keep `"--with"` and the package requirement
 as separate list elements. Choose OCRmyPDF and plugin versions compatible
 with each other and the selected Python version.
 
-Optional `extra_args` are individual arguments passed to `uv tool install`, for
-example `extra_args: ["--with", "some-dependency==1.2.3"]`. When migrating an
-existing machine with `/usr/local/bin/whisperx` already owned by the old role,
-use `extra_args: ["--force"]` for the migration to replace that executable.
-Remove that flag afterwards to retain normal repeat-run behavior. Fresh image
-builds do not need it.
-
 See the [uv tools documentation](https://docs.astral.sh/uv/concepts/tools/) for
 Python selection, environment isolation, and tool version behavior.
 
