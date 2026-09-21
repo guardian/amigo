@@ -4,3 +4,28 @@
     name: "uv=={{ uv_major_version }}.{{ uv_minor_version }}.*"
     extra_args: "--only-binary :all:"
     executable: pip3
+
+# needed so that uv tools can be run by ubuntu user when uv is executed as root
+- name: Create shared uv directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/uv/tools
+    - /usr/local/bin
+    - /opt/uv/python
+  when: uv_tools | length > 0
+
+- name: Install uv tools
+  command:
+    argv: "{{ ['uv', 'tool', 'install', item.package] + (['--python', item.python | string] if item.python is defined else []) + (item.extra_args | default([])) }}"
+  environment:
+    UV_TOOL_DIR: /opt/uv/tools
+    UV_TOOL_BIN_DIR: /usr/local/bin
+    UV_PYTHON_INSTALL_DIR: /opt/uv/python
+  loop: "{{ uv_tools }}"
+  loop_control:
+    label: "{{ item.package }}"
+  register: uv_tool_install
+  changed_when: "'Installed' in uv_tool_install.stderr"

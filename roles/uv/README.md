@@ -12,11 +12,36 @@ For the applications whose dependencies it manages, it will automatically downlo
 |----------|---------|-------------|
 | `uv_major_version` | `0` | The major version of uv to install |
 | `uv_minor_version` | `9` | The minor version of uv to install |
+| `uv_tools` | `[]` | Tools to install; each entry has a `package`, optional `python`, and optional `extra_args` list |
 
 The role will install the latest version matching `=={major}.{minor}.*`, to allow for auto-updating to the latest patch version.
 
 As stated in https://docs.astral.sh/uv/reference/policies/versioning/, "uv uses a custom versioning scheme in which the minor version number is bumped for breaking changes, and the patch version number is bumped for bug fixes, enhancements, and other non-breaking changes."
 
+## Installing command-line tools
+
+Run this role as root (for example, with `become: true`), as with the other
+system installation roles. Each tool is installed using `uv tool install` into
+its own persistent environment under `/opt/uv/tools`, with commands installed
+into `/usr/local/bin` and managed Python versions under `/opt/uv/python`.
+These locations make its commands
+available to all users without activating a virtual environment or changing
+shell startup files. Managed Python installations are also stored outside the
+installing user's home directory so other users can access them.
+
+Optional `extra_args` are individual arguments passed to `uv tool install`, for
+example `extra_args: ["--with", "some-dependency==1.2.3"]`. When migrating an
+existing machine with `/usr/local/bin/whisperx` already owned by the old role,
+use `extra_args: ["--force"]` for the migration to replace that executable.
+Remove that flag afterwards to retain normal repeat-run behavior. Fresh image
+builds do not need it.
+
+For manual tool maintenance, use the same `UV_TOOL_DIR`, `UV_TOOL_BIN_DIR`, and
+`UV_PYTHON_INSTALL_DIR` environment variables as the role. The commands installed
+by the role do not need those variables to run.
+
+See the [uv tools documentation](https://docs.astral.sh/uv/concepts/tools/) for
+Python selection, environment isolation, and tool version behavior.
 
 ## WARNING: Use with caution!
 In general it is **not recommended** to install your dependencies at instance launch time. It has the following downsides:
