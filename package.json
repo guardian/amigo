@@ -1,0 +1,24 @@
+{
+	"name": "amigo-browser-tests",
+	"private": true,
+	"scripts": {
+		"ci:node": "npm ci && npm run lint && npm run format:check && npm --prefix cdk ci && npm --prefix cdk run ci",
+		"lint": "eslint --max-warnings=0 eslint.config.mjs playwright.config.ts seed.spec.ts \"tests/e2e/**/*.ts\"",
+		"format": "prettier --write eslint.config.mjs playwright.config.ts seed.spec.ts \"tests/e2e/**/*.ts\" package.json tsconfig.json",
+		"format:check": "prettier --check eslint.config.mjs playwright.config.ts seed.spec.ts \"tests/e2e/**/*.ts\" package.json tsconfig.json",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:report": "playwright show-report"
+	},
+	"devDependencies": {
+		"@guardian/eslint-config": "^16.0.0",
+		"@guardian/prettier": "11.0.0",
+		"@guardian/tsconfig": "^2.0.0",
+		"@playwright/test": "1.63.0",
+		"@types/node": "^24.13.6",
+		"eslint": "^9.39.2",
+		"prettier": "^3.9.4",
+		"typescript": "5.9.3"
+	},
+	"prettier": "@guardian/prettier"
+}

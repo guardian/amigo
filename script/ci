@@ -2,13 +2,7 @@
 
 set -e
 
-(
- cd cdk
- npm ci
- npm run lint
- npm test
- npm run synth
-)
+npm run ci:node
 
 sbt clean scalafmtSbtCheck scalafmtCheckAll compile test
 
