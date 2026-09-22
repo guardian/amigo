@@ -7,10 +7,14 @@ manual](https://docs.fluentbit.io/manual/) provides a good overview.
 
 ## Configure role
 
-    version: 1.7.2. # for example, defaults to 'newest'
-    ubuntu_version: xenial | bionic | focal # defaults to bionic
+    version: newest # latest available package, or an exact version such as '5.1.2'
+    ubuntu_version: bionic # use noble for Ubuntu 24.04, resolute for 26.04
+    fluentbit_package: td-agent-bit # use fluent-bit for Ubuntu 24.04 and 26.04
 
-We recommend you set both vars explicitly in Amigo.
+Set the repository and package explicitly in Amigo when using this role directly.
+`cdk-base` selects these automatically. `newest` (the default) and `latest`
+install the latest available package; exact versions must exist in the selected
+repository for the target architecture.
 
 ## On your instance...
 
@@ -20,3 +24,8 @@ To start the agent:
 
 By default it loads config from `/etc/td-agent-bit/td-agent-bit.conf` so
 overwrite that with your own config in your userdata/startup scripts.
+
+With `fluentbit_package: fluent-bit`, the service is `fluent-bit` and its
+configuration is `/etc/fluent-bit/fluent-bit.conf`. `devx-logs` and `cdk-base`
+detect this layout; custom configuration and startup scripts should use these
+native paths and service names.

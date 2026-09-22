@@ -1,3 +1,4 @@
 ---
 version: newest
 ubuntu_version: bionic
+fluentbit_package: td-agent-bit

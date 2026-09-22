@@ -1,13 +1,30 @@
 ---
+- name: Validate Fluent Bit package name
+  assert:
+    that:
+      - fluentbit_package in ['td-agent-bit', 'fluent-bit']
+    fail_msg: "fluentbit_package must be either 'td-agent-bit' or 'fluent-bit'."
+
+- name: Install repository prerequisites
+  apt:
+    name:
+      - ca-certificates
+      - gnupg
+      - python3-apt
+    update_cache: yes
+
 - name: Add GPG key
-  apt_key:
-    url: "https://packages.fluentbit.io/fluentbit.key"
+  get_url:
+    url: https://packages.fluentbit.io/fluentbit.key
+    dest: /usr/share/keyrings/fluentbit-keyring.asc
+    mode: '0644'
 
 - name: Add repository
   ansible.builtin.apt_repository:
-    repo: deb https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
+    repo: deb [signed-by=/usr/share/keyrings/fluentbit-keyring.asc] https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
 
 - name: Install
   apt:
-    name: td-agent-bit={{version}}
+    name: "{{ fluentbit_package }}{{ '' if version in ['newest', 'latest'] else '=' ~ version }}"
+    state: "{{ 'latest' if version in ['newest', 'latest'] else 'present' }}"
     update_cache: yes

@@ -1,8 +1,8 @@
 ---
-- name: Fail when we attempt to install on a distro above 22.04 (no available fluentbit version)
+- name: Fail when no Fluent Bit repository is configured for this Ubuntu release
   fail:
-    msg: No version of fluentbit specified for distros above 22.04 (please add one)!
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 22
+    msg: No Fluent Bit repository configured for Ubuntu {{ ansible_distribution_version }} (please add one)!
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 22 and ansible_distribution_version not in ['24.04', '26.04']
 
 - name: Setup target directory
   file:
@@ -29,10 +29,19 @@
 
 # Note, this is required to ensure we start Fluentbit *after* updating the config.
 - name: Add start Fluentbit script
-  shell: |
-    NAME=start-fluentbit
-    printf '#!/bin/bash\nsystemctl start td-agent-bit.service' > /var/lib/cloud/scripts/per-instance/02-$NAME
-    chmod +x /var/lib/cloud/scripts/per-instance/02-$NAME
+  copy:
+    dest: /var/lib/cloud/scripts/per-instance/02-start-fluentbit
+    mode: '0755'
+    content: |
+      #!/bin/bash
+      if [ -f /etc/fluent-bit/fluent-bit.conf ]; then
+        systemctl start fluent-bit.service
+      elif [ -f /etc/td-agent-bit/td-agent-bit.conf ]; then
+        systemctl start td-agent-bit.service
+      else
+        echo 'No Fluent Bit configuration found' >&2
+        exit 1
+      fi
   when:
     - ansible_os_family == "Debian"
     - start_fluentbit
