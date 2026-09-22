@@ -353,7 +353,7 @@ class AppComponents(
     wsClient,
     controllerComponents,
     googleGroupsToCheck,
-    groupChecker
+    GoogleGroupLookup(groupChecker)
   )
   lazy val router: Router = new Routes(
     httpErrorHandler,

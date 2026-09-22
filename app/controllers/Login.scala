@@ -20,7 +20,7 @@ class Login(
     override val wsClient: WSClient,
     components: ControllerComponents,
     googleGroupsToCheck: Set[String],
-    groupChecker: GoogleGroupChecker
+    groupLookup: GoogleGroupLookup
 )(implicit executionContext: ExecutionContext)
     extends AbstractController(components)
     with LoginSupport
@@ -53,7 +53,7 @@ class Login(
   private def checkGoogleGroupMembership(
       userIdentity: UserIdentity
   ): EitherT[Future, Result, Unit] = {
-    groupChecker
+    groupLookup
       .retrieveGroupsFor(userIdentity.email)
       .attemptT
       .leftMap({ t =>
@@ -81,4 +81,18 @@ class Login(
 
   override val failureRedirectTarget: Call = routes.Login.loginAction()
   override val defaultRedirectTarget: Call = routes.RootController.index()
+}
+
+trait GoogleGroupLookup {
+  def retrieveGroupsFor(email: String): Future[Set[String]]
+}
+
+object GoogleGroupLookup {
+  def apply(groupChecker: GoogleGroupChecker)(implicit
+      executionContext: ExecutionContext
+  ): GoogleGroupLookup =
+    new GoogleGroupLookup {
+      override def retrieveGroupsFor(email: String): Future[Set[String]] =
+        groupChecker.retrieveGroupsFor(email)
+    }
 }

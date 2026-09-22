@@ -118,6 +118,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.20" % Test,
   "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
   "org.mockito" % "mockito-inline" % "5.2.0" % Test,
+  "no.nav.security" % "mock-oauth2-server" % "6.0.2" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "8.0.0"
 ) ++ safeTransitiveDependencies
