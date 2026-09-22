@@ -1,4 +1,10 @@
 ---
+- name: Validate Fluent Bit package name
+  assert:
+    that:
+      - fluentbit_package in ['td-agent-bit', 'fluent-bit']
+    fail_msg: "fluentbit_package must be either 'td-agent-bit' or 'fluent-bit'."
+
 - name: Install repository prerequisites
   apt:
     name:
