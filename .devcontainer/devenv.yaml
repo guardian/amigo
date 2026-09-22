@@ -12,6 +12,3 @@ modules:
 
 forwardPorts:
   - 9000
-
-mounts:
-  - "source=${localEnv:HOME}/.gu/amigo,target=/home/vscode/.gu/amigo,readonly,type=bind,consistency=cached"
