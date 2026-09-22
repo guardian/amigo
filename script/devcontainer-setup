@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export AWS_PROFILE=deployTools
+export AWS_REGION=eu-west-1
+
+ssm() { aws ssm get-parameter --name "$1" --query Parameter.Value --output text; }
+
+CERT_PATH=$(ssm /DEV/deploy/amigo/auth.google.serviceAccountCertPath)
+BUCKET=$(ssm /CODE/deploy/amigo/aws.distributionBucket)
+
+mkdir -p "$(dirname "$CERT_PATH")"
+aws s3 cp "s3://$BUCKET/deploy/CODE/amigo/conf/amigo-service-account-cert.json" "$CERT_PATH"
