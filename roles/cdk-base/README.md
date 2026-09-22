@@ -9,19 +9,11 @@ At the moment this means the following:
 
 ## Ubuntu support
 
-Ubuntu 24.04 and 26.04 use the official `noble` and `resolute` repositories,
-respectively, and the `fluent-bit` package (5.1.2 was available for amd64 and
-arm64 when support was added).
-`devx-logs` detects the installed configuration layout, and the startup script
-starts `fluent-bit.service` or `td-agent-bit.service` accordingly, after
-`devx-logs` has written its configuration. No compatibility links are required.
-
-Deploy the version of `devx-logs` that detects both layouts before baking images
-with this role. Custom startup scripts on Ubuntu 24.04 and 26.04 must use
-`fluent-bit.service` and `/etc/fluent-bit/fluent-bit.conf`.
-
-Ubuntu 18.04, 20.04 and 22.04 retain the `td-agent-bit` package. Other Ubuntu
-releases above 22.04 remain rejected until a repository is configured for them.
+In version 24.04 of ubuntu the default fluent-bit version changed package name from td-agent-bit
+to fluent-bit, so the startup script this role adds for fluent-bit has a conditional to take that
+into account - preferring to start the newer fluent-bit service. devx-logs, which provides the config
+for shipping logs to ELK, will write either a fluent-bit.conf or td-agent-bit.conf depending on what's
+installed on the instance.
 
 ## Requirements
 
