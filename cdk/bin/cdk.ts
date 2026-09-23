@@ -11,7 +11,7 @@ const stageAgnosticProps = {
 	migratedFromCloudFormation: true,
 };
 
-const amigoCodeProps: AmigoProps = {
+export const amigoCodeProps: AmigoProps = {
 	...stageAgnosticProps,
 	stage: 'CODE',
 	domainName: 'amigo.code.dev-gutools.co.uk',
