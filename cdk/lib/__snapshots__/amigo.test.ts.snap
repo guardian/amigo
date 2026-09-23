@@ -1,5 +1,919 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`The Amigo stack matches the Amigo developer policy snapshot 1`] = `
+{
+  "CODE": {
+    "AmigoDeveloperPolicy0F3D623E": {
+      "Properties": {
+        "Description": "Develop and test Amigo",
+        "Path": "/developer-policy/guardian/amigo/deploy/CODE/amigo-dev/",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ssm:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/DEV/deploy/amigo",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:PutParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ssm:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":parameter/DEV/deploy/amigo/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ssm:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":parameter/CODE/deploy/amigo/aws.distributionBucket",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetBucketPolicy",
+                "s3:PutBucketPolicy",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/deploy/CODE/amigo/conf/amigo-service-account-cert.json",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:ListBucket",
+              "Condition": {
+                "StringLike": {
+                  "s3:prefix": "packagelists/*",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DevDataBucketAmigo1209458A",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "DevDataBucketAmigo1209458A",
+                        "Arn",
+                      ],
+                    },
+                    "/packagelists/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "dynamodb:ListTables",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:CreateTable",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/amigo-DEV-*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/amigo-DEV-*/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "sns:ListTopics",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "sns:AddPermission",
+                "sns:CreateTopic",
+                "sns:Publish",
+                "sns:RemovePermission",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":sns:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":amigo-DEV-notify",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":sns:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":amigo-DEV-housekeeping-notify",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "sts:GetCallerIdentity",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "ec2:Describe*",
+              "Condition": {
+                "StringEquals": {
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "ec2:CopyImage",
+                "ec2:CreateImage",
+                "ec2:CreateKeyPair",
+                "ec2:CreateSecurityGroup",
+                "ec2:CreateSnapshot",
+                "ec2:CreateVolume",
+                "ec2:RegisterImage",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "aws:RequestTag/AmigoStage": "DEV",
+                  "aws:RequestTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::image/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":key-pair/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":security-group/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::snapshot/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":volume/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ec2:RunInstances",
+              "Condition": {
+                "StringEquals": {
+                  "aws:RequestTag/AmigoStage": "DEV",
+                  "aws:RequestTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":instance/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":network-interface/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":volume/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ec2:CreateTags",
+              "Condition": {
+                "StringEquals": {
+                  "aws:RequestTag/AmigoStage": "DEV",
+                  "aws:RequestTag/Stack": "amigo-packer",
+                  "ec2:CreateAction": [
+                    "CopyImage",
+                    "CreateImage",
+                    "CreateKeyPair",
+                    "CreateSecurityGroup",
+                    "CreateSnapshot",
+                    "CreateVolume",
+                    "RegisterImage",
+                    "RunInstances",
+                  ],
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::image/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":instance/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":key-pair/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":network-interface/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":security-group/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::snapshot/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":volume/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ec2:CreateImage",
+              "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/AmigoStage": "DEV",
+                  "aws:ResourceTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ec2:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":instance/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ec2:CreateSnapshot",
+              "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/AmigoStage": "DEV",
+                  "aws:ResourceTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ec2:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":volume/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ec2:RegisterImage",
+              "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/AmigoStage": "DEV",
+                  "aws:ResourceTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ec2:eu-west-1::snapshot/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ec2:CreateSecurityGroup",
+              "Condition": {
+                "StringEquals": {
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ec2:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":vpc/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ec2:CreateVolume",
+              "Condition": {
+                "StringEquals": {
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ec2:eu-west-1::snapshot/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ec2:RunInstances",
+              "Condition": {
+                "StringEquals": {
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::image/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":key-pair/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":security-group/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::snapshot/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":subnet/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "ec2:AttachVolume",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:DeleteKeyPair",
+                "ec2:DeleteSecurityGroup",
+                "ec2:DeleteSnapshot",
+                "ec2:DeleteVolume",
+                "ec2:DeregisterImage",
+                "ec2:DetachVolume",
+                "ec2:ModifyImageAttribute",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:ModifySnapshotAttribute",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "aws:ResourceTag/AmigoStage": "DEV",
+                  "aws:ResourceTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::image/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":instance/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":key-pair/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":security-group/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::snapshot/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":volume/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "ssm:StartSession",
+                "ssm:TerminateSession",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "iam:GetInstanceProfile",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "PackerInstanceProfile",
+              },
+            },
+            {
+              "Action": "iam:PassRole",
+              "Condition": {
+                "StringEquals": {
+                  "iam:PassedToService": "ec2.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":iam::",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":role/PackerUser-PackerRole-*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
+    },
+  },
+  "PROD": {},
+}
+`;
+
 exports[`The Amigo stack matches the snapshot 1`] = `
 {
   "Metadata": {
