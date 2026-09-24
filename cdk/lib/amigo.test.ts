@@ -86,14 +86,15 @@ describe('The Amigo stack', () => {
 				};
 			};
 		};
-		const ec2WriteStatements = policy.Properties.PolicyDocument.Statement.filter(
-			({ Action }) =>
-				[Action].flat().some(
-					(action) =>
-						action.startsWith('ec2:') &&
-						!action.startsWith('ec2:Describe'),
-				),
-		);
+		const ec2WriteStatements =
+			policy.Properties.PolicyDocument.Statement.filter(({ Action }) =>
+				[Action]
+					.flat()
+					.some(
+						(action) =>
+							action.startsWith('ec2:') && !action.startsWith('ec2:Describe'),
+					),
+			);
 
 		for (const statement of ec2WriteStatements) {
 			expect([statement.Resource].flat()).not.toContain('*');
