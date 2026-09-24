@@ -69,12 +69,13 @@ export const createAmigoDeveloperPolicy = (
 			allow(
 				[
 					// 'ssm:GetParameter',
-					// 'ssm:GetParameters',
 					'ssm:GetParametersByPath',
+					'ssm:GetParameters',
 					'ssm:PutParameter',
 				],
 				[
 					`arn:${partition}:ssm:${region}:${account}:parameter/DEV/${stack}/amigo`,
+					`arn:${partition}:ssm:${region}:${account}:parameter/DEV/${stack}/amigo/*`,
 					`arn:${partition}:ssm:${region}:${account}:parameter/CODE/${stack}/amigo/aws.distributionBucket`,
 				],
 			),
