@@ -1,6 +1,7 @@
 package packer
 
 import ansible.PlaybookGenerator
+import event.BakeEvent.PackerProcessExited
 import event.EventBus
 import models.Bake
 import models.packer.PackerVariablesConfig
@@ -40,51 +41,61 @@ class PackerRunner(maxInstances: Int) extends Loggable {
       amigoDataBucket: Option[String]
   )(implicit packerConfig: PackerConfig): Future[Int] = {
     val sourceAmi = bake.recipe.baseImage.amiId.value
-    val amiMetadata = amiMetadataLookup
+    amiMetadataLookup
       .lookupMetadataFor(sourceAmi)
-      .getOrElse(
-        throw new IllegalStateException(
-          s"Unable to identify the architecture for $sourceAmi"
-        )
+      .fold(
+        error => {
+          log.error(s"Unable to look up metadata for $sourceAmi: $error")
+          eventBus.publish(PackerProcessExited(bake.bakeId, exitCode = 1))
+          Future.successful(1)
+        },
+        amiMetadata => {
+
+          val playbookYaml = PlaybookGenerator.generatePlaybook(
+            bake.recipe,
+            ansibleVars ++ Map(
+              "arch" -> amiMetadata.architecture,
+              "deb_arch" -> amiMetadata.debArchitecture
+            )
+          )
+          val playbookFile =
+            Files.createTempFile(
+              s"amigo-ansible-${bake.recipe.id.value}",
+              ".yml"
+            )
+          Files.write(
+            playbookFile,
+            playbookYaml.getBytes(StandardCharsets.UTF_8)
+          ) // TODO error handling
+
+          val awsAccountNumbers = prism.accounts.map(_.accountNumber)
+
+          val packerVars = PackerVariablesConfig(bake)
+          val packerBuildConfig =
+            PackerBuildConfigGenerator.generatePackerBuildConfig(
+              stage,
+              bake,
+              playbookFile,
+              packerVars,
+              awsAccountNumbers,
+              amiMetadata,
+              amigoDataBucket,
+              bake.recipe.baseImage.requiresXLargeBuilder
+            )
+          val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
+          val packerConfigFile =
+            Files.createTempFile(
+              s"amigo-packer-${bake.recipe.id.value}",
+              ".json"
+            )
+          Files.write(
+            packerConfigFile,
+            packerJson.getBytes(StandardCharsets.UTF_8)
+          ) // TODO error handling
+
+          executePacker(bake, playbookFile, packerConfigFile, eventBus, debug)
+        }
       )
-
-    val playbookYaml = PlaybookGenerator.generatePlaybook(
-      bake.recipe,
-      ansibleVars ++ Map(
-        "arch" -> amiMetadata.architecture,
-        "deb_arch" -> amiMetadata.debArchitecture
-      )
-    )
-    val playbookFile =
-      Files.createTempFile(s"amigo-ansible-${bake.recipe.id.value}", ".yml")
-    Files.write(
-      playbookFile,
-      playbookYaml.getBytes(StandardCharsets.UTF_8)
-    ) // TODO error handling
-
-    val awsAccountNumbers = prism.accounts.map(_.accountNumber)
-
-    val packerVars = PackerVariablesConfig(bake)
-    val packerBuildConfig =
-      PackerBuildConfigGenerator.generatePackerBuildConfig(
-        stage,
-        bake,
-        playbookFile,
-        packerVars,
-        awsAccountNumbers,
-        amiMetadata,
-        amigoDataBucket,
-        bake.recipe.baseImage.requiresXLargeBuilder
-      )
-    val packerJson = Json.prettyPrint(Json.toJson(packerBuildConfig))
-    val packerConfigFile =
-      Files.createTempFile(s"amigo-packer-${bake.recipe.id.value}", ".json")
-    Files.write(
-      packerConfigFile,
-      packerJson.getBytes(StandardCharsets.UTF_8)
-    ) // TODO error handling
-
-    executePacker(bake, playbookFile, packerConfigFile, eventBus, debug)
   }
 
   private def executePacker(
