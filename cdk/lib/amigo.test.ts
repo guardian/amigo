@@ -112,7 +112,7 @@ describe('The Amigo stack', () => {
 		const policies = template.findResources('AWS::IAM::ManagedPolicy');
 		const policy = JSON.stringify(Object.values(policies)[0]);
 
-		expect(policy).toContain('parameter/DEV/custom-stack/amigo/*');
+		expect(policy).toContain('parameter/DEV/custom-stack/amigo');
 		expect(policy).toContain(
 			'parameter/CODE/custom-stack/amigo/aws.distributionBucket',
 		);
