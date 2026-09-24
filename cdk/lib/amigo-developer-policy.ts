@@ -67,7 +67,12 @@ export const createAmigoDeveloperPolicy = (
 		statements: [
 			// Read and update Amigo configuration.
 			allow(
-				['ssm:GetParameter', 'ssm:GetParameters', 'ssm:PutParameter'],
+				[
+					// 'ssm:GetParameter',
+					// 'ssm:GetParameters',
+					'ssm:GetParametersByPath',
+					'ssm:PutParameter',
+				],
 				[
 					`arn:${partition}:ssm:${region}:${account}:parameter/DEV/${stack}/amigo/*`,
 					`arn:${partition}:ssm:${region}:${account}:parameter/CODE/${stack}/amigo/aws.distributionBucket`,
