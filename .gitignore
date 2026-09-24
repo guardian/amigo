@@ -12,6 +12,7 @@ Brewfile.lock.json
 
 roles/*.log
 roles/.vagrant
+/ansible/
 
 .metals
 .vscode
