@@ -1,10 +1,31 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR=${DIR}/..
+ROOT_DIR="${DIR}/.."
 
-brew bundle --file=${ROOT_DIR}/Brewfile
+export PACKER_PLUGIN_PATH=/opt/packer/.plugins
 
-${ROOT_DIR}/script/cp_roles
+sudo install -d \
+  -o "$(id -u)" \
+  -g "$(id -g)" \
+  "$PACKER_PLUGIN_PATH"
+
+packer plugins install github.com/hashicorp/amazon
+packer plugins install github.com/hashicorp/ansible
+
+if ! command -v session-manager-plugin >/dev/null; then
+  session_manager_deb="$(mktemp --suffix=.deb)"
+  trap 'rm -f "$session_manager_deb"' EXIT
+
+  wget -qO "$session_manager_deb" \
+    "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb"
+
+  sudo dpkg -i "$session_manager_deb"
+fi
+
+packer version
+session-manager-plugin --version
+
+"${ROOT_DIR}/script/cp_roles"

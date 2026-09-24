@@ -78,7 +78,7 @@ You should also disconnect from the VPN too if using it.
 
 ### Running the full app
 
-Load the `deployTools` credentials using Janus, then execute [`./script/server`](./script/server). This will run the 
+Load the `deployTools` credentials using Janus with the `amigo-dev` developer policy, then execute [`./script/server`](./script/server). This will run the 
 Amigo app locally and the associated packer process should have the sufficient AWS authorization.
 
 Note that you must use Java 21 to run this app. There are a few options for switching between Java versions at the
