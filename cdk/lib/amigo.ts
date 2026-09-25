@@ -43,6 +43,7 @@ import {
 	ParameterTier,
 	StringParameter,
 } from 'aws-cdk-lib/aws-ssm';
+import { createAmigoDeveloperPolicy } from './amigo-developer-policy';
 
 const packerVersion = '1.13.1';
 
@@ -65,9 +66,9 @@ export class AmigoStack extends GuStack {
 			policyName: 'app-policy',
 			statements: [
 				/*
-        Permissions to enable listing of installed packages created during a bake
-        See https://github.com/guardian/amigo/pull/395
-         */
+		Permissions to enable listing of installed packages created during a bake
+		See https://github.com/guardian/amigo/pull/395
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
@@ -75,10 +76,10 @@ export class AmigoStack extends GuStack {
 				}),
 
 				/*
-        AMIgo uses DynamoDb as a data store.
-        The permissions are quite wide, mainly because AMIgo creates tables as well as reading/writing data.
-        See `app/data/Dynamo.scala`
-         */
+		AMIgo uses DynamoDb as a data store.
+		The permissions are quite wide, mainly because AMIgo creates tables as well as reading/writing data.
+		See `app/data/Dynamo.scala`
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['dynamodb:ListTables'],
@@ -91,9 +92,9 @@ export class AmigoStack extends GuStack {
 				}),
 
 				/*
-        Permissions to support encrypted bakes
-        See https://github.com/guardian/amigo/pull/164
-         */
+		Permissions to support encrypted bakes
+		See https://github.com/guardian/amigo/pull/164
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['sns:ListTopics'],
@@ -101,9 +102,9 @@ export class AmigoStack extends GuStack {
 				}),
 
 				/*
-        Permissions to trigger AMI deletion
-        See https://github.com/guardian/amigo/pull/193
-         */
+		Permissions to trigger AMI deletion
+		See https://github.com/guardian/amigo/pull/193
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['sns:*'],
@@ -114,8 +115,8 @@ export class AmigoStack extends GuStack {
 				}),
 
 				/*
-        Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
-         */
+		Allow us to allow other accounts to retrieve the ImageCopier lambda artifact
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetBucketPolicy', 's3:PutBucketPolicy'],
@@ -125,8 +126,8 @@ export class AmigoStack extends GuStack {
 				}),
 
 				/*
-        See https://github.com/guardian/amigo/pull/526
-         */
+		See https://github.com/guardian/amigo/pull/526
+		 */
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['iam:GetInstanceProfile'],
@@ -149,6 +150,19 @@ export class AmigoStack extends GuStack {
 					'Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM',
 			},
 		);
+
+		if (this.stage === 'CODE') {
+			const devDataBucket = new GuS3Bucket(this, 'DevDataBucket', {
+				app: AmigoStack.app.app,
+				bucketName: 'amigo-data-dev',
+			});
+
+			createAmigoDeveloperPolicy(
+				this,
+				this.packerInstanceProfile,
+				devDataBucket,
+			);
+		}
 
 		this.dataBucket = new GuS3Bucket(this, 'AmigoDataBucket', {
 			app: AmigoStack.app.app,
