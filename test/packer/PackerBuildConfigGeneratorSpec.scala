@@ -13,13 +13,14 @@ import models.{
 import org.joda.time.DateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.Json
 import services.AmiMetadata
 
 import java.nio.file.Paths
 
 class PackerBuildConfigGeneratorSpec extends AnyFlatSpec with Matchers {
 
-  "generatePackerBuildConfig" should "tag volumes created for developer bakes" in {
+  "generatePackerBuildConfig" should "configure developer bakes" in {
     val now = DateTime.parse("2026-09-28T08:15:01.450Z")
     val baseImage = BaseImage(
       BaseImageId("ubuntu"),
@@ -54,7 +55,7 @@ class PackerBuildConfigGeneratorSpec extends AnyFlatSpec with Matchers {
       deleted = false
     )
     implicit val packerConfig: PackerConfig =
-      PackerConfig("DEV", None, None, None, None)
+      PackerConfig("DEV", None, "subnet-private", None, None)
 
     val config = PackerBuildConfigGenerator.generatePackerBuildConfig(
       amigoStage = "DEV",
@@ -72,5 +73,8 @@ class PackerBuildConfigGeneratorSpec extends AnyFlatSpec with Matchers {
       "Stack" -> "amigo-packer"
     )
     config.builders.head.tags("Stack") shouldBe "amigo-packer"
+    config.builders.head.subnet_id shouldBe "subnet-private"
+    (Json.toJson(config.builders.head) \ "associate_public_ip_address")
+      .as[Boolean] shouldBe false
   }
 }

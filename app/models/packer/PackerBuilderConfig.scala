@@ -19,7 +19,7 @@ case class PackerBuilderConfig(
     `type`: String,
     region: String,
     vpc_id: Option[String],
-    subnet_id: Option[String],
+    subnet_id: String,
     source_ami: String,
     instance_type: String,
     ssh_username: String,
@@ -39,13 +39,21 @@ case class PackerBuilderConfig(
     //  See https://developer.hashicorp.com/packer/integrations/hashicorp/amazon#resourcenotready-error
     aws_polling: Option[AwsPolling],
     metadata_options: Map[String, String]
-)
+) {
+  val associate_public_ip_address: Boolean = false
+}
 
 object PackerBuilderConfig {
   implicit val jsonAwsPollingWrites: OWrites[AwsPolling] =
     Json.writes[AwsPolling]
   implicit val jsonDiskWrites: OWrites[BlockDeviceMapping] =
     Json.writes[BlockDeviceMapping]
-  implicit val jsonWrites: OWrites[PackerBuilderConfig] =
+  private val baseJsonWrites: OWrites[PackerBuilderConfig] =
     Json.writes[PackerBuilderConfig]
+  implicit val jsonWrites: OWrites[PackerBuilderConfig] = OWrites { config =>
+    baseJsonWrites.writes(config) +
+      ("associate_public_ip_address" -> Json.toJson(
+        config.associate_public_ip_address
+      ))
+  }
 }
