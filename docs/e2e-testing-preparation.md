@@ -6,7 +6,7 @@ A Chromium-only Playwright suite will test representative read-only UI journeys 
 
 ## Preparation work list
 
-- [ ] **Create an isolated application entry point**
+- [x] **Create an isolated application entry point**
   - Add a dedicated E2E `ApplicationLoader` and component graph.
   - Do not subclass production components.
   - Bypass SSM configuration loading.
