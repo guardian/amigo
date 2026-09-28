@@ -69,6 +69,10 @@ object PackerBuildConfigGenerator {
         "App" -> "{{user `recipe`}}",
         "BakeId" -> s"${bake.bakeId.toString}"
       ),
+      run_volume_tags = Map(
+        "AmigoStage" -> amigoStage,
+        "Stack" -> stack
+      ),
       ami_name = imageDetails.name,
       ami_description = imageDetails.description,
       ami_users = awsAccounts,

@@ -25,6 +25,7 @@ case class PackerBuilderConfig(
     ssh_username: String,
     ssh_interface: String,
     run_tags: Map[String, String],
+    run_volume_tags: Map[String, String],
     ami_name: String,
     ami_description: String,
     ami_users: String,
