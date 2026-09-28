@@ -5,7 +5,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 name := "amigo"
 version := "1.0-latest"
-scalaVersion := "2.13.18"
+scalaVersion := "3.3.8"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -58,12 +58,26 @@ lazy val root = (project in file("."))
     )
   )
 
-scalacOptions ++= Seq(
-  "-unchecked",
-  "-deprecation",
+ThisBuild / scalacOptions ++= Seq(
   "-feature",
-  "-Xfatal-warnings"
+  "-Wunused:all",
+  "-Wvalue-discard",
+  "-Wnonunit-statement",
+  // Play's generated Twirl and routes sources produce unused false positives.
+  "-Wconf:msg=unused&src=target/.*/twirl/.*:s",
+  "-Wconf:msg=unused&src=target/.*/routes/.*:s",
+  "-no-indent",
+  "-Werror"
 )
+
+Test / fork := true
+Test / javaOptions ++= Seq(
+  "-XX:+EnableDynamicAgentLoading",
+  "-Xshare:off"
+)
+
+// Scala 3.3 Scaladoc cannot resolve links inherited from Play and Enumeratum.
+Compile / doc / scalacOptions += "-no-link-warnings"
 
 val jacksonV2Version = "2.22.2"
 val circeVersion = "0.14.16"
@@ -102,7 +116,8 @@ libraryDependencies ++= Seq(
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
   "com.gu.play-googleauth" %% "play-v30" % "42.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
-  "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
+  ("com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3")
+    .cross(CrossVersion.for3Use2_13), // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
   "joda-time" % "joda-time" % "2.14.3",
@@ -132,7 +147,11 @@ lazy val imageCopier = (project in file("imageCopier"))
     JDebPackaging
   )
   .settings(
-    scalaVersion := "2.13.18",
+    scalaVersion := "3.3.8",
+    scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    maintainer := "Guardian Developer Experience <devx@theguardian.com>",
+    makeBashScripts := Seq.empty,
+    makeBatScripts := Seq.empty,
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
     libraryDependencies ++= Seq(

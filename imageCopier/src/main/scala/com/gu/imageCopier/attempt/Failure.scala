@@ -13,7 +13,7 @@ sealed trait Failure {
   */
 sealed trait FailureWithThrowable extends Failure {
   def throwable: Throwable
-  override def cause = Some(throwable)
+  override def cause: Option[Throwable] = Some(throwable)
 
   // provide a default mechanism for showing the exception to a user
   override def msg = {

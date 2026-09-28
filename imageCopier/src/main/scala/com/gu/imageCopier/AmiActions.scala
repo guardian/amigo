@@ -87,7 +87,7 @@ object AmiActions {
         .imageId(amiId)
         .build()
       println(s"Deregistering AMI with request $request")
-      val response = ec2Client.deregisterImage(request)
+      val _ = ec2Client.deregisterImage(request)
       println(s"Deregistered")
       amiId
     } { case ace: SdkServiceException =>
@@ -103,7 +103,7 @@ object AmiActions {
         .snapshotId(snapshotId)
         .build
       println(s"Deleting snapshot with request $request")
-      val response = ec2Client.deleteSnapshot(request)
+      val _ = ec2Client.deleteSnapshot(request)
       println(s"Deleted snapshot")
       snapshotId
     } { case ace: SdkServiceException =>

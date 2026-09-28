@@ -34,9 +34,10 @@ object PackerProcessMonitor {
       process.waitFor()
       val exitValue = process.exitValue()
       eventBus.publish(PackerProcessExited(bakeId, exitValue))
-      exitValuePromise.trySuccess(exitValue)
+      val _ = exitValuePromise.trySuccess(exitValue)
     } catch {
-      case NonFatal(e) => exitValuePromise.tryFailure(e)
+      case NonFatal(e) =>
+        val _ = exitValuePromise.tryFailure(e)
     }
   }
 

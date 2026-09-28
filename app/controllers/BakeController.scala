@@ -37,7 +37,7 @@ class BakeController(
           case Some(buildNumber) =>
             val theBake = Bakes
               .create(recipe, buildNumber, startedBy = request.user.fullName)
-            packerRunner.createImage(
+            val _ = packerRunner.createImage(
               stage,
               theBake,
               prism,
@@ -63,7 +63,7 @@ class BakeController(
         .findPreviousSuccessfulBake(recipeId, buildNumber - 1)
         .map(_.bakeId)
       Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) {
-        bake: Bake =>
+        (bake: Bake) =>
           val bakeLogs = BakeLogs.list(BakeId(recipeId, buildNumber))
           val packageList = PackageList.getPackageList(
             s3Client,
@@ -126,7 +126,7 @@ class BakeController(
     }
 
   def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] =
-    authAction { implicit request =>
+    authAction { _ =>
       Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
         val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
 

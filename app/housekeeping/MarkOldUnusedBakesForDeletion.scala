@@ -3,7 +3,7 @@ package housekeeping
 import data.{Bakes, Dynamo, Recipes}
 import models.{Bake, RecipeId}
 import org.joda.time.{DateTime, Duration}
-import org.quartz.SimpleScheduleBuilder
+import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
 import prism.RecipeUsage
 import services.{Loggable, PrismData}
 
@@ -34,7 +34,8 @@ object MarkOldUnusedBakesForDeletion {
 class MarkOldUnusedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo)
     extends HousekeepingJob
     with Loggable {
-  override val schedule = SimpleScheduleBuilder.repeatHourlyForever(1)
+  override val schedule: ScheduleBuilder[_ <: Trigger] =
+    SimpleScheduleBuilder.repeatHourlyForever(1)
 
   override def housekeep(): Unit = {
     implicit val implicitPrismAgents: PrismData = prismAgents

@@ -5,7 +5,7 @@ import models.Recipe.DbModel
 import models._
 import org.joda.time.DateTime
 import org.scanamo.DynamoReadError
-import org.scanamo.generic.auto.genericDerivedFormat
+import org.scanamo.generic.auto.autoDerived
 import org.scanamo.syntax._
 
 import scala.jdk.CollectionConverters._

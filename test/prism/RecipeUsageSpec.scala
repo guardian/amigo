@@ -45,7 +45,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     RecipeId(id),
     None,
     fixtureBaseImage(s"base-image-$id"),
-    Some(100),
+    Some(size),
     List(),
     "Test",
     DateTime.now,
@@ -104,7 +104,6 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val amiId3 = AmiId("3")
     val amiId4 = AmiId("4")
     val amiId5 = AmiId("5")
-    val amiId6 = AmiId("6")
 
     val recipe1 = fixtureRecipe("recipe1")
     val recipe2 = fixtureRecipeWithSize("recipe2", 100)
@@ -158,14 +157,14 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val usages: Map[Recipe, RecipeUsage] =
       RecipeUsage.forAll(recipes, bakes)(mockPrismAgents)
 
-    usages.size shouldBe 3
-    usages.keySet shouldBe Set(recipe1, recipe2, recipe3)
+    val _ = usages.size shouldBe 3
+    val _ = usages.keySet shouldBe Set(recipe1, recipe2, recipe3)
 
     val recipe1Usages = usages(recipe1)
-    recipe1Usages.instances shouldBe Seq(instance1, instance2)
-    recipe1Usages.launchConfigurations shouldBe Seq(lc1)
-    recipe1Usages.launchTemplates shouldBe Seq(lt1)
-    recipe1Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
+    val _ = recipe1Usages.instances shouldBe Seq(instance1, instance2)
+    val _ = recipe1Usages.launchConfigurations shouldBe Seq(lc1)
+    val _ = recipe1Usages.launchTemplates shouldBe Seq(lt1)
+    val _ = recipe1Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
       BakeUsage(AmiId("1"), bakeR1A1, None, Seq(instance1), Seq(lc1), Seq(lt1)),
       BakeUsage(
         AmiId("2"),
@@ -178,9 +177,9 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     )
 
     val recipe2Usages = usages(recipe2)
-    recipe2Usages.instances shouldBe Seq(instance5)
-    recipe2Usages.launchConfigurations shouldBe Seq(lc2)
-    recipe2Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
+    val _ = recipe2Usages.instances shouldBe Seq(instance5)
+    val _ = recipe2Usages.launchConfigurations shouldBe Seq(lc2)
+    val _ = recipe2Usages.bakeUsage.sortBy(_.amiId.value) shouldBe Seq(
       BakeUsage(AmiId("3"), bakeR2A3, None, Seq.empty, Seq(lc2), Seq.empty),
       BakeUsage(
         AmiId("5"),
@@ -193,9 +192,9 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     )
 
     val recipe3Usages = usages(recipe3)
-    recipe3Usages.instances shouldBe Seq.empty
-    recipe3Usages.launchConfigurations shouldBe Seq.empty
-    recipe3Usages.launchTemplates shouldBe Seq.empty
+    val _ = recipe3Usages.instances shouldBe Seq.empty
+    val _ = recipe3Usages.launchConfigurations shouldBe Seq.empty
+    val _ = recipe3Usages.launchTemplates shouldBe Seq.empty
     recipe3Usages.bakeUsage shouldBe Seq.empty
   }
 
@@ -204,7 +203,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val recipe2 = fixtureRecipe("recipe2")
     val usages = Map(recipe1 -> emptyUsage, recipe2 -> instanceUsage)
 
-    RecipeUsage.hasUsage(recipe1, usages) shouldBe false
+    val _ = RecipeUsage.hasUsage(recipe1, usages) shouldBe false
     RecipeUsage.hasUsage(recipe2, usages) shouldBe true
   }
 
@@ -213,7 +212,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val recipe2 = fixtureRecipe("recipe2")
     val usages = Map(recipe1 -> emptyUsage, recipe2 -> launchConfigurationUsage)
 
-    RecipeUsage.hasUsage(recipe1, usages) shouldBe false
+    val _ = RecipeUsage.hasUsage(recipe1, usages) shouldBe false
     RecipeUsage.hasUsage(recipe2, usages) shouldBe true
   }
 
@@ -222,7 +221,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val recipe2 = fixtureRecipe("recipe2")
     val usages = Map(recipe1 -> launchTemplateUsage, recipe2 -> emptyUsage)
 
-    RecipeUsage.hasUsage(recipe1, usages) shouldBe true
+    val _ = RecipeUsage.hasUsage(recipe1, usages) shouldBe true
     RecipeUsage.hasUsage(recipe2, usages) shouldBe false
   }
 }

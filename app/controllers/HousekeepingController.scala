@@ -24,18 +24,19 @@ class HousekeepingController(
     Ok(views.html.housekeeping(orphanedBakes, errors.length))
   }
 
-  def deleteOrphans(): Action[AnyContent] = authAction { implicit request =>
-    for {
-      formData <- request.body.asFormUrlEncoded.toSeq
-      bakes <- formData.get("orphaned-bakes").toSeq
-      bakeIdFromString <- bakes.map(BakeId.fromString)
-    } yield {
-      bakeIdFromString match {
-        case Right(bakeId) => Bakes.markToDelete(bakeId)
-        case Left(err)     => log.warn(err.toString)
+  def deleteOrphans(): Action[AnyContent] = authAction {
+    implicit request: AuthAction.UserIdentityRequest[AnyContent] =>
+      val _ = for {
+        formData <- request.body.asFormUrlEncoded.toSeq
+        bakes <- formData.get("orphaned-bakes").toSeq
+        bakeIdFromString <- bakes.map(BakeId.fromString)
+      } yield {
+        bakeIdFromString match {
+          case Right(bakeId) => Bakes.markToDelete(bakeId)
+          case Left(err)     => log.warn(err.toString)
+        }
       }
-    }
 
-    Redirect(routes.HousekeepingController.showOrphans())
+      Redirect(routes.HousekeepingController.showOrphans())
   }
 }

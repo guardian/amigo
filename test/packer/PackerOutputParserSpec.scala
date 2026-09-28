@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 class PackerOutputParserSpec extends AnyFlatSpec with Matchers {
 
   it should "parse a line of Packer output" in {
-    PackerOutputParser.parseLine(
+    val _ = PackerOutputParser.parseLine(
       "1455354962,,ui,say,ubuntu-wily-java8 output will be in this color."
     ) should be(
       Some(
@@ -50,14 +50,14 @@ class PackerOutputParserSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "parse a line of coloured Packer output" in {
-    PackerOutputParser.parseLine(
+    val _ = PackerOutputParser.parseLine(
       "123,,ui,message,\u001B[0;32mfoo\u001B[0m"
     ) should be(
       Some(
         PackerOutputParser.UiOutput("info", List(MessagePart("foo", "#00C200")))
       )
     )
-    PackerOutputParser.parseLine(
+    val _ = PackerOutputParser.parseLine(
       "123,,ui,message,foo\u001B[0;32mbar\u001B[0m"
     ) should be(
       Some(
@@ -67,7 +67,7 @@ class PackerOutputParserSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    PackerOutputParser.parseLine(
+    val _ = PackerOutputParser.parseLine(
       "123,,ui,message,foo\u001B[0;32mbar\u001B[0mbaz"
     ) should be(
       Some(

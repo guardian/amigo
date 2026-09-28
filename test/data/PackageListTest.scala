@@ -14,7 +14,7 @@ class PackageListTest extends AnyFlatSpec with Matchers {
   "removeNonPackageLines" should "remove redundant output" in {
     val packageList = List("Installed Packages", "p1", "p2,")
     val removed = PackageList.removeNonPackageLines(packageList)
-    removed.head should be("p1")
+    val _ = removed.head should be("p1")
     removed.length should be(2)
   }
 }

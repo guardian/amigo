@@ -71,7 +71,7 @@ class TimeOutLongRunningBakesSpec
     val bakesToTimeOut =
       housekeepingJob.getBakesToTimeOut(earliestStartedAt = now.minusHours(1))
 
-    bakesToTimeOut shouldEqual List(
+    val _ = bakesToTimeOut shouldEqual List(
       Bake.DbModel(
         recipeId = RecipeId("identity"),
         buildNumber = 1,
@@ -138,7 +138,7 @@ class TimeOutLongRunningBakesSpec
     housekeepingJob.runHouseKeeping(earliestStartedAt = now.minusHours(1))
 
     // Check that we get overrunning instance and terminate it.
-    verify(packerEC2Client).getBakeInstance(
+    val _ = verify(packerEC2Client).getBakeInstance(
       ArgumentMatchers.eq(overrunningBakeId)
     )
     verify(packerEC2Client).terminateEC2Instance(
@@ -149,7 +149,7 @@ class TimeOutLongRunningBakesSpec
     verifyNoMoreInteractions(packerEC2Client)
 
     // Check we set the status of overrunning bakes to timed out
-    verify(bakesRepo, times(1)).getBakes
+    val _ = verify(bakesRepo, times(1)).getBakes
     verify(bakesRepo, times(1))
       .updateStatusToTimedOutIfRunning(
         ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1))
@@ -190,12 +190,12 @@ class TimeOutLongRunningBakesSpec
     housekeepingJob.runHouseKeeping(earliestStartedAt = now.minusHours(1))
 
     // Check that we get overrunning instance and terminate it.
-    verify(packerEC2Client).getBakeInstance(
+    val _ = verify(packerEC2Client).getBakeInstance(
       ArgumentMatchers.eq(overrunningBakeId)
     )
 
     // Check we still set the status of overrunning bakes to timed out.
-    verify(bakesRepo, times(1)).getBakes
+    val _ = verify(bakesRepo, times(1)).getBakes
     verify(bakesRepo, times(1))
       .updateStatusToTimedOutIfRunning(
         ArgumentMatchers.eq(BakeId(RecipeId("identity"), buildNumber = 1))

@@ -74,7 +74,7 @@ class PackerEC2Client(underlying: Ec2Client, amigoStage: String) {
       .builder()
       .instanceIds(instanceId)
       .build()
-    underlying.terminateInstances(request)
+    val _ = underlying.terminateInstances(request)
   }
 
   def getRunningPackerInstances(): List[Instance] = {

@@ -40,11 +40,7 @@ import prism.Prism
 import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
 import services.{AmiMetadataLookup, Loggable, PrismData}
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain,
-  InstanceProfileCredentialsProvider,
-  ProfileCredentialsProvider
-}
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.ec2.Ec2Client

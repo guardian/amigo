@@ -2,8 +2,7 @@ package models
 
 import org.scanamo.DynamoFormat
 import org.scanamo.{DynamoReadError, TypeCoercionError}
-import data.PackageList
-import play.api.libs.json.{JsObject, Json, OWrites, Writes}
+import play.api.libs.json.{JsObject, Json, Writes}
 
 case class BakeId(recipeId: RecipeId, buildNumber: Int) {
   override def toString: String = s"${recipeId.value} #$buildNumber"

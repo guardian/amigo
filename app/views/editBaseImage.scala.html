@@ -1,7 +1,5 @@
 @import views.html.helper.CSRF
-@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
-
-@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+@(image: BaseImage, form: Form[_], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages, implicitFieldConstructor: b3.B3FieldConstructor = b3.horizontal.fieldConstructor("col-md-2", "col-md-10"))
 
 @simpleLayout("AMIgo"){
 

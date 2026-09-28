@@ -8,7 +8,7 @@ import scala.util.control.NonFatal
 /** Represents a value that will need to be calculated using an asynchronous
   * computation that may fail.
   */
-case class Attempt[A] private (underlying: Future[Either[Failure, A]]) {
+case class Attempt[A](underlying: Future[Either[Failure, A]]) {
   def map[B](f: A => B)(implicit ec: ExecutionContext): Attempt[B] =
     flatMap(a => Attempt.Right(f(a)))
 

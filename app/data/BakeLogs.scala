@@ -1,9 +1,8 @@
 package data
 
-import org.scanamo.query.{UniqueKeyConditions, UniqueKeys}
+import org.scanamo.query.UniqueKeys
 import org.scanamo.syntax._
 import models._
-import org.scanamo.DynamoObject
 import services.Loggable
 
 object BakeLogs extends Loggable {
@@ -29,6 +28,7 @@ object BakeLogs extends Loggable {
   def delete(bakeId: BakeId, attempt: Int = 0)(implicit
       dynamo: Dynamo
   ): Unit = {
+    val _ = attempt
     val logNumbers: Seq[Int] = table
       .query("bakeId" === bakeId)
       .exec()
@@ -44,16 +44,10 @@ object BakeLogs extends Loggable {
     }
   }
 
-  type UniqueKeySet = Set[DynamoObject]
-  implicit private val identityKeyConditions
-      : UniqueKeyConditions[UniqueKeySet] =
-    new UniqueKeyConditions[UniqueKeySet] {
-      override def toDynamoObject(t: UniqueKeySet): Set[DynamoObject] = t
-    }
-
   private def doDelete(logLines: UniqueKeys[_], attempt: Int = 0)(implicit
       dynamo: Dynamo
   ): Unit = {
+    val _ = attempt
     table.deleteAll(logLines).exec()
   }
 

@@ -3,7 +3,7 @@ package notification
 import models.{AmiId, Bake}
 import models.packer.PackerVariablesConfig
 import _root_.packer.ImageDetails
-import play.api.libs.json.{JsString, Json, Writes}
+import play.api.libs.json.{JsString, JsValue, Json, Writes}
 import prism.Ami
 import services.Loggable
 import software.amazon.awssdk.regions.Region
@@ -26,7 +26,7 @@ class NotificationSender(sns: SNS, region: Region, stage: String)
     )
     val messageStr = Json.stringify(message)
     log.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
-    sns.client.publish(
+    val _ = sns.client.publish(
       PublishRequest
         .builder()
         .topicArn(sns.topicArn)
@@ -37,7 +37,7 @@ class NotificationSender(sns: SNS, region: Region, stage: String)
 
   def sendHousekeepingTopicMessage(amisToDelete: List[Ami]): Unit = {
     implicit val amiIdWrites: Writes[AmiId] = new Writes[AmiId] {
-      def writes(o: AmiId) = JsString(o.value)
+      def writes(o: AmiId): JsValue = JsString(o.value)
     }
     implicit val amiWrites: Writes[Ami] = Json.writes[Ami]
     // don't overwhelm the receiver with more than 10 AMIs per message

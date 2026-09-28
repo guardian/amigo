@@ -29,7 +29,7 @@ object Bakes extends Loggable {
   def updateStatus(bakeId: BakeId, status: BakeStatus)(implicit
       dynamo: Dynamo
   ): Unit = {
-    table
+    val _ = table
       .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
         ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
@@ -41,7 +41,7 @@ object Bakes extends Loggable {
   def updateStatusIfRunning(bakeId: BakeId, status: BakeStatus)(implicit
       dynamo: Dynamo
   ): Unit = {
-    table
+    val _ = table
       .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
         ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
@@ -53,7 +53,7 @@ object Bakes extends Loggable {
   def updateAmiId(bakeId: BakeId, amiId: AmiId)(implicit
       dynamo: Dynamo
   ): Unit = {
-    table
+    val _ = table
       .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
         ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),
@@ -114,7 +114,7 @@ object Bakes extends Loggable {
   }
 
   def markToDelete(bakeId: BakeId)(implicit dynamo: Dynamo): Unit = {
-    table
+    val _ = table
       .when(attributeExists("recipeId") and attributeExists("buildNumber"))
       .update(
         ("recipeId" === bakeId.recipeId) and ("buildNumber" === bakeId.buildNumber),

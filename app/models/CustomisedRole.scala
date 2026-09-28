@@ -2,7 +2,6 @@ package models
 
 import org.scanamo.DynamoFormat
 import org.scanamo.TypeCoercionError
-import org.scanamo.generic.auto.genericDerivedFormat
 
 case class CustomisedRole(roleId: RoleId, variables: Map[String, ParamValue]) {
 
@@ -36,7 +35,8 @@ case class DictParamValue(params: Map[String, SingleParamValue])
     params.map { case (k, v) => s"$k: ${v.quoted}" }.mkString("{", ", ", "}")
 }
 object ListParamValue {
-  def of(params: String*) = ListParamValue(params.map(SingleParamValue).toList)
+  def of(params: String*) =
+    ListParamValue(params.map(SingleParamValue.apply).toList)
 }
 object ParamValue {
   implicit val format: DynamoFormat[ParamValue] =
@@ -63,9 +63,9 @@ object CustomisedRole {
   def allowedUnquotedChars: Char => Boolean = c =>
     c.isLetterOrDigit || c == '-' || c == '_' || c == '/' || c == '.'
   def unquotedSingleValue[T: P]: P[SingleParamValue] =
-    P(CharPred(allowedUnquotedChars).rep(1).!).map(SingleParamValue)
+    P(CharPred(allowedUnquotedChars).rep(1).!).map(SingleParamValue.apply)
   def quotedSingleValue[T: P]: P[SingleParamValue] =
-    P("'" ~ CharsWhile(_ != '\'', 0).! ~ "'").map(SingleParamValue)
+    P("'" ~ CharsWhile(_ != '\'', 0).! ~ "'").map(SingleParamValue.apply)
   def singleValue[T: P]: P[SingleParamValue] = P(
     unquotedSingleValue | quotedSingleValue
   )

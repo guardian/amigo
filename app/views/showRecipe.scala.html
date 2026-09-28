@@ -12,9 +12,7 @@
         allRoles: Seq[RoleSummary],
         debugAvailable: Boolean,
         cloneForm: Form[_]
-)(implicit request: RequestHeader, flash: Flash, messages: play.api.i18n.Messages)
-
-@implicitFieldConstructor = @{ b3.inline.fieldConstructor() }
+)(implicit request: RequestHeader, flash: Flash, messages: play.api.i18n.Messages, implicitFieldConstructor: b3.B3FieldConstructor = b3.inline.fieldConstructor())
 
 @simpleLayout("AMIgo"){
 

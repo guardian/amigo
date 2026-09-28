@@ -1,7 +1,6 @@
 package models
 
 import org.scanamo.DynamoFormat
-import play.api.libs.json.{JsString, Json, OWrites, Writes}
 import play.api.mvc.PathBindable
 
 case class RecipeId(value: String) extends AnyVal with StringId

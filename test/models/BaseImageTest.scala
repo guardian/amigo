@@ -24,8 +24,8 @@ class BaseImageTest extends AnyFlatSpec with Matchers {
     val baseImageLongSupport = makeBaseImage(DateTime.now.plusMonths(24))
     val baseImageExpiresSoon = makeBaseImage(DateTime.now.plusMonths(1))
     val baseImageExpired = makeBaseImage(DateTime.now.minusMonths(1))
-    BaseImage.eolStatus(baseImageLongSupport) should be(Supported)
-    BaseImage.eolStatus(baseImageExpiresSoon) should be(EndOfLifeSoon)
+    val _ = BaseImage.eolStatus(baseImageLongSupport) should be(Supported)
+    val _ = BaseImage.eolStatus(baseImageExpiresSoon) should be(EndOfLifeSoon)
     BaseImage.eolStatus(baseImageExpired) should be(EndOfLife)
   }
 

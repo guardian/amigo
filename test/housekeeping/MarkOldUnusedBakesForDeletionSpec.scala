@@ -76,12 +76,17 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
     )
   }
 
-  def getBakes(recipeId: RecipeId): Iterable[Bake] =
+  def getBakes(recipeId: RecipeId): Iterable[Bake] = {
+    val _ = recipeId
     Iterable(oldBake1, oldBake2, newBake1, newBake2)
-  def getEmptyRecipeUsage(bakes: Iterable[Bake]): RecipeUsage =
+  }
+  def getEmptyRecipeUsage(bakes: Iterable[Bake]): RecipeUsage = {
+    val _ = bakes
     RecipeUsage(Seq.empty, Seq.empty, Seq.empty, Seq.empty)
+  }
 
   def getRecipeUsage(bakes: Iterable[Bake]): RecipeUsage = {
+    val _ = bakes
     val bakeUsageA =
       BakeUsage(AmiId("ami-2"), oldBake2, None, Seq.empty, Seq.empty, Seq.empty)
     val bakeUsageB =
@@ -122,7 +127,7 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
       getEmptyRecipeUsage
     )
 
-    markedBakes.size shouldEqual 2
+    val _ = markedBakes.size shouldEqual 2
     markedBakes.map(_.bakeId) shouldEqual Set(
       BakeId(RecipeId("recipe-1"), 1),
       BakeId(RecipeId("recipe-2"), 1)
@@ -144,7 +149,7 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
       getRecipeUsage
     )
 
-    markedBakes.size shouldEqual 1
+    val _ = markedBakes.size shouldEqual 1
     markedBakes.map(_.bakeId) shouldEqual Set(BakeId(RecipeId("recipe-1"), 1))
   }
 }

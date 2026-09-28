@@ -15,7 +15,7 @@ import prism.Prism.{
 }
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.{MapView, SeqLike, SeqOps}
+import scala.collection.SeqOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
@@ -28,19 +28,22 @@ object PrismData {
   type CacheData[T] = Either[Failure, (T, DateTime)]
   def dataToResult[T](data: CacheData[T], now: DateTime)(implicit
       exec: ExecutionContext
-  ): T = data match {
-    case Left(NotInitialised) =>
-      throw new IllegalStateException(
-        s"AMIgo internal data cache is not yet populated"
-      )
-    case Left(_) =>
-      throw new IllegalStateException(s"CacheData failed for unknown reason")
-    case Right((_, staleTimeStamp))
-        if (now.getMillis - staleTimeStamp.getMillis) > MAX_AGE =>
-      throw new IllegalStateException(
-        s"AMIgo internal data cache is stale - last update at $staleTimeStamp"
-      )
-    case Right((t, _)) => t
+  ): T = {
+    val _ = exec
+    data match {
+      case Left(NotInitialised) =>
+        throw new IllegalStateException(
+          s"AMIgo internal data cache is not yet populated"
+        )
+      case Left(_) =>
+        throw new IllegalStateException(s"CacheData failed for unknown reason")
+      case Right((_, staleTimeStamp))
+          if (now.getMillis - staleTimeStamp.getMillis) > MAX_AGE =>
+        throw new IllegalStateException(
+          s"AMIgo internal data cache is stale - last update at $staleTimeStamp"
+        )
+      case Right((t, _)) => t
+    }
   }
 }
 
@@ -89,30 +92,36 @@ class PrismData(
       scheduler.scheduleWithFixedDelay(0.seconds, 1.minutes) { () =>
         {
           log.debug(s"Refreshing Prism data")
-          refresh(prism.findAllInstances(), instancesAgent, "instances")(
-            identity
-          )
-          refresh(
+          val _ =
+            refresh(prism.findAllInstances(), instancesAgent, "instances")(
+              identity
+            )
+          val _ = refresh(
             prism.findAllLaunchConfigurations(),
             launchConfigurationsAgent,
             "launch configuration"
           )(identity)
-          refresh(
+          val _ = refresh(
             prism.findAllLaunchTemplates(),
             launchTemplatesAgent,
             "launch template"
           )(identity)
-          refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(
+          val _ = refresh(
+            prism.findCopiedImages(),
+            copiedImagesAgent,
+            "copied image"
+          )(
             _.groupBy(_.copiedFromAMI)
           )
-          refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(
-            identity
-          )
+          val _ =
+            refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(
+              identity
+            )
         }
       }
 
     lifecycle.addStopHook { () =>
-      prismDataSchedule.cancel()
+      val _ = prismDataSchedule.cancel()
       Future.successful(())
     }
   }

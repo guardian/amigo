@@ -66,7 +66,7 @@ class CustomisedRoleTest extends AnyFlatSpec with Matchers with EitherValues {
   "ParamValue.format" should "round trip param values" in {
     def roundTrip(pv: ParamValue) =
       ParamValue.format.read(ParamValue.format.write(pv)).toOption.get
-    roundTrip(SingleParamValue("X")) shouldBe SingleParamValue("X")
+    val _ = roundTrip(SingleParamValue("X")) shouldBe SingleParamValue("X")
     roundTrip(
       DictParamValue(
         Map(

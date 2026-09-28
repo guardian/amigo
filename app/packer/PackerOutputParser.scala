@@ -3,7 +3,6 @@ package packer
 import models.{MessagePart, AmiId}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.matching.Regex.MatchIterator
 
 object PackerOutputParser {
 
@@ -51,7 +50,7 @@ object PackerOutputParser {
     var previousEndIndex = 0
 
     while (it.hasNext) {
-      it.next()
+      val _ = it.next()
       if (it.start > previousEndIndex) {
         // Add any non-coloured part between the end of the previous coloured part
         // and the start of this one

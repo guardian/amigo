@@ -3,7 +3,7 @@ package housekeeping
 import data.{BakeLogs, Bakes, Dynamo}
 import models.BakeId
 import notification.NotificationSender
-import org.quartz.SimpleScheduleBuilder
+import org.quartz.{ScheduleBuilder, SimpleScheduleBuilder, Trigger}
 import prism.RecipeUsage
 import services.{Loggable, PrismData}
 
@@ -22,7 +22,7 @@ class BakeDeletion(
   implicit private val implDynamo: Dynamo = dynamo
   implicit private val implPrismAgents: PrismData = prismAgents
 
-  override val schedule =
+  override val schedule: ScheduleBuilder[_ <: Trigger] =
     SimpleScheduleBuilder.repeatMinutelyForever(frequencyMinutes)
 
   def housekeep(): Unit = {

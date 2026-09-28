@@ -37,7 +37,7 @@ class ScheduledBakeRunner(
                   Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
                 log.info(s"Starting scheduled bake: ${theBake.bakeId}")
-                packerRunner.createImage(
+                val _ = packerRunner.createImage(
                   stage,
                   theBake,
                   prism,

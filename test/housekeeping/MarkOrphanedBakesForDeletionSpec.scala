@@ -57,7 +57,7 @@ class MarkOrphanedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
       otherBakes ++ orphanBakes
     )
 
-    markedBakes.size shouldEqual 2
+    val _ = markedBakes.size shouldEqual 2
     markedBakes shouldEqual List(
       BakeId(RecipeId("recipe-x"), 1),
       BakeId(RecipeId("recipe-y"), 1)
@@ -72,7 +72,7 @@ class MarkOrphanedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
       otherBakes ++ orphanBakes
     )
 
-    markedBakes.size shouldEqual 3
+    val _ = markedBakes.size shouldEqual 3
     markedBakes.toSet shouldEqual Set(
       BakeId(RecipeId("recipe-x"), 1),
       BakeId(RecipeId("recipe-y"), 1),

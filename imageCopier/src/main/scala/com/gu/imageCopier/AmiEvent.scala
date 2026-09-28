@@ -3,7 +3,6 @@ package com.gu.imageCopier
 import io.circe._
 import io.circe.parser.decode
 import com.gu.imageCopier.attempt._
-import cats.syntax.either._
 
 case class AmiEvent(
     sourceAmi: String,
@@ -37,5 +36,5 @@ object AmiEvent {
   }
 
   def fromJsonString(json: String): Attempt[AmiEvent] =
-    decode[AmiEvent](json).toAttempt(JsonParseFailure)
+    decode[AmiEvent](json).toAttempt(JsonParseFailure.apply)
 }

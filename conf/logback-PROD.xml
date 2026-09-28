@@ -1,6 +1,6 @@
 <configuration>
 
-  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+  <conversionRule conversionWord="coloredLevel" class="play.api.libs.logback.ColoredLevel" />
 
   <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${logs.home}/amigo.log</file>
