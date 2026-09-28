@@ -78,7 +78,7 @@ object PackerBuildConfigGenerator {
       ami_users = awsAccounts,
       snapshot_users = awsAccounts,
       iam_instance_profile = packerConfig.instanceProfile,
-      tags = imageDetails.tags,
+      tags = imageDetails.tags + ("Stack" -> stack),
       ami_block_device_mappings = disk,
       launch_block_device_mappings = disk,
       security_group_id = packerConfig.securityGroupId,

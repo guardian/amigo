@@ -71,5 +71,6 @@ class PackerBuildConfigGeneratorSpec extends AnyFlatSpec with Matchers {
       "AmigoStage" -> "DEV",
       "Stack" -> "amigo-packer"
     )
+    config.builders.head.tags("Stack") shouldBe "amigo-packer"
   }
 }

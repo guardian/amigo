@@ -543,6 +543,43 @@ exports[`The Amigo stack matches the Amigo developer policy snapshot 1`] = `
               ],
             },
             {
+              "Action": "ec2:CreateTags",
+              "Condition": {
+                "StringEquals": {
+                  "aws:RequestTag/AmigoStage": "DEV",
+                  "aws:RequestTag/Stack": "amigo-packer",
+                  "ec2:Region": "eu-west-1",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::image/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":ec2:eu-west-1::snapshot/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
               "Action": "ec2:CreateImage",
               "Condition": {
                 "StringEquals": {
