@@ -22,7 +22,7 @@ import {
 	GuLogShippingPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
-import { Duration, SecretValue } from 'aws-cdk-lib';
+import { Aws, Duration, SecretValue } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
 import {
 	InstanceClass,
@@ -36,7 +36,12 @@ import {
 	ListenerAction,
 	UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	AnyPrincipal,
+	Effect,
+	Policy,
+	PolicyStatement,
+} from 'aws-cdk-lib/aws-iam';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	ParameterDataType,
@@ -156,6 +161,19 @@ export class AmigoStack extends GuStack {
 				app: AmigoStack.app.app,
 				bucketName: 'amigo-data-dev',
 			});
+			devDataBucket.addToResourcePolicy(
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					principals: [new AnyPrincipal()],
+					actions: ['s3:PutObject'],
+					resources: [devDataBucket.arnForObjects('packagelists/*')],
+					conditions: {
+						ArnLike: {
+							'aws:PrincipalArn': `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/PackerUser-PackerRole-*`,
+						},
+					},
+				}),
+			);
 
 			createAmigoDeveloperPolicy(
 				this,
