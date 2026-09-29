@@ -37,7 +37,7 @@ import {
 	UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import {
-	AnyPrincipal,
+	AccountPrincipal,
 	Effect,
 	Policy,
 	PolicyStatement,
@@ -164,7 +164,7 @@ export class AmigoStack extends GuStack {
 			devDataBucket.addToResourcePolicy(
 				new PolicyStatement({
 					effect: Effect.ALLOW,
-					principals: [new AnyPrincipal()],
+					principals: [new AccountPrincipal(Aws.ACCOUNT_ID)],
 					actions: ['s3:PutObject'],
 					resources: [devDataBucket.arnForObjects('packagelists/*')],
 					conditions: {
