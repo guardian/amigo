@@ -19,6 +19,7 @@ An implementation-ready specification for removing Amigo's direct identity-provi
 - [ALB OIDC header contract](issues/01-alb-oidc-header-contract.md): trust only the verified ALB-signed claims JWT and pin it to the expected listener identity.
 - [`play-googleauth` compatibility boundary](issues/02-play-googleauth-compatibility-boundary.md): an app-owned authenticated action can preserve controller behaviour with only import changes.
 - [Locate the external group gate](issues/03-locate-external-group-gate.md): Guardian CDK's Cognito-backed `googleAuth.allowedGroups` option provides the gate, with Janus as the configuration reference.
+- [Decide identity validation contract](issues/04-decide-identity-validation-contract.md): strictly bind the ALB-signed JWT to this ALB and Cognito client, require verified email identity, and fail closed without duplicating group authorisation.
 
 ## Not yet specified
 
