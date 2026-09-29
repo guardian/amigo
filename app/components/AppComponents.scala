@@ -210,7 +210,7 @@ class AppComponents(
   implicit val packerConfig: PackerConfig = PackerConfig(
     stage = stage,
     vpcId = configuration.get[Option[String]]("packer.vpcId"),
-    subnetId = configuration.get[Option[String]]("packer.subnetId"),
+    subnetId = mandatoryConfig("packer.subnetId"),
     instanceProfile =
       configuration.get[Option[String]]("packer.instanceProfile"),
     securityGroupId =

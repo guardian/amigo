@@ -189,6 +189,12 @@ export const createAmigoDeveloperPolicy = (
 					},
 				},
 			),
+			// Apply ownership tags to completed AMIs and their snapshots.
+			allow(
+				['ec2:CreateTags'],
+				[imageArn, snapshotArn],
+				packerRequestConditions,
+			),
 			// Create AMIs from tagged Packer builders.
 			allow(['ec2:CreateImage'], [instanceArn], packerResourceConditions),
 			// Snapshot tagged Packer volumes.
