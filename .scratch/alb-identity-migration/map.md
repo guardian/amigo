@@ -31,3 +31,4 @@ An implementation-ready specification for removing Amigo's direct identity-provi
 - Changing which Google groups are authorised or introducing application roles.
 - Expanding authentication to routes that are not currently wrapped by `AuthAction`.
 - Requiring an end-to-end non-member test as evidence of the external group gate.
+- [Decide CI end-to-end authentication](issues/08-decide-ci-end-to-end-authentication.md): CI and deployed ALB/Cognito end-to-end authentication support are beyond this migration's implementation-ready specification.
