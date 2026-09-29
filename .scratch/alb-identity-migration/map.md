@@ -22,6 +22,7 @@ An implementation-ready specification for removing Amigo's direct identity-provi
 - [Decide identity validation contract](issues/04-decide-identity-validation-contract.md): strictly bind the ALB-signed JWT to this ALB and Cognito client, require verified email identity, and fail closed without duplicating group authorisation.
 - [Decide minimal Scala integration](issues/05-decide-minimal-scala-integration.md): preserve controller call sites with an app-owned stateless action, injectable identity providers, strict production configuration, and a development-only fixed identity.
 - [Decide infrastructure and rollout](issues/06-decide-infrastructure-and-rollout.md): adopt Guardian CDK's Cognito group gate through an identifier-exposing library update and use a phased CODE-to-PROD rollout with seven-day rollback retention.
+- [Decide handoff plan](issues/07-decide-handoff-plan.md): deliver four ordered changes with focused CDK and Scala tests, staged acceptance, rollback retention, and a linked implementation-ready specification.
 
 ## Not yet specified
 
