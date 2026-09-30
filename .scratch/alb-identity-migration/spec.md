@@ -11,12 +11,6 @@ Remove Amigo's direct Google OAuth and Directory API calls. Authenticate and aut
 - Add target-side TLS, authentication-specific monitoring, or CI/deployed end-to-end authentication.
 - Require a non-member end-to-end test.
 
-## Prerequisite: Guardian CDK
-
-Add a typed, stable result to `GuEc2App`/`GuPlayApp` for enabled Google authentication, for example `googleAuthResources`, exposing the generated Cognito `UserPool` and `UserPoolClient`. Keep it absent when Google authentication is disabled.
-
-Do not make Amigo search the construct tree by child ID and do not copy the Cognito/gatekeeper implementation into Amigo. Add Guardian CDK construct tests, release the change, and update Amigo from `@guardian/cdk` 63.6.2 to that release.
-
 ## Infrastructure
 
 Configure `GuPlayApp.googleAuth` with:
@@ -36,11 +30,13 @@ Preserve private-subnet placement and the security-group rule that permits port 
 
 The application requires these values outside Play `Mode.Dev`:
 
-- expected signer ARN: read the existing `/infosec/waf/services/<stage>/amigo-alb-arn` SSM parameter;
-- expected issuer: `https://cognito-idp.eu-west-1.amazonaws.com/<user-pool-id>`;
-- expected client ID: the generated Cognito user-pool client ID.
+- expected signer ARN: inject `guPlayApp.loadBalancer.loadBalancerArn` into the
+	systemd service environment from CDK user data;
 
-Use the exposed Guardian CDK resources to publish the issuer as `/<stage>/deploy/amigo/auth.alb.issuer` and the client ID as `/<stage>/deploy/amigo/auth.alb.clientId`. Fail application startup outside development when any expected value is absent.
+The `/infosec/waf/services/<stage>/amigo-alb-arn` SSM parameter remains for WAF
+only. Fail application startup outside development when the injected signer ARN
+is unavailable. Cognito issuer and client metadata are covered by the verified
+ALB signature but are not independently configured.
 
 Before deployment, create the Guardian CDK JSON secret without deleting the legacy credentials and add Cognito's generated Google callback URL to the existing Google OAuth client.
 
@@ -73,7 +69,7 @@ For every protected request:
 3. Fetch the key only from `https://public-keys.auth.elb.eu-west-1.amazonaws.com/<kid>`.
 4. Cache keys by `kid` in a fixed-size cache. For an unknown `kid`, refresh once before failing closed.
 5. Verify the signature and expiration, allowing at most 60 seconds of clock skew.
-6. Require exact matches for the expected ALB `signer`, Cognito `iss`, and generated `client` header values.
+6. Require an exact match for the expected ALB `signer` header value.
 7. Require a non-empty `sub`, a non-empty `email`, and boolean `email_verified: true` in the payload.
 8. Resolve `fullName` from non-empty `name`, then the non-empty parts of `given_name` and `family_name` joined with one space, then email.
 
@@ -95,35 +91,29 @@ Retain the service-account object, its instance download, development setup, leg
 
 ## Focused tests
 
-### Guardian CDK
-
-- Google authentication exposes typed user-pool and client resources when enabled and no result when disabled.
-- Existing group-gate resources, triggers, scopes, and listener action remain unchanged.
-
 ### Amigo CDK
 
-- Focused template assertions cover the Cognito action, the three resolved allowed-group addresses, PROD gatekeeper stage, 15-minute session, generated runtime parameters, and ALB-to-target security-group rule.
+- Focused template assertions cover the Cognito action, the three resolved allowed-group addresses, PROD gatekeeper stage, 15-minute session, direct signer-ARN injection, existing WAF parameter, and ALB-to-target security-group rule.
 - The template no longer contains Amigo's direct OIDC listener action or extra IdP egress group.
 
 ### Scala
 
 - Claim translation covers every `fullName` fallback and rejects missing or unverified email and missing `sub`.
-- JWT tests use ephemeral EC keys and cover valid tokens, wrong signature or algorithm, wrong signer/issuer/client, expiration and skew boundaries, malformed input, key-fetch failure, and unknown-`kid` refresh/cache behaviour.
+- JWT tests use ephemeral EC keys and cover valid tokens, wrong signature or algorithm, wrong signer, expiration and skew boundaries, malformed input, key-fetch failure, and unknown-`kid` refresh/cache behaviour.
 - `AuthAction` returns `401` for each failure class and preserves authenticated requests for both default and explicit body parsers.
-- Wiring tests prove `Mode.Dev` selects the fixed provider, other modes select ALB validation, and missing production values fail startup.
+- Wiring tests prove `Mode.Dev` selects the fixed provider, other modes select ALB validation, and a missing production signer ARN fails startup.
 - Existing protected controllers continue to compile and tests confirm health/assets remain outside `AuthAction`.
 
 Run Scala formatting, compilation, and tests, plus CDK formatting, lint, build, tests, and synth. Update the CDK snapshot only for intended resource changes.
 
 ## Delivery sequence
 
-1. **Guardian CDK release:** expose typed Google-auth resources, test, and release.
-2. **Amigo gate and configuration:** bump Guardian CDK; create the JSON credential secret and Google callback; enable `googleAuth`; publish Cognito runtime values; deploy to CODE.
-3. **Amigo application migration:** add ALB identity validation and app-owned `AuthAction`; remove active legacy auth code and dependency; deploy to CODE.
-4. **CODE acceptance:** confirm the Cognito action and allowed-group configuration, successful protected use by a group member, expected runtime values, `401` for invalid app-level assertions, and unchanged health/assets.
-5. **PROD rollout:** repeat infrastructure then application deployment and perform the same smoke checks.
-6. **Seven-day soak:** retain legacy credentials, service-account material, setup, configuration, and old artefact. Roll back the application first and infrastructure second if required.
-7. **Cleanup release:** remove retained legacy secrets and parameters, service-account object/download, development setup, and obsolete configuration after the soak.
+1. **Amigo gate and configuration:** create the JSON credential secret and Google callback, enable `googleAuth`, and deploy to CODE.
+2. **Amigo application migration:** add ALB identity validation and app-owned `AuthAction`; remove active legacy auth code and dependency; deploy to CODE.
+3. **CODE acceptance:** confirm the Cognito action and allowed-group configuration, successful protected use by a group member, expected signer configuration, `401` for invalid app-level assertions, and unchanged health/assets.
+4. **PROD rollout:** repeat infrastructure then application deployment and perform the same smoke checks.
+5. **Seven-day soak:** retain legacy credentials, service-account material, setup, configuration, and old artefact. Roll back the application first and infrastructure second if required.
+6. **Cleanup release:** remove retained legacy secrets and parameters, service-account object/download, development setup, and obsolete configuration after the soak.
 
 Monitoring remains unchanged: retain existing application and ALB access logging and add no authentication-specific alarms or dashboards.
 

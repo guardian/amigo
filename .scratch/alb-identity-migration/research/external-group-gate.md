@@ -8,7 +8,7 @@ Guardian CDK implements this option using a Cognito user pool federated with Goo
 
 The group check is therefore available as infrastructure owned by this repository once Amigo replaces its hand-written direct Google `authenticateOidc` action with `GuPlayApp`'s `googleAuth` option and carries across its three allowed groups. The resulting configuration in `cdk/lib/amigo.ts`, following the pinned Janus example, is the required configuration reference.
 
-This changes the expected identity-provider contract from direct Google OIDC to the Cognito-backed ALB flow. The identity-validation decision must pin claims to the generated ALB and Cognito resources rather than to the current Google issuer and client.
+This changes the expected identity-provider contract from direct Google OIDC to the Cognito-backed ALB flow. The application validates the assertion against the expected ALB signer while Cognito owns the upstream identity and group checks.
 
 ## Sources
 

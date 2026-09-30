@@ -12,7 +12,7 @@ Replace `play-googleauth` with an app-owned `UserIdentity(email, fullName)` and 
 
 Keep identity request-scoped and stateless. An injectable identity-provider interface returns either an authenticated identity or a typed authentication failure. `AlbIdentityProvider` validates and translates `x-amzn-oidc-data` on every protected request; `AuthAction` only refines the Play request and converts failures to `401 Unauthorized`. Do not create a Play identity session.
 
-Select a fixed configured development identity only when Play is running in `Mode.Dev`. All other modes use the ALB provider, with no runtime switch or production bypass. Require explicit expected signer ARN, Cognito issuer, and client ID configuration outside development and fail application startup when any is absent.
+Select a fixed configured development identity only when Play is running in `Mode.Dev`. All other modes use the ALB provider, with no runtime switch or production bypass. Read the expected signer ARN from configuration injected by CDK and fail application startup when it is unavailable.
 
 Use Nimbus JOSE JWT for ES256 and JWT handling. Keep ALB public-key retrieval behind a small provider using Play WS and a bounded `kid` cache, so token validation and key-fetch behaviour can be tested independently.
 
