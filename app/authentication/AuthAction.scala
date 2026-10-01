@@ -1,6 +1,7 @@
 package authentication
 
 import authentication.AuthAction.UserIdentityRequest
+import play.api.http.HeaderNames.CACHE_CONTROL
 import play.api.mvc.Security.AuthenticatedRequest
 import play.api.mvc._
 
@@ -10,7 +11,12 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * Delegates identity resolution to [[IdentityProvider]] and exposes successful
   * results as an `AuthenticatedRequest` containing [[UserIdentity]]. Rejected
-  * requests receive HTTP 401; the controller action is not invoked.
+  * requests receive HTTP 401 with a friendly sign-in error page and
+  * `Cache-Control: no-store`; the controller action is not invoked.
+  *
+  * This action only handles requests that reach Amigo. Authentication and group
+  * rejection by Cognito or the ALB happens upstream and cannot render this
+  * page.
   *
   * @tparam A
   *   Request body type produced by the default body parser.
@@ -31,7 +37,12 @@ final class AuthAction[A](
   ): Future[Either[Result, AuthenticatedRequest[B, UserIdentity]]] =
     identityProvider.identityFor(request).map {
       case Right(identity) => Right(new AuthenticatedRequest(identity, request))
-      case Left(_)         => Left(Results.Unauthorized)
+      case Left(_)         =>
+        Left(
+          Results
+            .Unauthorized(views.html.authenticationError())
+            .withHeaders(CACHE_CONTROL -> "no-store")
+        )
     }
 }
 

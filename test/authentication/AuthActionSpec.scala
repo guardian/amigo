@@ -57,7 +57,7 @@ class AuthActionSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     contentAsString(result) should be("value")
   }
 
-  it should "return unauthorized when identity resolution fails" in {
+  it should "return a friendly uncached unauthorized page when identity resolution fails" in {
     val rejectedProvider = new IdentityProvider {
       override def identityFor(
           request: RequestHeader
@@ -71,6 +71,16 @@ class AuthActionSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     val result = call(action, FakeRequest())
 
     status(result) should be(UNAUTHORIZED)
+    contentType(result) shouldBe Some("text/html")
+    header(CACHE_CONTROL, result) shouldBe Some("no-store")
+    val body = contentAsString(result)
+    body should include("We couldn't verify your sign-in")
+    body should include("private browser window")
+    body should include("Guardian Google account")
+    body should include("authorised Google group")
+    body should include("""href="/"""")
+    body should not include "missing identity"
+    body should not include identity.email
   }
 
   override protected def afterAll(): Unit = {

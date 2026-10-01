@@ -1,0 +1,22 @@
+@()
+
+@simpleLayout("Sign-in problem | Amigo") {
+  <main class="row">
+    <div class="col-md-8">
+      <h1>We couldn't verify your sign-in</h1>
+      <p>You cannot access this page until Amigo can confirm your identity.</p>
+
+      <h2>What you can do</h2>
+      <ul>
+        <li>Try again if this was a temporary problem.</li>
+        <li>Open Amigo in a private browser window and sign in with your Guardian Google account to start a fresh session.</li>
+        <li>If you need access, ask DevX to check that you belong to an authorised Google group.</li>
+        <li>If you already have access and the problem continues, contact DevX with the page URL and the time it happened.</li>
+      </ul>
+
+      <p>
+        <a class="btn btn-primary" href="@routes.RootController.index()">Try again</a>
+      </p>
+    </div>
+  </main>
+}
