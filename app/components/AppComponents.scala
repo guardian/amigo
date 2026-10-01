@@ -1,14 +1,8 @@
 package components
 
+import authentication.{AuthAction, IdentityProvider}
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest
-import com.google.auth.oauth2.ServiceAccountCredentials
-import com.gu.googleauth.{
-  AntiForgeryChecker,
-  AuthAction,
-  GoogleAuthConfig,
-  GoogleGroupChecker
-}
 import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV2, SecretSupplier}
 import com.gu.play.secretrotation.{
   RotatingSecretComponents,
@@ -16,6 +10,7 @@ import com.gu.play.secretrotation.{
   TransitionTiming
 }
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
+import config.Config.mandatoryConfig
 import controllers._
 import data.{Dynamo, Recipes}
 import event.{ActorSystemWrapper, BakeEvent, Behaviours}
@@ -52,8 +47,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.sns.{SnsAsyncClient, SnsClient}
 import software.amazon.awssdk.services.ssm.SsmClient
 
-import java.io.FileInputStream
-import java.time.Duration
+import java.time.Clock
 import java.time.Duration.{ofHours, ofMinutes}
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -77,10 +71,6 @@ class AppComponents(
     case DevIdentity(_)              => "DEV"
     case AwsIdentity(_, _, stage, _) => stage
   }
-
-  def mandatoryConfig(key: String): String = configuration
-    .get[Option[String]](key)
-    .getOrElse(sys.error(s"Missing config key: $key"))
 
   val region = Region.EU_WEST_1
 
@@ -197,20 +187,10 @@ class AppComponents(
     eventBusActorSystem
   )
 
-  val googleAuthConfig = GoogleAuthConfig(
-    clientId = mandatoryConfig("google.clientId"),
-    clientSecret = mandatoryConfig("google.clientSecret"),
-    redirectUrl = mandatoryConfig("google.redirectUrl"),
-    domains = List("guardian.co.uk"),
-    maxAuthAge = Some(Duration.ofDays(90)),
-    enforceValidity = true,
-    antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
-  )
-
   implicit val packerConfig: PackerConfig = PackerConfig(
     stage = stage,
     vpcId = configuration.get[Option[String]]("packer.vpcId"),
-    subnetId = mandatoryConfig("packer.subnetId"),
+    subnetId = mandatoryConfig(configuration, "packer.subnetId"),
     instanceProfile =
       configuration.get[Option[String]]("packer.instanceProfile"),
     securityGroupId =
@@ -281,30 +261,6 @@ class AppComponents(
 
   val debugAvailable = stage != "PROD"
 
-  // Membership in at least one of these groups is required to pass authentication.
-  val googleGroupsToCheck = Set(
-    configuration.get[String]("auth.google.departmentGroupId"),
-    configuration.get[String]("auth.google.dataScientistsGroupId"),
-    configuration.get[String]("auth.google.multimediaGroupId")
-  )
-
-  val groupChecker = {
-    val serviceAccountCertPath =
-      configuration.get[String]("auth.google.serviceAccountCertPath")
-    val serviceAccountCert = Try(new FileInputStream(serviceAccountCertPath))
-      .getOrElse(
-        throw new RuntimeException(
-          s"Could not load service account JSON from $serviceAccountCertPath"
-        )
-      )
-    val serviceAccount =
-      ServiceAccountCredentials.fromStream(serviceAccountCert)
-    val impersonatedUser =
-      configuration.get[String]("auth.google.impersonatedUser")
-
-    new GoogleGroupChecker(impersonatedUser, serviceAccount)
-  }
-
   /** Play 2.8's default is Seq(csrfFilter, securityHeadersFilter,
     * allowedHostsFilter). The allowedHostsFilter is removed here as it causes
     * healthchecks to fail. This service is not accessible on the public
@@ -316,9 +272,17 @@ class AppComponents(
   override def httpFilters: Seq[EssentialFilter] =
     Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
+  val identityProvider: IdentityProvider =
+    IdentityProvider.create(
+      environment.mode,
+      configuration,
+      region,
+      wsClient,
+      Clock.systemUTC()
+    )(executionContext)
+
   val authAction = new AuthAction[AnyContent](
-    googleAuthConfig,
-    routes.Login.loginAction(),
+    identityProvider,
     controllerComponents.parsers.default
   )(executionContext)
 
@@ -348,13 +312,6 @@ class AppComponents(
     packerRunner,
     bakeDeletionFrequencyMinutes
   )
-  val loginController = new Login(
-    googleAuthConfig,
-    wsClient,
-    controllerComponents,
-    googleGroupsToCheck,
-    groupChecker
-  )
   lazy val router: Router = new Routes(
     httpErrorHandler,
     rootController,
@@ -363,7 +320,6 @@ class AppComponents(
     roleController,
     recipeController,
     bakeController,
-    loginController,
     assets
   )
 }

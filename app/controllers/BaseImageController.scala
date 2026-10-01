@@ -1,6 +1,6 @@
 package controllers
 
-import com.gu.googleauth.AuthAction
+import authentication.AuthAction
 import controllers.ControllerHelpers.parseEnabledRoles
 import data._
 import models._
