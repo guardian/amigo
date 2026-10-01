@@ -47,7 +47,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
   }
 
   private val provider = new AlbIdentityProvider(
-    AlbIdentityConfig(signerArn),
+    signerArn,
     publicKeyProvider,
     clock
   )

@@ -12,15 +12,10 @@ import java.time.{Clock, Duration, Instant}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-final case class AlbIdentityConfig(
-    expectedSignerArn: String,
-    allowedClockSkew: Duration = Duration.ofSeconds(60)
-)
-
 /** Resolves a request identity from the ALB-signed `x-amzn-oidc-data` header.
   *
   * Requires ES256, the configured signer ARN, an unexpired header `exp` within
-  * the allowed clock skew, and a UUID key ID. The signature is verified with
+  * 60 seconds of clock skew, and a UUID key ID. The signature is verified with
   * the ALB public key before reading identity claims.
   *
   * Builds [[UserIdentity]] from the `email` and `name` string claims only when
@@ -31,15 +26,15 @@ final case class AlbIdentityConfig(
   *
   * Google group authorisation is enforced upstream by Cognito Gatekeeper.
   *
-  * @param config
-  *   Expected ALB signer ARN and permitted expiration clock skew.
+  * @param expectedSignerArn
+  *   ARN of the ALB that must have signed the assertion.
   * @param publicKeyProvider
   *   Supplies the ALB signing public key for the validated key ID.
   * @param clock
   *   Time source used to validate the assertion's header expiration.
   */
 final class AlbIdentityProvider(
-    config: AlbIdentityConfig,
+    expectedSignerArn: String,
     publicKeyProvider: AlbPublicKeyProvider,
     clock: Clock
 )(implicit executionContext: ExecutionContext)
@@ -91,9 +86,9 @@ final class AlbIdentityProvider(
     val validKeyId = Option(header.getKeyID).flatMap(KeyId.fromString)
     val valid =
       header.getAlgorithm == JWSAlgorithm.ES256 &&
-        header.getCustomParam("signer") == config.expectedSignerArn &&
+        header.getCustomParam("signer") == expectedSignerArn &&
         expiration.exists(
-          !_.plus(config.allowedClockSkew).isBefore(clock.instant())
+          !_.plus(AllowedClockSkew).isBefore(clock.instant())
         )
 
     if (valid) {
@@ -142,4 +137,6 @@ final class AlbIdentityProvider(
 
 object AlbIdentityProvider {
   val IdentityHeader = "x-amzn-oidc-data"
+
+  private val AllowedClockSkew = Duration.ofSeconds(60)
 }

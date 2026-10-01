@@ -273,7 +273,7 @@ class AppComponents(
     Seq(csrfFilter, securityHeadersFilter, cspFilter)
 
   val identityProvider: IdentityProvider =
-    IdentityProvider.create(
+    IdentityProviderWiring.create(
       environment.mode,
       configuration,
       region,
