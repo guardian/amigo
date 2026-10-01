@@ -18,13 +18,13 @@ jobs:
       id-token: write # ...to exchange an OIDC JWT ID token for AWS credentials
       pull-requests: write #...to comment on PRs
     steps:
-      - uses: actions/checkout@v7.0.0
-      - uses: actions/setup-node@v6 # This is required by cdk
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7 # This is required by cdk
         with:
           cache: 'npm'
           cache-dependency-path: 'cdk/package-lock.json'
           node-version-file: '.tool-versions'
-      - uses: guardian/setup-scala@v1
+      - uses: guardian/setup-scala@v2
       - name: Seed build number from TeamCity
         run: |
           LAST_TEAMCITY_BUILD=3006
