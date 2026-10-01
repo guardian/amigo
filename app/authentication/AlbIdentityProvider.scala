@@ -9,7 +9,6 @@ import services.Loggable
 
 import java.security.interfaces.ECPublicKey
 import java.time.{Clock, Duration, Instant}
-import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -84,12 +83,12 @@ final class AlbIdentityProvider(
 
   private def validateHeader(
       token: SignedJWT
-  ): Either[AuthenticationFailure, String] = {
+  ): Either[AuthenticationFailure, KeyId] = {
     val header = token.getHeader
     val expiration = Option(header.getCustomParam("exp")).collect {
       case number: Number => Instant.ofEpochSecond(number.longValue())
     }
-    val validKeyId = Option(header.getKeyID).filter(isValidKeyId)
+    val validKeyId = Option(header.getKeyID).flatMap(KeyId.fromString)
     val valid =
       header.getAlgorithm == JWSAlgorithm.ES256 &&
         header.getCustomParam("signer") == config.expectedSignerArn &&
@@ -143,9 +142,4 @@ final class AlbIdentityProvider(
 
 object AlbIdentityProvider {
   val IdentityHeader = "x-amzn-oidc-data"
-
-  private def isValidKeyId(keyId: String): Boolean =
-    Try(UUID.fromString(keyId)).toOption.exists(
-      _.toString.equalsIgnoreCase(keyId)
-    )
 }

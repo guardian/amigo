@@ -24,9 +24,9 @@ class AlbPublicKeyProviderSpec
     ExecutionContext.global
 
   it should "cache a fetched ALB public key by key ID" in {
-    val keyId = UUID.randomUUID().toString
+    val keyId = randomKeyId()
     val keyUrl =
-      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$keyId"
+      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${keyId.value}"
     val keyPairGenerator = KeyPairGenerator.getInstance("EC")
     keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"))
     val publicKey = keyPairGenerator.generateKeyPair().getPublic
@@ -50,8 +50,8 @@ class AlbPublicKeyProviderSpec
   }
 
   it should "fetch a different key for a different key ID" in {
-    val firstKeyId = UUID.randomUUID().toString
-    val secondKeyId = UUID.randomUUID().toString
+    val firstKeyId = randomKeyId()
+    val secondKeyId = randomKeyId()
     val generator = KeyPairGenerator.getInstance("EC")
     generator.initialize(new ECGenParameterSpec("secp256r1"))
     val firstKey = generator.generateKeyPair().getPublic
@@ -63,12 +63,12 @@ class AlbPublicKeyProviderSpec
     val secondResponse = mock[WSResponse]
     when(
       wsClient.url(
-        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$firstKeyId"
+        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${firstKeyId.value}"
       )
     ).thenReturn(firstRequest)
     when(
       wsClient.url(
-        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$secondKeyId"
+        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${secondKeyId.value}"
       )
     ).thenReturn(secondRequest)
     when(firstRequest.get()).thenReturn(Future.successful(firstResponse))
@@ -85,19 +85,19 @@ class AlbPublicKeyProviderSpec
     Await.result(provider.keyFor(secondKeyId), 2.seconds) shouldBe
       Right(secondKey)
     verify(wsClient, times(1)).url(
-      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$secondKeyId"
+      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${secondKeyId.value}"
     )
   }
 
   it should "retain only the two most recently fetched keys by default" in {
-    val keyIds = Vector.fill(3)(UUID.randomUUID().toString)
+    val keyIds = Vector.fill(3)(randomKeyId())
     val generator = KeyPairGenerator.getInstance("EC")
     generator.initialize(new ECGenParameterSpec("secp256r1"))
     val wsClient = mock[WSClient]
     val request = mock[WSRequest]
     val response = mock[WSResponse]
-    def keyUrl(keyId: String) =
-      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$keyId"
+    def keyUrl(keyId: KeyId) =
+      s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${keyId.value}"
     keyIds.foreach(keyId =>
       when(wsClient.url(keyUrl(keyId))).thenReturn(request)
     )
@@ -134,13 +134,13 @@ class AlbPublicKeyProviderSpec
   private def keyForPem(
       pem: String
   ): Either[AuthenticationFailure, ECPublicKey] = {
-    val keyId = UUID.randomUUID().toString
+    val keyId = randomKeyId()
     val wsClient = mock[WSClient]
     val request = mock[WSRequest]
     val response = mock[WSResponse]
     when(
       wsClient.url(
-        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/$keyId"
+        s"https://public-keys.auth.elb.eu-west-1.amazonaws.com/${keyId.value}"
       )
     ).thenReturn(request)
     when(request.get()).thenReturn(Future.successful(response))
@@ -153,6 +153,9 @@ class AlbPublicKeyProviderSpec
       2.seconds
     )
   }
+
+  private def randomKeyId(): KeyId =
+    KeyId.fromString(UUID.randomUUID().toString).get
 
   private def pemFor(publicKey: java.security.PublicKey): String = {
     val encodedKey =

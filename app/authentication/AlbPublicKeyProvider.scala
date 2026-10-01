@@ -14,7 +14,7 @@ import scala.util.Try
 
 trait AlbPublicKeyProvider {
   def keyFor(
-      keyId: String
+      keyId: KeyId
   ): Future[Either[AuthenticationFailure, ECPublicKey]]
 }
 
@@ -29,10 +29,10 @@ final class CachingAlbPublicKeyProvider(
 
   private val maximumEntries = 2
   private val cachedKeys =
-    new AtomicReference(Vector.empty[(String, ECPublicKey)])
+    new AtomicReference(Vector.empty[(KeyId, ECPublicKey)])
 
   override def keyFor(
-      keyId: String
+      keyId: KeyId
   ): Future[Either[AuthenticationFailure, ECPublicKey]] =
     cachedKeys.get().collectFirst {
       case (cachedKeyId, publicKey) if cachedKeyId == keyId =>
@@ -43,10 +43,10 @@ final class CachingAlbPublicKeyProvider(
     }
 
   private def fetchAndCache(
-      keyId: String
+      keyId: KeyId
   ): Future[Either[AuthenticationFailure, ECPublicKey]] = {
     val keyUrl =
-      s"https://public-keys.auth.elb.${region.id}.amazonaws.com/$keyId"
+      s"https://public-keys.auth.elb.${region.id}.amazonaws.com/${keyId.value}"
     wsClient
       .url(keyUrl)
       .get()
@@ -73,7 +73,7 @@ final class CachingAlbPublicKeyProvider(
   }
 
   @tailrec
-  private def cache(keyId: String, publicKey: ECPublicKey): Unit = {
+  private def cache(keyId: KeyId, publicKey: ECPublicKey): Unit = {
     // Replace the key as the newest entry and evict the oldest if full.
     // Retry if another thread changed the cache before the update.
     val existing = cachedKeys.get()

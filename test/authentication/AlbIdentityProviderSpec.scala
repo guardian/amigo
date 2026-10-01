@@ -41,7 +41,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
 
   private val publicKeyProvider = new AlbPublicKeyProvider {
     override def keyFor(
-        requestedKeyId: String
+        requestedKeyId: KeyId
     ): Future[Either[AuthenticationFailure, ECPublicKey]] =
       Future.successful(Right(publicKey))
   }
