@@ -10,11 +10,7 @@ import {
 	GuStringParameter,
 } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
-import {
-	GuHttpsEgressSecurityGroup,
-	GuSecurityGroup,
-	GuVpc,
-} from '@guardian/cdk/lib/constructs/ec2';
+import { GuSecurityGroup, GuVpc } from '@guardian/cdk/lib/constructs/ec2';
 import {
 	GuAllowPolicy,
 	GuAnghammaradSenderPolicy,
@@ -22,8 +18,9 @@ import {
 	GuLogShippingPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
-import { Aws, Duration, SecretValue } from 'aws-cdk-lib';
+import { Aws, Duration, Lazy } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
+import { CfnUserPoolIdentityProvider } from 'aws-cdk-lib/aws-cognito';
 import {
 	InstanceClass,
 	InstanceSize,
@@ -32,10 +29,6 @@ import {
 	Port,
 	UserData,
 } from 'aws-cdk-lib/aws-ec2';
-import {
-	ListenerAction,
-	UnauthenticatedAction,
-} from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import {
 	AccountPrincipal,
 	Effect,
@@ -308,38 +301,48 @@ export class AmigoStack extends GuStack {
 			'amigo_1.0-latest_all.deb',
 		].join('/');
 
+		// Amigo uses this ARN to reject identity assertions signed by another ALB.
+		const signerArn = Lazy.string({
+			produce: () => guPlayApp.loadBalancer.loadBalancerArn,
+		});
+
+		const userData = UserData.custom(
+			[
+				'#!/bin/bash -ev',
+				`wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
+				'mkdir /opt/packer',
+				'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
+				"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
+
+				/*
+				By default, Packer installs plugins in the user's home directory using $HOME.
+				The value of $HOME is not yet known in the UserData script, so set PACKER_PLUGIN_PATH to a custom directory.
+				See https://developer.hashicorp.com/packer/docs/plugins/install#installation-directory.
+				 */
+				'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
+				'/opt/packer/packer plugins install github.com/hashicorp/amazon',
+				'/opt/packer/packer plugins install github.com/hashicorp/ansible',
+				// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
+				'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
+
+				'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
+				'dpkg -i /tmp/session-manager-plugin.deb',
+
+				`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
+
+				// Set AMIGO_ALB_ARN in a systemd drop-in before installing Amigo;
+				// it uses this ARN to verify assertions signed by this ALB.
+				'mkdir -p /etc/systemd/system/amigo.service.d',
+				`printf '%s\\n' '[Service]' 'Environment="AMIGO_ALB_ARN=${signerArn}"' > /etc/systemd/system/amigo.service.d/alb-identity.conf`,
+
+				'dpkg -i /tmp/amigo.deb',
+			].join('\n'),
+		);
+
 		const guPlayApp = new GuPlayApp(this, {
 			...AmigoStack.app,
 			instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
-			userData: UserData.custom(
-				[
-					'#!/bin/bash -ev',
-					`wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
-					'mkdir /opt/packer',
-					'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
-					"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
-
-					/*
-					By default, Packer installs plugins in the user's home directory using $HOME.
-					The value of $HOME is not yet known in the UserData script, so set PACKER_PLUGIN_PATH to a custom directory.
-					See https://developer.hashicorp.com/packer/docs/plugins/install#installation-directory.
-					 */
-					'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
-					'/opt/packer/packer plugins install github.com/hashicorp/amazon',
-					'/opt/packer/packer plugins install github.com/hashicorp/ansible',
-					// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
-					'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
-
-					'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
-					'dpkg -i /tmp/session-manager-plugin.deb',
-
-					'mkdir /amigo',
-					`aws --region eu-west-1 s3 cp s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/amigo-service-account-cert.json /amigo/`,
-
-					`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
-					'dpkg -i /tmp/amigo.deb',
-				].join('\n'),
-			),
+			userData,
 			access: {
 				scope: AccessScope.PUBLIC,
 			},
@@ -354,16 +357,30 @@ export class AmigoStack extends GuStack {
 			applicationLogging: {
 				enabled: true,
 			},
+			googleAuth: {
+				enabled: true,
+				domain: domainName,
+				allowedGroups: [
+					'engineering@guardian.co.uk',
+					'data.science.amigo.access@guardian.co.uk',
+					'multimediatech@guardian.co.uk',
+				],
+			},
 			instanceMetricGranularity,
 		});
 
-		// Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
-		const albEgressSg = new GuHttpsEgressSecurityGroup(this, 'IdP-access', {
-			app: AmigoStack.app.app,
-			vpc: guPlayApp.vpc,
-		});
-
-		guPlayApp.loadBalancer.addSecurityGroup(albEgressSg);
+		// GuPlayApp does not map Google's email verification status by default.
+		const googleIdentityProvider =
+			this.node.findChild('google-idp').node.defaultChild;
+		if (!(googleIdentityProvider instanceof CfnUserPoolIdentityProvider)) {
+			throw new Error(
+				'Expected GuPlayApp to create a Google identity provider',
+			);
+		}
+		googleIdentityProvider.addPropertyOverride(
+			'AttributeMapping.email_verified',
+			'email_verified',
+		);
 
 		// This parameter is used by https://github.com/guardian/waf
 		new StringParameter(this, 'AlbSsmParam', {
@@ -373,29 +390,6 @@ export class AmigoStack extends GuStack {
 			stringValue: guPlayApp.loadBalancer.loadBalancerArn,
 			tier: ParameterTier.STANDARD,
 			dataType: ParameterDataType.TEXT,
-		});
-
-		const clientId = new GuStringParameter(this, 'ClientId', {
-			description: 'Google OAuth client ID',
-		});
-
-		guPlayApp.listener.addAction('Google Auth', {
-			action: ListenerAction.authenticateOidc({
-				authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-				issuer: 'https://accounts.google.com',
-				scope: 'openid',
-				authenticationRequestExtraParams: { hd: 'guardian.co.uk' },
-				onUnauthenticatedRequest: UnauthenticatedAction.AUTHENTICATE,
-
-				tokenEndpoint: 'https://oauth2.googleapis.com/token',
-
-				userInfoEndpoint: 'https://openidconnect.googleapis.com/v1/userinfo',
-				clientId: clientId.valueAsString,
-				clientSecret: SecretValue.secretsManager(
-					`/${this.stage}/deploy/amigo/clientSecret`,
-				),
-				next: ListenerAction.forward([guPlayApp.targetGroup]),
-			}),
 		});
 
 		new GuCname(this, 'DnsRecord', {
