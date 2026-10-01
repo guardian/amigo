@@ -1,6 +1,6 @@
 package authentication
 
-import authentication.AuthenticationFailure.InvalidIdentity
+import authentication.AuthenticationFailure._
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jwt.SignedJWT
@@ -54,7 +54,7 @@ final class AlbIdentityProvider(
   ): Future[Either[AuthenticationFailure, UserIdentity]] = {
     val result = request.headers.get(IdentityHeader) match {
       case None =>
-        Future.successful(Left(InvalidIdentity("missing_identity_header")))
+        Future.successful(Left(MissingIdentityHeader))
       case Some(encodedToken) =>
         parseToken(encodedToken) match {
           case Left(failure) => Future.successful(Left(failure))
@@ -80,7 +80,7 @@ final class AlbIdentityProvider(
       encodedToken: String
   ): Either[AuthenticationFailure, SignedJWT] =
     Try(SignedJWT.parse(encodedToken)).toEither.left
-      .map(_ => InvalidIdentity("malformed_token"))
+      .map(_ => MalformedToken)
 
   private def validateHeader(
       token: SignedJWT
@@ -98,9 +98,9 @@ final class AlbIdentityProvider(
         )
 
     if (valid) {
-      validKeyId.toRight(InvalidIdentity("invalid_key_id"))
+      validKeyId.toRight(InvalidKeyId)
     } else {
-      Left(InvalidIdentity("invalid_token_header"))
+      Left(InvalidTokenHeader)
     }
   }
 
@@ -109,9 +109,9 @@ final class AlbIdentityProvider(
       publicKey: ECPublicKey
   ): Either[AuthenticationFailure, UserIdentity] =
     Try(token.verify(new ECDSAVerifier(publicKey))).toEither.left
-      .map(_ => InvalidIdentity("signature_verification_failed"))
+      .map(_ => SignatureVerificationFailed)
       .flatMap {
-        case false => Left(InvalidIdentity("invalid_signature"))
+        case false => Left(InvalidSignature)
         case true  => identityFromClaims(token)
       }
 
@@ -137,8 +137,8 @@ final class AlbIdentityProvider(
         if emailVerified
       } yield UserIdentity(validEmail, fullName)
     }.toEither.left
-      .map(_ => InvalidIdentity("invalid_claims"))
-      .flatMap(_.toRight(InvalidIdentity("invalid_identity_claims")))
+      .map(_ => InvalidClaims)
+      .flatMap(_.toRight(InvalidIdentityClaims))
 }
 
 object AlbIdentityProvider {

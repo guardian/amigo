@@ -1,6 +1,6 @@
 package authentication
 
-import authentication.AuthenticationFailure.InvalidIdentity
+import authentication.AuthenticationFailure._
 import com.nimbusds.jose.jwk.{ECKey, JWK}
 import play.api.http.Status.OK
 import play.api.libs.ws.WSClient
@@ -53,16 +53,16 @@ final class CachingAlbPublicKeyProvider(
       .map { response =>
         if (response.status == OK) {
           parsePublicKey(response.body).toEither.left
-            .map(_ => InvalidIdentity("invalid_public_key"))
+            .map(_ => InvalidPublicKey)
             .map { publicKey =>
               cache(keyId, publicKey)
               publicKey
             }
         } else {
-          Left(InvalidIdentity("public_key_fetch_failed"))
+          Left(PublicKeyFetchFailed)
         }
       }
-      .recover { case _ => Left(InvalidIdentity("public_key_fetch_failed")) }
+      .recover { case _ => Left(PublicKeyFetchFailed) }
   }
 
   private def parsePublicKey(pem: String): Try[ECPublicKey] = Try {

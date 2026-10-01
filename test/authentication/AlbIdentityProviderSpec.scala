@@ -1,5 +1,6 @@
 package authentication
 
+import authentication.AuthenticationFailure._
 import ch.qos.logback.classic.{Level, Logger}
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
@@ -77,7 +78,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    result.left.map(_.reason) shouldBe Left("invalid_identity_claims")
+    result shouldBe Left(InvalidIdentityClaims)
   }
 
   it should "reject a non-string name" in {
@@ -92,7 +93,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    result.left.map(_.reason) shouldBe Left("invalid_claims")
+    result shouldBe Left(InvalidClaims)
   }
 
   it should "reject an unverified email" in {
@@ -107,7 +108,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    result.left.map(_.reason) should be(Left("invalid_identity_claims"))
+    result shouldBe Left(InvalidIdentityClaims)
   }
 
   it should "reject a token issued for another load balancer" in {
@@ -123,7 +124,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    result.left.map(_.reason) should be(Left("invalid_token_header"))
+    result shouldBe Left(InvalidTokenHeader)
   }
 
   it should "reject an expired token outside the allowed clock skew" in {
@@ -139,7 +140,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    result.left.map(_.reason) should be(Left("invalid_token_header"))
+    result shouldBe Left(InvalidTokenHeader)
   }
 
   it should "accept a token at the allowed clock skew boundary" in {
@@ -161,14 +162,14 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "reject false, missing, and malformed verified-email claims" in {
-    Seq[(Any, String)](
-      "false" -> "invalid_identity_claims",
-      "TRUE" -> "invalid_claims",
-      " true " -> "invalid_claims",
-      true -> "invalid_claims",
-      false -> "invalid_claims",
-      1 -> "invalid_claims"
-    ).foreach { case (claim, reason) =>
+    Seq[(Any, AuthenticationFailure)](
+      "false" -> InvalidIdentityClaims,
+      "TRUE" -> InvalidClaims,
+      " true " -> InvalidClaims,
+      true -> InvalidClaims,
+      false -> InvalidClaims,
+      1 -> InvalidClaims
+    ).foreach { case (claim, failure) =>
       val result = identityFor(
         token(
           Map(
@@ -179,7 +180,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
           )
         )
       )
-      result.left.map(_.reason) should be(Left(reason))
+      result shouldBe Left(failure)
     }
 
     val missing = identityFor(
@@ -191,7 +192,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    missing.left.map(_.reason) should be(Left("invalid_identity_claims"))
+    missing shouldBe Left(InvalidIdentityClaims)
   }
 
   it should "reject a request without the ALB identity header" in {
@@ -200,7 +201,7 @@ class AlbIdentityProviderSpec extends AnyFlatSpec with Matchers {
       2.seconds
     )
 
-    result.left.map(_.reason) should be(Left("missing_identity_header"))
+    result shouldBe Left(MissingIdentityHeader)
   }
 
   it should "log only rejection reasons without personal data" in {

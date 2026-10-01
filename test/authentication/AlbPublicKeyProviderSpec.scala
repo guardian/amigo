@@ -1,5 +1,6 @@
 package authentication
 
+import authentication.AuthenticationFailure.InvalidPublicKey
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -119,7 +120,7 @@ class AlbPublicKeyProviderSpec
     keyForPem(
       "-----BEGIN PUBLIC KEY-----\ninvalid\n-----END PUBLIC KEY-----"
     ) shouldBe
-      Left(AuthenticationFailure.InvalidIdentity("invalid_public_key"))
+      Left(InvalidPublicKey)
   }
 
   it should "reject a non-EC public key" in {
@@ -127,7 +128,7 @@ class AlbPublicKeyProviderSpec
     generator.initialize(2048)
 
     keyForPem(pemFor(generator.generateKeyPair().getPublic)) shouldBe
-      Left(AuthenticationFailure.InvalidIdentity("invalid_public_key"))
+      Left(InvalidPublicKey)
   }
 
   private def keyForPem(

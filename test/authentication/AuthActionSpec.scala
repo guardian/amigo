@@ -1,6 +1,6 @@
 package authentication
 
-import authentication.AuthenticationFailure.InvalidIdentity
+import authentication.AuthenticationFailure.MissingIdentityHeader
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.{Materializer, SystemMaterializer}
 import org.scalatest.BeforeAndAfterAll
@@ -62,7 +62,7 @@ class AuthActionSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
       override def identityFor(
           request: RequestHeader
       ): Future[Either[AuthenticationFailure, UserIdentity]] =
-        Future.successful(Left(InvalidIdentity("missing identity")))
+        Future.successful(Left(MissingIdentityHeader))
     }
     val authAction =
       new AuthAction(rejectedProvider, components.parsers.default)
@@ -79,7 +79,7 @@ class AuthActionSpec extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     body should include("Guardian Google account")
     body should include("authorised Google group")
     body should include("""href="/"""")
-    body should not include "missing identity"
+    body should not include MissingIdentityHeader.reason
     body should not include identity.email
   }
 
