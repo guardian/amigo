@@ -10,7 +10,7 @@ import com.gu.play.secretrotation.{
   TransitionTiming
 }
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
-import config.Config.mandatoryConfig
+import components.Config.mandatoryConfig
 import controllers._
 import data.{Dynamo, Recipes}
 import event.{ActorSystemWrapper, BakeEvent, Behaviours}

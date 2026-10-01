@@ -1,7 +1,7 @@
 package components
 
 import authentication._
-import config.Config.mandatoryConfig
+import components.Config.mandatoryConfig
 import play.api.libs.ws.WSClient
 import play.api.{Configuration, Mode}
 import software.amazon.awssdk.regions.Region

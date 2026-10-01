@@ -1,4 +1,4 @@
-package config
+package components
 
 import play.api.Configuration
 
