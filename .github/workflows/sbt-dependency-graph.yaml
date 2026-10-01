@@ -8,8 +8,8 @@ jobs:
   dependency-graph:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@4f1f4aec02e41874fa0262ea8ff5172d7978ad1e # v4.1.7
-      - uses: guardian/setup-scala@v1
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v4.1.7
+      - uses: guardian/setup-scala@v2
       - uses: scalacenter/sbt-dependency-submission@d84eef4c09e633bcf5f113bcad7fd5e9af1baee9 # v3.2.3
     permissions:
       contents: write
