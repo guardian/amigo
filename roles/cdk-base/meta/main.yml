@@ -13,8 +13,8 @@ dependencies:
   - role: fluentbit
     ubuntu_version: noble
     fluentbit_package: fluent-bit
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 24
   - role: fluentbit
     ubuntu_version: resolute
     fluentbit_package: fluent-bit
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 26

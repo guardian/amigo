@@ -5,14 +5,6 @@
       - fluentbit_package in ['td-agent-bit', 'fluent-bit']
     fail_msg: "fluentbit_package must be either 'td-agent-bit' or 'fluent-bit'."
 
-- name: Install repository prerequisites
-  apt:
-    name:
-      - ca-certificates
-      - gnupg
-      - python3-apt
-    update_cache: yes
-
 - name: Add GPG key
   get_url:
     url: https://packages.fluentbit.io/fluentbit.key
