@@ -14,7 +14,23 @@ The root `playwright.config.ts` discovers all Playwright end-to-end tests recurs
 
 The generator seed is `tests/e2e/seed.spec.ts`, alongside the scenario files. It is excluded from the automated suite by `testIgnore` and is only used for Playwright test generation setup.
 
-Set `AMIGO_BASE_URL` to use a different application origin. The suite does not start the application or change its data.
+Local tests use `http://localhost:9000`. The suite does not start the application or change its data in this mode.
+
+## Offline CI application
+
+CI runs the same browser tests against an isolated Play application:
+
+```bash
+AMIGO_E2E_SERVER=true mise exec java sbt node -- npm run test:e2e
+```
+
+This mode starts `e2e.E2EServer` from the Scala test classpath on `127.0.0.1:9100` and stops it after the tests. Playwright waits for `/recipes` to render successfully, which exercises the populated Prism cache, rather than checking only that a port is listening.
+
+The server uses the production routes, navigation controllers, templates and filters, with the existing development identity in `Mode.Dev`. No ALB headers are required. Its local Prism stub serves all five expected datasets with `stale: false`; the normal Prism cache refresh still runs. Read-only DynamoDB fixtures contain one synthetic base image and recipe, with no bakes. Unsupported operations and writes fail explicitly.
+
+The bootstrap does not load AWS configuration, fetch rotating secrets, perform STS calls or start baking, housekeeping or notification jobs. It lives entirely under `test/e2e`, is never packaged with the deployed application, and does not change production authentication or startup. No AWS credentials or access to the Prism deployment are needed.
+
+The `E2E` job in `.github/workflows/ci.yaml` uses the Node and Scala setup actions with `.tool-versions`, runs `npm ci` before reading the installed Playwright version, restores a browser cache keyed by that version and `package-lock.json`, installs headless Chromium and its system dependencies, compiles the test bootstrap, and runs this mode. Server startup uses the `sbt` on `PATH`, so mise is not required on the CI runner. Results remain terminal-only.
 
 ## Coverage and output
 

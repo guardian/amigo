@@ -125,6 +125,8 @@ libraryDependencies ++= Seq(
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
+Test / runMain / fork := true
+
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(
     JavaAppPackaging,

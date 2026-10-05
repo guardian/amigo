@@ -13,6 +13,8 @@ Automated end-to-end tests verify that AMIgo is visible and its primary navigati
 
 Run the automated tests from the repository root with `npm run test:e2e`. The suite does not record traces, screenshots or videos, and does not retain diagnostic test output.
 
+In CI, `AMIGO_E2E_SERVER=true` starts an isolated application on `http://127.0.0.1:9100` with development authentication, a local Prism stub and read-only synthetic data. The same scenarios run without a load balancer, real Prism access or AWS credentials. See `tests/e2e/README.md` for startup details.
+
 ## Shared expectations
 
 For every destination:
