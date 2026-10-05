@@ -22,7 +22,7 @@ object E2EServer {
       )(E2EPrismStub.routes) { prismPort =>
         Server.withApplicationFromContext(
           ServerConfig(
-            port = Some(9100),
+            port = Some(9000),
             address = "127.0.0.1",
             mode = Mode.Dev
           )

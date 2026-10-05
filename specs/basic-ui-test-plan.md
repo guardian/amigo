@@ -6,14 +6,14 @@ Automated end-to-end tests verify that AMIgo is visible and its primary navigati
 
 ## Preconditions
 
-- AMIgo is running at `http://localhost:9000`.
+- Playwright starts the isolated test application at `http://localhost:9000`; the full development app must not be running on that port.
 - Use a desktop browser with the primary navigation visible.
 - No data creation, modification or deletion is required.
 - Start each scenario at `/` unless otherwise specified.
 
-Run the automated tests from the repository root with `npm run test:e2e`. The suite does not record traces, screenshots or videos, and does not retain diagnostic test output.
+Run the automated tests from the repository root with `npm run test:e2e`. All runs record traces and retain generated test artefacts. Screenshots are captured on failure; videos are not recorded.
 
-In CI, `AMIGO_E2E_SERVER=true` starts an isolated application on `http://127.0.0.1:9100` with development authentication, a local Prism stub and read-only synthetic data. The same scenarios run without a load balancer, real Prism access or AWS credentials. See `tests/e2e/README.md` for startup details.
+All Playwright runs start an isolated application on `http://localhost:9000` with development authentication, a local Prism stub and read-only synthetic data. The same scenarios run locally and in CI without a load balancer, real Prism access or AWS credentials. See `tests/e2e/README.md` for startup details.
 
 ## Shared expectations
 

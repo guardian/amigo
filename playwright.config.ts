@@ -1,34 +1,37 @@
-import { devNull } from 'node:os';
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
-process.env.PLAYWRIGHT_LAST_RUN_OUTPUT_FILE = devNull;
+const appURL = "http://localhost:9000";
+const isCI = Boolean(process.env.CI);
 
-const offlineServer = process.env.AMIGO_E2E_SERVER === 'true';
-const offlineURL = 'http://127.0.0.1:9100';
-
+// eslint-disable-next-line import/no-default-export -- Playwright loads a default-exported configuration.
 export default defineConfig({
-  testDir: './tests/e2e',
-  testIgnore: '**/seed.spec.ts',
-  workers: 1,
-  forbidOnly: Boolean(process.env.CI),
-  retries: 0,
-  outputDir: './test-results/e2e',
-  preserveOutput: 'never',
-  reporter: 'list',
-  webServer: offlineServer
-    ? {
-        command: 'sbt -batch "Test / runMain e2e.E2EServer"',
-        url: `${offlineURL}/recipes`,
-        timeout: 30_000,
-        reuseExistingServer: false,
-        gracefulShutdown: { signal: 'SIGTERM', timeout: 15_000 },
-        stdout: 'pipe',
-      }
-    : undefined,
+  testDir: "./tests/e2e",
+  testIgnore: "**/seed.spec.ts",
+  fullyParallel: true,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  preserveOutput: "always",
+  reporter: isCI
+    ? [["github"], ["html", { open: "never" }]]
+    : [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: offlineServer ? offlineURL : 'http://localhost:9000',
-    browserName: 'chromium',
+    baseURL: appURL,
     headless: true,
-    viewport: { width: 1440, height: 900 },
+    trace: "on",
+    screenshot: "only-on-failure",
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+  ],
+  webServer: {
+    command: 'sbt -batch "E2E / run"',
+    url: appURL,
+    reuseExistingServer: !isCI,
+    timeout: 60_000,
+    stdout: "pipe",
+    stderr: "pipe",
   },
 });

@@ -22,4 +22,6 @@ project/project
 .bsp
 
 node_modules
-.playwright-mcp
+
+playwright-report/
+test-results/

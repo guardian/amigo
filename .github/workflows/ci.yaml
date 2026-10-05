@@ -46,8 +46,6 @@ jobs:
 
       - name: Run end-to-end tests
         run: npm run test:e2e
-        env:
-          AMIGO_E2E_SERVER: 'true'
 
   CI:
     runs-on: ubuntu-latest

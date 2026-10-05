@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui --trace on --ui-host 127.0.0.1 --ui-port 9323"
   },
   "dependencies": {
     "@playwright/test": "^1.63.0"
