@@ -29,3 +29,5 @@ packer version
 session-manager-plugin --version
 
 "${ROOT_DIR}/script/cp_roles"
+
+npx playwright install --with-deps --only-shell chromium
