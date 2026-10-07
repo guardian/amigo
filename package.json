@@ -1,0 +1,16 @@
+{
+  "name": "amigo",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:auth": "playwright test --project=auth-contracts",
+    "test:e2e:ui": "playwright test --ui --trace on --ui-host 127.0.0.1 --ui-port 9323",
+    "test:e2e:mock": "node --test tests/e2e/auth/*.test.mjs",
+    "typecheck:e2e": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}
