@@ -7,7 +7,16 @@ At the moment this means the following:
 - fetch instance tags and store under `/etc/config` (via [`instance-tag-discovery`](https://github.com/guardian/instance-tag-discovery))
 - ship `cloud-init-output` and application logs to a Kinesis stream (via [`devx-logs`](https://github.com/guardian/devx-logs))
 
+## Ubuntu support
+
+In version 24.04 of ubuntu the default fluent-bit version changed package name from td-agent-bit
+to fluent-bit, so the startup script this role adds for fluent-bit has a conditional to take that
+into account - preferring to start the newer fluent-bit service. devx-logs, which provides the config
+for shipping logs to ELK, will write either a fluent-bit.conf or td-agent-bit.conf depending on what's
+installed on the instance.
+
 ## Requirements
+
 ℹ If you are using [`@guardian/cdk`](http://github.com/guardian/cdk) version 41.1.0 or greater, these requirements are met automatically.
 
 ### Kinesis
@@ -114,6 +123,7 @@ as this allows tag lookup without requiring remote AWS API calls at runtime._
     Set this to `false` if you do not want log shipping to start automatically.
     This is useful if you will add or change the log shipping config supplied by
     `devx-logs`. If you have set this to `false` you are now responsible for
-    starting `td-agent-bit.service` in your user data script
-    (by running `systemctl start td-agent-bit.service` after all config files
-    have been created), and if you fail to do so logs will not be shipped.
+    starting the installed service in your user data script after all config
+    files have been created: `systemctl start fluent-bit.service` on Ubuntu
+    24.04/26.04, or `systemctl start td-agent-bit.service` on older supported
+    releases. If you fail to do so logs will not be shipped.
