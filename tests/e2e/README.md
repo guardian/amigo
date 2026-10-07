@@ -12,8 +12,6 @@ npm run test:e2e
 
 The root `playwright.config.ts` discovers all Playwright end-to-end tests recursively under `tests/e2e`, including both `*.spec.*` and `*.test.*` files. Keep end-to-end tests in this directory. Shared browser settings are configured centrally, so new end-to-end tests should import `test` from `@playwright/test` without repeating those settings.
 
-The generator seed is `tests/e2e/seed.spec.ts`, alongside the scenario files. It is excluded from the automated suite by `testIgnore` and is only used for Playwright test generation setup.
-
 All Playwright runs start an isolated application with synthetic data at `http://localhost:9000` and stop it afterwards. Stop the full development app before running tests, as it uses the same port. Node, Java and sbt must be available on `PATH`; use mise with the repository's `.tool-versions` to manage their versions.
 
 ## Interactive UI

@@ -1,5 +1,4 @@
 // spec: specs/basic-ui-test-plan.md
-// seed: tests/e2e/seed.spec.ts
 import { expect } from '@playwright/test';
 import { expectPage, test } from './support';
 

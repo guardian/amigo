@@ -6,7 +6,6 @@ const isCI = Boolean(process.env.CI);
 // eslint-disable-next-line import/no-default-export -- Playwright loads a default-exported configuration.
 export default defineConfig({
   testDir: "./tests/e2e",
-  testIgnore: "**/seed.spec.ts",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,

@@ -1,5 +1,4 @@
 // spec: specs/basic-ui-test-plan.md
-// seed: tests/e2e/seed.spec.ts
 import { expectRoles, test } from './support';
 
 test.describe('Basic UI visibility and navigation', () => {
