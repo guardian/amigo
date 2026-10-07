@@ -9,6 +9,37 @@ on:
       - main
 
 jobs:
+  E2E:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7
+        with:
+          cache: 'npm'
+          node-version-file: '.tool-versions'
+      - uses: guardian/setup-scala@v2
+      - run: npm ci
+      - run: npm run typecheck:e2e && npm run test:e2e:mock
+      - name: Read installed Playwright version
+        id: playwright
+        run: echo "version=$(node -p 'require("@playwright/test/package.json").version')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --workers=2
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: google-mocked-e2e-results
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
   CI:
     runs-on: ubuntu-latest
     permissions:
