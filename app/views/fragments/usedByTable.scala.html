@@ -1,3 +1,8 @@
+@import _root_.play.twirl.api.TwirlFeatureImports._
+@import models._
+@import controllers._
+@import views.html._
+
 @(title: String, recipes: Seq[Recipe], usages: Map[Recipe, prism.RecipeUsage])
 
 <h3>@title</h3>

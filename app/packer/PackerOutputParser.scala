@@ -3,7 +3,6 @@ package packer
 import models.{MessagePart, AmiId}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.matching.Regex.MatchIterator
 
 object PackerOutputParser {
 

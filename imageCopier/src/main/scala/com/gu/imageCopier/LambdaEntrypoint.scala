@@ -23,7 +23,7 @@ class LambdaEntrypoint {
   import LambdaEntrypoint._
 
   def run(input: SNSEvent, context: Context): Unit = {
-    println("Running AMIgo copier")
+    context.getLogger.log("Running AMIgo copier\n")
     val messages = SNSMessage.fromLambdaEvent(input)
     println(s"Got messages: $messages")
     val amisAttempt = Attempt.traverseWithFailures(messages) { message =>
@@ -50,7 +50,7 @@ class LambdaEntrypoint {
   }
 
   def housekeeping(input: SNSEvent, context: Context): Unit = {
-    println("Running AMIgo housekeeper")
+    context.getLogger.log("Running AMIgo housekeeper\n")
     val messages = SNSMessage.fromLambdaEvent(input)
     println(s"Got messages: $messages")
     val deleteAttempt = Attempt.traverseWithFailures(messages) { message =>

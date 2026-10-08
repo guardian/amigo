@@ -126,7 +126,7 @@ class BaseImageController(
                 requiresXLargeBuilder
               ) =>
             BaseImages.findById(id) match {
-              case Some(existingImage) =>
+              case Some(_) =>
                 val formWithError = Forms.createBaseImage
                   .fill(
                     (
@@ -211,7 +211,7 @@ class BaseImageController(
     }
   }
 
-  def deleteBaseImage(id: BaseImageId) = authAction { implicit request =>
+  def deleteBaseImage(id: BaseImageId) = authAction { _ =>
     BaseImages.findById(id).fold[Result](NotFound) { image =>
       val usedByRecipes = Recipes.findByBaseImage(id)
       if (usedByRecipes.isEmpty) {

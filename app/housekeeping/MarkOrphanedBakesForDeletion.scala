@@ -3,7 +3,7 @@ package housekeeping
 import data.{Bakes, Dynamo, Recipes}
 import models.{Bake, BakeId, RecipeId}
 import org.quartz.SimpleScheduleBuilder
-import services.{Loggable, PrismData}
+import services.Loggable
 
 /*
 If a recipe has been deleted from a table but not the associated bake, then these
@@ -23,13 +23,12 @@ object MarkOrphanedBakesForDeletion {
   }
 }
 
-class MarkOrphanedBakesForDeletion(prismAgents: PrismData, dynamo: Dynamo)
+class MarkOrphanedBakesForDeletion(dynamo: Dynamo)
     extends HousekeepingJob
     with Loggable {
   override val schedule = SimpleScheduleBuilder.repeatHourlyForever(24)
 
   override def housekeep(): Unit = {
-    implicit val implicitPrismAgents: PrismData = prismAgents
     implicit val implicitDynamo: Dynamo = dynamo
     val (errors, recipes) = Recipes.recipesWithErrors()
     errors match {

@@ -26,7 +26,7 @@ class NotificationSender(sns: SNS, region: Region, stage: String)
     )
     val messageStr = Json.stringify(message)
     log.info(s"Sending message to topic ${sns.topicArn}: $messageStr")
-    sns.client.publish(
+    val _ = sns.client.publish(
       PublishRequest
         .builder()
         .topicArn(sns.topicArn)

@@ -50,7 +50,7 @@ import {
 } from 'aws-cdk-lib/aws-ssm';
 import { createAmigoDeveloperPolicy } from './amigo-developer-policy';
 
-const packerVersion = '1.13.1';
+const packerVersion = '1.16.1';
 
 export interface AmigoProps extends GuStackProps {
 	domainName: string;
@@ -348,9 +348,7 @@ export class AmigoStack extends GuStack {
 			monitoringConfiguration: {
 				noMonitoring: true,
 			},
-			roleConfiguration: {
-				additionalPolicies: policiesToAttachToRootRole,
-			},
+			additionalPolicies: policiesToAttachToRootRole,
 			applicationLogging: {
 				enabled: true,
 			},

@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.{Configuration, Environment}
 import play.api.http.DefaultFileMimeTypesProvider
 import play.api.http.HttpConfiguration.HttpConfigurationProvider
-import play.api.mvc.{Action, Results}
+import play.api.mvc.Results
 import play.api.test.WsTestClient
 import play.core.server.Server
 import play.api.routing.sird._

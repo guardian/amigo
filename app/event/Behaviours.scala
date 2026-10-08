@@ -56,7 +56,7 @@ object Behaviours extends Loggable {
 
   def sendAmiCreatedNotification(
       amiCreated: (Bake, AmiId) => Unit
-  )(implicit dynamo: Dynamo, ec: ExecutionContext): Behavior[BakeEvent] = {
+  )(implicit dynamo: Dynamo): Behavior[BakeEvent] = {
     Behaviors.receiveMessage[BakeEvent] { message =>
       message match {
         case AmiCreated(bakeId, amiId) =>

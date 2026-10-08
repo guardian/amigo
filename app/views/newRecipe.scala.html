@@ -1,3 +1,9 @@
+@import models._
+@import controllers._
+@import views.html._
+@import play.api.mvc._
+@import play.api.data._
+
 @import helper.CSRF
 @(form: Form[_], availableBaseImages: Seq[BaseImage], availableRoles: Seq[RoleId])(implicit request: RequestHeader, messages: play.api.i18n.Messages)
 

@@ -39,7 +39,6 @@ class LambdaDistributionBucketSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "create policy if there isn't one" in {
-    val bucketPolicy = BucketPolicy(Some("test"), Some("testing"), List.empty)
     val newCopierStatement = LambdaDistributionBucket.createCopierStatement(
       "bucket",
       "TEST",

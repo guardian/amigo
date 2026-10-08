@@ -6,7 +6,6 @@ import software.amazon.awssdk.services.sns.model._
 
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
-import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
 object SNS extends Loggable {
@@ -73,7 +72,7 @@ object SNS extends Loggable {
       .actionNames("Subscribe", "ListSubscriptionsByTopic", "Receive")
       .label("amigo_lambda_subs")
       .build()
-    client.addPermission(addRequest)
+    val _ = client.addPermission(addRequest)
   }
 
   def findOrCreateTopic(topicName: String, accountNumbers: Seq[String])(implicit
@@ -88,9 +87,7 @@ object SNS extends Loggable {
   }
 }
 
-class SNS(sns: SnsClient, stage: String, accountNumbers: Seq[String])(implicit
-    exec: ExecutionContext
-) {
+class SNS(sns: SnsClient, stage: String, accountNumbers: Seq[String]) {
   implicit val client: SnsClient = sns
   val topicName: String = s"amigo-$stage-notify"
   val topicArn: String = SNS.findOrCreateTopic(topicName, accountNumbers)

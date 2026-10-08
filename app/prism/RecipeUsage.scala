@@ -1,6 +1,6 @@
 package prism
 
-import data.{Bakes, Dynamo, PackageList, Recipes}
+import data.{Bakes, Dynamo, PackageList}
 import models.{AmiId, Bake, BakeId, Recipe, RecipeId}
 import play.api.libs.json.Json
 import prism.Prism.{Image, Instance, LaunchConfiguration, LaunchTemplate}

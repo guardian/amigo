@@ -1,3 +1,8 @@
+@import models._
+@import controllers._
+@import views.html._
+@import play.api.mvc._
+
 @import prism.BakeUsage
 @import views.html.helper.CSRF
 @(recipeToDelete: Recipe, bakes: Seq[Bake], usages: Seq[BakeUsage])(implicit request: RequestHeader)

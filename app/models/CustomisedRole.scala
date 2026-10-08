@@ -2,7 +2,6 @@ package models
 
 import org.scanamo.DynamoFormat
 import org.scanamo.TypeCoercionError
-import org.scanamo.generic.auto.genericDerivedFormat
 
 case class CustomisedRole(roleId: RoleId, variables: Map[String, ParamValue]) {
 

@@ -33,7 +33,7 @@ object LambdaDistributionBucket {
       .bucket(bucketName)
       .policy(newPolicy)
       .build()
-    s3Client.putBucketPolicy(putPolicyRequest)
+    val _ = s3Client.putBucketPolicy(putPolicyRequest)
   }
 
   /*

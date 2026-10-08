@@ -1,6 +1,6 @@
 java corretto-21
 sbt 1
 node 24
-aqua:aws/aws-cli latest
-packer 1.13.1
-github:guardian/devenv 20260721-123412
+aqua:aws/aws-cli 2.37.10
+packer 1.16.1
+github:guardian/devenv 20260930-111347

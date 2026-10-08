@@ -1,7 +1,6 @@
 package prism
 
 import models.AmiId
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import services.Loggable

@@ -1,6 +1,6 @@
 package housekeeping
 
-import software.amazon.awssdk.services.ec2.model.{Instance, Tag}
+import software.amazon.awssdk.services.ec2.model.Instance
 import housekeeping.utils.{BakesRepo, PackerEC2Client}
 import models.BakeId
 import org.joda.time.DateTime

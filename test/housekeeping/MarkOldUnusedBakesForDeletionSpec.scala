@@ -76,12 +76,12 @@ class MarkOldUnusedBakesForDeletionSpec extends AnyFlatSpec with Matchers {
     )
   }
 
-  def getBakes(recipeId: RecipeId): Iterable[Bake] =
+  val getBakes: RecipeId => Iterable[Bake] = _ =>
     Iterable(oldBake1, oldBake2, newBake1, newBake2)
-  def getEmptyRecipeUsage(bakes: Iterable[Bake]): RecipeUsage =
+  val getEmptyRecipeUsage: Iterable[Bake] => RecipeUsage = _ =>
     RecipeUsage(Seq.empty, Seq.empty, Seq.empty, Seq.empty)
 
-  def getRecipeUsage(bakes: Iterable[Bake]): RecipeUsage = {
+  val getRecipeUsage: Iterable[Bake] => RecipeUsage = _ => {
     val bakeUsageA =
       BakeUsage(AmiId("ami-2"), oldBake2, None, Seq.empty, Seq.empty, Seq.empty)
     val bakeUsageB =

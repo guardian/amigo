@@ -4,11 +4,10 @@ import ansible.PlaybookGenerator
 import event.EventBus
 import models.Bake
 import models.packer.PackerVariablesConfig
-import org.apache.http.concurrent.BasicFuture
 import play.api.libs.json.Json
 import services.{AmiMetadataLookup, Loggable, PrismData}
 
-import java.io.{File, IOException}
+import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path}
 import scala.collection.mutable

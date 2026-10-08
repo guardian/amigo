@@ -184,7 +184,7 @@ class RecipeController(
               s"Creating recipe ${id} - requested by ${request.user.email}"
             )
             Recipes.findById(id) match {
-              case Some(existingRecipe) =>
+              case Some(_) =>
                 val formWithError = Forms.createRecipe
                   .fill(
                     (

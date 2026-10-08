@@ -36,6 +36,10 @@ object Bakes extends Loggable {
         set("status", status)(BakeStatus.dynamoFormat)
       )
       .exec()
+      .left
+      .foreach(error =>
+        log.error(s"Failed to update $bakeId to $status: $error")
+      )
   }
 
   def updateStatusIfRunning(bakeId: BakeId, status: BakeStatus)(implicit
@@ -48,6 +52,10 @@ object Bakes extends Loggable {
         set("status", status)(BakeStatus.dynamoFormat)
       )
       .exec()
+      .left
+      .foreach(error =>
+        log.error(s"Failed to update $bakeId to $status: $error")
+      )
   }
 
   def updateAmiId(bakeId: BakeId, amiId: AmiId)(implicit
@@ -60,6 +68,10 @@ object Bakes extends Loggable {
         set("amiId", amiId)
       )
       .exec()
+      .left
+      .foreach(error =>
+        log.error(s"Failed to set AMI $amiId for $bakeId: $error")
+      )
   }
 
   def list(recipeId: RecipeId)(implicit dynamo: Dynamo): Iterable[Bake] = {
@@ -121,6 +133,10 @@ object Bakes extends Loggable {
         set("deleted", true)
       )
       .exec()
+      .left
+      .foreach(error =>
+        log.error(s"Failed to mark $bakeId for deletion: $error")
+      )
   }
 
   def findDeleted()(implicit dynamo: Dynamo): List[Bake.DbModel] = {

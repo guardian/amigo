@@ -1,11 +1,8 @@
 package com.gu.imageCopier
 
-import io.circe._
 import io.circe.parser.decode
 import com.gu.imageCopier.attempt._
 import io.circe.{Decoder, HCursor}
-
-import cats.syntax.either._
 
 case class Ami(account: String, id: String)
 

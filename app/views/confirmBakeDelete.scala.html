@@ -1,3 +1,8 @@
+@import models._
+@import controllers._
+@import views.html._
+@import play.api.mvc._
+
 @import prism.BakeUsage
 @import views.html.helper.CSRF
 @(bakeId: BakeId, usages: Seq[BakeUsage], bakeDeletionFrequencyMinutes: Int)(implicit request: RequestHeader)

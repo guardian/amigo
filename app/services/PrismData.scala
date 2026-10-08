@@ -15,7 +15,7 @@ import prism.Prism.{
 }
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.{MapView, SeqLike, SeqOps}
+import scala.collection.SeqOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
@@ -26,9 +26,7 @@ object PrismData {
   case object NotInitialised extends Failure
 
   type CacheData[T] = Either[Failure, (T, DateTime)]
-  def dataToResult[T](data: CacheData[T], now: DateTime)(implicit
-      exec: ExecutionContext
-  ): T = data match {
+  def dataToResult[T](data: CacheData[T], now: DateTime): T = data match {
     case Left(NotInitialised) =>
       throw new IllegalStateException(
         s"AMIgo internal data cache is not yet populated"
@@ -89,25 +87,34 @@ class PrismData(
       scheduler.scheduleWithFixedDelay(0.seconds, 1.minutes) { () =>
         {
           log.debug(s"Refreshing Prism data")
-          refresh(prism.findAllInstances(), instancesAgent, "instances")(
-            identity
+          val refreshes = Seq(
+            refresh(prism.findAllInstances(), instancesAgent, "instances")(
+              identity
+            ),
+            refresh(
+              prism.findAllLaunchConfigurations(),
+              launchConfigurationsAgent,
+              "launch configuration"
+            )(identity),
+            refresh(
+              prism.findAllLaunchTemplates(),
+              launchTemplatesAgent,
+              "launch template"
+            )(identity),
+            refresh(
+              prism.findCopiedImages(),
+              copiedImagesAgent,
+              "copied image"
+            )(
+              _.groupBy(_.copiedFromAMI)
+            ),
+            refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(
+              identity
+            )
           )
-          refresh(
-            prism.findAllLaunchConfigurations(),
-            launchConfigurationsAgent,
-            "launch configuration"
-          )(identity)
-          refresh(
-            prism.findAllLaunchTemplates(),
-            launchTemplatesAgent,
-            "launch template"
-          )(identity)
-          refresh(prism.findCopiedImages(), copiedImagesAgent, "copied image")(
-            _.groupBy(_.copiedFromAMI)
-          )
-          refresh(prism.findAllAWSAccounts(), accountsAgent, "aws accounts")(
-            identity
-          )
+          Future
+            .sequence(refreshes)
+            .foreach(_ => log.debug("Prism cache refresh completed"))
         }
       }
 

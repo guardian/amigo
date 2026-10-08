@@ -1,5 +1,9 @@
+@import _root_.play.twirl.api.TwirlFeatureImports._
+@import models._
+@import controllers._
+@import views.html._
+
 @import data.Roles
-@import data.Recipes
 @(roles: Iterable[RoleSummary], recipes: Iterable[Recipe], baseImages: Seq[BaseImage])
 @layout("AMIgo"){
 
@@ -26,7 +30,7 @@
           <div id="detail-@role.roleId" class="hidden">
 
             <ul class="nav nav-tabs" role="tablist">
-              @for(readme <- role.readme) {
+              @for(_ <- role.readme) {
                 <li role="presentation" class="tab-label active">
                   <a aria-controls="readme" role="tab" data-toggle="tab" data-target="#readme-@role.roleId">README</a>
                 </li>

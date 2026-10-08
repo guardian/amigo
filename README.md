@@ -81,12 +81,13 @@ You should also disconnect from the VPN too if using it.
 Load the `deployTools` credentials using Janus with the `amigo-dev` developer policy, then execute [`./script/server`](./script/server). This will run the 
 Amigo app locally and the associated packer process should have the sufficient AWS authorization.
 
-Note that you must use Java 21 to run this app. There are a few options for switching between Java versions at the
-time of writing:
+Use Java 21 to run this app. Tool versions are managed with
+[mise](https://mise.jdx.dev/) and declared in `.tool-versions`:
 
-* [Coursier](https://get-coursier.io/docs/cli-java)
-* [asdf](https://asdf-vm.com/)
-* [sdkman](https://sdkman.io/usage)
+```shell
+mise install
+mise exec -- ./script/server
+```
 
 <details>
 <summary>Previous run locally advice</summary>
@@ -135,8 +136,34 @@ $ sbt run
 ## How to run the tests
 
 ```shell
-$ sbt test
+$ mise exec -- sbt test
 ```
+
+Both the application and `imageCopier` compile with deprecation, feature,
+unchecked, unused-code and discarded-value diagnostics enabled, and warnings
+treated as errors. Twirl templates declare their imports explicitly rather than
+inheriting unused default imports. Mockito is loaded as a test JVM startup agent
+because its inline mock maker is needed for final AWS SDK model classes.
+
+`imageCopier` uses explicit Circe decoders, so it does not depend on
+`circe-generic`. Its distribution contains libraries for AWS Lambda rather than
+CLI launchers. Debian packaging applies only to the Play application.
+
+CDK validation is separate:
+
+```shell
+cd cdk
+mise exec -- npm ci
+mise exec -- npm run build
+mise exec -- npm run lint
+mise exec -- npm test
+mise exec -- npm run synth
+```
+
+The CDK build type-checks without emitting JavaScript beside the TypeScript
+sources. TypeScript remains on 6.x because `ts-jest` requires a version below 7;
+ESLint remains on 9.x because the Guardian configuration requires that line.
+Packer's version in the CDK instance bootstrap must match `.tool-versions`.
 
 ## Required AWS permissions for Packer
 

@@ -5,6 +5,7 @@ import event.EventBus
 import models.RecipeId
 import packer.{PackerConfig, PackerRunner}
 import services.{AmiMetadataLookup, Loggable, PrismData}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ScheduledBakeRunner(
     stage: String,
@@ -37,16 +38,21 @@ class ScheduledBakeRunner(
                   Bakes.create(recipe, buildNumber, startedBy = "scheduler")
 
                 log.info(s"Starting scheduled bake: ${theBake.bakeId}")
-                packerRunner.createImage(
-                  stage,
-                  theBake,
-                  prism,
-                  eventBus,
-                  ansibleVars,
-                  false,
-                  amiMetadataLookup,
-                  amigoDataBucket
-                )
+                packerRunner
+                  .createImage(
+                    stage,
+                    theBake,
+                    prism,
+                    eventBus,
+                    ansibleVars,
+                    false,
+                    amiMetadataLookup,
+                    amigoDataBucket
+                  )
+                  .failed
+                  .foreach(error =>
+                    log.error(s"Scheduled bake ${theBake.bakeId} failed", error)
+                  )
               case None =>
                 log.warn(
                   s"Failed to get the next build number for recipe $recipeId"

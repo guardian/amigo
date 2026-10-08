@@ -1,3 +1,8 @@
+@import _root_.play.twirl.api.Html
+@import models._
+@import controllers._
+@import views.html._
+
 @import data.PackageListDiff
 @import fun.mike.dmp.Operation
 @(bake: Bake,
@@ -55,7 +60,7 @@
   <div class="package-list">
 
       @packageListDiff match {
-        case Right(PackageListDiff(previousBakeId, removed, added, diff)) => {
+        case Right(PackageListDiff(previousBakeId, _, _, diff)) => {
           <h2>Package Changes</h2>
           <div class="row">
             <div class="col-md-12">
@@ -83,7 +88,7 @@
           </div>
          </div>
         }
-        case Left(message) => {}
+        case Left(_) => {}
       }
     </div>
 

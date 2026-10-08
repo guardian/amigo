@@ -1,3 +1,8 @@
+@import models._
+@import controllers._
+@import views.html._
+@import play.api.mvc._
+
 @import views.html.helper.CSRF
 @(baseImageToDelete: BaseImage, usages: Seq[Recipe])(implicit request: RequestHeader)
 @simpleLayout("AMIgo"){

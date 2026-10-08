@@ -6,6 +6,7 @@ import java.time.{ZoneId, ZonedDateTime}
 name := "amigo"
 version := "1.0-latest"
 scalaVersion := "2.13.18"
+val packageMaintainer = "Guardian Developer Experience <devx@theguardian.com>"
 
 Universal / javaOptions ++= Seq(
   s"-Dpidfile.path=/dev/null",
@@ -32,7 +33,8 @@ lazy val root = (project in file("."))
   )
   .settings(
     Universal / packageName := normalizedName.value,
-    maintainer := "Guardian Developer Experience <devx@theguardian.com>",
+    maintainer := packageMaintainer,
+    Debian / packageBin / aggregate := false,
     Debian / serverLoading := Some(Systemd),
     // Include the roles dir in the tarball for now
     Universal / mappings ++= (file("roles") ** "*").get.map { f =>
@@ -58,18 +60,28 @@ lazy val root = (project in file("."))
     )
   )
 
-scalacOptions ++= Seq(
+ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
+  "-Wunused",
+  "-Wvalue-discard",
   "-Xfatal-warnings"
 )
 
 val jacksonV2Version = "2.22.3"
 val circeVersion = "0.14.16"
 
-val awsV2SdkVersion = "2.54.16"
-val playSecretRotationVersion = "19.2.0"
+val awsV2SdkVersion = "2.55.12"
+val playSecretRotationVersion = "21.0.1"
+val scalaTestDependencies = Seq(
+  "org.scalatest" %% "scalatest-flatspec" % "3.2.20" % Test,
+  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.20" % Test
+)
+
+// Core's public API is unchanged between 20.0.2 and 21.0.1; only build dependencies changed.
+dependencyOverrides +=
+  "com.gu.play-secret-rotation" %% "core" % playSecretRotationVersion
 
 /*
  * To test whether any of these entries are redundant:
@@ -85,10 +97,11 @@ val safeTransitiveDependencies = {
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonV2Version,
     "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonV2Version,
     "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonV2Version,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonV2Version,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.22.3.1",
     "tools.jackson.core" % "jackson-core" % jacksonV3Version,
     "tools.jackson.core" % "jackson-databind" % jacksonV3Version,
-    "ch.qos.logback" % "logback-classic" % "1.6.3"
+    "ch.qos.logback" % "logback-classic" % "1.6.5",
+    "at.yawk.lz4" % "lz4-java" % "1.12.0"
   )
 }
 
@@ -97,49 +110,57 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
   "org.scanamo" %% "scanamo" % "7.0.0",
   "com.beachape" %% "enumeratum" % "1.9.8",
-  "com.gu" %% "simple-configuration-ssm" % "14.0.1",
+  "com.gu" %% "simple-configuration-ssm" % "15.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "42.0.0",
+  "com.gu.play-googleauth" %% "play-v30" % "45.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
   "com.lihaoyi" %% "fastparse" % "3.1.1",
-  "joda-time" % "joda-time" % "2.14.3",
+  "joda-time" % "joda-time" % "2.15.0",
   "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sns" % awsV2SdkVersion,
   "software.amazon.awssdk" % "s3" % awsV2SdkVersion,
   "software.amazon.awssdk" % "sts" % awsV2SdkVersion,
+  "software.amazon.awssdk" % "ssm" % awsV2SdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "9.0",
   "software.amazon.awssdk" % "dynamodb" % awsV2SdkVersion,
   "software.amazon.awssdk" % "auth" % awsV2SdkVersion,
   "software.amazon.awssdk" % "regions" % awsV2SdkVersion,
-  "org.scalatest" %% "scalatest-flatspec" % "3.2.20" % Test,
-  "org.scalatest" %% "scalatest-shouldmatchers" % "3.2.20" % Test,
-  "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
-  "org.mockito" % "mockito-inline" % "5.2.0" % Test,
+  "org.scalatestplus" %% "mockito-5-23" % "3.2.20.0" % Test,
+  "org.mockito" % "mockito-core" % "5.24.0" % Test,
   "fun.mike" % "diff-match-patch" % "0.0.2",
   "com.gu" %% "anghammarad-client" % "9.0.0"
-) ++ safeTransitiveDependencies
+) ++ safeTransitiveDependencies ++ scalaTestDependencies
+
+Test / javaOptions ++= {
+  val mockitoAgent = (Test / dependencyClasspath).value
+    .find(_.data.getName.startsWith("mockito-core-"))
+    .getOrElse(sys.error("Mockito's test instrumentation agent is missing"))
+    .data
+  // Mockito appends to the bootstrap classpath, which cannot use class sharing.
+  Seq(s"-javaagent:${mockitoAgent.getAbsolutePath}", "-Xshare:off")
+}
+
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
+Compile / TwirlKeys.templateImports := Seq.empty
 
 lazy val imageCopier = (project in file("imageCopier"))
-  .enablePlugins(
-    JavaAppPackaging,
-
-    // Though this project doesn't use JDebPackaging, it is used in the root project and needed here to prevent the error: java.io.IOException: Cannot run program "fakeroot"
-    JDebPackaging
-  )
+  .enablePlugins(JavaAppPackaging)
   .settings(
     scalaVersion := "2.13.18",
     Universal / topLevelDirectory := None,
     Universal / packageName := normalizedName.value,
+    maintainer := packageMaintainer,
+    // AWS invokes the handlers directly; this library has no CLI entry point.
+    makeBashScripts := Seq.empty,
+    makeBatScripts := Seq.empty,
     libraryDependencies ++= Seq(
       "software.amazon.awssdk" % "ec2" % awsV2SdkVersion,
       "com.amazonaws" % "aws-lambda-java-core" % "1.4.0",
       "com.amazonaws" % "aws-lambda-java-events" % "3.16.1",
-      "io.circe" %% "circe-parser" % circeVersion,
-      "io.circe" %% "circe-generic" % circeVersion
-    )
+      "io.circe" %% "circe-parser" % circeVersion
+    ) ++ scalaTestDependencies
   )

@@ -126,7 +126,7 @@ class BakeController(
     }
 
   def deleteBake(recipeId: RecipeId, buildNumber: Int): Action[AnyContent] =
-    authAction { implicit request =>
+    authAction { _ =>
       Bakes.findById(recipeId, buildNumber).fold[Result](NotFound) { bake =>
         val recipeUsage: RecipeUsage = RecipeUsage(Seq(bake))(prism)
 

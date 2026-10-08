@@ -45,7 +45,7 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     RecipeId(id),
     None,
     fixtureBaseImage(s"base-image-$id"),
-    Some(100),
+    Some(size),
     List(),
     "Test",
     DateTime.now,
@@ -104,7 +104,6 @@ class RecipeUsageSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val amiId3 = AmiId("3")
     val amiId4 = AmiId("4")
     val amiId5 = AmiId("5")
-    val amiId6 = AmiId("6")
 
     val recipe1 = fixtureRecipe("recipe1")
     val recipe2 = fixtureRecipeWithSize("recipe2", 100)

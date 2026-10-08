@@ -1654,6 +1654,28 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "Port": 443,
         "Protocol": "HTTPS",
         "SslPolicy": "ELBSecurityPolicy-TLS13-1-2-2021-06",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
     },
@@ -2170,7 +2192,7 @@ exports[`The Amigo stack matches the snapshot 1`] = `
                 "",
                 [
                   "#!/bin/bash -ev
-wget -P /tmp https://releases.hashicorp.com/packer/1.13.1/packer_1.13.1_linux_arm64.zip
+wget -P /tmp https://releases.hashicorp.com/packer/1.16.1/packer_1.16.1_linux_arm64.zip
 mkdir /opt/packer
 unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip
 echo 'export PATH=\${!PATH}:/opt/packer' > /etc/profile.d/packer.sh
