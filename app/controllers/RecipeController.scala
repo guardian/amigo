@@ -1,6 +1,6 @@
 package controllers
 
-import com.gu.googleauth.AuthAction
+import authentication.AuthAction
 import data._
 import models._
 import org.quartz.CronExpression

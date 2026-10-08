@@ -1,7 +1,7 @@
 package controllers
 
+import authentication.AuthAction
 import software.amazon.awssdk.services.s3.S3Client
-import com.gu.googleauth.AuthAction
 import data._
 import event._
 import models.BakeStatus.DeletionScheduled

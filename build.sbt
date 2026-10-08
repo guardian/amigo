@@ -97,10 +97,11 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonV2Version,
   "org.scanamo" %% "scanamo" % "7.0.0",
   "com.beachape" %% "enumeratum" % "1.9.8",
+  "com.nimbusds" % "nimbus-jose-jwt" % "10.10",
+  "org.bouncycastle" % "bcpkix-jdk18on" % "1.86",
   "com.gu" %% "simple-configuration-ssm" % "14.0.1",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "42.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",

@@ -1,7 +1,7 @@
 package controllers
 
 import amigo.BuildInfo
-import com.gu.googleauth.AuthAction
+import authentication.AuthAction
 import play.api.libs.json.Json
 import play.api.mvc._
 

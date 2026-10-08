@@ -1,6 +1,6 @@
 package controllers
 
-import com.gu.googleauth.AuthAction
+import authentication.AuthAction
 import data._
 import play.api.mvc._
 
