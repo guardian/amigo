@@ -1,4 +1,7 @@
 import com.typesafe.sbt.packager.archetypes.systemloader.ServerLoader.Systemd
+import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys
+import play.sbt.PlayImport.PlayKeys._
+import play.sbt.PlayInternalKeys._
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
@@ -22,13 +25,36 @@ Universal / javaOptions ++= Seq(
 def env(propName: String): String =
   sys.env.get(propName).filter(_.trim.nonEmpty).getOrElse("DEV")
 
+lazy val E2E = config("e2e").extend(Test)
+
 lazy val root = (project in file("."))
+  .configs(E2E)
   .aggregate(imageCopier)
   .enablePlugins(
     PlayScala,
     JDebPackaging,
     BuildInfoPlugin,
     SystemdPlugin
+  )
+  .settings(
+    inConfig(E2E)(
+      Seq(
+        run := sbt.PlayRun.playDefaultRunTask.evaluated,
+        playDependencyClasspath := (Test / externalDependencyClasspath).value,
+        playReloaderClasspath := Classpaths
+          .concatDistinct(Test / exportedProducts, Runtime / exportedProducts)
+          .value,
+        playReload := {
+          val _ = (Assets / WebKeys.assets).value
+          (Test / compile).value.asInstanceOf[sbt.internal.inc.Analysis]
+        },
+        playMonitoredFiles := (Compile / playMonitoredFiles).value :+
+          (baseDirectory.value / "test" / "e2e"),
+        devSettings := (Compile / devSettings).value :+
+          ("play.application.loader" -> "e2e.E2EApplicationLoader"),
+        playDefaultAddress := "localhost"
+      )
+    )
   )
   .settings(
     Universal / packageName := normalizedName.value,
@@ -124,6 +150,9 @@ libraryDependencies ++= Seq(
 ) ++ safeTransitiveDependencies
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
+
+Test / runMain / fork := true
+Test / fullClasspathAsJars += Attributed.blank((Assets / packageBin).value)
 
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(

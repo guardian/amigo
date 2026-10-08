@@ -12,3 +12,4 @@ modules:
 
 forwardPorts:
   - 9000
+  - 9323
