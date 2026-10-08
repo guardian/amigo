@@ -9,6 +9,41 @@ on:
       - main
 
 jobs:
+  E2E:
+    name: E2E testing with mock OAuth
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.tool-versions'
+          cache: 'npm'
+      - uses: guardian/setup-scala@v2
+      - run: npm ci
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          version=$(node -p "require('@playwright/test/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-${{ runner.arch }}-playwright-${{ steps.playwright-version.outputs.version }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps --only-shell chromium
+      - run: npm run test:e2e
+      - name: Upload browser test artefacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   CI:
     runs-on: ubuntu-latest
     permissions:
