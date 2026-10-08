@@ -138,6 +138,18 @@ $ sbt run
 $ sbt test
 ```
 
+### Browser navigation tests
+
+The Playwright suite covers the same six navigation scenarios as [#1912](https://github.com/guardian/amigo/pull/1912), using [`mock-oauth2-server`](https://github.com/navikt/mock-oauth2-server) for Google OAuth rather than removing authentication. It starts an isolated application with local Prism and read-only DynamoDB fixtures, without AWS credentials or a real Google account.
+
+```shell
+mise exec -- npm ci
+mise exec -- npx playwright install --with-deps --only-shell chromium
+mise exec -- npm run test:e2e
+```
+
+See [the end-to-end test documentation](tests/e2e/README.md) for interactive mode, authentication wiring and the comparison with #1912.
+
 ## Required AWS permissions for Packer
 
 ```json5

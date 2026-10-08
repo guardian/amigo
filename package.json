@@ -1,0 +1,11 @@
+{
+  "name": "amigo",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui --ui-host=0.0.0.0 --ui-port=9323"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
