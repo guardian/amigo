@@ -6,6 +6,8 @@ import com.google.auth.oauth2.ServiceAccountCredentials
 import com.gu.googleauth.{
   AntiForgeryChecker,
   AuthAction,
+  DiscoveryDocument,
+  GoogleAuth,
   GoogleAuthConfig,
   GoogleGroupChecker
 }
@@ -29,7 +31,7 @@ import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
 import packer.{PackerConfig, PackerRunner}
 import play.api.ApplicationLoader.Context
-import play.api.BuiltInComponentsFromContext
+import play.api.{BuiltInComponentsFromContext, Mode}
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.{AnyContent, EssentialFilter}
@@ -55,7 +57,7 @@ import software.amazon.awssdk.services.ssm.SsmClient
 import java.io.FileInputStream
 import java.time.Duration
 import java.time.Duration.{ofHours, ofMinutes}
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
@@ -127,7 +129,9 @@ class AppComponents(
 
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
 
-  val prism = new Prism(wsClient)
+  val prism = configuration
+    .getOptional[String]("prism.url")
+    .fold(new Prism(wsClient))(new Prism(wsClient, _))
   val pekkoActorSystem = UntypedActorSystem.create("pekko")
 
   val prismAgents = new PrismData(
@@ -206,6 +210,24 @@ class AppComponents(
     enforceValidity = true,
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
+
+  // Used by the browser tests to sign in against a local mock OIDC provider.
+  val mockOidcDiscoveryUrl: Option[String] =
+    configuration.getOptional[String]("auth.mockOidcDiscoveryUrl")
+  mockOidcDiscoveryUrl.foreach { url =>
+    require(
+      environment.mode == Mode.Dev,
+      "auth.mockOidcDiscoveryUrl is only allowed in dev mode"
+    )
+    GoogleAuth.discoveryDocumentHolder = Some(
+      wsClient
+        .url(url)
+        .get()
+        .map(response => DiscoveryDocument.fromJson(response.json))(
+          executionContext
+        )
+    )
+  }
 
   implicit val packerConfig: PackerConfig = PackerConfig(
     stage = stage,
@@ -288,7 +310,7 @@ class AppComponents(
     configuration.get[String]("auth.google.multimediaGroupId")
   )
 
-  val groupChecker = {
+  lazy val groupChecker = {
     val serviceAccountCertPath =
       configuration.get[String]("auth.google.serviceAccountCertPath")
     val serviceAccountCert = Try(new FileInputStream(serviceAccountCertPath))
@@ -304,6 +326,14 @@ class AppComponents(
 
     new GoogleGroupChecker(impersonatedUser, serviceAccount)
   }
+
+  val retrieveGroups: String => Future[Set[String]] =
+    if (mockOidcDiscoveryUrl.isDefined) { _ =>
+      Future.successful(googleGroupsToCheck)
+    } else {
+      val checker = groupChecker
+      email => checker.retrieveGroupsFor(email)(executionContext)
+    }
 
   /** Play 2.8's default is Seq(csrfFilter, securityHeadersFilter,
     * allowedHostsFilter). The allowedHostsFilter is removed here as it causes
@@ -353,7 +383,7 @@ class AppComponents(
     wsClient,
     controllerComponents,
     googleGroupsToCheck,
-    groupChecker
+    retrieveGroups
   )
   lazy val router: Router = new Routes(
     httpErrorHandler,

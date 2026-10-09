@@ -1,0 +1,42 @@
+name: amigo-e2e
+
+services:
+  aws:
+    image: motoserver/moto:5.2.3
+    ports:
+      - 127.0.0.1:5050:5000
+    healthcheck:
+      test: [CMD, curl, -fs, http://localhost:5000/moto-api/]
+      interval: 1s
+      retries: 30
+
+  oauth:
+    image: ghcr.io/navikt/mock-oauth2-server:6.0.4
+    ports:
+      - 127.0.0.1:8090:8080
+    environment:
+      JSON_CONFIG_PATH: /config/oauth.json
+    volumes:
+      - ./oauth.json:/config/oauth.json:ro
+
+  prism:
+    image: wiremock/wiremock:3.13.2
+    ports:
+      - 127.0.0.1:8091:8080
+    volumes:
+      - ./prism:/home/wiremock/mappings:ro
+
+  seed:
+    image: amazon/aws-cli:2.37.11
+    profiles: [seed]
+    depends_on:
+      aws:
+        condition: service_healthy
+    entrypoint: [/bin/sh, /seed.sh]
+    environment:
+      AWS_ENDPOINT_URL: http://aws:5000
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: eu-west-1
+    volumes:
+      - ./seed.sh:/seed.sh:ro

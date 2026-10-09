@@ -1,0 +1,44 @@
+{
+  "mappings": [
+    {
+      "request": { "method": "GET", "urlPath": "/sources" },
+      "response": {
+        "status": 200,
+        "jsonBody": {
+          "stale": false,
+          "data": [
+            { "origin": { "accountName": "E2E", "accountNumber": "000000000000" } }
+          ]
+        }
+      }
+    },
+    {
+      "request": { "method": "GET", "urlPath": "/instances" },
+      "response": {
+        "status": 200,
+        "jsonBody": { "stale": false, "data": { "instances": [] } }
+      }
+    },
+    {
+      "request": { "method": "GET", "urlPath": "/launch-configurations" },
+      "response": {
+        "status": 200,
+        "jsonBody": { "stale": false, "data": { "launch-configurations": [] } }
+      }
+    },
+    {
+      "request": { "method": "GET", "urlPath": "/active-launch-template-versions" },
+      "response": {
+        "status": 200,
+        "jsonBody": { "stale": false, "data": { "active-launch-template-versions": [] } }
+      }
+    },
+    {
+      "request": { "method": "GET", "urlPath": "/images" },
+      "response": {
+        "status": 200,
+        "jsonBody": { "stale": false, "data": { "images": [] } }
+      }
+    }
+  ]
+}

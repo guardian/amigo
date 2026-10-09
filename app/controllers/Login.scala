@@ -3,12 +3,7 @@ package controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.applicativeError._
-import com.gu.googleauth.{
-  GoogleAuthConfig,
-  GoogleGroupChecker,
-  LoginSupport,
-  UserIdentity
-}
+import com.gu.googleauth.{GoogleAuthConfig, LoginSupport, UserIdentity}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Loggable
@@ -20,7 +15,7 @@ class Login(
     override val wsClient: WSClient,
     components: ControllerComponents,
     googleGroupsToCheck: Set[String],
-    groupChecker: GoogleGroupChecker
+    retrieveGroups: String => Future[Set[String]]
 )(implicit executionContext: ExecutionContext)
     extends AbstractController(components)
     with LoginSupport
@@ -53,9 +48,7 @@ class Login(
   private def checkGoogleGroupMembership(
       userIdentity: UserIdentity
   ): EitherT[Future, Result, Unit] = {
-    groupChecker
-      .retrieveGroupsFor(userIdentity.email)
-      .attemptT
+    retrieveGroups(userIdentity.email).attemptT
       .leftMap({ t =>
         val message =
           s"Login failure, Could not look up Google groups for ${userIdentity.email}"

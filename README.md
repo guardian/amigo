@@ -140,7 +140,7 @@ $ sbt test
 
 ### Browser navigation tests
 
-The Playwright suite covers the same six navigation scenarios as [#1912](https://github.com/guardian/amigo/pull/1912), using [`mock-oauth2-server`](https://github.com/navikt/mock-oauth2-server) for Google OAuth rather than removing authentication. It starts an isolated application with local Prism and read-only DynamoDB fixtures, without AWS credentials or a real Google account.
+The Playwright suite covers the same six navigation scenarios as [#1912](https://github.com/guardian/amigo/pull/1912), using [`mock-oauth2-server`](https://github.com/navikt/mock-oauth2-server) for Google OAuth rather than removing authentication. It runs the normal app against Docker containers for AWS (moto), Prism (WireMock) and OAuth, without AWS credentials or a real Google account. Docker is required.
 
 ```shell
 mise exec -- npm ci

@@ -1,0 +1,25 @@
+{
+  "interactiveLogin": true,
+  "tokenCallbacks": [
+    {
+      "issuerId": "google",
+      "requestMappings": [
+        {
+          "requestParam": "code",
+          "match": "*",
+          "claims": {
+            "email": "navigation@guardian.co.uk",
+            "email_verified": true,
+            "aud": "amigo-e2e",
+            "azp": "amigo-e2e",
+            "at_hash": "unused-by-play-googleauth",
+            "hd": "guardian.co.uk",
+            "name": "Navigation Tester",
+            "given_name": "Navigation",
+            "family_name": "Tester"
+          }
+        }
+      ]
+    }
+  ]
+}
