@@ -20,7 +20,7 @@ Docker with Compose is also required.
 Playwright's `webServer` command:
 
 1. Starts the containers in [docker/docker-compose.yml](docker/docker-compose.yml).
-2. Runs the one-off `seed` container to load SSM config and DynamoDB fixtures into moto.
+2. Runs the one-off `seed` container to load the DEV SSM config into moto.
 3. Starts the normal app with `sbt -batch run` on `http://localhost:9000` and waits for `/healthcheck`.
 
 | Container | Image | Host port | Replaces |
@@ -71,14 +71,14 @@ The token mapping includes `azp` and a synthetic `at_hash` because `play-googlea
 
 The app starts through the normal `AppLoader` and `AppComponents`. Config loading from SSM, rotating-secret retrieval, STS, DynamoDB table setup, SNS topic setup, the bake scheduler and housekeeping jobs all run against moto.
 
-* [docker/seed.sh](docker/seed.sh) writes the DEV SSM parameters and creates the DynamoDB tables. It adds one synthetic base image and one recipe, with no bakes or bake logs.
+* [docker/seed.sh](docker/seed.sh) writes the DEV SSM parameters. The app creates its DynamoDB tables on startup, and they start empty.
 * [docker/prism/prism.json](docker/prism/prism.json) serves all five Prism datasets with `stale: false`. It returns one synthetic AWS account and no instances, launch configurations, launch templates or copied images. `AppComponents` reads the Prism URL from the `prism.url` config key.
 
 ## Comparison with #1912
 
 | Aspect | #1912 | This approach |
 | --- | --- | --- |
-| Navigation scenarios and data | Six scenarios, local Prism, read-only DynamoDB | Same |
+| Navigation scenarios and data | Six scenarios, local Prism, read-only DynamoDB | Same scenarios, local Prism, empty DynamoDB |
 | Authentication | Development identity, Google login removed | Real Google auth action and login controller against a local OAuth provider |
 | Browser setup | Navigate directly to the app | Sign in through the mock provider once per scenario |
 | Additional dependencies | Playwright | Playwright and Docker |
