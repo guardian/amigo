@@ -124,6 +124,21 @@ libraryDependencies ++= Seq(
 routesGenerator := InjectedRoutesGenerator
 routesImport += "models._"
 
+Test / runMain / fork := true
+Test / javaOptions ++= {
+  val agent = (Test / dependencyClasspath).value
+    .map(_.data)
+    .find(_.getName.startsWith("byte-buddy-agent-"))
+    .getOrElse(sys.error("Byte Buddy agent is missing from the test classpath"))
+  Seq(
+    s"-javaagent:${agent.getAbsolutePath}",
+    "-XX:-EnableDynamicAgentLoading",
+    // Mockito's bootstrap injection is incompatible with class-data sharing.
+    "-Xshare:off"
+  )
+}
+Test / fullClasspathAsJars += Attributed.blank((Assets / packageBin).value)
+
 lazy val imageCopier = (project in file("imageCopier"))
   .enablePlugins(
     JavaAppPackaging,
