@@ -36,6 +36,8 @@ The judgements below are engineering recommendations derived from the cited mech
 | **D. Run a local authentication provider** | A local OAuth/OIDC server replaces Google | Real application redirects, callback and session handling against a local provider | Local provider behaviour is not Google behaviour; separate Google APIs may still need stubs | Amigo #1915; Grid[^4][^14] |
 | **E. Authenticate against the real provider** | Real test credentials and live provider-issued state | Actual external-provider compatibility and configuration | Not strictly isolated; account and provider conditions affect execution | Playwright documents login-and-reuse mechanics; Google documents automation restrictions[^6][^15] |
 
+**WireMock is another implementation of category C**, particularly for backend HTTP calls that Playwright's browser routes cannot intercept. With its JWT extension and explicitly modelled OAuth endpoints, it can also simulate a local provider, but that is not equivalent to a turnkey OAuth/OIDC implementation.[^wm-core][^wm-jwt][^wm-demo]
+
 These categories are not mutually exclusive at suite level. Classify **each replacement boundary**: for example, “local OIDC provider, group-checker dependency stub, and reused application session” accurately describes a hybrid. Amigo #1915 is such a hybrid, not simply browser interception with a library.[^4]
 
 ### Two dimensions that should not become competing categories
@@ -172,6 +174,87 @@ Prefer an established local protocol library when the objective includes a real 
 
 Check the actual feature contract rather than the word “OIDC”. NAV 6.0.4 has permissive test-login behaviour and does not require a missing PKCE verifier in the inspected helper. `oidc-provider`'s defaults and claim placement also need deliberate configuration. Adding a library reduces protocol plumbing; it does not eliminate fixture design or missing-negative-case risks.[^53][^54]
 
+### WireMock: reusable HTTP stubbing instead of a bespoke proxy
+
+**WireMock OSS fits category C: control HTTP interactions.** It matches requests, returns configured responses and records requests for verification. It can replace backend token, userinfo, authentication and group endpoints while Playwright remains the browser runner. It does not automatically intercept clients or implement an OAuth/OIDC provider.[^wm-core][^wm-match][^wm-verify]
+
+#### When it is a good choice
+
+**Recommended use:** choose WireMock when you need the application's real backend authentication code to run against controlled HTTP responses, especially when testing errors or when a bespoke stub/proxy would otherwise be necessary. Configure the application to call a local WireMock endpoint wherever possible; this is simpler than intercepting the original HTTPS destination. Use Playwright routes separately for browser-only interactions.[^wm-core][^wm-proxy][^45]
+
+| How WireMock helps | What it does not solve |
+|---|---|
+| Method, URL, header and body matching make outbound request contracts explicit | Matching a bearer header does not validate the token's signature or claims |
+| The HTTP admin API lets Playwright configure stubs and assert received requests | It does not automatically become part of the application server's network path |
+| Delays, invalid response bodies and connection faults make failure cases controllable | Ordinary successful mappings do not implement a complete OAuth state machine |
+| Reusable mappings reduce custom HTTP-server plumbing | Fixtures can still encode incorrect provider assumptions |
+| HTTPS forward proxying can preserve hard-coded destination URLs | Each client needs proxy configuration and certificate trust; compatibility is not automatic |
+
+These distinctions follow from WireMock's matching, verification, fault and proxy mechanisms; the maintenance judgement is engineering synthesis.[^wm-match][^wm-verify][^wm-faults][^wm-proxy]
+
+#### Existing Guardian examples
+
+[guardian/identity](https://github.com/guardian/identity) uses WireMock to stub Okta authentication success and rejection. Its tests call the application's real authentication endpoint, check the resulting session-cookie response or rejection, and verify outbound authentication requests. This is a useful example of retaining application session issuance while controlling the remote provider.[^wm-identity]
+
+[guardian/discussion-api](https://github.com/guardian/discussion-api) stubs an Identity API callback used to authenticate requests before application operations. The stub checks the expected forwarded identity cookie and returns user data; it is not itself a cryptographic cookie verifier.[^wm-discussion]
+
+**Both are Scala HTTP integration tests, not Playwright E2E authentication suites.** Their backend-stubbing boundary is transferable to a Playwright-driven app, but these links should not be presented as ready-made Playwright fixtures. Neither Amigo #1914 nor #1915 is a WireMock implementation.[^wm-identity][^wm-discussion][^20][^4]
+
+#### A practical Playwright integration recipe
+
+The following is a recommended design, not an implementation executed during this research:
+
+1. Start WireMock alongside the application; await readiness and all stub registrations before browser navigation.
+2. Configure every relevant backend endpoint to use it. If supplying discovery, make its advertised token/userinfo/JWKS URLs local too.
+3. Install request mappings through `POST /__admin/mappings`. Drive the application with Playwright and assert the browser result.
+4. Count expected exchanges through `POST /__admin/requests/count` and inspect `GET /__admin/requests/unmatched`. Keep the request journal enabled and check that verification has not been disabled.
+5. Isolate state and traffic between workers. Prefer a per-worker WireMock **and a backend configured for that instance**; otherwise correlate every request and avoid global resets during concurrent tests.[^wm-core][^wm-verify][^wm-lifecycle][^wm-journal]
+
+For WireMock 3.0.1 and the inspected 3.13.2 release, `GET /__admin/health` is available. It is absent in 3.0.0; `GET /__admin/mappings` provides a compatible admin-response probe. A healthy stub server does not prove the application has been configured to use it.[^wm-health]
+
+Reset semantics matter. In the inspected 3.13.2 implementation, `POST /__admin/reset` and `POST /__admin/mappings/reset` clear requests and restore default mappings; `DELETE /__admin/requests` clears only the journal. Global resets can erase another worker's mappings or evidence. Avoid using `DELETE /__admin/mappings` against valuable file-backed mappings: its saver can remove tracked mapping files.[^wm-lifecycle]
+
+**Example fault mapping:** a deliberately rejected code exchange at a controlled local endpoint. This is illustrative, unexecuted JSON; the literal form-body matcher does not URL-decode fields or validate the full OAuth request.[^wm-match][^wm-oauth-error]
+
+```json
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/oauth/token",
+    "bodyPatterns": [
+      { "matches": "(?s)(?:^|.*&)grant_type=authorization_code(?:&.*|$)" }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "error": "invalid_grant" }
+  }
+}
+```
+
+Use the mapping's **request object**, not the entire mapping, as the count query. The count proves matching traffic arrived, not that a particular response was served or the UI handled it correctly; check the application outcome and serve-event details where needed. WireMock also supports fixed delays, malformed HTTP responses and connection failures for targeted negative tests.[^wm-verify][^wm-faults]
+
+#### HTTPS interception and isolation risks
+
+WireMock's forward/browser proxy can decrypt and stub HTTPS traffic to original destination URLs by generating certificates for those hosts. This is genuine TLS interception, but only for clients that use the proxy and trust its CA. Configuring Playwright's browser proxy does not configure the application's backend clients.[^wm-proxy][^45]
+
+**Important default:** browser-proxy mode passes unmatched requests through by default. Disable automatic pass-through, avoid explicit catch-all forwarding mappings, and assert unexpected traffic if the suite must be isolated. A default stub-server 404 or failed request alone need not fail the test. Clients that bypass WireMock also remain outside its controls.[^wm-proxy][^wm-core][^wm-verify]
+
+For Amigo #1914, WireMock is therefore a **possible alternative to parts of the bespoke HTTP/HTTPS proxy**, not a verified drop-in replacement. JVM proxy support, trust stores and each Google client transport still need validation; this research did not execute that substitution.[^21][^wm-proxy]
+
+#### Signed JWTs and an explicitly modelled local provider
+
+WireMock core does not issue JWTs. The separately installed OSS JWT extension supplies signing and JWKS template helpers. At the inspected 0.3.0 revision, RS256 can be selected explicitly; the default is HS256. A JWKS endpoint still needs a mapping, and redirects, discovery, code handling, userinfo and errors remain test-authored contracts.[^wm-jwt]
+
+The official [WireMock Spring OAuth demonstration](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo) shows those mappings and templates, including a synthetic login redirect, token response and JWKS. **It is a wiring example, not a turnkey provider:** its inspected mappings accept arbitrary login input, echo state, and derive token claims from a synthetic code without a registered redirect allowlist, client-secret comparison or single-use code consumption. The application remains responsible for its own callback checks.[^wm-demo]
+
+Version and coverage qualification: the pinned demonstration uses JWT extension **0.2.0**, whereas the separately researched extension is **0.3.0**. Its stock client requests `profile,email` without `openid`, so successful demo login must not be claimed as proof of OIDC ID-token validation. Adapt scopes, issuer, audience, short expiry and trusted JWKS to the application's actual contract; retain its real verifier rather than disabling checks to accommodate a fixture.[^wm-demo-config][^wm-demo]
+
+**Recommendation:** use a protocol provider such as NAV's server or `oidc-provider` for routine redirect/code/session coverage; use WireMock for precise HTTP contracts and failures, or deliberately maintain a WireMock provider simulation if that control justifies the extra modelling. It can complement a local provider, but higher-priority mappings only override traffic reaching the same WireMock instance, not a separate provider automatically.[^24][^52][^wm-core]
+
+WireMock core and the JWT extension are Apache-2.0 OSS; WireMock Cloud is not required for these features. The inspected extension 0.3.0 declares WireMock 3.13.1 as an API dependency, which does not establish compatibility with every WireMock version. Pin and verify the chosen server/extension combination; no 4.x compatibility claim is made here.[^wm-versions]
+
 ### Keep three layers of coverage
 
 Recommended coverage allocation:
@@ -201,6 +284,8 @@ Likewise, do not state that every Google sign-in test account requires allowlist
 **Version provenance:** Amigo and Interview Questions findings use PR heads; Panda examples use reported indexed revisions, with relevant Scala verifier releases inspected separately. The `play-googleauth` release resolves to `314210c2e77b2d5ccc6ef2c8a9c3150432eeb3b8`; its indexed default revision was different and was not substituted for v42.0.0. NAV library findings use 6.0.4; the inspected `oidc-provider` source declares 9.12.2 and is not asserted to be Grid's installed version.[^25][^52][^58]
 
 **Secondary-source limitations:** the requested [Medium article](https://medium.com/@delyce35/end-to-end-testing-with-playwright-managing-google-authentication-across-tests-fbca95eeb991) returned HTTP 403 with a blocking page; the requested [Autonoma article](https://getautonoma.com/blog/how-to-test-google-oauth-login) returned HTTP 404 with `DEPLOYMENT_NOT_FOUND` during research. Their contents were not inferred or used. Official web documentation is live, so check APIs against the installed Playwright version.[^41]
+
+**WireMock confidence:** core features, HTTPS proxy defaults, reset behaviour and the linked Guardian integration examples are supported by primary documentation and pinned source. Applying them to Playwright and replacing Amigo's bespoke proxy are recommendations, not verified integrations. No auth-specific Guardian Playwright/WireMock example was established, no examples were executed, and no protocol conformance was demonstrated for the WireMock OAuth sample.[^wm-core][^wm-proxy][^wm-lifecycle][^wm-identity][^wm-discussion][^wm-demo]
 
 ## Footnotes
 
@@ -262,3 +347,18 @@ Likewise, do not state that every Google sign-in test account requires allowlist
 [^56]: [Google OAuth policies: separate testing and production projects](https://developers.google.com/identity/protocols/oauth2/policies#use-separate-projects-for-testing-and-production).
 [^57]: [guardian/cdk: src/patterns/ec2-app/base.ts:576-598, Lambda artifact reference](https://github.com/guardian/cdk/blob/820366c5ad463d1619d265016a02909d08804db5/src/patterns/ec2-app/base.ts#L576-L598).
 [^58]: [guardian/play-googleauth: version.sbt:1](https://github.com/guardian/play-googleauth/blob/314210c2e77b2d5ccc6ef2c8a9c3150432eeb3b8/version.sbt#L1); [panva/node-oidc-provider: package.json:1-4](https://github.com/panva/node-oidc-provider/blob/f72e14e0de04ce8f32973153e6bb6ea7bdec6722/package.json#L1-L4).
+[^wm-core]: [WireMock OSS: stubbing, admin API, priorities and default responses](https://wiremock.org/docs/stubbing/).
+[^wm-match]: [WireMock OSS: request matching, including headers and body patterns](https://wiremock.org/docs/request-matching/).
+[^wm-verify]: [WireMock OSS: verification through the HTTP API, serve events and unmatched requests](https://wiremock.org/docs/verifying/).
+[^wm-faults]: [WireMock OSS: delays and connection/response faults](https://wiremock.org/docs/simulating-faults/).
+[^wm-proxy]: [WireMock OSS: forward proxy, HTTPS interception and pass-through defaults](https://wiremock.org/docs/proxying/).
+[^wm-identity]: [guardian/identity: integration/src/test/scala/com/gu/identity/integration/util/OktaApiStubs.scala:139-167](https://github.com/guardian/identity/blob/47c8696df218170217a8f4dbf47afb0037c214b6/integration/src/test/scala/com/gu/identity/integration/util/OktaApiStubs.scala#L139-L167); [integration/src/test/scala/com/gu/identity/integration/servlet/AuthServletIntegrationTest.scala:14-67](https://github.com/guardian/identity/blob/47c8696df218170217a8f4dbf47afb0037c214b6/integration/src/test/scala/com/gu/identity/integration/servlet/AuthServletIntegrationTest.scala#L14-L67); [integration/src/test/scala/com/gu/identity/integration/util/OktaApiStubs.scala:278-282](https://github.com/guardian/identity/blob/47c8696df218170217a8f4dbf47afb0037c214b6/integration/src/test/scala/com/gu/identity/integration/util/OktaApiStubs.scala#L278-L282).
+[^wm-discussion]: [guardian/discussion-api: integration/src/test/scala/com/gu/discussion/api/integration/IdentityApiMock.scala:14-44](https://github.com/guardian/discussion-api/blob/5d87ad19dcfece5294d7e5a1761bfc4a833ff93a/integration/src/test/scala/com/gu/discussion/api/integration/IdentityApiMock.scala#L14-L44); [same file:56-72](https://github.com/guardian/discussion-api/blob/5d87ad19dcfece5294d7e5a1761bfc4a833ff93a/integration/src/test/scala/com/gu/discussion/api/integration/IdentityApiMock.scala#L56-L72); [same file:157-180](https://github.com/guardian/discussion-api/blob/5d87ad19dcfece5294d7e5a1761bfc4a833ff93a/integration/src/test/scala/com/gu/discussion/api/integration/IdentityApiMock.scala#L157-L180); [integration/src/test/scala/com/gu/discussion/api/integration/DiscussionApiTests.scala:29-37](https://github.com/guardian/discussion-api/blob/5d87ad19dcfece5294d7e5a1761bfc4a833ff93a/integration/src/test/scala/com/gu/discussion/api/integration/DiscussionApiTests.scala#L29-L37).
+[^wm-lifecycle]: [wiremock/wiremock: src/main/java/com/github/tomakehurst/wiremock/core/WireMockApp.java:364-390, 3.13.2](https://github.com/wiremock/wiremock/blob/88587aa13b4899da080538e1b21bec0da105491e/src/main/java/com/github/tomakehurst/wiremock/core/WireMockApp.java#L364-L390); [src/main/java/com/github/tomakehurst/wiremock/standalone/JsonFileMappingsSource.java:87-101](https://github.com/wiremock/wiremock/blob/88587aa13b4899da080538e1b21bec0da105491e/src/main/java/com/github/tomakehurst/wiremock/standalone/JsonFileMappingsSource.java#L87-L101); [Playwright: worker-scoped service fixtures](https://playwright.dev/docs/test-fixtures#worker-scoped-fixtures).
+[^wm-journal]: [WireMock OSS: request-journal configuration](https://wiremock.org/docs/configuration/#request-journal); [wiremock/wiremock: src/main/java/com/github/tomakehurst/wiremock/verification/VerificationResult.java:26-43](https://github.com/wiremock/wiremock/blob/88587aa13b4899da080538e1b21bec0da105491e/src/main/java/com/github/tomakehurst/wiremock/verification/VerificationResult.java#L26-L43); [src/main/java/com/github/tomakehurst/wiremock/verification/FindRequestsResult.java:27-44](https://github.com/wiremock/wiremock/blob/88587aa13b4899da080538e1b21bec0da105491e/src/main/java/com/github/tomakehurst/wiremock/verification/FindRequestsResult.java#L27-L44).
+[^wm-health]: [wiremock/wiremock: src/main/java/com/github/tomakehurst/wiremock/admin/AdminRoutes.java:53-60, 3.0.0](https://github.com/wiremock/wiremock/blob/00b664a979455bf2b1bc2f01efa9724656dd1868/src/main/java/com/github/tomakehurst/wiremock/admin/AdminRoutes.java#L53-L60); [same path:113-116, 3.0.1](https://github.com/wiremock/wiremock/blob/34d4930e30a881526f52ed5aca9bb0554e54385a/src/main/java/com/github/tomakehurst/wiremock/admin/AdminRoutes.java#L113-L116); [src/main/java/com/github/tomakehurst/wiremock/admin/tasks/HealthCheckTask.java:29-41, 3.13.2](https://github.com/wiremock/wiremock/blob/88587aa13b4899da080538e1b21bec0da105491e/src/main/java/com/github/tomakehurst/wiremock/admin/tasks/HealthCheckTask.java#L29-L41).
+[^wm-oauth-error]: [RFC 6749: section 5.2, token error responses](https://www.rfc-editor.org/rfc/rfc6749.html#section-5.2).
+[^wm-jwt]: [WireMock OSS: JWT extension](https://wiremock.org/docs/jwt/); [wiremock/wiremock-jwt-extension: src/main/java/org/wiremock/extension/jwt/JwtExtensionFactory.java:12-21](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/src/main/java/org/wiremock/extension/jwt/JwtExtensionFactory.java#L12-L21); [src/main/java/org/wiremock/extension/jwt/JwtHandlebarsHelper.java:40-104](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/src/main/java/org/wiremock/extension/jwt/JwtHandlebarsHelper.java#L40-L104); [src/main/java/org/wiremock/extension/jwt/JwksHandlebarsHelper.java:18-26](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/src/main/java/org/wiremock/extension/jwt/JwksHandlebarsHelper.java#L18-L26).
+[^wm-demo]: [wiremock/wiremock-spring-boot-oauth2-demo: wiremock-oauth2/mappings/oauth-oidc-stubs.json:47-145](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo/blob/5d191445b90501fc2efefa3069eccec3534cf9e8/wiremock-oauth2/mappings/oauth-oidc-stubs.json#L47-L145); [wiremock-oauth2/__files/login.html.handlebars:75-94](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo/blob/5d191445b90501fc2efefa3069eccec3534cf9e8/wiremock-oauth2/__files/login.html.handlebars#L75-L94); [wiremock-oauth2/__files/token.json.handlebars:1-17](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo/blob/5d191445b90501fc2efefa3069eccec3534cf9e8/wiremock-oauth2/__files/token.json.handlebars#L1-L17).
+[^wm-demo-config]: [wiremock/wiremock-spring-boot-oauth2-demo: build.gradle:24-45](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo/blob/5d191445b90501fc2efefa3069eccec3534cf9e8/build.gradle#L24-L45); [src/main/resources/application.yml:4-17](https://github.com/wiremock/wiremock-spring-boot-oauth2-demo/blob/5d191445b90501fc2efefa3069eccec3534cf9e8/src/main/resources/application.yml#L4-L17); [spring-projects/spring-security: oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/authentication/OAuth2LoginAuthenticationProvider.java:93-120](https://github.com/spring-projects/spring-security/blob/5fe6d9259fbee532d402a801527b7aed4d937e98/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/authentication/OAuth2LoginAuthenticationProvider.java#L93-L120).
+[^wm-versions]: [wiremock/wiremock: LICENSE.txt:2-6](https://github.com/wiremock/wiremock/blob/17e4c4d0a77080471485c8abdc60ee98afef9cab/LICENSE.txt#L2-L6); [wiremock/wiremock-jwt-extension: LICENSE.txt:1-5](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/LICENSE.txt#L1-L5); [build.gradle:23-28](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/build.gradle#L23-L28); [build.gradle:57-62](https://github.com/wiremock/wiremock-jwt-extension/blob/ea07f0a89249f35b1e9390a8bf20f8db09fbc482/build.gradle#L57-L62).
