@@ -29,3 +29,7 @@ packer version
 session-manager-plugin --version
 
 "${ROOT_DIR}/script/cp_roles"
+
+# Set up Playwright framework
+npm --prefix "${ROOT_DIR}/e2e/tests" ci
+npm --prefix "${ROOT_DIR}/e2e/tests" exec -- playwright install --with-deps chromium

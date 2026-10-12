@@ -138,6 +138,22 @@ $ sbt run
 $ sbt test
 ```
 
+### Browser navigation tests
+
+The separate suite in `e2e/tests` uses Playwright Test to cover navigation scenarios, using [`mock-oauth2-server`](https://github.com/navikt/mock-oauth2-server) 
+for Google OAuth rather than removing authentication. It starts an isolated application with local Prism and read-only 
+DynamoDB fixtures, without AWS credentials or a real Google account. Browser scenarios are TypeScript because the full 
+Playwright web UI requires its Node-based test runner; the Scala application bootstrap, fixtures and guardrails live in 
+`test/e2e`.
+
+```shell
+./script/setup
+npm --prefix e2e/tests run test:e2e
+```
+
+For the full web UI, run `npm --prefix e2e/tests run test:e2e:ui` and open `http://localhost:9323/`. Browser scenarios 
+are separate from ordinary `sbt test` runs. The two Scala isolation guardrails are included in `sbt test`.
+
 ## Required AWS permissions for Packer
 
 ```json5
