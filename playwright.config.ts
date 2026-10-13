@@ -1,43 +1,24 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import path from 'node:path';
-
-const appURL = 'http://localhost:9000';
-const isCI = Boolean(process.env.CI);
-const compose = 'docker compose -f tests/e2e/docker/docker-compose.yml';
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  forbidOnly: isCI,
-  retries: isCI ? 2 : 0,
-  preserveOutput: 'always',
-  reporter: isCI
-    ? [['github'], ['html', { open: 'never' }]]
-    : [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: appURL,
-    headless: true,
-    trace: 'on',
-    screenshot: 'only-on-failure',
+    baseURL: 'http://localhost:9000',
+    trace: 'retain-on-failure',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
   webServer: {
-    command: `${compose} up -d --wait && sbt -batch run`,
+    command: 'docker compose -f tests/e2e/docker/docker-compose.yml up -d --wait && sbt -batch run',
     // Keeps every AWS call on the LocalStack container and away from real credentials.
     env: {
       AWS_ENDPOINT_URL: 'http://localhost:4566',
       AWS_SHARED_CREDENTIALS_FILE: path.resolve(__dirname, 'tests/e2e/docker/aws-credentials'),
       AWS_CONFIG_FILE: '/dev/null',
     },
-    url: `${appURL}/healthcheck`,
-    reuseExistingServer: false,
+    url: 'http://localhost:9000/healthcheck',
     timeout: 300_000,
     stdout: 'pipe',
-    stderr: 'pipe',
   },
 });

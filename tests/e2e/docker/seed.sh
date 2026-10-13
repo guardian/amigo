@@ -11,7 +11,7 @@ param() {
 param play.http.secret.key "e2e-only-secret-key-not-used-anywhere-else"
 param google.clientId amigo-e2e
 param google.clientSecret e2e-unused
-param auth.mockOidcDiscoveryUrl http://localhost:8090/google/.well-known/openid-configuration
+param auth.mockOidcIssuerUrl http://localhost:8090/google
 param auth.google.departmentGroupId e2e-navigation@guardian.co.uk
 param auth.google.dataScientistsGroupId e2e-data@guardian.co.uk
 param auth.google.multimediaGroupId e2e-multimedia@guardian.co.uk

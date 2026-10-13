@@ -212,21 +212,19 @@ class AppComponents(
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
 
-  // Used by the browser tests to sign in against a local mock OIDC provider.
-  val mockOidcDiscoveryUrl: Option[String] =
-    configuration.getOptional[String]("auth.mockOidcDiscoveryUrl")
-  mockOidcDiscoveryUrl.foreach { url =>
-    require(
-      environment.mode == Mode.Dev,
-      "auth.mockOidcDiscoveryUrl is only allowed in dev mode"
-    )
+  // Browser tests sign in against a local mock-oauth2-server, which can't answer Google Groups lookups.
+  val mockOidcIssuerUrl: Option[String] =
+    configuration.getOptional[String]("auth.mockOidcIssuerUrl")
+  mockOidcIssuerUrl.foreach { issuer =>
+    require(environment.mode == Mode.Dev, "mock OIDC is dev-only")
     GoogleAuth.discoveryDocumentHolder = Some(
-      wsClient
-        .url(url)
-        .get()
-        .map(response => DiscoveryDocument.fromJson(response.json))(
-          executionContext
+      Future.successful(
+        DiscoveryDocument(
+          s"$issuer/authorize",
+          s"$issuer/token",
+          s"$issuer/userinfo"
         )
+      )
     )
   }
 
@@ -328,14 +326,6 @@ class AppComponents(
     new GoogleGroupChecker(impersonatedUser, serviceAccount)
   }
 
-  val retrieveGroups: String => Future[Set[String]] =
-    if (mockOidcDiscoveryUrl.isDefined) { _ =>
-      Future.successful(googleGroupsToCheck)
-    } else {
-      val checker = groupChecker
-      email => checker.retrieveGroupsFor(email)(executionContext)
-    }
-
   /** Play 2.8's default is Seq(csrfFilter, securityHeadersFilter,
     * allowedHostsFilter). The allowedHostsFilter is removed here as it causes
     * healthchecks to fail. This service is not accessible on the public
@@ -384,7 +374,7 @@ class AppComponents(
     wsClient,
     controllerComponents,
     googleGroupsToCheck,
-    retrieveGroups
+    Option.when(mockOidcIssuerUrl.isEmpty)(groupChecker)
   )
   lazy val router: Router = new Routes(
     httpErrorHandler,

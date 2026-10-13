@@ -1,5 +1,5 @@
 {
-  "interactiveLogin": true,
+  "interactiveLogin": false,
   "tokenCallbacks": [
     {
       "issuerId": "google",
@@ -8,6 +8,7 @@
           "requestParam": "code",
           "match": "*",
           "claims": {
+            "sub": "navigation",
             "email": "navigation@guardian.co.uk",
             "email_verified": true,
             "aud": "amigo-e2e",
