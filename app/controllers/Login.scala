@@ -3,12 +3,7 @@ package controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.applicativeError._
-import com.gu.googleauth.{
-  GoogleAuthConfig,
-  GoogleGroupChecker,
-  LoginSupport,
-  UserIdentity
-}
+import com.gu.googleauth.{GoogleAuthConfig, LoginSupport, UserIdentity}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.Loggable
@@ -20,7 +15,7 @@ class Login(
     override val wsClient: WSClient,
     components: ControllerComponents,
     googleGroupsToCheck: Set[String],
-    groupChecker: Option[GoogleGroupChecker]
+    retrieveGroupsFor: String => Future[Set[String]]
 )(implicit executionContext: ExecutionContext)
     extends AbstractController(components)
     with LoginSupport
@@ -39,9 +34,7 @@ class Login(
   ): Future[Result] = {
     (for {
       identity <- checkIdentity()
-      _ <- groupChecker.fold(EitherT.rightT[Future, Result](()))(
-        checkGoogleGroupMembership(identity, _)
-      )
+      _ <- checkGoogleGroupMembership(identity)
     } yield {
       log.info(s"User ${identity.email} successfully logged in")
       setupSessionWhenSuccessful(identity)
@@ -53,12 +46,9 @@ class Login(
   TODO update https://github.com/guardian/play-googleauth ?
    */
   private def checkGoogleGroupMembership(
-      userIdentity: UserIdentity,
-      groupChecker: GoogleGroupChecker
+      userIdentity: UserIdentity
   ): EitherT[Future, Result, Unit] = {
-    groupChecker
-      .retrieveGroupsFor(userIdentity.email)
-      .attemptT
+    retrieveGroupsFor(userIdentity.email).attemptT
       .leftMap({ t =>
         val message =
           s"Login failure, Could not look up Google groups for ${userIdentity.email}"

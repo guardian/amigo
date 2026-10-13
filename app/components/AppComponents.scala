@@ -212,7 +212,7 @@ class AppComponents(
     antiForgeryChecker = AntiForgeryChecker(secretStateSupplier)
   )
 
-  // Browser tests sign in against a local mock-oauth2-server, which can't answer Google Groups lookups.
+  // Lets browser tests sign in against a local mock-oauth2-server instead of Google.
   val mockOidcIssuerUrl: Option[String] =
     configuration.getOptional[String]("auth.mockOidcIssuerUrl")
   mockOidcIssuerUrl.foreach { issuer =>
@@ -326,6 +326,11 @@ class AppComponents(
     new GoogleGroupChecker(impersonatedUser, serviceAccount)
   }
 
+  // mock-oauth2-server can't answer Google Groups lookups, so mock users are treated as members.
+  val retrieveGroupsFor: String => Future[Set[String]] =
+    if (mockOidcIssuerUrl.isDefined) _ => Future.successful(googleGroupsToCheck)
+    else groupChecker.retrieveGroupsFor(_)
+
   /** Play 2.8's default is Seq(csrfFilter, securityHeadersFilter,
     * allowedHostsFilter). The allowedHostsFilter is removed here as it causes
     * healthchecks to fail. This service is not accessible on the public
@@ -374,7 +379,7 @@ class AppComponents(
     wsClient,
     controllerComponents,
     googleGroupsToCheck,
-    Option.when(mockOidcIssuerUrl.isEmpty)(groupChecker)
+    retrieveGroupsFor
   )
   lazy val router: Router = new Routes(
     httpErrorHandler,
