@@ -27,10 +27,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `${compose} up -d --wait && ${compose} run --rm seed && sbt -batch run`,
-    // Keeps every AWS call on the moto container and away from real credentials.
+    command: `${compose} up -d --wait && sbt -batch run`,
+    // Keeps every AWS call on the LocalStack container and away from real credentials.
     env: {
-      AWS_ENDPOINT_URL: 'http://localhost:5050',
+      AWS_ENDPOINT_URL: 'http://localhost:4566',
       AWS_SHARED_CREDENTIALS_FILE: path.resolve(__dirname, 'tests/e2e/docker/aws-credentials'),
       AWS_CONFIG_FILE: '/dev/null',
     },

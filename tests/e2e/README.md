@@ -19,17 +19,16 @@ Docker with Compose is also required.
 
 Playwright's `webServer` command:
 
-1. Starts the containers in [docker/docker-compose.yml](docker/docker-compose.yml).
-2. Runs the one-off `seed` container to load the DEV SSM config into moto.
-3. Starts the normal app with `sbt -batch run` on `http://localhost:9000` and waits for `/healthcheck`.
+1. Starts the containers in [docker/docker-compose.yml](docker/docker-compose.yml). LocalStack runs [docker/seed.sh](docker/seed.sh) as a ready hook to load the DEV SSM config, and only reports healthy once it succeeds.
+2. Starts the normal app with `sbt -batch run` on `http://localhost:9000` and waits for `/healthcheck`.
 
 | Container | Image | Host port | Replaces |
 | --- | --- | --- | --- |
-| `aws` | `motoserver/moto` | 5050 | SSM, DynamoDB, STS, EC2, SNS, S3 |
+| `aws` | `localstack/localstack:4.14.0` | 4566 | SSM, DynamoDB, STS, EC2, SNS, S3 |
 | `oauth` | `ghcr.io/navikt/mock-oauth2-server` | 8090 | Google OpenID Connect |
 | `prism` | `wiremock/wiremock` | 8091 | Prism |
 
-The app runs with `AWS_ENDPOINT_URL` pointing at moto and dummy credentials from [docker/aws-credentials](docker/aws-credentials). `AWS_CONFIG_FILE` is set to `/dev/null` so your own AWS profiles are never read. Ports are bound to `127.0.0.1` only. Stop any app already using port 9000 first.
+The app runs with `AWS_ENDPOINT_URL` pointing at LocalStack and dummy credentials from [docker/aws-credentials](docker/aws-credentials). `AWS_CONFIG_FILE` is set to `/dev/null` so your own AWS profiles are never read. Ports are bound to `127.0.0.1` only. Stop any app already using port 9000 first.
 
 Containers stay running between runs so later runs start faster. Stop them with:
 
@@ -69,7 +68,7 @@ The token mapping includes `azp` and a synthetic `at_hash` because `play-googlea
 
 ## Everything else
 
-The app starts through the normal `AppLoader` and `AppComponents`. Config loading from SSM, rotating-secret retrieval, STS, DynamoDB table setup, SNS topic setup, the bake scheduler and housekeeping jobs all run against moto.
+The app starts through the normal `AppLoader` and `AppComponents`. Config loading from SSM, rotating-secret retrieval, STS, DynamoDB table setup, SNS topic setup, the bake scheduler and housekeeping jobs all run against LocalStack. The image is pinned to 4.14.0, the last open-source community release. Later LocalStack images require an auth token.
 
 * [docker/seed.sh](docker/seed.sh) writes the DEV SSM parameters. The app creates its DynamoDB tables on startup, and they start empty.
 * [docker/prism/prism.json](docker/prism/prism.json) serves all five Prism datasets with `stale: false`. It returns one synthetic AWS account and no instances, launch configurations, launch templates or copied images. `AppComponents` reads the Prism URL from the `prism.url` config key.
@@ -84,7 +83,7 @@ The app starts through the normal `AppLoader` and `AppComponents`. Config loadin
 | Additional dependencies | Playwright | Playwright and Docker |
 | Additional wiring | Development identity provider | A dev-only mock OIDC config key and a configurable Prism URL |
 | What it exercises | Navigation after an auth bypass | The production wiring, plus redirects, code exchange, user info, state checks and session creation |
-| What it cannot establish | Real authentication behaviour | Real Google behaviour, Directory API integration, ID-token validation absent from the existing client, or differences between moto and AWS |
+| What it cannot establish | Real authentication behaviour | Real Google behaviour, Directory API integration, ID-token validation absent from the existing client, or differences between LocalStack and AWS |
 
 ## Artefacts
 

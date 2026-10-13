@@ -1,10 +1,11 @@
 #!/bin/sh
-# Seeds the moto container with the SSM config AMIgo reads in DEV.
+# LocalStack ready hook: seeds the SSM config AMIgo reads in DEV.
 set -eu
 
 param() {
-  aws ssm put-parameter --overwrite --type String \
-    --name "/DEV/deploy/amigo/$1" --value "$2" >/dev/null
+  # JSON input stops AWS CLI v1 fetching values that look like URLs.
+  awslocal --region eu-west-1 ssm put-parameter --cli-input-json \
+    "{\"Name\":\"/DEV/deploy/amigo/$1\",\"Value\":\"$2\",\"Type\":\"String\",\"Overwrite\":true}" >/dev/null
 }
 
 param play.http.secret.key "e2e-only-secret-key-not-used-anywhere-else"
