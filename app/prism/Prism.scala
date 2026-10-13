@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Prism(
     ws: WSClient,
-    val baseUrl: String = "https://prism.gutools.co.uk"
+    val baseUrl: String
 )(implicit
     ec: ExecutionContext
 ) extends Loggable {

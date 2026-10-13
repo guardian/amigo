@@ -129,9 +129,10 @@ class AppComponents(
 
   val amiMetadataLookup: AmiMetadataLookup = new AmiMetadataLookup(ec2Client)
 
-  val prism = configuration
-    .getOptional[String]("prism.url")
-    .fold(new Prism(wsClient))(new Prism(wsClient, _))
+  val prismUrl: String = configuration
+    .get[Option[String]]("prism.url")
+    .getOrElse("https://prism.gutools.co.uk")
+  val prism = new Prism(wsClient, prismUrl)
   val pekkoActorSystem = UntypedActorSystem.create("pekko")
 
   val prismAgents = new PrismData(
