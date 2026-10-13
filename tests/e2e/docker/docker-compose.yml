@@ -6,8 +6,6 @@ services:
     image: localstack/localstack:4.14.0
     ports:
       - 127.0.0.1:4566:4566
-    environment:
-      SERVICES: ssm,dynamodb,sts,ec2,sns,s3
     volumes:
       - ./seed.sh:/etc/localstack/init/ready.d/seed.sh:ro
     healthcheck:
