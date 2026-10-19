@@ -12,7 +12,12 @@ These browser scenarios must therefore remain TypeScript to preserve the full Pl
 
 ## Run locally
 
-Run this command from the repository root:
+In order to run the tests locally, you need to have previously run the setup script to make Playwright available:
+```bash
+./script/setup
+```
+
+Then, run this command from the repository root:
 
 ```bash
 npm --prefix e2e/tests run test:e2e
@@ -64,19 +69,10 @@ The non-auth mocks are:
 
 The bootstrap lives entirely on the Scala test classpath and rejects modes other than `Mode.Dev`. The OAuth and Prism servers stop with the application, including on reload. The normal development and production loaders, auth configuration and login controller are unchanged.
 
-## Checks and artefacts
+## Artefacts
 
-```bash
-sbt --client test
-npm --prefix e2e/tests run test:e2e
-```
-
-The first command runs the standard Scala tests, including `test/e2e/E2EIsolationSpec.scala`'s two guardrails: both bootstrap entry points reject non-development mode, and the DynamoDB fixture rejects writes. These checks are discovered normally by `sbt test`, without a separate configuration or CI step. They do not start the application or local OAuth/Prism servers. The browser scenarios already cover bootstrap startup, fixture-backed navigation and successful OAuth login, so there are no duplicate Scala checks for those paths. The second command runs all six TypeScript browser scenarios.
-
-Every Playwright run retains traces under `e2e/tests/test-results/`, takes screenshots on failure and produces an HTML report under `e2e/tests/playwright-report/`. These directories and ScalaTest reports under `target/` are ignored by Git. Inspect a completed browser run with:
+Every Playwright run retains traces under `e2e/tests/test-results/`, takes screenshots on failure and produces an HTML report under `e2e/tests/playwright-report/`.  Inspect a completed browser run with:
 
 ```bash
 npm --prefix e2e/tests exec -- playwright show-report e2e/tests/playwright-report
 ```
-
-The main CI job runs the Scala isolation guardrails as part of its standard `sbt test` command. The separate `E2E` CI job installs Node and Scala using `.tool-versions`, installs this suite's npm dependencies and headless Chromium, runs the browser scenarios, and uploads browser reports and traces even when tests fail. Server logs are visible in the terminal and the UI's Output panel.
