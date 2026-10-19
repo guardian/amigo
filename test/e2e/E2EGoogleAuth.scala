@@ -64,6 +64,9 @@ private[e2e] object E2EGoogleAuth {
     )
   }
 
+  /** Mock [[GoogleGroupChecker]] that will give [[group]] in response to a
+    * request for groups of email [[email]] otherwise will throw an exception.
+    */
   def groupChecker(): GoogleGroupChecker =
     mock(
       classOf[GoogleGroupChecker],
