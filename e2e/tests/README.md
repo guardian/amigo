@@ -64,10 +64,12 @@ The token mapping includes `azp` and a synthetic `at_hash` because `play-googlea
 The non-auth mocks are:
 
 * `E2EPrismStub` serves all five expected Prism datasets with `stale: false`, one synthetic AWS account and no instances, launch configurations, launch templates or copied images. The normal Prism refresh still runs.
-* `E2EFixtures` provides the same read-only DynamoDB records: one synthetic base image, one recipe, no bakes and no bake logs. Unknown tables, writes and unsupported operations fail explicitly.
+* `E2EFixtures` provides read-only DynamoDB records: one synthetic base image, one recipe, no bakes and no bake logs. `E2EDynamoClient` implements the SDK interface with typed methods for scans, key-based item lookups and queries against the empty bake table. It uses immutable Scala collections and exercises the application's real Scanamo encoding and decoding. It does not interpret query expressions or validate DynamoDB service behaviour. Unknown tables, writes and unsupported operations fail explicitly.
 * The real routes, navigation controllers, templates, assets and filters run. Bake execution is disabled. AWS configuration loading, rotating-secret retrieval, STS, baking, housekeeping schedulers and notifications are not started.
 
 The bootstrap lives entirely on the Scala test classpath and rejects modes other than `Mode.Dev`. The OAuth and Prism servers stop with the application, including on reload. The normal development and production loaders, auth configuration and login controller are unchanged.
+
+`test/e2e/E2EDynamoClientSpec.scala` checks fixture decoding, key lookups, empty bake reads and unsupported requests. These checks run as part of `sbt --client test` without starting the application or local OAuth/Prism servers.
 
 ## Artefacts
 

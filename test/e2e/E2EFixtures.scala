@@ -8,8 +8,7 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model._
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.jdk.CollectionConverters._
 
@@ -46,8 +45,8 @@ private[e2e] object E2EFixtures {
 
   private def item[A: DynamoFormat](
       value: A
-  ): java.util.Map[String, AttributeValue] =
-    DynamoFormat[A].write(value).toAttributeValue.m()
+  ): Map[String, AttributeValue] =
+    DynamoFormat[A].write(value).toAttributeValue.m().asScala.toMap
 
   private val tables = Map(
     "amigo-E2E-base-images" -> List(item(baseImage)),
@@ -56,12 +55,7 @@ private[e2e] object E2EFixtures {
     "amigo-E2E-bake-logs" -> Nil
   )
 
-  private def rows(name: String): List[java.util.Map[String, AttributeValue]] =
-    tables.getOrElse(
-      name,
-      throw new IllegalArgumentException(s"Unknown E2E table: $name")
-    )
-
+  /* This allows us to pass args where a concrete implementation is required, ensuring it isn't actually used */
   def disabled[A](kind: Class[A]): A =
     mock(
       kind,
@@ -73,46 +67,6 @@ private[e2e] object E2EFixtures {
       }
     )
 
-  def dynamo(): Dynamo = {
-    val client = mock(
-      classOf[DynamoDbClient],
-      new Answer[AnyRef] {
-        override def answer(invocation: InvocationOnMock): AnyRef =
-          invocation.getMethod.getName match {
-            case "scan" =>
-              val request = invocation.getArgument[ScanRequest](0)
-              ScanResponse
-                .builder()
-                .items(rows(request.tableName()).asJava)
-                .build()
-            case "getItem" =>
-              val request = invocation.getArgument[GetItemRequest](0)
-              val found = rows(request.tableName()).find { row =>
-                request.key().asScala.forall { case (key, value) =>
-                  row.get(key) == value
-                }
-              }
-              GetItemResponse
-                .builder()
-                .item(found.getOrElse(Map.empty[String, AttributeValue].asJava))
-                .build()
-            case "query" =>
-              val request = invocation.getArgument[QueryRequest](0)
-              require(
-                request.tableName() == "amigo-E2E-bakes",
-                "Only bake queries are supported by the E2E fixtures"
-              )
-              QueryResponse
-                .builder()
-                .items(rows(request.tableName()).asJava)
-                .build()
-            case method =>
-              throw new UnsupportedOperationException(
-                s"DynamoDB.$method is disabled in E2E"
-              )
-          }
-      }
-    )
-    new Dynamo(client, "E2E")
-  }
+  def dynamo(): Dynamo =
+    new Dynamo(new E2EDynamoClient(tables), "E2E")
 }
