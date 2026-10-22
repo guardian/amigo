@@ -5,15 +5,15 @@
       - fluentbit_package in ['td-agent-bit', 'fluent-bit']
     fail_msg: "fluentbit_package must be either 'td-agent-bit' or 'fluent-bit'."
 
-- name: Add GPG key
-  get_url:
-    url: https://packages.fluentbit.io/fluentbit.key
-    dest: /usr/share/keyrings/fluentbit-keyring.asc
-    mode: '0644'
-
 - name: Add repository
-  ansible.builtin.apt_repository:
-    repo: deb [signed-by=/usr/share/keyrings/fluentbit-keyring.asc] https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }} {{ ubuntu_version }} main
+  ansible.builtin.deb822_repository:
+    name: fluentbit
+    types: deb
+    uris: "https://packages.fluentbit.io/ubuntu/{{ ubuntu_version }}"
+    suites: "{{ ubuntu_version }}"
+    components: main
+    signed_by: https://packages.fluentbit.io/fluentbit.key
+    state: present
 
 - name: Install
   apt:
