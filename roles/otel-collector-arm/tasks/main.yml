@@ -1,7 +1,8 @@
 ---
-- name: Add AWS OTEL key
-  apt_key: url=https://aws-otel-collector.s3.amazonaws.com/aws-otel-collector.gpg state=present
-
+# NOTE: this package is not signature-verified. AWS only sign it with dpkg-sig (unsupported by
+# apt/dpkg, and absent from modern Debian/Ubuntu) and publish no apt repository or versioned URL.
+# See https://github.com/aws-observability/aws-otel-collector/issues/3240 for request for updated
+# verification mechanism
 - name: Install latest otel collector package
   apt: deb=https://aws-otel-collector.s3.amazonaws.com/ubuntu/arm64/latest/aws-otel-collector.deb state=present
 
