@@ -24,6 +24,24 @@
   command: /var/lib/dpkg/info/ca-certificates-java.postinst configure
   when: ansible_os_family == "Debian"
 
+## Block compromised emudhra certificates (Java 8 calls the file blacklisted.certs)
+- name: Find installed OpenJDK 8 JVMs
+  find:
+    paths: /usr/lib/jvm
+    patterns: "java-8-openjdk-*"
+    file_type: directory
+    recurse: no
+  register: openjdk8_homes
+  when: ansible_os_family == "Debian"
+
+- name: Append emudhra certs to JVM blocked certificate config
+  blockinfile:
+    path: "{{ item }}/jre/lib/security/blacklisted.certs"
+    block: "{{ lookup('file', 'emudhra.certs') }}"
+    create: yes
+  loop: "{{ openjdk8_homes.files | map(attribute='path') | list }}"
+  when: ansible_os_family == "Debian"
+
 ## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
 ## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
 - name: Change JVM DNS cache TTL

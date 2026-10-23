@@ -16,6 +16,14 @@
     state: latest
   when: ansible_os_family == "Debian"
 
+## Block compromised emudhra certificates
+- name: Append emudhra certs to JVM blocked certificate config
+  blockinfile:
+    path: /usr/lib/jvm/java-21-amazon-corretto/lib/security/blocked.certs
+    block: "{{ lookup('file', 'emudhra.certs') }}"
+    create: yes
+  when: ansible_os_family == "Debian"
+
 ## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
 ## seconds. See this issue for full details: https://github.com/guardian/amigo/issues/238
 - name: Change JVM DNS cache TTL
