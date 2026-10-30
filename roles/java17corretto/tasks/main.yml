@@ -14,6 +14,7 @@
     name:
     - java-17-amazon-corretto-jdk
     state: latest
+    update_cache: true
   when: ansible_os_family == "Debian"
 
 ## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60
