@@ -52,7 +52,7 @@ case object Ubuntu extends LinuxDist {
         "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
         "DEBIAN_FRONTEND=noninteractive  apt-get --yes install software-properties-common",
         "version=$(. /etc/os-release; echo $VERSION_ID | cut -d'.' -f1)",
-        "if (($version < 20)); then apt-add-repository --yes ppa:ansible/ansible; fi",
+        "if (($version <= 22)); then apt-add-repository --yes ppa:ansible/ansible; fi",
         // disable and remove unattended upgrades as this can break bakes that are trying to use apt
         "systemctl stop unattended-upgrades || true",
         "apt-get remove unattended-upgrades -y || true",
