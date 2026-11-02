@@ -1,15 +1,40 @@
 ---
-- name: Install signing keys (url)
-  apt_key: url={{ item }} state=present
+# apt-key is gone from newer Ubuntu releases, so keys are added directly to apt's trusted keyring.
+# Keys may be served armored or binary; `gpg --dearmor` accepts either and writes binary.
+- name: Download signing keys (url)
+  get_url:
+    url: "{{ item }}"
+    dest: "/tmp/signing-key-{{ item | hash('sha1') }}"
+    mode: "0600"
   with_items: "{{ signing_keys|default([]) }}"
   when:
   - ansible_os_family == "Debian"
 
-- name: Install signing keys (keysever)
-  apt_key:
-    id: "{{ item.key }}"
-    keyserver: "{{ item.value }}"
+# TODO: the downloaded key is not checked against the requested fingerprint. Probably okay
+# (the keyserver is fetched over HTTPS), but we may want to verify this in future.
+- name: Download signing keys (keyserver)
+  get_url:
+    url: "https://{{ item.value }}/pks/lookup?op=get&search=0x{{ item.key }}"
+    dest: "/tmp/signing-key-{{ item.key | hash('sha1') }}"
+    mode: "0600"
   with_dict: "{{ keyserver_keys|default({}) }}"
+  when:
+  - ansible_os_family == "Debian"
+
+- name: Install signing keys
+  command: >-
+    gpg --dearmor --yes
+    -o /etc/apt/trusted.gpg.d/{{ item }}.gpg
+    /tmp/signing-key-{{ item }}
+  with_items: "{{ ((signing_keys | default([])) + (keyserver_keys | default({}) | list)) | map('hash', 'sha1') | list }}"
+  when:
+  - ansible_os_family == "Debian"
+
+- name: Remove downloaded signing keys
+  file:
+    path: "/tmp/signing-key-{{ item }}"
+    state: absent
+  with_items: "{{ ((signing_keys | default([])) + (keyserver_keys | default({}) | list)) | map('hash', 'sha1') | list }}"
   when:
   - ansible_os_family == "Debian"
 
