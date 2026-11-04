@@ -32,7 +32,7 @@ All data (base images, recipes, bakes, bake logs) are stored in DynamoDB. The Dy
 ## Debugging recipes
 
 When running in an environment that is not `PROD` there is an option to `Bake with debug enabled`.
-This passes the `-debug` flag through to packer which saves a copy of the SSH key in AMIgos working directory. This makes 
+This passes the `-debug` flag through to packer which saves a copy of the SSH key in AMIgo's working directory. This makes 
 it possible to SSH onto the instance that is being used to build the AMI. 
 
 ## Troubleshooting problems with scheduled bakes
@@ -93,7 +93,7 @@ time of writing:
 
 Install dependencies with [`./script/setup`](./script/setup)
 
-(For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without runing amigo/packer' below.)
+(For a faster but messier way of testing your ansible scripts - see 'Testing ansible scripts without running amigo/packer' above.)
 
 AMIgo requires Packer to be [installed](https://www.packer.io/intro/getting-started/install.html)
 
