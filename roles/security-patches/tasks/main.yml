@@ -27,3 +27,33 @@
     create: yes
     insertafter: EOF
     line: JAVA_TOOL_OPTIONS=-javaagent:/usr/local/log4j-hotpatch/Log4jHotPatch.jar=log4jFixerVerbose=false
+
+## CVE-2026-98432 nftables mitigation
+
+- name: Create /etc/nftables.d directory
+  file:
+    path: /etc/nftables.d
+    state: directory
+    mode: "0755"
+
+- name: Copy CVE-2026-98432 nftables rules
+  copy:
+    src: cve-2026-98432.nft
+    dest: /etc/nftables.d/cve-2026-98432.nft
+    mode: "0644"
+
+# Fails the role if the rules are invalid; runs before the include is added
+- name: Check nft accepts CVE-2026-98432 rules
+  command: nft -c -f /etc/nftables.d/cve-2026-98432.nft
+  changed_when: false
+
+- name: Include CVE-2026-98432 rules in nftables.conf
+  lineinfile:
+    path: /etc/nftables.conf
+    insertafter: EOF
+    line: include "/etc/nftables.d/cve-2026-98432.nft"
+
+- name: Ensure nftables.service is enabled
+  systemd:
+    name: nftables.service
+    enabled: yes
