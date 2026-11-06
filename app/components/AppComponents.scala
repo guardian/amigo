@@ -39,7 +39,7 @@ import play.filters.csp.CSPComponents
 import prism.Prism
 import router.Routes
 import schedule.{BakeScheduler, ScheduledBakeRunner}
-import services.{AmiMetadataLookup, Loggable, PrismData}
+import services.{AmiMetadataLookup, Loggable, PrismData, TargetHeaderFilter}
 import software.amazon.awssdk.auth.credentials.{
   AwsCredentialsProviderChain,
   InstanceProfileCredentialsProvider,
@@ -314,7 +314,14 @@ class AppComponents(
     * https://www.playframework.com/documentation/2.8.x/CspFilter#Enabling-Through-Compile-Time
     */
   override def httpFilters: Seq[EssentialFilter] =
-    Seq(csrfFilter, securityHeadersFilter, cspFilter)
+    Seq(
+      new TargetHeaderFilter(
+        TargetHeaderFilter.targetFromEnvironment(sys.env)
+      ),
+      csrfFilter,
+      securityHeadersFilter,
+      cspFilter
+    )
 
   val authAction = new AuthAction[AnyContent](
     googleAuthConfig,
