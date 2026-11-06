@@ -7,8 +7,13 @@ export AWS_REGION=eu-west-1
 
 ssm() { aws ssm get-parameter --name "$1" --query Parameter.Value --output text; }
 
-CERT_PATH=$(ssm /DEV/deploy/amigo/auth.google.serviceAccountCertPath)
 BUCKET=$(ssm /CODE/deploy/amigo/aws.distributionBucket)
+CERT_PATH=$(ssm /DEV/deploy/amigo/auth.google.serviceAccountCertPath)
+CERT_DIR=$(dirname "$CERT_PATH")
+SYNCED_CERT="$CERT_DIR/amigo-service-account-cert.json"
 
-mkdir -p "$(dirname "$CERT_PATH")"
-aws s3 cp "s3://$BUCKET/deploy/CODE/amigo/conf/amigo-service-account-cert.json" "$CERT_PATH"
+mkdir -p "$CERT_DIR"
+aws s3 sync "s3://$BUCKET/deploy/CODE/amigo/conf/" "$CERT_DIR/"
+if [[ "$CERT_PATH" != "$SYNCED_CERT" ]]; then
+	cp "$SYNCED_CERT" "$CERT_PATH"
+fi
