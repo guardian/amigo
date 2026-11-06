@@ -36,21 +36,22 @@ This step records the current state and migration risks:
   including Packer's EC2 launch and `iam:PassRole` needs, without relying on
   EC2 instance-profile credentials.
 - `AppLoader` explicitly uses profile and instance-profile credential
-  providers. This does not establish support for ECS task-role credentials;
-  the SDK default provider chain and local-development behavior need review.
+  providers. Step 04 adds the ECS container credentials provider while
+  retaining local profiles and the EC2 instance-profile fallback. ECS task-role
+  behavior still requires deployment verification.
 - Packer is an in-process external executable (`1.13.1`) with plugins and the
   Session Manager plugin installed by EC2 user data. It writes generated
   playbooks/configuration and a cache under the system temporary directory.
   The ECS image needs the correct ARM64 binaries, network access to the
-  Packer builder instances, and a deliberate scratch-space solution compatible
-  with a read-only container filesystem.
+  Packer builder instances, and writable `/tmp` scratch space compatible with
+  a read-only container filesystem.
 - The current EC2 host is `t4g.medium`; user data installs ARM64 Packer and
   Session Manager artifacts. The image and CI publishing architecture must
   therefore be chosen explicitly; the present GitHub runner is `ubuntu-latest`.
-- Production logging is not read-only compatible: `build.sbt` directs
-  application and JVM GC logs to `/var/log/amigo`, and `conf/logback-PROD.xml`
-  has a rolling file appender as well as stdout. ECS requires logs on stdout
-  only and a read-only root filesystem.
+- Step 04 removes production application and JVM GC file logging; both now
+  write to stdout. Confirm the EC2 stdout collection path before merging, and
+  validate the app with a read-only root filesystem plus writable `/tmp` before
+  ECS traffic is enabled.
 - Dynamic configuration currently comes from SSM through
   `ConfigurationLoader`/`SSMConfigurationLocation`. Separately, EC2 user data
   downloads `amigo-service-account-cert.json` from the distribution bucket to
