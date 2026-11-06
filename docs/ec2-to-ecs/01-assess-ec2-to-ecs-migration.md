@@ -8,8 +8,8 @@ Packer launches to bake AMIs.
 
 ## Base Branch and Dependencies
 
-Base branch: `main`. This is the first selected migration step and has no
-preceding migration branch.
+Base branch: `ec2-to-ecs-00-add-target-group-type-to-response-headers`.
+This step follows the optional target-response-header step.
 
 The assessment uses repository configuration and user-provided information.
 No AWS account or deployment state was queried.
@@ -80,10 +80,9 @@ Downstream assessment supplied by the user:
   sufficient.
 - The user considers manual testing and automated deployment checks
   sufficient for migration validation. No observability was identified.
-- The question about how those checks run against CODE was skipped. The exact
-  manual test procedure, expected results, owners/contacts, and deployment
-  health signals are not yet recorded. Agree and document these with DevX and
-  Security before migration implementation or traffic shifting.
+- The agreed CODE check is to deploy via Riff-Raff, confirm the deployment
+  succeeded, and interact with the UI. Named individual contacts and
+  additional observability are not identified.
 
 ## Local Validation
 
@@ -94,6 +93,8 @@ Downstream assessment supplied by the user:
   were not read.
 - `gh api repos/guardian/amigo/actions/oidc/customization/sub` — succeeded;
   reported `use_immutable_subject: true`.
+- `sbt 'testOnly services.TargetHeaderFilterSpec'` — passed (3 tests) for the
+  preceding optional target-response-header step.
 - Application tests and CDK snapshot tests were not run because this step
   changes assessment documentation only.
 
@@ -102,12 +103,11 @@ Downstream assessment supplied by the user:
 - [x] DevX and Security are identified as downstream teams.
 - [x] The user considers built-in CI sufficient and accepts manual testing and
   automated deployment checks as the migration validation approach.
-- [ ] Agree the exact CODE smoke-test procedure, expected results, and
-  responsible reviewers with DevX and Security; this was not established in
-  the assessment conversation.
-- [ ] Agree the health signals and rollback/response owners for weighted
-  traffic shifting. No observability was identified; manual testing and
-  deployment checks need to be made concrete for the rollout.
+- [x] The user agreed the CODE check: deploy through Riff-Raff, confirm
+  successful deployment, and interact with the UI.
+- [ ] Agree the specific UI workflows, pass results, and reviewers with DevX
+  and Security. No observability was identified; define operational health
+  signals and rollback/response owners before weighted traffic shifting.
 - [x] `GU_ARTIFACTS_ROLE_ARN` is configured in the repository and immutable
   OIDC is enabled. The role's trust and usability by an approved publishing
   workflow still need verification by the responsible team.
@@ -129,12 +129,12 @@ Downstream assessment supplied by the user:
 
 ## Deployment and Verification
 
-No deployment or live verification was performed. Before any migration
-implementation, DevX and Security should agree the CODE manual test and the
-automated deployment health checks. A useful smoke-test proposal is to verify
-login and group authorization, inspect recipes/base images, run a controlled
-CODE bake, and confirm its status, logs, resulting AMI, and expected
-notifications. Treat this as a proposed test plan, not a result.
+No deployment or live verification was performed. The user-agreed CODE check
+is to deploy through Riff-Raff, confirm successful deployment, and interact
+with the UI. DevX and Security should specify which UI workflows and results
+constitute a pass. A CODE bake and verification of its status, logs, resulting
+AMI, and expected notifications are possible additional checks, but were not
+included in the user's agreed validation. No live result is claimed.
 
 The following read-only commands are for the service owner to run; they were
 not run by the agent. Replace `<AWS_PROFILE>` with the team's profile:
