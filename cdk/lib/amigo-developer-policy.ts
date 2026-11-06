@@ -3,7 +3,7 @@ import type {
 	GuStack,
 	GuStringParameter,
 } from '@guardian/cdk/lib/constructs/core';
-import { GuDeveloperPolicyExperimental } from '@guardian/cdk/lib/experimental/constructs/iam/policies';
+import { GuDeveloperPolicy } from '@guardian/cdk/lib/constructs/iam/policies';
 import { Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -26,7 +26,7 @@ export const createAmigoDeveloperPolicy = (
 	scope: GuStack,
 	packerInstanceProfile: GuStringParameter,
 	dataBucket: IBucket,
-): GuDeveloperPolicyExperimental => {
+): GuDeveloperPolicy => {
 	const account = Aws.ACCOUNT_ID;
 	const partition = Aws.PARTITION;
 	const stack = scope.stack;
@@ -65,7 +65,7 @@ export const createAmigoDeveloperPolicy = (
 		StringEquals: { 'ec2:Region': region },
 	};
 
-	return new GuDeveloperPolicyExperimental(scope, 'AmigoDeveloperPolicy', {
+	return new GuDeveloperPolicy(scope, 'AmigoDeveloperPolicy', {
 		grantId: 'amigo-dev',
 		friendlyName: 'Develop and test Amigo',
 		withoutPolicyChecks: true,

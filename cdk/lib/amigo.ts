@@ -1,4 +1,3 @@
-import { GuPlayApp } from '@guardian/cdk';
 import { AccessScope } from '@guardian/cdk/lib/constants';
 import type {
 	AppIdentity,
@@ -20,8 +19,10 @@ import {
 	GuAnghammaradSenderPolicy,
 	GuDescribeEC2Policy,
 	GuLogShippingPolicy,
+	GuPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
+import { GuLoadBalancedAppExperimental } from '@guardian/cdk/lib/experimental/patterns/gu-load-balanced-app';
 import { Aws, Duration, SecretValue } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
 import {
@@ -36,12 +37,7 @@ import {
 	ListenerAction,
 	UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import {
-	AccountPrincipal,
-	Effect,
-	Policy,
-	PolicyStatement,
-} from 'aws-cdk-lib/aws-iam';
+import { AccountPrincipal, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	ParameterDataType,
@@ -66,8 +62,8 @@ export class AmigoStack extends GuStack {
 	private readonly dataBucket: Bucket;
 	private readonly packerInstanceProfile: GuStringParameter;
 
-	private get appPolicy(): Policy {
-		return new Policy(this, 'AppPolicy', {
+	private get appPolicy(): GuPolicy {
+		return new GuPolicy(this, 'AppPolicy', {
 			policyName: 'app-policy',
 			statements: [
 				/*
@@ -192,7 +188,7 @@ export class AmigoStack extends GuStack {
 			reason: 'To prevent orphaning of the YAML defined bucket',
 		});
 
-		const ssmPolicy = new Policy(this, 'SSMPolicy', {
+		const ssmPolicy = new GuPolicy(this, 'SSMPolicy', {
 			statements: [
 				new PolicyStatement({
 					effect: Effect.ALLOW,
@@ -223,7 +219,7 @@ export class AmigoStack extends GuStack {
 			],
 		});
 
-		const policiesToAttachToRootRole: Policy[] = [
+		const additionalPolicies: GuPolicy[] = [
 			ssmPolicy,
 			GuLogShippingPolicy.getInstance(this),
 			new GuAllowPolicy(this, 'PackerPolicy', {
@@ -308,69 +304,68 @@ export class AmigoStack extends GuStack {
 			'amigo_1.0-latest_all.deb',
 		].join('/');
 
-		const guPlayApp = new GuPlayApp(this, {
+		const amigoApp = new GuLoadBalancedAppExperimental(this, {
 			...AmigoStack.app,
-			instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
-			userData: UserData.custom(
-				[
-					'#!/bin/bash -ev',
-					`wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
-					'mkdir /opt/packer',
-					'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
-					"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
+			applicationPort: 9000,
+			ec2Props: {
+				instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
+				userData: UserData.custom(
+					[
+						'#!/bin/bash -ev',
+						`wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
+						'mkdir /opt/packer',
+						'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
+						"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
 
-					/*
+						/*
 					By default, Packer installs plugins in the user's home directory using $HOME.
 					The value of $HOME is not yet known in the UserData script, so set PACKER_PLUGIN_PATH to a custom directory.
 					See https://developer.hashicorp.com/packer/docs/plugins/install#installation-directory.
 					 */
-					'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
-					'/opt/packer/packer plugins install github.com/hashicorp/amazon',
-					'/opt/packer/packer plugins install github.com/hashicorp/ansible',
-					// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
-					'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
+						'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
+						'/opt/packer/packer plugins install github.com/hashicorp/amazon',
+						'/opt/packer/packer plugins install github.com/hashicorp/ansible',
+						// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
+						'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
 
-					'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
-					'dpkg -i /tmp/session-manager-plugin.deb',
+						'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
+						'dpkg -i /tmp/session-manager-plugin.deb',
 
-					'mkdir /amigo',
-					`aws --region eu-west-1 s3 cp s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/amigo-service-account-cert.json /amigo/`,
+						'mkdir /amigo',
+						`aws --region eu-west-1 s3 cp s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/amigo-service-account-cert.json /amigo/`,
 
-					`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
-					'dpkg -i /tmp/amigo.deb',
-				].join('\n'),
-			),
+						`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
+						'dpkg -i /tmp/amigo.deb',
+					].join('\n'),
+				),
+				scaling: { minimumInstances: 1 },
+				applicationLogging: { enabled: true },
+				instanceMetricGranularity,
+			},
 			access: {
 				scope: AccessScope.PUBLIC,
 			},
 			certificateProps: { domainName },
-			scaling: { minimumInstances: 1 },
 			monitoringConfiguration: {
 				noMonitoring: true,
 			},
-			roleConfiguration: {
-				additionalPolicies: policiesToAttachToRootRole,
-			},
-			applicationLogging: {
-				enabled: true,
-			},
-			instanceMetricGranularity,
+			additionalPolicies,
 		});
 
 		// Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
 		const albEgressSg = new GuHttpsEgressSecurityGroup(this, 'IdP-access', {
 			app: AmigoStack.app.app,
-			vpc: guPlayApp.vpc,
+			vpc: amigoApp.vpc,
 		});
 
-		guPlayApp.loadBalancer.addSecurityGroup(albEgressSg);
+		amigoApp.loadBalancer.addSecurityGroup(albEgressSg);
 
 		// This parameter is used by https://github.com/guardian/waf
 		new StringParameter(this, 'AlbSsmParam', {
 			parameterName: `/infosec/waf/services/${this.stage}/amigo-alb-arn`,
 			description: `The arn of the ALB for amigo-${this.stage}. N.B. this parameter is created via cdk`,
 			simpleName: false,
-			stringValue: guPlayApp.loadBalancer.loadBalancerArn,
+			stringValue: amigoApp.loadBalancer.loadBalancerArn,
 			tier: ParameterTier.STANDARD,
 			dataType: ParameterDataType.TEXT,
 		});
@@ -379,7 +374,12 @@ export class AmigoStack extends GuStack {
 			description: 'Google OAuth client ID',
 		});
 
-		guPlayApp.listener.addAction('Google Auth', {
+		const ec2TargetGroup = amigoApp.targetGroups.ec2;
+		if (!ec2TargetGroup) {
+			throw new Error('AMIgo EC2 target group was not created');
+		}
+
+		amigoApp.listener.addAction('Google Auth', {
 			action: ListenerAction.authenticateOidc({
 				authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
 				issuer: 'https://accounts.google.com',
@@ -394,7 +394,7 @@ export class AmigoStack extends GuStack {
 				clientSecret: SecretValue.secretsManager(
 					`/${this.stage}/deploy/amigo/clientSecret`,
 				),
-				next: ListenerAction.forward([guPlayApp.targetGroup]),
+				next: ListenerAction.forward([ec2TargetGroup]),
 			}),
 		});
 
@@ -402,7 +402,7 @@ export class AmigoStack extends GuStack {
 			app: AmigoStack.app.app,
 			domainName: domainName,
 			ttl: Duration.hours(1),
-			resourceRecord: guPlayApp.loadBalancer.loadBalancerDnsName,
+			resourceRecord: amigoApp.loadBalancer.loadBalancerDnsName,
 		});
 	}
 }
