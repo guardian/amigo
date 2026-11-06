@@ -971,6 +971,7 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       "GuSubnetListParameter",
       "GuSubnetListParameter",
       "GuLoadBalancedAppExperimental",
+      "GuListBucketPolicy",
       "GuInstanceRole",
       "GuSsmSshPolicy",
       "GuGetDistributablePolicy",
@@ -1473,6 +1474,46 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "ToPort": 9000,
       },
       "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "GuListBucketPolicyAmigo094DC318": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:ListBucket",
+              "Condition": {
+                "StringLike": {
+                  "s3:prefix": "deploy/PROD/amigo/conf/",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuListBucketPolicyAmigo094DC318",
+        "Roles": [
+          {
+            "Ref": "InstanceRoleAmigo75944747",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "GuLogShippingPolicy981BFE5A": {
       "Properties": {
@@ -2204,12 +2245,12 @@ export PACKER_PLUGIN_PATH=/opt/packer/.plugins
 echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment
 wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
 dpkg -i /tmp/session-manager-plugin.deb
-mkdir /amigo
-aws --region eu-west-1 s3 cp s3://",
+mkdir -p /etc/amigo
+aws --region eu-west-1 s3 sync s3://",
                   {
                     "Ref": "DistributionBucketName",
                   },
-                  "/deploy/PROD/amigo/conf/amigo-service-account-cert.json /amigo/
+                  "/deploy/PROD/amigo/conf/ /etc/amigo/
 aws --region eu-west-1 s3 cp s3://",
                   {
                     "Ref": "DistributionBucketName",
