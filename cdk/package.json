@@ -12,7 +12,7 @@
 		"diff": "cdk diff --path-metadata false --version-reporting false"
 	},
 	"devDependencies": {
-		"@guardian/cdk": "63.6.2",
+		"@guardian/cdk": "66.0.0",
 		"@guardian/eslint-config": "^16.0.0",
 		"@guardian/prettier": "11.0.0",
 		"@guardian/tsconfig": "^2.0.0",
