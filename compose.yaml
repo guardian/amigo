@@ -36,7 +36,7 @@ services:
     tmpfs:
       - /tmp:rw,nosuid,size=1g
     volumes:
-      - amigo-config:/etc/amigo:ro
+      - amigo-config:/etc/gu/s3-sync:ro
 
 volumes:
   amigo-config:

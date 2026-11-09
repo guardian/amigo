@@ -28,9 +28,11 @@ trust and publication have not been verified by this change.
   runner and publish the resulting image to ECR with the team's approved
   action.
 - Add Compose services that fetch the existing CODE `amigo/conf/` prefix
-  into a named volume and mount it read-only at `/etc/amigo`. Credentials
-  are passed explicitly through environment variables, and downloaded
-  configuration stays outside the repository.
+  into a named volume and mount it read-only at `/etc/gu/s3-sync/`, matching
+  the path established by step 03 and intended for the ECS S3 configuration
+  mount. Credentials are passed explicitly through environment variables,
+  and downloaded configuration stays outside the repository. SSM-based
+  application configuration continues to use its existing loading path.
 - Set the local app container's root filesystem read-only with writable
   `/tmp`, consistent with the previously identified Packer scratch-file
   requirement.
@@ -54,7 +56,8 @@ trust and publication have not been verified by this change.
   `/tmp` is writable, and the packaged application directory is not writable.
   This checked image tooling/filesystem only; it did not start AMIgo.
 - `AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test DISTRIBUTION_BUCKET=example docker compose config --quiet`
-  — passed without AWS access.
+  — passed without AWS access; revalidated after aligning the mount with
+  `/etc/gu/s3-sync/`.
 - `git diff --check` — passed.
 - The image startup check with a read-only filesystem is blocked unless
   isolated SSM/AWS dependency fixtures and a valid local configuration fixture

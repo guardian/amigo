@@ -99,11 +99,14 @@ sbt "Docker / publishLocal"
 ```
 
 Compose downloads CODE configuration into a Docker-managed volume, then mounts
-it read-only at `/etc/amigo`. It does not write downloaded configuration into
-the repository. Export short-lived credentials for the `amigo-dev` developer
-policy before starting Compose; the same credentials are passed explicitly to
-the app and the configuration-fetching sidecar. Set `DISTRIBUTION_BUCKET` to
-the distribution bucket used by the deployment:
+it read-only at `/etc/gu/s3-sync`, matching the S3 configuration path used by
+the EC2 deployment and intended for the ECS mount. SSM-based application
+configuration continues to load through its existing path. Compose does not
+write downloaded configuration into the repository. Export short-lived
+credentials for the `amigo-dev` developer policy before starting Compose; the
+same credentials are passed explicitly to the app and the configuration-fetching
+sidecar. Set `DISTRIBUTION_BUCKET` to the distribution bucket used by the
+deployment:
 
 ```shell
 export AWS_ACCESS_KEY_ID=...
