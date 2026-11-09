@@ -2,14 +2,6 @@
 
 set -e
 
-(
- cd cdk
- npm ci
- npm run lint
- npm test
- npm run synth
-)
-
 sbt clean scalafmtSbtCheck scalafmtCheckAll compile test
 
 # Create debian package of AMIgo Play app

@@ -6,9 +6,17 @@ import { ImageCopierLambda } from '../lib/image-copier-lambda';
 
 const app = new App();
 
+const imageDigest = process.env.IMAGE_DIGEST;
+if (!imageDigest) {
+	throw new Error(
+		'Set IMAGE_DIGEST to the digest published by the image CI step',
+	);
+}
+
 const stageAgnosticProps = {
 	stack: 'deploy',
 	migratedFromCloudFormation: true,
+	imageDigest,
 };
 
 export const amigoCodeProps: AmigoProps = {

@@ -24,7 +24,10 @@ import {
 	GuPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
-import { GuLoadBalancedAppExperimental } from '@guardian/cdk/lib/experimental/patterns/gu-load-balanced-app';
+import {
+	getDefaultS3ConfigMount,
+	GuLoadBalancedAppExperimental,
+} from '@guardian/cdk/lib/experimental/patterns/gu-load-balanced-app';
 import { Aws, Duration, SecretValue } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
 import {
@@ -35,12 +38,16 @@ import {
 	Port,
 	UserData,
 } from 'aws-cdk-lib/aws-ec2';
+import { CfnTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import type { Volume } from 'aws-cdk-lib/aws-ecs';
 import {
+	ApplicationListenerRule,
 	ListenerAction,
 	UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AccountPrincipal, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
+import { CfnFileSystem } from 'aws-cdk-lib/aws-s3files';
 import {
 	ParameterDataType,
 	ParameterTier,
@@ -55,6 +62,7 @@ const packerVersion = readFileSync(
 
 export interface AmigoProps extends GuStackProps {
 	domainName: string;
+	imageDigest: string;
 
 	instanceMetricGranularity: '1Minute' | '5Minute';
 }
@@ -146,7 +154,10 @@ export class AmigoStack extends GuStack {
 	constructor(scope: App, id: string, props: AmigoProps) {
 		super(scope, id, props);
 
-		const { domainName, instanceMetricGranularity } = props;
+		const { domainName, instanceMetricGranularity, imageDigest } = props;
+		if (!/^sha256:[a-f0-9]{64}$/.test(imageDigest)) {
+			throw new Error('AMIgo requires an immutable SHA-256 image digest');
+		}
 
 		this.packerInstanceProfile = new GuStringParameter(
 			this,
@@ -312,6 +323,15 @@ export class AmigoStack extends GuStack {
 		const amigoApp = new GuLoadBalancedAppExperimental(this, {
 			...AmigoStack.app,
 			applicationPort: 9000,
+			ecsProps: {
+				imageIdentifier: imageDigest,
+				repositoryName: 'guardian/amigo/amigo',
+				cpu: 2048,
+				memoryLimitMiB: 4096,
+				scaling: { minimumTasks: 1, maximumTasks: 1 },
+				s3Config: getDefaultS3ConfigMount(this, AmigoStack.app),
+			},
+			targetGroupWeights: { ec2: 100, ecs: 0 },
 			ec2Props: {
 				instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
 				userData: UserData.custom(
@@ -358,6 +378,48 @@ export class AmigoStack extends GuStack {
 			additionalPolicies,
 		});
 
+		const taskDefinition = amigoApp.ecsService?.taskDefinition;
+		const appContainer = taskDefinition?.defaultContainer;
+		if (!taskDefinition || !appContainer) {
+			throw new Error(
+				'AMIgo ECS task or application container was not created',
+			);
+		}
+
+		const tmpVolume: Volume = { name: 'tmp-volume' };
+		taskDefinition.addVolume(tmpVolume);
+		appContainer.addMountPoints({
+			containerPath: '/tmp',
+			sourceVolume: tmpVolume.name,
+			readOnly: false,
+		});
+
+		const cfnTaskDefinition = taskDefinition.node.defaultChild;
+		if (!(cfnTaskDefinition instanceof CfnTaskDefinition)) {
+			throw new Error(
+				'AMIgo ECS task definition has no CloudFormation resource',
+			);
+		}
+		const configFileSystem = this.node.findChild('S3FilesFileSystem');
+		if (!(configFileSystem instanceof CfnFileSystem)) {
+			throw new Error(
+				'AMIgo S3 Files configuration filesystem was not created',
+			);
+		}
+		// GuCDK v66 overrides Volumes, hiding volumes registered through addVolume.
+		// Keep its logging and S3 Files volumes alongside writable scratch space.
+		cfnTaskDefinition.addPropertyOverride('Volumes', [
+			{ Name: 'logging-volume' },
+			{
+				Name: 's3files-volume',
+				S3FilesVolumeConfiguration: {
+					FileSystemArn: configFileSystem.attrFileSystemArn,
+					RootDirectory: '/',
+				},
+			},
+			{ Name: tmpVolume.name },
+		]);
+
 		// Ensure LB can egress to 443 (for Google endpoints) for OIDC flow.
 		const albEgressSg = new GuHttpsEgressSecurityGroup(this, 'IdP-access', {
 			app: AmigoStack.app.app,
@@ -381,12 +443,13 @@ export class AmigoStack extends GuStack {
 		});
 
 		const ec2TargetGroup = amigoApp.targetGroups.ec2;
-		if (!ec2TargetGroup) {
-			throw new Error('AMIgo EC2 target group was not created');
+		const ecsTargetGroup = amigoApp.targetGroups.ecs;
+		if (!ec2TargetGroup || !ecsTargetGroup) {
+			throw new Error('AMIgo EC2 or ECS target group was not created');
 		}
 
-		amigoApp.listener.addAction('Google Auth', {
-			action: ListenerAction.authenticateOidc({
+		const authenticate = (next: ListenerAction) =>
+			ListenerAction.authenticateOidc({
 				authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
 				issuer: 'https://accounts.google.com',
 				scope: 'openid',
@@ -400,9 +463,28 @@ export class AmigoStack extends GuStack {
 				clientSecret: SecretValue.secretsManager(
 					`/${this.stage}/deploy/amigo/clientSecret`,
 				),
-				next: ListenerAction.forward([ec2TargetGroup]),
-			}),
+				next,
+			});
+
+		amigoApp.listener.addAction('Google Auth', {
+			action: authenticate(
+				ListenerAction.weightedForward([
+					{ targetGroup: ec2TargetGroup, weight: 100 },
+					{ targetGroup: ecsTargetGroup, weight: 0 },
+				]),
+			),
 		});
+
+		for (const [ruleId, targetGroup] of [
+			['DeterministicRouteToEc2Rule', ec2TargetGroup],
+			['DeterministicRouteToEcsRule', ecsTargetGroup],
+		] as const) {
+			const rule = amigoApp.listener.node.findChild(ruleId);
+			if (!(rule instanceof ApplicationListenerRule)) {
+				throw new Error(`AMIgo routing rule ${ruleId} was not created`);
+			}
+			rule.configureAction(authenticate(ListenerAction.forward([targetGroup])));
+		}
 
 		new GuCname(this, 'DnsRecord', {
 			app: AmigoStack.app.app,
