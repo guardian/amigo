@@ -292,7 +292,7 @@ class AppComponents(
     val serviceAccountCertPath =
       if (stage == "DEV")
         configuration.get[String]("auth.google.serviceAccountCertPath")
-      else "/etc/amigo/amigo-service-account-cert.json"
+      else "/etc/gu/s3-sync/amigo-service-account-cert.json"
     val serviceAccountCert = Try(new FileInputStream(serviceAccountCertPath))
       .getOrElse(
         throw new RuntimeException(

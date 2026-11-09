@@ -2245,12 +2245,12 @@ export PACKER_PLUGIN_PATH=/opt/packer/.plugins
 echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment
 wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb
 dpkg -i /tmp/session-manager-plugin.deb
-mkdir -p /etc/amigo
+mkdir -p /etc/gu/s3-sync
 aws --region eu-west-1 s3 sync s3://",
                   {
                     "Ref": "DistributionBucketName",
                   },
-                  "/deploy/PROD/amigo/conf/ /etc/amigo/
+                  "/deploy/PROD/amigo/conf/ /etc/gu/s3-sync/
 aws --region eu-west-1 s3 cp s3://",
                   {
                     "Ref": "DistributionBucketName",

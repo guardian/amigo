@@ -10,10 +10,16 @@ ssm() { aws ssm get-parameter --name "$1" --query Parameter.Value --output text;
 BUCKET=$(ssm /CODE/deploy/amigo/aws.distributionBucket)
 CERT_PATH=$(ssm /DEV/deploy/amigo/auth.google.serviceAccountCertPath)
 CERT_DIR=$(dirname "$CERT_PATH")
-SYNCED_CERT="$CERT_DIR/amigo-service-account-cert.json"
+SYNC_DIR=/etc/gu/s3-sync
+SYNCED_CERT="$SYNC_DIR/amigo-service-account-cert.json"
 
+sudo install -d -o "$(id -u)" -g "$(id -g)" "$SYNC_DIR"
 mkdir -p "$CERT_DIR"
-aws s3 sync "s3://$BUCKET/deploy/CODE/amigo/conf/" "$CERT_DIR/"
+aws s3 sync "s3://$BUCKET/deploy/CODE/amigo/conf/" "$SYNC_DIR/"
 if [[ "$CERT_PATH" != "$SYNCED_CERT" ]]; then
-	cp "$SYNCED_CERT" "$CERT_PATH"
+	if [[ -d "$CERT_PATH" && ! -L "$CERT_PATH" ]]; then
+		echo "Certificate path is a directory, expected a file: $CERT_PATH" >&2
+		exit 1
+	fi
+	ln -sfn "$SYNCED_CERT" "$CERT_PATH"
 fi

@@ -331,8 +331,8 @@ export class AmigoStack extends GuStack {
 						'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
 						'dpkg -i /tmp/session-manager-plugin.deb',
 
-						'mkdir -p /etc/amigo',
-						`aws --region eu-west-1 s3 sync s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/ /etc/amigo/`,
+						'mkdir -p /etc/gu/s3-sync',
+						`aws --region eu-west-1 s3 sync s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/ /etc/gu/s3-sync/`,
 
 						`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
 						'dpkg -i /tmp/amigo.deb',
