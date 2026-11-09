@@ -91,6 +91,8 @@ time of writing:
 ### Running the app in Docker
 
 The image targets Linux ARM64, matching the current AMIgo EC2 architecture.
+The root `packer-version` file sets the Packer version for both the EC2
+deployment and the Docker image.
 Build and run it on an ARM64 Docker host (or an ARM64 host configured for
 emulation):
 

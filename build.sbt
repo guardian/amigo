@@ -48,7 +48,7 @@ lazy val root = (project in file("."))
       if (userIndex < 0) sys.error("Docker image has no runtime USER command")
 
       val runtimeUser = commands(userIndex)
-      val packerVersion = "1.13.1"
+      val packerVersion = IO.read(baseDirectory.value / "packer-version").trim
       val imageTools = Seq(
         Cmd("USER", "root"),
         Cmd(
