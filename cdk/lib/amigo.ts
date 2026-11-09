@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { AccessScope } from '@guardian/cdk/lib/constants';
 import type {
 	AppIdentity,
@@ -46,7 +48,10 @@ import {
 } from 'aws-cdk-lib/aws-ssm';
 import { createAmigoDeveloperPolicy } from './amigo-developer-policy';
 
-const packerVersion = '1.13.1';
+const packerVersion = readFileSync(
+	join(__dirname, '../../packer-version'),
+	'utf8',
+).trim();
 
 export interface AmigoProps extends GuStackProps {
 	domainName: string;

@@ -1,0 +1,42 @@
+services:
+  app-config:
+    image: public.ecr.aws/aws-cli/aws-cli:latest
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      AWS_DEFAULT_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Export AWS_ACCESS_KEY_ID before starting Compose}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Export AWS_SECRET_ACCESS_KEY before starting Compose}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+      DISTRIBUTION_BUCKET: ${DISTRIBUTION_BUCKET:?Set DISTRIBUTION_BUCKET before starting Compose}
+    command:
+      - |
+        set -eu
+        aws s3 sync "s3://${DISTRIBUTION_BUCKET}/deploy/CODE/amigo/conf/" /config/ --delete
+        if [ ! -s /config/amigo-service-account-cert.json ]; then
+          echo "Missing or empty configuration file: amigo-service-account-cert.json" >&2
+          exit 1
+        fi
+    volumes:
+      - amigo-config:/config
+
+  amigo:
+    image: amigo:1.0-latest
+    pull_policy: never
+    depends_on:
+      app-config:
+        condition: service_completed_successfully
+    environment:
+      AWS_DEFAULT_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Export AWS_ACCESS_KEY_ID before starting Compose}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Export AWS_SECRET_ACCESS_KEY before starting Compose}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+    ports:
+      - "127.0.0.1:9000:9000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=1g
+    volumes:
+      - amigo-config:/etc/gu/s3-sync:ro
+
+volumes:
+  amigo-config:
