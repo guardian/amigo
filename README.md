@@ -88,6 +88,37 @@ time of writing:
 * [asdf](https://asdf-vm.com/)
 * [sdkman](https://sdkman.io/usage)
 
+### Running the app in Docker
+
+The image targets Linux ARM64, matching the current AMIgo EC2 architecture.
+Build and run it on an ARM64 Docker host (or an ARM64 host configured for
+emulation):
+
+```shell
+sbt "Docker / publishLocal"
+```
+
+Compose downloads CODE configuration into a Docker-managed volume, then mounts
+it read-only at `/etc/amigo`. It does not write downloaded configuration into
+the repository. Export short-lived credentials for the `amigo-dev` developer
+policy before starting Compose; the same credentials are passed explicitly to
+the app and the configuration-fetching sidecar. Set `DISTRIBUTION_BUCKET` to
+the distribution bucket used by the deployment:
+
+```shell
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=... # when using temporary credentials
+export DISTRIBUTION_BUCKET=...
+docker compose up
+```
+
+The app listens on `http://localhost:9000`. The app container has a read-only
+root filesystem and writable temporary storage at `/tmp`. Local startup still
+requires access to AMIgo's configured SSM and AWS dependencies, as well as a
+valid CODE configuration prefix. Stop with `docker compose down`; to remove
+the downloaded configuration volume as well, run `docker compose down --volumes`.
+
 <details>
 <summary>Previous run locally advice</summary>
 
