@@ -14,9 +14,7 @@ Universal / javaOptions ++= Seq(
   "-J-XX:MaxMetaspaceSize=300m",
   "-J-DpackerHome=/opt/packer",
   "-J-Dlogger.resource=logback-PROD.xml",
-  s"-J-Dlogs.home=/var/log/${packageName.value}",
-  "-J-Xlog:gc*",
-  s"-J-Xlog:gc:/var/log/${packageName.value}/gc.log"
+  "-J-Xlog:gc*"
 )
 
 def env(propName: String): String =

@@ -7,6 +7,7 @@ import play.api.{Application, ApplicationLoader, Configuration, Mode}
 import services.Loggable
 import software.amazon.awssdk.auth.credentials.{
   AwsCredentialsProviderChain,
+  ContainerCredentialsProvider,
   InstanceProfileCredentialsProvider,
   ProfileCredentialsProvider
 }
@@ -24,6 +25,7 @@ class AppLoader extends ApplicationLoader with Loggable {
     val credentialsProvider = AwsCredentialsProviderChain.of(
       ProfileCredentialsProvider.create("deployTools"),
       ProfileCredentialsProvider.create(),
+      ContainerCredentialsProvider.create(),
       InstanceProfileCredentialsProvider.create()
     )
     val isDev = context.environment.mode == Mode.Dev
