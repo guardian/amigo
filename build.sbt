@@ -34,7 +34,7 @@ lazy val root = (project in file("."))
     Universal / packageName := normalizedName.value,
     maintainer := "Guardian Developer Experience <devx@theguardian.com>",
     Debian / serverLoading := Some(Systemd),
-    dockerBaseImage := "amazoncorretto:21-al2023",
+    dockerBaseImage := "eclipse-temurin:21-jre-jammy",
     dockerExposedPorts := Seq(9000),
     Docker / publishLocal / aggregate := false,
     Docker / dockerCommands := {
@@ -44,26 +44,21 @@ lazy val root = (project in file("."))
       if (userCreationIndex < 0)
         sys.error("Docker image has no runtime-user creation command")
 
-      val commandsWithUserUtils = commands.patch(
-        userCreationIndex,
-        Seq(Cmd("RUN", "dnf install -y shadow-utils && dnf clean all")),
-        0
-      )
-      val userIndex =
-        commandsWithUserUtils.lastIndexWhere(_.makeContent.startsWith("USER "))
+      val userIndex = commands.lastIndexWhere(_.makeContent.startsWith("USER "))
       if (userIndex < 0) sys.error("Docker image has no runtime USER command")
 
-      val runtimeUser = commandsWithUserUtils(userIndex)
+      val runtimeUser = commands(userIndex)
       val packerVersion = "1.13.1"
       val imageTools = Seq(
         Cmd("USER", "root"),
-        Cmd("RUN", "dnf remove -y shadow-utils && dnf clean all"),
         Cmd(
           "RUN",
-          s"""dnf install -y unzip &&
+          s"""apt-get update &&
+             |apt-get install -y --no-install-recommends curl unzip &&
              |curl -fsSLo /tmp/packer.zip https://releases.hashicorp.com/packer/$packerVersion/packer_${packerVersion}_linux_arm64.zip &&
              |mkdir -p /opt/packer && unzip -q /tmp/packer.zip -d /opt/packer &&
-             |rm -f /tmp/packer.zip && dnf clean all && rm -rf /var/cache/dnf""".stripMargin
+             |rm -f /tmp/packer.zip &&
+             |apt-get clean && rm -rf /var/lib/apt/lists/*""".stripMargin
             .replace('\n', ' ')
         ),
         Cmd(
@@ -74,12 +69,14 @@ lazy val root = (project in file("."))
         ),
         Cmd(
           "RUN",
-          "dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_arm64/session-manager-plugin.rpm && " +
-            "dnf clean all && rm -rf /var/cache/dnf"
+          "curl -fsSLo /tmp/session-manager-plugin.deb " +
+            "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb && " +
+            "apt-get update && apt-get install -y /tmp/session-manager-plugin.deb && " +
+            "rm -f /tmp/session-manager-plugin.deb && apt-get clean && rm -rf /var/lib/apt/lists/*"
         ),
         runtimeUser
       )
-      commandsWithUserUtils.patch(userIndex, imageTools, 1)
+      commands.patch(userIndex, imageTools, 1)
     },
     // Include the roles dir in the tarball for now
     Universal / mappings ++= (file("roles") ** "*").get.map { f =>

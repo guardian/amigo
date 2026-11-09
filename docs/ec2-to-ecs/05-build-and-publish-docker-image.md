@@ -19,9 +19,11 @@ trust and publication have not been verified by this change.
 ## Proposed Changes
 
 - Enable sbt-native-packager's Docker plugin and build a Java 21 image for
-  port 9000.
+  port 9000 on Ubuntu 22.04 ARM64, consistent with the application's existing
+  Ubuntu ARM64 runtime tooling.
 - Include ARM64 Packer 1.13.1, the HashiCorp Amazon and Ansible Packer
-  plugins, and the AWS Session Manager plugin required by AMI bakes.
+  plugins, and the Ubuntu ARM64 AWS Session Manager `.deb` package required
+  by AMI bakes.
 - Build the image locally in `script/ci`; run that CI job on an ARM64 GitHub
   runner and publish the resulting image to ECR with the team's approved
   action.
@@ -40,7 +42,11 @@ trust and publication have not been verified by this change.
 
 - `sbt -batch clean scalafmtSbtCheck scalafmtCheckAll compile test 'Debian / packageBin' 'Docker / publishLocal'`
   — passed; Scala/SBT formatting, compilation, all 50 tests, Debian packaging,
-  and the local Docker image build succeeded.
+  and the initial local Docker image build succeeded.
+- `sbt -batch 'Docker / publishLocal'` — passed after switching the image to
+  Ubuntu 22.04 ARM64 and the matching AWS Session Manager `.deb`.
+- `sbt -batch scalafmtCheckAll test` — passed after the Ubuntu image
+  adjustment; all 50 tests succeeded.
 - `docker image inspect amigo:1.0-latest --format '{{.Os}}/{{.Architecture}}'`
   — passed; the image reports `linux/arm64`.
 - `docker run --rm --read-only --tmpfs /tmp:rw,nosuid,size=1g --entrypoint /bin/sh amigo:1.0-latest -c 'id && /opt/packer/packer version && session-manager-plugin --version && touch /tmp/write-test && test -w /tmp && test ! -w /opt/docker && echo "read-only root and writable /tmp verified"'`
