@@ -319,6 +319,7 @@ export class AmigoStack extends GuStack {
 			'amigo_1.0-latest_all.deb',
 		].join('/');
 
+		const targetGroupWeights = { ec2: 99, ecs: 1 };
 		const amigoApp = new GuLoadBalancedAppExperimental(this, {
 			...AmigoStack.app,
 			applicationPort: 9000,
@@ -330,7 +331,7 @@ export class AmigoStack extends GuStack {
 				scaling: { minimumTasks: 1, maximumTasks: 1 },
 				s3Config: getDefaultS3ConfigMount(this, AmigoStack.app),
 			},
-			targetGroupWeights: { ec2: 100, ecs: 0 },
+			targetGroupWeights,
 			ec2Props: {
 				instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
 				userData: UserData.custom(
@@ -482,8 +483,8 @@ export class AmigoStack extends GuStack {
 		amigoApp.listener.addAction('Google Auth', {
 			action: authenticate(
 				ListenerAction.weightedForward([
-					{ targetGroup: ec2TargetGroup, weight: 100 },
-					{ targetGroup: ecsTargetGroup, weight: 0 },
+					{ targetGroup: ec2TargetGroup, weight: targetGroupWeights.ec2 },
+					{ targetGroup: ecsTargetGroup, weight: targetGroupWeights.ecs },
 				]),
 			),
 		});
