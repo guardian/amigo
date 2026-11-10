@@ -23,7 +23,6 @@ export const amigoCodeProps: AmigoProps = {
 	...stageAgnosticProps,
 	stage: 'CODE',
 	domainName: 'amigo.code.dev-gutools.co.uk',
-	instanceMetricGranularity: '5Minute',
 	cloudFormationStackName: 'amigo-CODE',
 	env: { region: 'eu-west-1' },
 };
@@ -34,7 +33,6 @@ export const amigoProdProps: AmigoProps = {
 	...stageAgnosticProps,
 	stage: 'PROD',
 	domainName: 'amigo.gutools.co.uk',
-	instanceMetricGranularity: '1Minute',
 	cloudFormationStackName: 'amigo-PROD',
 	env: { region: 'eu-west-1' },
 };

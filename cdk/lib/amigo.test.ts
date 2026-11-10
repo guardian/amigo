@@ -5,7 +5,7 @@ import { AmigoStack } from './amigo';
 
 describe('The Amigo stack', () => {
 	it.each([amigoCodeProps, amigoProdProps])(
-		'keeps the $stage root and configuration read-only with writable scratch space',
+		'uses ECS only in $stage, retaining bake infrastructure and read-only mounts with scratch space',
 		(props) => {
 			const template = Template.fromStack(
 				new AmigoStack(new App(), `AMIgo-${props.stage}-volumes`, props),
@@ -62,40 +62,35 @@ describe('The Amigo stack', () => {
 				Prefix: `deploy/${props.stage}/amigo/conf/`,
 			});
 			template.resourceCountIs('AWS::ECS::Service', 1);
-			template.resourceCountIs('AWS::AutoScaling::AutoScalingGroup', 1);
+			template.resourceCountIs('AWS::AutoScaling::AutoScalingGroup', 0);
+			template.resourceCountIs('AWS::AutoScaling::LaunchConfiguration', 0);
+			template.resourceCountIs('AWS::EC2::LaunchTemplate', 0);
+			template.resourceCountIs('AWS::IAM::InstanceProfile', 0);
+			template.resourceCountIs('AWS::ElasticLoadBalancingV2::TargetGroup', 1);
+			template.resourceCountIs('AWS::ElasticLoadBalancingV2::ListenerRule', 0);
+			template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+				GroupName: `amigo-packer-${props.stage}`,
+			});
+			expect(template.findResources('AWS::EC2::SecurityGroup')).toHaveProperty(
+				'PackerSecurityGroup',
+			);
+			template.hasParameter('PackerInstanceProfile', {
+				Type: 'String',
+			});
+			expect(template.toJSON().Parameters).not.toHaveProperty('AMIAmigo');
+			expect(template.toJSON().Resources).not.toHaveProperty(
+				'InstanceRoleAmigo75944747',
+			);
 			template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
 				Port: 443,
 				DefaultActions: [
 					Match.objectLike({ Type: 'authenticate-oidc' }),
 					Match.objectLike({
 						Type: 'forward',
-						ForwardConfig: {
-							TargetGroups: [
-								{
-									TargetGroupArn: { Ref: 'TargetGroupAmigoB9501F07' },
-									Weight: 0,
-								},
-								{
-									TargetGroupArn: { Ref: 'AmigoEcsTargetGroupAmigoF6C987CA' },
-									Weight: 100,
-								},
-							],
-						},
+						TargetGroupArn: { Ref: 'AmigoEcsTargetGroupAmigoF6C987CA' },
 					}),
 				],
 			});
-			for (const priority of [10, 11]) {
-				template.hasResourceProperties(
-					'AWS::ElasticLoadBalancingV2::ListenerRule',
-					{
-						Priority: priority,
-						Actions: [
-							Match.objectLike({ Type: 'authenticate-oidc' }),
-							Match.objectLike({ Type: 'forward' }),
-						],
-					},
-				);
-			}
 		},
 	);
 

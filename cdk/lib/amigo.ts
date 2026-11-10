@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { AccessScope } from '@guardian/cdk/lib/constants';
 import type {
 	AppIdentity,
@@ -30,18 +28,10 @@ import {
 } from '@guardian/cdk/lib/experimental/patterns/gu-load-balanced-app';
 import { Aws, Duration, SecretValue } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
-import {
-	InstanceClass,
-	InstanceSize,
-	InstanceType,
-	Peer,
-	Port,
-	UserData,
-} from 'aws-cdk-lib/aws-ec2';
+import { Peer, Port } from 'aws-cdk-lib/aws-ec2';
 import { CfnTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import type { Volume } from 'aws-cdk-lib/aws-ecs';
 import {
-	ApplicationListenerRule,
 	ListenerAction,
 	UnauthenticatedAction,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -54,16 +44,9 @@ import {
 } from 'aws-cdk-lib/aws-ssm';
 import { createAmigoDeveloperPolicy } from './amigo-developer-policy';
 
-const packerVersion = readFileSync(
-	join(__dirname, '../../packer-version'),
-	'utf8',
-).trim();
-
 export interface AmigoProps extends GuStackProps {
 	domainName: string;
 	imageDigest: string;
-
-	instanceMetricGranularity: '1Minute' | '5Minute';
 }
 
 export class AmigoStack extends GuStack {
@@ -153,7 +136,7 @@ export class AmigoStack extends GuStack {
 	constructor(scope: App, id: string, props: AmigoProps) {
 		super(scope, id, props);
 
-		const { domainName, instanceMetricGranularity, imageDigest } = props;
+		const { domainName, imageDigest } = props;
 		if (!/^sha256:[a-f0-9]{64}$/.test(imageDigest)) {
 			throw new Error('AMIgo requires an immutable SHA-256 image digest');
 		}
@@ -308,18 +291,6 @@ export class AmigoStack extends GuStack {
 				"Keeping the same resource for simplicity. We would otherwise have to update the stack when there are no ongoing bakes, i.e. when the security group isn't in use.",
 		});
 
-		const distBucket =
-			GuDistributionBucketParameter.getInstance(this).valueAsString;
-
-		const artifactPath = [
-			distBucket,
-			this.stack,
-			this.stage,
-			AmigoStack.app.app,
-			'amigo_1.0-latest_all.deb',
-		].join('/');
-
-		const targetGroupWeights = { ec2: 0, ecs: 100 };
 		const amigoApp = new GuLoadBalancedAppExperimental(this, {
 			...AmigoStack.app,
 			applicationPort: 9000,
@@ -330,43 +301,6 @@ export class AmigoStack extends GuStack {
 				memoryLimitMiB: 4096,
 				scaling: { minimumTasks: 1, maximumTasks: 1 },
 				s3Config: getDefaultS3ConfigMount(this, AmigoStack.app),
-			},
-			targetGroupWeights,
-			ec2Props: {
-				instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MEDIUM),
-				userData: UserData.custom(
-					[
-						'#!/bin/bash -ev',
-						`wget -P /tmp https://releases.hashicorp.com/packer/${packerVersion}/packer_${packerVersion}_linux_arm64.zip`,
-						'mkdir /opt/packer',
-						'unzip -d /opt/packer /tmp/packer_*_linux_arm64.zip',
-						"echo 'export PATH=${!PATH}:/opt/packer' > /etc/profile.d/packer.sh",
-
-						/*
-					By default, Packer installs plugins in the user's home directory using $HOME.
-					The value of $HOME is not yet known in the UserData script, so set PACKER_PLUGIN_PATH to a custom directory.
-					See https://developer.hashicorp.com/packer/docs/plugins/install#installation-directory.
-					 */
-						'export PACKER_PLUGIN_PATH=/opt/packer/.plugins',
-						'/opt/packer/packer plugins install github.com/hashicorp/amazon',
-						'/opt/packer/packer plugins install github.com/hashicorp/ansible',
-						// Ensure the custom directory is known to all users, so they can find the plugin. Useful for debugging.
-						'echo PACKER_PLUGIN_PATH=$PACKER_PLUGIN_PATH >> /etc/environment',
-
-						'wget -P /tmp https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb',
-						'dpkg -i /tmp/session-manager-plugin.deb',
-
-						'mkdir -p /etc/gu/s3-sync',
-						`aws --region eu-west-1 s3 sync s3://${distBucket}/${this.stack}/${this.stage}/${AmigoStack.app.app}/conf/ /etc/gu/s3-sync/`,
-
-						`aws --region eu-west-1 s3 cp s3://${artifactPath} /tmp/amigo.deb`,
-						'dpkg -i /tmp/amigo.deb',
-					].join('\n'),
-				),
-				scaling: { minimumInstances: 1 },
-				applicationLogging: { enabled: true },
-				instanceMetricGranularity,
-				allowS3Sync: true,
 			},
 			access: {
 				scope: AccessScope.PUBLIC,
@@ -456,10 +390,9 @@ export class AmigoStack extends GuStack {
 			description: 'Google OAuth client ID',
 		});
 
-		const ec2TargetGroup = amigoApp.targetGroups.ec2;
 		const ecsTargetGroup = amigoApp.targetGroups.ecs;
-		if (!ec2TargetGroup || !ecsTargetGroup) {
-			throw new Error('AMIgo EC2 or ECS target group was not created');
+		if (!ecsTargetGroup) {
+			throw new Error('AMIgo ECS target group was not created');
 		}
 
 		const authenticate = (next: ListenerAction) =>
@@ -481,24 +414,8 @@ export class AmigoStack extends GuStack {
 			});
 
 		amigoApp.listener.addAction('Google Auth', {
-			action: authenticate(
-				ListenerAction.weightedForward([
-					{ targetGroup: ec2TargetGroup, weight: targetGroupWeights.ec2 },
-					{ targetGroup: ecsTargetGroup, weight: targetGroupWeights.ecs },
-				]),
-			),
+			action: authenticate(ListenerAction.forward([ecsTargetGroup])),
 		});
-
-		for (const [ruleId, targetGroup] of [
-			['DeterministicRouteToEc2Rule', ec2TargetGroup],
-			['DeterministicRouteToEcsRule', ecsTargetGroup],
-		] as const) {
-			const rule = amigoApp.listener.node.findChild(ruleId);
-			if (!(rule instanceof ApplicationListenerRule)) {
-				throw new Error(`AMIgo routing rule ${ruleId} was not created`);
-			}
-			rule.configureAction(authenticate(ListenerAction.forward([targetGroup])));
-		}
 
 		new GuCname(this, 'DnsRecord', {
 			app: AmigoStack.app.app,
