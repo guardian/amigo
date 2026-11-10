@@ -319,7 +319,7 @@ export class AmigoStack extends GuStack {
 			'amigo_1.0-latest_all.deb',
 		].join('/');
 
-		const targetGroupWeights = { ec2: 99, ecs: 1 };
+		const targetGroupWeights = { ec2: 0, ecs: 100 };
 		const amigoApp = new GuLoadBalancedAppExperimental(this, {
 			...AmigoStack.app,
 			applicationPort: 9000,
