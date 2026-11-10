@@ -32,8 +32,11 @@ does not create independent capacity infrastructure.
   a Packer installation or persistent bake store. Packer remains in the image.
   The root filesystem remains read-only.
 - GuCDK 66 overrides the complete CloudFormation `Volumes` array, hiding
-  volumes added through `addVolume`. Replace that override with all three
-  volumes: GuCDK's logging volume, its S3 Files mount, and the scratch volume.
+  volumes added through `addVolume`. Read the existing rendered volumes
+  (including GuCDK's overrides) and spread them into the replacement array
+  alongside the scratch volume, without reconstructing the existing entries.
+  This uses CDK's internal `_toCloudFormation` rendering method because the
+  public `volumes` property does not include raw overrides.
   Tests verify the exact array and both application and log-router mounts.
   Revisit this version-specific adjustment when upgrading GuCDK.
 - Preserve stdout log shipping through GuCDK's FireLens sidecar. Its writable

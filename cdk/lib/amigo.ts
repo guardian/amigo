@@ -47,7 +47,6 @@ import {
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AccountPrincipal, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
-import { CfnFileSystem } from 'aws-cdk-lib/aws-s3files';
 import {
 	ParameterDataType,
 	ParameterTier,
@@ -400,23 +399,37 @@ export class AmigoStack extends GuStack {
 				'AMIgo ECS task definition has no CloudFormation resource',
 			);
 		}
-		const configFileSystem = this.node.findChild('S3FilesFileSystem');
-		if (!(configFileSystem instanceof CfnFileSystem)) {
-			throw new Error(
-				'AMIgo S3 Files configuration filesystem was not created',
-			);
-		}
 		// GuCDK v66 overrides Volumes, hiding volumes registered through addVolume.
-		// Keep its logging and S3 Files volumes alongside writable scratch space.
+		// Rendering includes those overrides; the public volumes property does not.
+		const renderedTemplate: unknown = this.resolve(
+			cfnTaskDefinition._toCloudFormation(),
+		);
+		if (
+			typeof renderedTemplate !== 'object' ||
+			renderedTemplate === null ||
+			!('Resources' in renderedTemplate) ||
+			typeof renderedTemplate.Resources !== 'object' ||
+			renderedTemplate.Resources === null
+		) {
+			throw new Error('AMIgo ECS task definition could not be rendered');
+		}
+		const renderedResource: unknown = Object.values(
+			renderedTemplate.Resources,
+		)[0];
+		if (
+			typeof renderedResource !== 'object' ||
+			renderedResource === null ||
+			!('Properties' in renderedResource) ||
+			typeof renderedResource.Properties !== 'object' ||
+			renderedResource.Properties === null ||
+			!('Volumes' in renderedResource.Properties) ||
+			!Array.isArray(renderedResource.Properties.Volumes)
+		) {
+			throw new Error('AMIgo ECS task definition has no rendered volumes');
+		}
+		const existingVolumes: unknown[] = renderedResource.Properties.Volumes;
 		cfnTaskDefinition.addPropertyOverride('Volumes', [
-			{ Name: 'logging-volume' },
-			{
-				Name: 's3files-volume',
-				S3FilesVolumeConfiguration: {
-					FileSystemArn: configFileSystem.attrFileSystemArn,
-					RootDirectory: '/',
-				},
-			},
+			...existingVolumes,
 			{ Name: tmpVolume.name },
 		]);
 
