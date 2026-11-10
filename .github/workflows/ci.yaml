@@ -31,11 +31,21 @@ jobs:
           echo BUILD_NUMBER=$(( $GITHUB_RUN_NUMBER + $LAST_TEAMCITY_BUILD )) >> $GITHUB_ENV
       - run: ./script/ci
       - name: Publish image to ECR
+        id: publish-image
         uses: guardian/actions-ecr/push@v1.0.1
         with:
           roleArn: ${{ secrets.GU_ARTIFACTS_ROLE_ARN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           app: amigo
+      - name: Validate and synthesize infrastructure
+        working-directory: cdk
+        env:
+          IMAGE_DIGEST: ${{ steps.publish-image.outputs.imageDigest }}
+        run: |
+          npm ci
+          npm run lint
+          npm test
+          npm run synth -- --no-lookups
       - uses: guardian/actions-riff-raff@v4
         with:
           projectName: tools::amigo

@@ -980,6 +980,12 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       "GuHttpsEgressSecurityGroup",
       "GuAutoScalingGroup",
       "GuApplicationTargetGroup",
+      "GuRepository",
+      "GuArtifactsAccountId",
+      "GuRiffRaffDeploymentIdParameterExperimental",
+      "GuHttpsEgressSecurityGroup",
+      "GuSecurityGroup",
+      "GuApplicationTargetGroup",
       "GuCertificate",
       "GuApplicationLoadBalancer",
       "GuAccessLoggingBucketParameter",
@@ -1016,6 +1022,11 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the ARN of the Anghammarad SNS topic",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "ArtifactsAccountId": {
+      "Default": "/organisation/accounts/artifacts",
+      "Description": "Account ID of the Artifacts account. Useful as some shared resources live here.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
     "ClientId": {
       "Description": "Google OAuth client ID",
       "Type": "String",
@@ -1032,6 +1043,10 @@ exports[`The Amigo stack matches the snapshot 1`] = `
     },
     "PackerInstanceProfile": {
       "Description": "Instance profile given to instances created by Packer. Find this in the PackerUser-PackerRole in IAM",
+      "Type": "String",
+    },
+    "RiffRaffDeploymentId": {
+      "Description": "Used by Riff-Raff to inject the deployment ID.",
       "Type": "String",
     },
     "VpcId": {
@@ -1105,6 +1120,55 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "AmigoEcsTargetGroupAmigoF6C987CA": {
+      "Properties": {
+        "HealthCheckIntervalSeconds": 10,
+        "HealthCheckPath": "/healthcheck",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthyThresholdCount": 5,
+        "Port": 9000,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30",
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false",
+          },
+        ],
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Ref": "VpcId",
+        },
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "AppPolicyF941AEC5": {
       "Properties": {
@@ -1184,6 +1248,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
           {
             "Ref": "InstanceRoleAmigo75944747",
           },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -1254,9 +1321,32 @@ exports[`The Amigo stack matches the snapshot 1`] = `
             "Ref": "TargetGroupAmigoB9501F07",
           },
         ],
-        "VPCZoneIdentifier": {
-          "Ref": "amigoPrivateSubnets",
-        },
+        "VPCZoneIdentifier": [
+          {
+            "Fn::Select": [
+              0,
+              {
+                "Ref": "amigoPrivateSubnets",
+              },
+            ],
+          },
+          {
+            "Fn::Select": [
+              1,
+              {
+                "Ref": "amigoPrivateSubnets",
+              },
+            ],
+          },
+          {
+            "Fn::Select": [
+              2,
+              {
+                "Ref": "amigoPrivateSubnets",
+              },
+            ],
+          },
+        ],
       },
       "Type": "AWS::AutoScaling::AutoScalingGroup",
     },
@@ -1317,6 +1407,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
           {
             "Ref": "InstanceRoleAmigo75944747",
           },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -1337,6 +1430,641 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
+    },
+    "EcsService81FC6EF6": {
+      "DependsOn": [
+        "EcsTaskDefinitionTaskRoleDefaultPolicy1FD2F057",
+        "EcsTaskDefinitionTaskRoleB7B6D8DD",
+        "ListenerAmigoDeterministicRouteToEc2Rule091623C8",
+        "ListenerAmigoDeterministicRouteToEcsRuleA0A9F93B",
+        "ListenerAmigo0180B42C",
+        "S3FilesMountTarget0",
+        "S3FilesMountTarget1",
+        "S3FilesMountTarget2",
+      ],
+      "Properties": {
+        "Cluster": {
+          "Ref": "amigoEcsCluster57D09FC9",
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false,
+          },
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true,
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 100,
+        },
+        "DeploymentController": {
+          "Type": "ECS",
+        },
+        "EnableECSManagedTags": false,
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "amigo",
+            "ContainerPort": 9000,
+            "TargetGroupArn": {
+              "Ref": "AmigoEcsTargetGroupAmigoF6C987CA",
+            },
+          },
+        ],
+        "Monitoring": {
+          "MetricConfigurations": [
+            {
+              "MetricNames": [
+                "CPUUtilization",
+                "MemoryUtilization",
+              ],
+              "ResolutionSeconds": 20,
+            },
+          ],
+        },
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+                  "GroupId",
+                ],
+              },
+            ],
+            "Subnets": [
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Ref": "amigoPrivateSubnets",
+                  },
+                ],
+              },
+              {
+                "Fn::Select": [
+                  1,
+                  {
+                    "Ref": "amigoPrivateSubnets",
+                  },
+                ],
+              },
+              {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Ref": "amigoPrivateSubnets",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        "PropagateTags": "SERVICE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TaskDefinition": {
+          "Ref": "EcsTaskDefinition63157ED3",
+        },
+      },
+      "Type": "AWS::ECS::Service",
+    },
+    "EcsServiceTaskCountTarget02FCCE22": {
+      "DependsOn": [
+        "EcsTaskDefinitionTaskRoleDefaultPolicy1FD2F057",
+        "EcsTaskDefinitionTaskRoleB7B6D8DD",
+        "S3FilesMountTarget0",
+        "S3FilesMountTarget1",
+        "S3FilesMountTarget2",
+      ],
+      "Properties": {
+        "MaxCapacity": 1,
+        "MinCapacity": 1,
+        "ResourceId": {
+          "Fn::Join": [
+            "",
+            [
+              "service/",
+              {
+                "Ref": "amigoEcsCluster57D09FC9",
+              },
+              "/",
+              {
+                "Fn::GetAtt": [
+                  "EcsService81FC6EF6",
+                  "Name",
+                ],
+              },
+            ],
+          ],
+        },
+        "RoleARN": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":iam::",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+            ],
+          ],
+        },
+        "ScalableDimension": "ecs:service:DesiredCount",
+        "ServiceNamespace": "ecs",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+    },
+    "EcsTaskDefinition63157ED3": {
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "DockerLabels": {
+              "RiffRaffDeploymentId": {
+                "Ref": "RiffRaffDeploymentId",
+              },
+            },
+            "Environment": [
+              {
+                "Name": "STACK",
+                "Value": "deploy",
+              },
+              {
+                "Name": "STAGE",
+                "Value": "PROD",
+              },
+              {
+                "Name": "APP",
+                "Value": "amigo",
+              },
+              {
+                "Name": "TASK_NAME",
+                "Value": "amigo",
+              },
+              {
+                "Name": "GU_REPO",
+                "Value": "guardian/amigo",
+              },
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "ArtifactsAccountId",
+                  },
+                  ".dkr.ecr.eu-west-1.",
+                  {
+                    "Ref": "AWS::URLSuffix",
+                  },
+                  "/guardian/amigo/amigo@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+                ],
+              ],
+            },
+            "LogConfiguration": {
+              "LogDriver": "awsfirelens",
+              "Options": {
+                "Name": "kinesis_streams",
+                "region": "eu-west-1",
+                "retry_limit": "2",
+                "stream": {
+                  "Ref": "LoggingStreamName",
+                },
+              },
+            },
+            "MountPoints": [
+              {
+                "ContainerPath": "/etc/gu/s3-sync/",
+                "ReadOnly": true,
+                "SourceVolume": "s3files-volume",
+              },
+              {
+                "ContainerPath": "/tmp",
+                "ReadOnly": false,
+                "SourceVolume": "tmp-volume",
+              },
+            ],
+            "Name": "amigo",
+            "PortMappings": [
+              {
+                "ContainerPort": 9000,
+                "Protocol": "tcp",
+              },
+            ],
+            "ReadonlyRootFilesystem": true,
+            "VersionConsistency": "disabled",
+          },
+          {
+            "Environment": [
+              {
+                "Name": "STACK",
+                "Value": "deploy",
+              },
+              {
+                "Name": "STAGE",
+                "Value": "PROD",
+              },
+              {
+                "Name": "APP",
+                "Value": "amigo",
+              },
+              {
+                "Name": "TASK_NAME",
+                "Value": "amigo",
+              },
+              {
+                "Name": "GU_REPO",
+                "Value": "guardian/amigo",
+              },
+            ],
+            "Essential": true,
+            "FirelensConfiguration": {
+              "Type": "fluentbit",
+            },
+            "Image": "ghcr.io/guardian/devx-logs@sha256:cf91724a5166f1c143e07958820aa2122afb61c164b68555d15cb92abb5acda0",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "EcsTaskDefinitionLogShippingLogGroup0E405BD0",
+                },
+                "awslogs-region": "eu-west-1",
+                "awslogs-stream-prefix": "deploy/PROD/amigo/devx-logs-sidecar",
+              },
+            },
+            "MountPoints": [
+              {
+                "ContainerPath": "/init",
+                "ReadOnly": false,
+                "SourceVolume": "logging-volume",
+              },
+            ],
+            "Name": "LogShipping",
+            "ReadonlyRootFilesystem": true,
+            "VersionConsistency": "disabled",
+          },
+        ],
+        "Cpu": "2048",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "EcsTaskDefinitionExecutionRoleBE450C73",
+            "Arn",
+          ],
+        },
+        "Family": "AMIgoEcsTaskDefinition6B55FA54",
+        "Memory": "4096",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE",
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "ARM64",
+          "OperatingSystemFamily": "LINUX",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "EcsTaskDefinitionTaskRoleB7B6D8DD",
+            "Arn",
+          ],
+        },
+        "Volumes": [
+          {
+            "Name": "logging-volume",
+          },
+          {
+            "Name": "s3files-volume",
+            "S3FilesVolumeConfiguration": {
+              "FileSystemArn": {
+                "Fn::GetAtt": [
+                  "S3FilesFileSystem",
+                  "FileSystemArn",
+                ],
+              },
+              "RootDirectory": "/",
+            },
+          },
+          {
+            "Name": "tmp-volume",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::TaskDefinition",
+    },
+    "EcsTaskDefinitionExecutionRoleBE450C73": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EcsTaskDefinitionExecutionRoleDefaultPolicy1611A942": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ecr:eu-west-1:",
+                    {
+                      "Ref": "ArtifactsAccountId",
+                    },
+                    ":repository/guardian/amigo/amigo",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:ecr:eu-west-1:694911143906:repository/aws-guardduty-agent-fargate",
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "EcsTaskDefinitionLogShippingLogGroup0E405BD0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EcsTaskDefinitionExecutionRoleDefaultPolicy1611A942",
+        "Roles": [
+          {
+            "Ref": "EcsTaskDefinitionExecutionRoleBE450C73",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EcsTaskDefinitionLogShippingLogGroup0E405BD0": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EcsTaskDefinitionTaskRoleB7B6D8DD": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EcsTaskDefinitionTaskRoleDefaultPolicy1FD2F057": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3files:ClientMount",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "S3FilesFileSystem",
+                  "FileSystemArn",
+                ],
+              },
+            },
+            {
+              "Action": "s3:ListBucket",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EcsTaskDefinitionTaskRoleDefaultPolicy1FD2F057",
+        "Roles": [
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "GetDistributablePolicyAmigoB25A5D2B": {
       "Properties": {
@@ -1389,6 +2117,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
           {
             "Ref": "InstanceRoleAmigo75944747",
           },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -1432,6 +2163,88 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::EC2::SecurityGroup",
+    },
+    "GuHttpsEgressSecurityGroupAmigoecsD177AA24": {
+      "Properties": {
+        "GroupDescription": "Allow all outbound HTTPS traffic",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound HTTPS traffic",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo-ecs",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VpcId": {
+          "Ref": "VpcId",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "GuHttpsEgressSecurityGroupAmigoecsfromAMIgoIdPaccessAmigo4AE1B4709000B8BBA21E": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "FromPort": 9000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "IdPaccessAmigo15F4FC41",
+            "GroupId",
+          ],
+        },
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
+    },
+    "GuHttpsEgressSecurityGroupAmigoecsfromAMIgoLoadBalancerAmigoSecurityGroup730D090E900007F30C86": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "FromPort": 9000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "LoadBalancerAmigoSecurityGroup304D707B",
+            "GroupId",
+          ],
+        },
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "GuHttpsEgressSecurityGroupAmigofromAMIgoIdPaccessAmigo4AE1B4709000BF8805C1": {
       "Properties": {
@@ -1549,6 +2362,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
           {
             "Ref": "InstanceRoleAmigo75944747",
           },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -1599,6 +2415,27 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "DestinationSecurityGroupId": {
           "Fn::GetAtt": [
             "GuHttpsEgressSecurityGroupAmigo28861996",
+            "GroupId",
+          ],
+        },
+        "FromPort": 9000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "IdPaccessAmigo15F4FC41",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
+    "IdPaccessAmigotoAMIgoGuHttpsEgressSecurityGroupAmigoecs6A352D0A9000A3096FF6": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
             "GroupId",
           ],
         },
@@ -1684,10 +2521,23 @@ exports[`The Amigo stack matches the snapshot 1`] = `
             "Type": "authenticate-oidc",
           },
           {
-            "Order": 2,
-            "TargetGroupArn": {
-              "Ref": "TargetGroupAmigoB9501F07",
+            "ForwardConfig": {
+              "TargetGroups": [
+                {
+                  "TargetGroupArn": {
+                    "Ref": "TargetGroupAmigoB9501F07",
+                  },
+                  "Weight": 100,
+                },
+                {
+                  "TargetGroupArn": {
+                    "Ref": "AmigoEcsTargetGroupAmigoF6C987CA",
+                  },
+                  "Weight": 0,
+                },
+              ],
             },
+            "Order": 2,
             "Type": "forward",
           },
         ],
@@ -1721,6 +2571,146 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
+    },
+    "ListenerAmigoDeterministicRouteToEc2Rule091623C8": {
+      "Properties": {
+        "Actions": [
+          {
+            "AuthenticateOidcConfig": {
+              "AuthenticationRequestExtraParams": {
+                "hd": "guardian.co.uk",
+              },
+              "AuthorizationEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+              "ClientId": {
+                "Ref": "ClientId",
+              },
+              "ClientSecret": "{{resolve:secretsmanager:/PROD/deploy/amigo/clientSecret:SecretString:::}}",
+              "Issuer": "https://accounts.google.com",
+              "OnUnauthenticatedRequest": "authenticate",
+              "Scope": "openid",
+              "TokenEndpoint": "https://oauth2.googleapis.com/token",
+              "UserInfoEndpoint": "https://openidconnect.googleapis.com/v1/userinfo",
+            },
+            "Order": 1,
+            "Type": "authenticate-oidc",
+          },
+          {
+            "Order": 2,
+            "TargetGroupArn": {
+              "Ref": "TargetGroupAmigoB9501F07",
+            },
+            "Type": "forward",
+          },
+        ],
+        "Conditions": [
+          {
+            "Field": "http-header",
+            "HttpHeaderConfig": {
+              "HttpHeaderName": "X-Gu-Target-Group",
+              "Values": [
+                "ec2",
+              ],
+            },
+          },
+        ],
+        "ListenerArn": {
+          "Ref": "ListenerAmigo0180B42C",
+        },
+        "Priority": 10,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+    },
+    "ListenerAmigoDeterministicRouteToEcsRuleA0A9F93B": {
+      "Properties": {
+        "Actions": [
+          {
+            "AuthenticateOidcConfig": {
+              "AuthenticationRequestExtraParams": {
+                "hd": "guardian.co.uk",
+              },
+              "AuthorizationEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+              "ClientId": {
+                "Ref": "ClientId",
+              },
+              "ClientSecret": "{{resolve:secretsmanager:/PROD/deploy/amigo/clientSecret:SecretString:::}}",
+              "Issuer": "https://accounts.google.com",
+              "OnUnauthenticatedRequest": "authenticate",
+              "Scope": "openid",
+              "TokenEndpoint": "https://oauth2.googleapis.com/token",
+              "UserInfoEndpoint": "https://openidconnect.googleapis.com/v1/userinfo",
+            },
+            "Order": 1,
+            "Type": "authenticate-oidc",
+          },
+          {
+            "Order": 2,
+            "TargetGroupArn": {
+              "Ref": "AmigoEcsTargetGroupAmigoF6C987CA",
+            },
+            "Type": "forward",
+          },
+        ],
+        "Conditions": [
+          {
+            "Field": "http-header",
+            "HttpHeaderConfig": {
+              "HttpHeaderName": "X-Gu-Target-Group",
+              "Values": [
+                "ecs",
+              ],
+            },
+          },
+        ],
+        "ListenerArn": {
+          "Ref": "ListenerAmigo0180B42C",
+        },
+        "Priority": 11,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "LoadBalancerAmigoC3017FAF": {
       "Properties": {
@@ -1866,6 +2856,27 @@ exports[`The Amigo stack matches the snapshot 1`] = `
       },
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
+    "LoadBalancerAmigoSecurityGrouptoAMIgoGuHttpsEgressSecurityGroupAmigoecs6A352D0A900064AD03DC": {
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+            "GroupId",
+          ],
+        },
+        "FromPort": 9000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "LoadBalancerAmigoSecurityGroup304D707B",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 9000,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
+    },
     "PackerPolicyE6040EA8": {
       "Properties": {
         "PolicyDocument": {
@@ -1916,6 +2927,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "InstanceRoleAmigo75944747",
+          },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
           },
         ],
       },
@@ -2009,9 +3023,473 @@ exports[`The Amigo stack matches the snapshot 1`] = `
           {
             "Ref": "InstanceRoleAmigo75944747",
           },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "S3FilesFileSystem": {
+      "DependsOn": [
+        "S3FilesRoleDefaultPolicyD9591E55",
+        "S3FilesRole37B20925",
+      ],
+      "Properties": {
+        "Bucket": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":s3:::",
+              {
+                "Ref": "DistributionBucketName",
+              },
+            ],
+          ],
+        },
+        "Prefix": "deploy/PROD/amigo/conf/",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "S3FilesRole37B20925",
+            "Arn",
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3Files::FileSystem",
+    },
+    "S3FilesMountTarget0": {
+      "Properties": {
+        "FileSystemId": {
+          "Fn::GetAtt": [
+            "S3FilesFileSystem",
+            "FileSystemId",
+          ],
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "S3FilesMountTargetSecurityGroupAmigos3filesEEA360FD",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Fn::Select": [
+            0,
+            {
+              "Ref": "amigoPrivateSubnets",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::S3Files::MountTarget",
+    },
+    "S3FilesMountTarget1": {
+      "Properties": {
+        "FileSystemId": {
+          "Fn::GetAtt": [
+            "S3FilesFileSystem",
+            "FileSystemId",
+          ],
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "S3FilesMountTargetSecurityGroupAmigos3filesEEA360FD",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Fn::Select": [
+            1,
+            {
+              "Ref": "amigoPrivateSubnets",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::S3Files::MountTarget",
+    },
+    "S3FilesMountTarget2": {
+      "Properties": {
+        "FileSystemId": {
+          "Fn::GetAtt": [
+            "S3FilesFileSystem",
+            "FileSystemId",
+          ],
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "S3FilesMountTargetSecurityGroupAmigos3filesEEA360FD",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Fn::Select": [
+            2,
+            {
+              "Ref": "amigoPrivateSubnets",
+            },
+          ],
+        },
+      },
+      "Type": "AWS::S3Files::MountTarget",
+    },
+    "S3FilesMountTargetSecurityGroupAmigos3filesEEA360FD": {
+      "Properties": {
+        "GroupDescription": "AMIgo/S3FilesMountTargetSecurityGroupAmigos3files",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "255.255.255.255/32",
+            "Description": "Disallow all traffic",
+            "FromPort": 252,
+            "IpProtocol": "icmp",
+            "ToPort": 86,
+          },
+        ],
+        "SecurityGroupIngress": [
+          {
+            "Description": "Allow ECS tasks to mount S3 Files",
+            "FromPort": 2049,
+            "IpProtocol": "tcp",
+            "SourceSecurityGroupId": {
+              "Fn::GetAtt": [
+                "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+                "GroupId",
+              ],
+            },
+            "ToPort": 2049,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo-s3files",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VpcId": {
+          "Ref": "VpcId",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "S3FilesRole37B20925": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":s3files:eu-west-1:",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":file-system/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "elasticfilesystem.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "Role used by the S3 Files filesystem for amigo mount",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "S3FilesRoleDefaultPolicyD9591E55": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:ListBucket",
+                "s3:ListBucketVersions",
+                "s3:GetBucketVersioning",
+                "s3:GetBucketLocation",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:DeleteObject*",
+                "s3:GetObject*",
+                "s3:List*",
+                "s3:PutObject*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncryptFrom",
+                "kms:ReEncryptTo",
+              ],
+              "Condition": {
+                "StringLike": {
+                  "kms:EncryptionContext:aws:s3:arn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":s3:::",
+                          {
+                            "Ref": "DistributionBucketName",
+                          },
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition",
+                          },
+                          ":s3:::",
+                          {
+                            "Ref": "DistributionBucketName",
+                          },
+                          "/*",
+                        ],
+                      ],
+                    },
+                  ],
+                  "kms:ViaService": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "s3.eu-west-1.",
+                        {
+                          "Ref": "AWS::URLSuffix",
+                        },
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":kms:eu-west-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":key/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "events:DeleteRule",
+                "events:DisableRule",
+                "events:EnableRule",
+                "events:PutRule",
+                "events:PutTargets",
+                "events:RemoveTargets",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "events:ManagedBy": "elasticfilesystem.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":events:*:*:rule/DO-NOT-DELETE-S3-Files*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "events:DescribeRule",
+                "events:ListTargetsByRule",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":events:*:*:rule/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "events:ListRuleNamesByTarget",
+                "events:ListRules",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3FilesRoleDefaultPolicyD9591E55",
+        "Roles": [
+          {
+            "Ref": "S3FilesRole37B20925",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3FilesTaskEgress": {
+      "Properties": {
+        "Description": "Allow NFS traffic to S3 Files mount targets",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "S3FilesMountTargetSecurityGroupAmigos3filesEEA360FD",
+            "GroupId",
+          ],
+        },
+        "FromPort": 2049,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "GuHttpsEgressSecurityGroupAmigoecsD177AA24",
+            "GroupId",
+          ],
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 2049,
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SSMPolicyEB6D0644": {
       "Properties": {
@@ -2046,6 +3524,9 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "InstanceRoleAmigo75944747",
+          },
+          {
+            "Ref": "EcsTaskDefinitionTaskRoleB7B6D8DD",
           },
         ],
       },
@@ -2135,6 +3616,39 @@ exports[`The Amigo stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    },
+    "amigoEcsCluster57D09FC9": {
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enhanced",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "amigo",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/amigo",
+          },
+          {
+            "Key": "Stack",
+            "Value": "deploy",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ECS::Cluster",
     },
     "deployPRODamigo77EB3561": {
       "DependsOn": [
