@@ -2527,13 +2527,13 @@ exports[`The Amigo stack matches the snapshot 1`] = `
                   "TargetGroupArn": {
                     "Ref": "TargetGroupAmigoB9501F07",
                   },
-                  "Weight": 100,
+                  "Weight": 99,
                 },
                 {
                   "TargetGroupArn": {
                     "Ref": "AmigoEcsTargetGroupAmigoF6C987CA",
                   },
-                  "Weight": 0,
+                  "Weight": 1,
                 },
               ],
             },

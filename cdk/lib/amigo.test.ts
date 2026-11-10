@@ -71,8 +71,14 @@ describe('The Amigo stack', () => {
 						Type: 'forward',
 						ForwardConfig: {
 							TargetGroups: [
-								{ TargetGroupArn: Match.anyValue(), Weight: 100 },
-								{ TargetGroupArn: Match.anyValue(), Weight: 0 },
+								{
+									TargetGroupArn: { Ref: 'TargetGroupAmigoB9501F07' },
+									Weight: 99,
+								},
+								{
+									TargetGroupArn: { Ref: 'AmigoEcsTargetGroupAmigoF6C987CA' },
+									Weight: 1,
+								},
 							],
 						},
 					}),
