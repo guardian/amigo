@@ -73,11 +73,11 @@ describe('The Amigo stack', () => {
 							TargetGroups: [
 								{
 									TargetGroupArn: { Ref: 'TargetGroupAmigoB9501F07' },
-									Weight: 99,
+									Weight: 0,
 								},
 								{
 									TargetGroupArn: { Ref: 'AmigoEcsTargetGroupAmigoF6C987CA' },
-									Weight: 1,
+									Weight: 100,
 								},
 							],
 						},
