@@ -4,8 +4,7 @@ set -e
 
 sbt clean scalafmtSbtCheck scalafmtCheckAll compile test
 
-# Create debian package of AMIgo Play app
-sbt "Debian / packageBin" "Docker / publishLocal"
+sbt "Docker / publishLocal"
 
 # Create zip file of imageCopier lambda
 sbt "project imageCopier" "dist"

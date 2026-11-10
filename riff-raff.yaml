@@ -3,23 +3,13 @@ stacks:
 regions:
 - eu-west-1
 deployments:
-  amigo:
-    type: autoscaling
-    parameters:
-    dependencies:
-      - cloudformation
   cloudformation:
     type: cloud-formation
     app: amigo
     parameters:
-      amiTags:
-        Recipe: arm64-jammy-java21-deploy-infrastructure
-        AmigoStage: PROD
-      amiEncrypted: true
       templateStagePaths:
         CODE: AMIgo-CODE.template.json
         PROD: AMIgo-PROD.template.json
-      amiParameter: AMIAmigo
   # upload lambda
   imagecopier:
     type: aws-s3

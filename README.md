@@ -90,9 +90,9 @@ time of writing:
 
 ### Running the app in Docker
 
-The image targets Linux ARM64, matching the current AMIgo EC2 architecture.
-The root `packer-version` file sets the Packer version for both the EC2
-deployment and the Docker image.
+The image targets Linux ARM64, matching the AMIgo ECS runtime.
+The root `packer-version` file sets the Packer version installed in the
+Docker image.
 Build and run it on an ARM64 Docker host (or an ARM64 host configured for
 emulation):
 
@@ -101,9 +101,9 @@ sbt "Docker / publishLocal"
 ```
 
 Compose downloads CODE configuration into a Docker-managed volume, then mounts
-it read-only at `/etc/gu/s3-sync`, matching the S3 configuration path used by
-the EC2 deployment and intended for the ECS mount. SSM-based application
-configuration continues to load through its existing path. Compose does not
+it read-only at `/etc/gu/s3-sync`, matching the ECS S3 configuration mount.
+SSM-based application configuration continues to load through its existing
+path. Compose does not
 write downloaded configuration into the repository. Export short-lived
 credentials for the `amigo-dev` developer policy before starting Compose; the
 same credentials are passed explicitly to the app and the configuration-fetching
