@@ -30,6 +30,11 @@
 
 ## CVE-2026-98432 nftables mitigation
 
+- name: Install nftables
+  package:
+    name: nftables
+    state: present
+
 - name: Create /etc/nftables.d directory
   file:
     path: /etc/nftables.d
