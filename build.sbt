@@ -69,7 +69,7 @@ val jacksonV2Version = "2.22.4"
 val circeVersion = "0.14.16"
 
 val awsV2SdkVersion = "2.54.20"
-val playSecretRotationVersion = "19.2.0"
+val playSecretRotationVersion = "23.0.0"
 
 /*
  * To test whether any of these entries are redundant:
@@ -100,7 +100,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "simple-configuration-ssm" % "15.0.0",
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion,
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion,
-  "com.gu.play-googleauth" %% "play-v30" % "42.2.0",
+  "com.gu.play-googleauth" %% "play-v30" % "49.0.0",
   // Pin play-bootstrap because it is tied to the bootstrap version
   "com.adrianhurt" %% "play-bootstrap" % "1.6.1-P28-B3", // scala-steward:off
   "org.quartz-scheduler" % "quartz" % "2.5.2",
