@@ -9,4 +9,4 @@ The Log4J HotPatch is intended to automatically disable Log4J2 vulnerability CVE
 - Tested only on Ubuntu 18.04 and 20.04. Outside those, the setting of global environment variables should be checked again
 
 ### CVE-2026-98432 nftables rules
-Installs `cve-2026-98432.nft` to `/etc/nftables.d/`, validates it with `nft -c -f`, appends an `include` for it to `/etc/nftables.conf`, and ensures `nftables.service` is enabled. Requires the `nftables` package (and so `/etc/nftables.conf`) to already be present on the image.
+Installs `cve-2026-98432.nft` to `/etc/nftables.d/`, validates it with `nft -c -f`, appends an `include` for it to `/etc/nftables.conf`, and ensures `nftables.service` is enabled.
