@@ -28,7 +28,14 @@
     insertafter: EOF
     line: JAVA_TOOL_OPTIONS=-javaagent:/usr/local/log4j-hotpatch/Log4jHotPatch.jar=log4jFixerVerbose=false
 
+
 ## CVE-2026-98432 nftables mitigation
+
+- name: Install nftables
+  apt:
+    name: nftables
+    state: present
+    update_cache: yes
 
 - name: Create /etc/nftables.d directory
   file:
