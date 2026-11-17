@@ -16,7 +16,8 @@ case class PackerProvisionerConfig(
     execute_command: Option[String] = None,
     playbook_file: Option[String] = None,
     role_paths: Option[Seq[String]] = None,
-    extra_arguments: Option[Seq[String]] = None
+    extra_arguments: Option[Seq[String]] = None,
+    command: Option[String] = None
 )
 
 object PackerProvisionerConfig {
@@ -41,11 +42,16 @@ object PackerProvisionerConfig {
     execute_command = Some("{{ .Vars }} sudo -E bash -x '{{ .Path }}'")
   )
 
-  def ansibleLocal(playbookFile: Path, rolesDir: Path) = {
+  def ansibleLocal(
+      playbookFile: Path,
+      rolesDir: Path,
+      command: Option[String] = None
+  ) = {
     val rolePaths =
       Files.list(rolesDir).iterator.asScala.toSeq.map(_.toAbsolutePath.toString)
     PackerProvisionerConfig(
       `type` = "ansible-local",
+      command = command,
       extra_arguments = Some(Seq("--verbose")),
       playbook_file = Some(playbookFile.toAbsolutePath.toString),
       role_paths = Some(rolePaths)

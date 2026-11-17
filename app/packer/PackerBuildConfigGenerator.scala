@@ -102,7 +102,11 @@ object PackerBuildConfigGenerator {
     }.toSeq
 
     val provisioners = baseImage.provisioners ++ Seq(
-      PackerProvisionerConfig.ansibleLocal(playbookFile, Paths.get("roles"))
+      PackerProvisionerConfig.ansibleLocal(
+        playbookFile,
+        Paths.get("roles"),
+        baseImage.ansiblePlaybookCommand
+      )
     ) ++ uploadPackagesCommand
 
     PackerBuildConfig(variables, Seq(builder), provisioners)
