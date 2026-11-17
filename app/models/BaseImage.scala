@@ -14,6 +14,7 @@ sealed trait LinuxDist {
   val provisioners: Seq[PackerProvisionerConfig]
   def savePackageListCommand(bakeId: BakeId): String
   val loginName: String
+  def ansiblePlaybookCommand: Option[String] = None
 }
 object LinuxDist {
   implicit val dynamoFormat: DynamoFormat[LinuxDist] =
@@ -44,6 +45,12 @@ object LinuxDist {
 case object Ubuntu extends LinuxDist {
   val name = "ubuntu"
   val loginName = "ubuntu"
+  // Deep Learning AMIs can have pip-installed packages in /usr/local that
+  // shadow apt's Ansible dependencies (notably an incompatible Jinja2).
+  // Prefer Ubuntu's packages for this process without changing the ML environment.
+  override val ansiblePlaybookCommand = Some(
+    "env ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 PYTHONNOUSERSITE=1 PYTHONPATH=/usr/lib/python3/dist-packages /usr/bin/ansible-playbook"
+  )
   val provisioners = Seq(
     // bootstrap Ansible
     PackerProvisionerConfig.executeRemoteCommands(
