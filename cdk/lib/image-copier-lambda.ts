@@ -3,7 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { CfnParameter, Duration, Fn } from 'aws-cdk-lib';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SnsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -51,6 +51,7 @@ export class ImageCopierLambda extends GuStack {
 		const copierLambda = new Function(this, 'ImageCopierLambda', {
 			description: 'Lambda for copying and encrypting AMIgo baked AMIs',
 			runtime: Runtime.JAVA_21,
+			architecture: Architecture.ARM_64,
 			memorySize: 512,
 			handler: 'com.gu.imageCopier.LambdaEntrypoint::run',
 			timeout: Duration.seconds(30),
@@ -100,6 +101,7 @@ export class ImageCopierLambda extends GuStack {
 		const housekeepingLambda = new Function(this, 'HousekeepingLambda', {
 			description: 'Lambda for housekeeping AMIgo baked AMIs in other accounts',
 			runtime: Runtime.JAVA_21,
+			architecture: Architecture.ARM_64,
 			memorySize: 512,
 			handler: 'com.gu.imageCopier.LambdaEntrypoint::housekeeping',
 			timeout: Duration.seconds(30),
