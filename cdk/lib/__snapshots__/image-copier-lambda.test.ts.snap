@@ -23,6 +23,9 @@ exports[`the lambda stack matches the snapshot 1`] = `
         "HousekeepingLambdaServiceRole70148A54",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": "deploy-tools-dist",
           "S3Key": "cdk/TEST/imagecopier/image-copier-v5.zip",
@@ -203,6 +206,9 @@ exports[`the lambda stack matches the snapshot 1`] = `
         "ImageCopierLambdaServiceRole77B845A3",
       ],
       "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
         "Code": {
           "S3Bucket": "deploy-tools-dist",
           "S3Key": "cdk/TEST/imagecopier/image-copier-v5.zip",
