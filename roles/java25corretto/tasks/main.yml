@@ -1,12 +1,12 @@
 ---
-- name: Add AWS Corretto signing key
-  apt_key:
-    url: "https://apt.corretto.aws/corretto.key"
-    state: present
-
 - name: Add AWS Corretto repo
-  apt_repository:
-    repo: "deb https://apt.corretto.aws stable main"
+  ansible.builtin.deb822_repository:
+    name: corretto
+    types: deb
+    uris: https://apt.corretto.aws
+    suites: stable
+    components: main
+    signed_by: https://apt.corretto.aws/corretto.key
     state: present
 
 - name: Install Java 25 Corretto JDK
@@ -14,6 +14,7 @@
     name:
       - java-25-amazon-corretto-jdk
     state: latest
+    update_cache: true
   when: ansible_os_family == "Debian"
 
 ## This modifies the JVM's DNS cache TTL, changing it from the default of INFINITY to 60

@@ -1,23 +1,25 @@
 ---
-- name: Add Elasticsearch repository key
-  apt_key: url=https://artifacts.elastic.co/GPG-KEY-elasticsearch state=present
+- name: Add Elastic repository
+  ansible.builtin.deb822_repository:
+    name: elastic
+    types: deb
+    uris: "https://artifacts.elastic.co/packages/{{ version.split('.')[0] }}.x/apt"
+    suites: stable
+    components: main
+    signed_by: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
 
 - name: Fail when we attempt to install Logstash (version < 7.10.0) for ARM64
   fail:
     msg: Logstash (version < 7.10.0) does not work for ARM64 architecture
   when: version is version('7.10.0', '<') and ansible_architecture == "aarch64"
 
-- name: Ensure Logstash is installed (version < 7.10.0) for AMD64
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}.deb state=present
-  when: version is version('7.10.0', '<') and ansible_architecture == "x86_64"
-
-- name: Ensure Logstash is installed (version >= 7.10.0) for ARM64
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-arm64.deb state=present
-  when: version is version('7.10.0', '>=') and ansible_architecture == "aarch64"
-
-- name: Ensure Logstash is installed (version >= 7.10.0) for AMD64
-  apt: deb=https://artifacts.elastic.co/downloads/logstash/logstash-{{ version }}-amd64.deb state=present
-  when: version is version('7.10.0', '>=') and ansible_architecture == "x86_64"
+# Logstash apt versions carry an epoch and release suffix, e.g. 1:7.10.0-1
+- name: Ensure Logstash is installed
+  apt:
+    name: "logstash=1:{{ version }}-*"
+    update_cache: true
+    state: present
 
 - name: Install Logstash plugins
   command: "{{ ls_home }}/bin/logstash-plugin install {{ item }}"

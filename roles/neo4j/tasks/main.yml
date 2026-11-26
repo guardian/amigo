@@ -1,9 +1,13 @@
 ---
-- name: Install neo4j GPG signing key
-  apt_key: url=https://debian.neo4j.com/neotechnology.gpg.key state=present
-
 - name: Add neo4j repository
-  apt_repository: repo='deb https://debian.neo4j.com stable {{ neo4j_repo_version }}' state=present
+  ansible.builtin.deb822_repository:
+    name: neo4j
+    types: deb
+    uris: https://debian.neo4j.com
+    suites: stable
+    components: "{{ neo4j_repo_version }}"
+    signed_by: https://debian.neo4j.com/neotechnology.gpg.key
+    state: present
 
 - name: Install neo4j
   apt:
