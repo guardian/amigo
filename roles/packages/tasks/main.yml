@@ -10,13 +10,24 @@
   when:
   - ansible_os_family == "Debian"
 
-# TODO: the downloaded key is not checked against the requested fingerprint. Probably okay
-# (the keyserver is fetched over HTTPS), but we may want to verify this in future.
 - name: Download signing keys (keyserver)
   get_url:
     url: "https://{{ item.value }}/pks/lookup?op=get&search=0x{{ item.key }}"
     dest: "/tmp/signing-key-{{ item.key | hash('sha1') }}"
     mode: "0600"
+  with_dict: "{{ keyserver_keys|default({}) }}"
+  when:
+  - ansible_os_family == "Debian"
+
+# The first fpr: line is the primary key's fingerprint. Requested fingerprints must be the full 40 characters.
+- name: Verify keyserver signing key fingerprints
+  command: gpg --show-keys --with-colons --fingerprint /tmp/signing-key-{{ item.key | hash('sha1') }}
+  register: keyserver_key_fingerprints
+  changed_when: false
+  failed_when: >-
+    (item.key | length) != 40
+    or keyserver_key_fingerprints.rc != 0
+    or (keyserver_key_fingerprints.stdout_lines | select('match', '^fpr:') | list | first).split(':')[9] != (item.key | upper)
   with_dict: "{{ keyserver_keys|default({}) }}"
   when:
   - ansible_os_family == "Debian"
